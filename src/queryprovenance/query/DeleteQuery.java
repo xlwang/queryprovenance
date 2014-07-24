@@ -14,7 +14,8 @@ public class DeleteQuery extends Query{
 		super.construct();
 	}
 	/* solve insert query by previous correct db state and next correct db state, return fixed query or null if not solvable*/
-	public Query solve(DatabaseState pre, DatabaseState next) throws Exception{
-		
+	public String solve(DatabaseState pre, DatabaseState next) throws Exception{
+		System.out.println("Delete function not implemented");
+		return null;
 	}
 }

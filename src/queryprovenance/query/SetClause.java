@@ -27,6 +27,7 @@ public class SetClause {
 	
 	/* solve the where clause given the previous/next db states */
 	public String solve(DatabaseState pre, DatabaseState next) throws Exception{
-		
+		System.out.println("Set clause function not implemented");
+		return null;
 	}
 }

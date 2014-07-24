@@ -22,7 +22,7 @@ public class SolveAll {
 	}
 	
 	/* initialize problem given a sequence of wrong queries, and a sequence of corresponding true queries*/
-	public String solveOnQ(String wrong_query, String true_query) throws Exception {
+	public String solveOnQ(String wrong_query, String true_query, String[] options) throws Exception {
 		String result = "";
 		DatabaseHandler database = new DatabaseHandler();
 		database.getConnected();
@@ -34,7 +34,8 @@ public class SolveAll {
 			current.queryInitialize();
 			DatabaseState pre = new DatabaseState(database, current);		
 			database.queryExecution(true_query);
-			result = current.solve(database, pre);
+			DatabaseState next = new DatabaseState(database, current);
+			result = current.solve(pre, next, options);
 		}
 		return result;
 	}
@@ -64,6 +65,8 @@ public class SolveAll {
 		SolveAll solver = new SolveAll();
 		String wquery = "UPDATE employee SET Salary = salary+1100 WHERE level >= 2 and salary < 100000;";
 		String tquery = "UPDATE employee SET Salary = salary+1100 WHERE level >= 3 and salary < 100000;";
-		String fquery = solver.solveOnQ(wquery, tquery);
+		arg = new String[]{"-M","0"};
+		String fquery = solver.solveOnQ(wquery, tquery, arg);
+		System.out.print(fquery);
 	} 
 }
