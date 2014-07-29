@@ -74,7 +74,7 @@ public class WhereClause {
 				if(option[i+1].equals("0")) // "0" for Decision tree solver
 					result = solveDT(pre,next);
 				else if(option[i+1].equals("1")) //"1" for MILP solver
-					result = solveMILP(pre,next);
+					result = solveMILP(pre,next, 0.1);
 				else
 					result = null;
 				break;
@@ -86,19 +86,52 @@ public class WhereClause {
 	}
 	
 	/* solve the where clause by MILP cplex*/
-	public String solveMILP(DatabaseState pre, DatabaseState next) throws Exception{
-		return "Function not implemented";
+	public String solveMILP(DatabaseState pre, DatabaseState next, double ep) throws Exception{
+		// build cplex solver
+		CplexHandler cplex = new CplexHandler(ep);
+		// prepare class information
+		String[] classinfo;
+		
+		// prepare feature information
+		ArrayList<String[]> valuesAll = new ArrayList<String[]>();
+		String[] value_names = this.getFeature().split(",");
+		
+		// if size of previous state and next state is different, this query cannot be solved by revise where clause
+		if(pre.size()!=next.size())
+			return null;
+		
+		// gather class information
+		classinfo = pre.compare(next);
+		
+		// gather feature information
+		for(String fname:value_names){
+			fname.trim();
+			String[] value = pre.getFeature(fname);
+			valuesAll.add(value);
+		}
+		
+		// prepare cplex
+		double[] fixed_values = cplex.solve(this, valuesAll, classinfo, "abs");
+		
+		// get fixed where
+		if(fixed_values != null)
+			fixed_where = cplex.toConditionRules(this, fixed_values);
+		else
+			fixed_where = null;
+		return fixed_where;
 	}
 	/* solve the where clause by decision tree */
 	public String solveDT(DatabaseState pre, DatabaseState next) throws Exception{
 		// prepare input for Decision Tree solver
+		// buid tree
+		DecisionTreeHandler tree = new DecisionTreeHandler();
 		
 		// prepare class information
 		String[] classinfo;
 		
 		// prepare feature information
 		ArrayList<String[]> features = new ArrayList<String[]>();
-		String[] feature_names = getDTFeature().split(",");
+		String[] feature_names = this.getFeature().split(",");
 		
 		// if size of previous state and next state is different, this query cannot be solved by revise where clause
 		if(pre.size()!=next.size())
@@ -115,119 +148,49 @@ public class WhereClause {
 		}
 		
 		//ResultSet features = database.queryExecution(featurequery);
-		prepareARFF(features, classinfo);
+		tree.prepareARFF(features, classinfo, this);
 		
-		// buid tree
-		DecisionTreeHandler tree = new DecisionTreeHandler();
+		// solve 
 		String rulelist = tree.buildTree("./data/feature.arff");
-
-		convertIntoRules(rulelist);
+		
+		//convertIntoRules(rulelist);
+		fixed_where = tree.toConditionRules(rulelist, this);
+		
 		//System.out.println(getFixedClause());
-		return getFixedClause();
+		return fixed_where;
 	}
 	
-	/* convert rule string into condition rules*/
-	public void convertIntoRules(String rulelist){
-		fixed_where = null;
-		// process generated rules
-		String[] lines = rulelist.split(System.getProperty("line.separator"));
-		Pattern pattern = Pattern.compile("(.+)(=> class=b)");
-		for(String line:lines){
-			Matcher matcher = pattern.matcher(line);
-			if(matcher.find())
-				fixed_where = matcher.group(1);
+	/* get decision tree features: represented as arithmetic expressions, connected by "," */
+	public String getFeature(){
+		String feature = "";
+		for(Condition subcond:where_conditions){
+			feature = feature + subcond.getLeft()+",";
 		}
-
-		for(String feature: attribute_condition_map.keySet()){
-			Pattern pattern3 = Pattern.compile(feature);
-			Matcher matcher = pattern3.matcher(fixed_where);
-			if(matcher.find())
-				fixed_where = fixed_where.replaceAll(feature, attribute_condition_map.get(feature).getLeft());
-			else{
-				fixed_where = null;
-				return;
-			}
-		}
-		
-		fixed_where = fixed_where.replaceAll("[\\(\\)]", "");
-		fixed_where.trim();
-		// check structure
-		// decompose fixed_where clause
-		Pattern pattern2 = Pattern.compile("(and|or)");
-		Matcher matcher = pattern2.matcher(fixed_where);
-		String fixed_operator=null;
-		if(matcher.find())
-			fixed_operator = matcher.group();
-		else
-			fixed_operator = "";
-		
-		// condition rules connection must be the same
-		if(!fixed_operator.equals(operator)){
-			fixed_where = null;
-			return;
-		}
-		
-		// cardinality must be the same
-		Partition fixed_where_part = new Partition("(where) (.+)","(and|or)");
-		fixed_where_part.getContentSplit("where "+fixed_where);
-		
-		// get a list of condition rules;
-		ArrayList<String> fixed_contents = fixed_where_part.getSplitedContent();
-		//System.out.println(String.valueOf(fixed_contents.size()));
-		//System.out.println(String.valueOf(where_conditions.length));
-		if(!(fixed_contents.size()==where_conditions.length)){
-			fixed_where = null;
-			return;
-		}	
+		return feature;
 	}
 	
+	/* return node type */
+	public int getNodeType(String str){
+		return 0;
+	}
 	/* get fixed where clause*/
 	public String getFixedClause(){
 		return fixed_where;
 	}
-	/* prepare input file for Decision tree solver */
-	public void prepareARFF(ArrayList<String[]> features, String[] classinfo) throws Exception {
-		
-		// prepare map between featureID and original condition
-		attribute_condition_map = new HashMap<String, Condition>();
-		
-		// prepare file for Decision tree solver
-		File filename = new File("./data/feature.arff");
-		if(!filename.exists())
-			filename.createNewFile();
-		FileWriter filewriter = new FileWriter(filename);
-		BufferedWriter writer = new BufferedWriter(filewriter); 
-		
-		// write data name
-		writer.write("@RELATION test"); writer.newLine();
-		
-		// write feature/attributes names
-		for(int i=0; i<where_conditions.length; ++i){
-			writer.write("@ATTRIBUTE" + " col"+String.valueOf(i) + " NUMERIC"); writer.newLine();
-			attribute_condition_map.put("col"+String.valueOf(i) , where_conditions[i]);
-		}
-		
-		// write class information
-		writer.write("@ATTRIBUTE class {g,b}"); writer.newLine();
-		
-		// write data
-		writer.write("@DATA"); writer.newLine();
-		for(int i=0; i<classinfo.length; ++i){
-			for(int j=0; j<features.size(); ++j)
-				writer.write(features.get(j)[i]+",");
-			writer.write(classinfo[i]); writer.newLine();
-		}
-		// finish prepare file for DT solver
-		writer.close();		
+	
+	/* get list of feature - attributes mapping list*/
+	public HashMap<String, Condition> getAttributeMap(){
+		return this.attribute_condition_map;
 	}
 	
-	/* get decision tree features: represented as arithmetic expressions, connected by "," */
-	public String getDTFeature(){
-		String featureDT = "";
-		for(Condition subcond:where_conditions){
-			featureDT = featureDT + subcond.getLeft()+",";
-		}
-		return featureDT;
+	/* get operator */
+	public String getOperator(){
+		return this.operator;
+	}
+	
+	/* get condition sets*/
+	public Condition[] getConditions(){
+		return this.where_conditions;
 	}
 
 }

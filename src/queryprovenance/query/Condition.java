@@ -56,6 +56,11 @@ public class Condition {
 			else
 				revised = revised + current;
 	}
+	
+	public String getOperator(){
+		return this.operator;
+	}
+	
 	public boolean isNumber(String str){
 		Pattern pattern3 = Pattern.compile(".*\\D.*");
 		Matcher matcher3 = pattern3.matcher(str);
@@ -64,5 +69,9 @@ public class Condition {
 	
 	public String getLeft(){
 		return left;
+	}
+	
+	public String getRight(){
+		return right;
 	}
 }
