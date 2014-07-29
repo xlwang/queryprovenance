@@ -25,14 +25,14 @@ public class DataGenerator {
 		String[] departments = new String[]{"sale","engineer","hr","finance","mangement"};
 		FileWriter filewriter = new FileWriter(filename);
 		BufferedWriter writer = new BufferedWriter(filewriter); 
-		for(int i=0; i<900; ++i){
+		for(int i=0; i<100; ++i){
 			Random rand = new Random();
 			int val1 = rand.nextInt(count-1);
 			int val2 = rand.nextInt(100);
 			int val3 = rand.nextInt(departments.length-1);
 			int val4 = rand.nextInt(6);
 			int val5 = rand.nextInt(150000)+50000;
-			writer.write("INSERT INTO Employee VALUES ("+String.valueOf(i)+","+"'"+names[val1]+"',"+"'store"+String.valueOf(val2)+"','"+departments[val3]+"',"+String.valueOf(val4)+","+String.valueOf(val5)+");");
+			writer.write("INSERT INTO Employee VALUES ("+String.valueOf(i)+","+String.valueOf(val4)+","+String.valueOf(val5)+");");
 			writer.newLine();
 		}
 		writer.close();

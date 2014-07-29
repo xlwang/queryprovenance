@@ -14,6 +14,7 @@ public class Condition {
 	protected String condition;
 	protected int variablecount;
 	
+	/* Construct condition: separate left, right, and operator */
 	public Condition(String condition_){
 		variables = new HashMap<String, String>();
 		condition = condition_;
@@ -23,14 +24,16 @@ public class Condition {
 		Pattern pattern2 = Pattern.compile("(.+)\\s*(=)\\s*(.+)");
 		Matcher matcher = pattern.matcher(condition);
 		if(matcher.find()||(matcher = pattern2.matcher(condition)).find()){
-			left = matcher.group(1);
-			operator = matcher.group(2);
-			right = matcher.group(3);
-			processVar(left);
-			revised = revised + operator;
+			left = matcher.group(1).trim();
+			operator = matcher.group(2).trim();
+			right = matcher.group(3).trim();
+			//processVar(left);
+			//revised = revised + operator;
 			processVar(right);
 		}
 	}
+	
+	/* rewrite right side of the condition into the form of columns + variables */
 	public void processVar(String str){
 		String current = str;
 		while(current.length()>0){
@@ -38,8 +41,8 @@ public class Condition {
 			Matcher matcher2 = pattern2.matcher(current);
 			if(!matcher2.find())
 				break;
-			String temp = matcher2.group(1).trim();
-			if(isNumber(temp)){
+			String temp;
+			if(isNumber(temp = matcher2.group(1).trim())){
 				variables.put("var"+String.valueOf(variablecount++), temp);
 				revised = revised+"var"+String.valueOf(variablecount-1);
 			}
@@ -55,23 +58,38 @@ public class Condition {
 			}
 			else
 				revised = revised + current;
+		revised = revised.replaceAll("/var", "\\*var");
 	}
 	
-	public String getOperator(){
-		return this.operator;
-	}
-	
+	/* return whether a string is a number */
 	public boolean isNumber(String str){
 		Pattern pattern3 = Pattern.compile(".*\\D.*");
 		Matcher matcher3 = pattern3.matcher(str);
 		return !matcher3.find();
 	}
 	
+	/* return left side*/
 	public String getLeft(){
 		return left;
 	}
 	
+	/* return right side*/
 	public String getRight(){
 		return right;
+	}
+	
+	/* return number of variables */
+	public int getVariableCount(){
+		return this.variablecount;
+	}
+	
+	/* return operator connects left and right side */
+	public String getOperator(){
+		return this.operator;
+	}
+	
+	/* return revised right side */
+	public String getRevisedRight(){
+		return this.revised;
 	}
 }

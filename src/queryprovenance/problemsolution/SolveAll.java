@@ -63,14 +63,15 @@ public class SolveAll {
 	public static void main(String[] arg) throws Exception{
 		DataGenerator datagenerator = new DataGenerator();
 		SolveAll solver = new SolveAll();
-		String wquery = "UPDATE employee SET Salary = salary+1100 WHERE level >= 2 and salary < 80000;";
-		String tquery = "UPDATE employee SET Salary = salary+1100 WHERE level >= 3 and salary < 80000;";
+		String wquery = "UPDATE employee SET Salary = salary+1100, level = level+1 WHERE level >= 2 and salary < 80000;";
+		String tquery = "UPDATE employee SET Salary = salary+1260, level = level+1 WHERE level >= 2 and salary < 80000;";
 		// test for MILP
 		arg = new String[]{"-M","1"};
 		// arg = new String[]{"-M", "0"}; // for Decision Tree
 		String fquery = solver.solveOnQ(wquery, tquery, arg);
 		
 		System.out.println("WRONG QUERY: "+wquery);
+		System.out.println("TRUE QUERY: "+tquery);
 		System.out.print("FIXED QUERY: "+fquery);
 	} 
 }

@@ -18,11 +18,11 @@ public class CplexHandler {
 		epsilon = ep;
 	}
 	/* solve cplex */
-	public double[] solve(WhereClause where, ArrayList<String[]> valuesAll, String[] classinfo, String method) throws Exception{
+	public double[] solve(WhereClause where, ArrayList<String[]> values_all, String[] classinfo, String method) throws Exception{
 		double[] fixed_values = new double[where.getConditions().length];
 		
 		// add constraints
-		this.addAllConstraint(where, valuesAll, classinfo);
+		this.addAllConstraint(where, values_all, classinfo);
 		
 		// add objective function
 		this.prepareObj(where, method);
@@ -56,21 +56,21 @@ public class CplexHandler {
 	}
 	
 	/* prepare all constraints */
-	public void addAllConstraint(WhereClause where, ArrayList<String[]> valuesAll, String[] classinfo) throws Exception {
+	public void addAllConstraint(WhereClause where, ArrayList<String[]> values_all, String[] classinfo) throws Exception {
 		// check input parameters
-		if(valuesAll.get(0).length != classinfo.length){
+		if(values_all.get(0).length != classinfo.length){
 			System.out.println("Where Clause Error: value length not equals to class information");
 			return;
 		}
 		// prepare cplex variables
 		var = cplex.numVarArray(where.getConditions().length, Double.MIN_VALUE, Double.MAX_VALUE);
 		int current = 0;
-		double[] values = new double[valuesAll.size()];
+		double[] values = new double[values_all.size()];
 		// for each tuple, add constraints
-		for(int i = 0; i < valuesAll.get(0).length; ++i){
+		for(int i = 0; i < values_all.get(0).length; ++i){
 			
-			for(int j = 0; j < valuesAll.size(); ++j)
-				values[j] = Double.valueOf(valuesAll.get(j)[i]);
+			for(int j = 0; j < values_all.size(); ++j)
+				values[j] = Double.valueOf(values_all.get(j)[i]);
 			boolean isTrue = classinfo[current++].equals("b")?true:false;
 			this.addConstraint(where, values, isTrue);
 		}

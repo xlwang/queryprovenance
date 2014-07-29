@@ -36,6 +36,16 @@ public class UpdateQuery extends Query{
 		if(result!=null&&result.length()>0){
 			fixed_query = fixed_query.replaceAll("(where.*;)", "where "+result+";");
 		}
+		
+		// send to set clause
+		result = set_clause.solve(pre, next);
+		if(result!=null && result.length()>0){
+			String temp = fixed_query.replaceAll("set.*where", "set "+result+" where");
+			if(!temp.equals(fixed_query))
+				fixed_query = temp;
+			else
+				fixed_query = fixed_query.replaceAll("set.*;", "set "+result+";");
+		}
 		//System.out.println(result);
 		return fixed_query;
 	}

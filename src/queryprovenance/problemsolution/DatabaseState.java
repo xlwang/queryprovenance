@@ -4,8 +4,13 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Set;
+
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptEngine;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import queryprovenance.query.Partition;
 import queryprovenance.query.Query;
@@ -149,6 +154,25 @@ public class DatabaseState {
 			result[count++] = engine.eval(current_feature).toString();
 		}
 		return result;
+	}
+	public String[] getFeature(String feature_name, Set<String> key_list) throws Exception{
+		String[] result = new String[state.size()];
+		int count = 0;
+		ScriptEngineManager mgr = new ScriptEngineManager();
+	    ScriptEngine engine = mgr.getEngineByName("JavaScript");
+		for(String key:key_list){
+			String[] values = state.get(key);
+			String current_feature = feature_name;
+			for(int i=0; i< values.length; ++i){
+				current_feature = current_feature.replaceAll(column_names[i], values[i]);
+			}
+			result[count++] = engine.eval(current_feature).toString();
+		}
+		return result;
+	}
+	/* get key set*/
+	public Set<String> getKeySet(){
+		return this.state.keySet();
 	}
  	/* check whether a tuple exists in the state based on its key*/
 	public boolean containTuple(String key){
