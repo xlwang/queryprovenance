@@ -1,5 +1,8 @@
 package queryprovenance.problemsolution;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -21,6 +24,55 @@ public class SolveAll {
 
 	}
 	
+	public QueryLog solve(QueryLog wrong_query_log, DatabaseState[] database_states, Complaint complaint_set){
+		// to be implemented
+		return null;
+	}
+	
+	public QueryLog solve(QueryLog wrong_query_log, DatabaseState[] database_states, DatabaseState[] true_database_states){
+		// to be implemented
+				return null;
+	}
+	/*
+	public void Initialize(String wrong_query_path, String true_query_path) throws Exception{
+		// read query from files
+		// read wrong queries
+		String s = new String();  
+        StringBuffer sb = new StringBuffer();  	   
+        FileReader fr = new FileReader(new File(wrong_query_path));  
+        BufferedReader br = new BufferedReader(fr);  	  
+        while((s = br.readLine()) != null) {  
+            sb.append(s);  
+        }  
+        br.close();  
+        String[] wrong_query_list = sb.toString().split(";");  
+        // read true queries
+        s = new String();  
+        sb = new StringBuffer();  	   
+        fr = new FileReader(new File(true_query_path));  
+        br = new BufferedReader(fr);  	  
+        while((s = br.readLine()) != null) {  
+            sb.append(s);  
+        }  
+        br.close();  
+        String[] true_query_list = sb.toString().split(";");  
+        
+        if(wrong_query_list.length != true_query_list.length){
+        	System.out.println("Error: Wrong query list and True query list not match");
+        	return;
+        }
+        
+        int query_count = wrong_query_list.length;
+        query_seq = new Query[query_count];
+        db_org = new DatabaseState[query_count];
+        
+        // initialize query sequence and database state
+        for(int i = 0; i < query_count; ++i){
+        	
+        }
+ 
+	}
+	*/
 	/* initialize problem given a sequence of wrong queries, and a sequence of corresponding true queries*/
 	public String solveOnQ(String wrong_query, String true_query, String[] options) throws Exception {
 		String result = "";
@@ -60,9 +112,13 @@ public class SolveAll {
 			next = new DatabaseState(database, current);
 			result = current.solve(pre, next, options);
 			break;
+		default: 
+			System.out.println("Error: Query type not supported");
 		}
 		return result;
 	}
+	
+	/* get query type */
 	public String getType(String query){
 		query = query.trim().toLowerCase();
 		if(matchtype(query, "(insert into) (.+) (values) (.+)"))
@@ -75,8 +131,9 @@ public class SolveAll {
 			return "select";
 		if(matchtype(query, "(insert into) (.+) (select) (.+) (from) (.+)"))
 			return "insertselect";
-		return "error";
+		return "Error: Invalid query type";
 	}
+	
 	/* whether the query fit a given type based on its regular expression*/
 	public boolean matchtype(String query, String regex){
 		Pattern p = Pattern.compile(regex);
@@ -85,12 +142,13 @@ public class SolveAll {
 	}
 	
 	public static void main(String[] arg) throws Exception{
-		DataGenerator datagenerator = new DataGenerator();
+		int tuple_count = 100;
+		//DataGenerator datagenerator = new DataGenerator(tuple_count);
 		SolveAll solver = new SolveAll();
 		// check insert query
 		System.out.println("INSERT QUERY DEMO: ");
 		String wquery = "INSERT INTO Employee VALUES (101,3,153716);";
-		String tquery = "INSERT INTO Employee VALUES (101,3,153726);";
+		String tquery = "";
 		
 		String fquery = solver.solveOnQ(wquery, tquery, arg);
 		
@@ -102,8 +160,8 @@ public class SolveAll {
 		System.out.println();
 		System.out.println("###################");
 		System.out.println("UPDATE QUERY DEMO: ");
-		wquery = "UPDATE employee SET Salary = salary+1100, level = level+1 WHERE level >= 2 and salary < 80000;";
-		tquery = "UPDATE employee SET Salary = salary+1260, level = level+1 WHERE level >= 2 and salary < 80000;";
+		wquery = "UPDATE employee SET Salary = salary+1200, level = level+1 WHERE salary >130000;";
+		tquery = "UPDATE employee SET Salary = salary+12550, level = level+1 WHERE salary >130000;";
 		// test for MILP
 		arg = new String[]{"-M","1"};
 		// arg = new String[]{"-M", "0"}; // for Decision Tree
@@ -118,7 +176,7 @@ public class SolveAll {
 		System.out.println("###################");
 		System.out.println("DELETE QUERY DEMO: ");
 		wquery = "DELETE FROM employee WHERE salary > 130000;";
-		tquery = "DELETE FROM employee WHERE salary > 120000;";
+		tquery = "";
 		arg = new String[]{"-M","1"};
 		fquery = solver.solveOnQ(wquery, tquery, arg);
 		
