@@ -32,7 +32,7 @@ public class Partition {
 			content_body = matcher.group(2).trim();
 			content_body = content_body.replaceAll("[;]", "");
 			getContentSplit();
-			if(matcher.groupCount()< 4)
+			if(matcher.groupCount() < 4)
 				remain = "";
 			else
 				remain = matcher.group(3)+" "+matcher.group(4);

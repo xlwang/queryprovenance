@@ -122,10 +122,6 @@ public class WhereClause {
 		ArrayList<String[]> features = new ArrayList<String[]>();
 		String[] feature_names = this.getFeature().split(",");
 		
-		// if size of previous state and next state is different, this query cannot be solved by revise where clause
-		if(pre.size()!=next.size())
-			return null;
-		
 		// gather class information
 		classinfo = pre.compare(next);
 		

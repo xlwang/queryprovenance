@@ -9,7 +9,7 @@ import java.util.Random;
 
 public class DataGenerator {
 
-	public DataGenerator() throws Exception{
+	public DataGenerator(int tuple_count) throws Exception{
 		BufferedReader reader = new BufferedReader( 
 				 new FileReader("./data/names.txt"));
 		String str;
@@ -25,7 +25,7 @@ public class DataGenerator {
 		String[] departments = new String[]{"sale","engineer","hr","finance","mangement"};
 		FileWriter filewriter = new FileWriter(filename);
 		BufferedWriter writer = new BufferedWriter(filewriter); 
-		for(int i=0; i<100; ++i){
+		for(int i=0; i<tuple_count; ++i){
 			Random rand = new Random();
 			int val1 = rand.nextInt(count-1);
 			int val2 = rand.nextInt(100);
@@ -40,7 +40,6 @@ public class DataGenerator {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		new DataGenerator();
 	}
 
 }

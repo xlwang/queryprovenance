@@ -1,18 +1,17 @@
 package queryprovenance.database;
 
-import java.sql.*;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.script.ScriptEngineManager;
 import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import queryprovenance.query.Partition;
+import queryprovenance.problemsolution.Complaint;
 import queryprovenance.query.Query;
 
 public class DatabaseState {
@@ -76,6 +75,13 @@ public class DatabaseState {
 			}			
 		}
 	}
+	
+	/* return D*, a correct database state by given a set of complaints*/
+	public DatabaseState getTrueState(Complaint complaint_set){
+		// to be implemented
+		return null;
+	}
+	
 	/* compose check query of one tuple */
 	public String getCheckQuery(String[] data){
 		if(data.length!=column_names.length)
@@ -83,6 +89,7 @@ public class DatabaseState {
 		String checkquery = state_query.substring(0,state_query.length()-1) + getCheckCondition(data);
 		return checkquery;
 	}
+	
 	/* compose check conditions given one tuple*/
 	public String getCheckCondition(String[] data){
 		String checkcondition = " where ";
@@ -93,6 +100,7 @@ public class DatabaseState {
 		checkcondition = checkcondition.substring(0, checkcondition.length()-4)+";";
 		return checkcondition;
 	}
+	
 	/* compare two database state */
 	public String[] compare(DatabaseState compare_to_state){
 		String[] check_list = new String[this.state.size()];

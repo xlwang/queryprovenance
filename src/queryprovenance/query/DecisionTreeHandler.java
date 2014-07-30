@@ -52,7 +52,19 @@ public class DecisionTreeHandler {
 		for(String line:lines){
 			Matcher matcher = pattern.matcher(line);
 			if(matcher.find())
-				fixed_where = matcher.group(1);
+				fixed_where = matcher.group(1).trim();
+		}
+		if(fixed_where == null||fixed_where.length()<1){
+			pattern = Pattern.compile("(.+)(=> class=g)");
+			for(String line:lines){
+				Matcher matcher = pattern.matcher(line);
+				if(matcher.find())
+					fixed_where = matcher.group(1);
+			}
+			fixed_where = fixed_where.replace(">=", "<=");
+			fixed_where = fixed_where.replace("<=", ">=");
+			fixed_where = fixed_where.replace(">", "<");
+			fixed_where = fixed_where.replace("<", ">");
 		}
 		// replace feature by attributes
 		for(String feature: attribute_condition_map.keySet()){
