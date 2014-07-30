@@ -1,10 +1,8 @@
 package queryprovenance.query;
 
-import java.sql.*;
 import java.util.ArrayList;
 
-import queryprovenance.problemsolution.DatabaseHandler;
-import queryprovenance.problemsolution.DatabaseState;
+import queryprovenance.database.DatabaseState;
 
 
 public class Query {

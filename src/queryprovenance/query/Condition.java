@@ -1,9 +1,7 @@
 package queryprovenance.query;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Condition {
 	protected String left; // left side of equation or inequality; fixed;

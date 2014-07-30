@@ -1,4 +1,4 @@
-package queryprovenance.problemsolution;
+package queryprovenance.database;
 
 import java.sql.*;
 import java.util.ArrayList;

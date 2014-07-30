@@ -1,6 +1,6 @@
 package queryprovenance.query;
 
-import queryprovenance.problemsolution.DatabaseState;
+import queryprovenance.database.DatabaseState;
 
 public class DeleteQuery extends Query{
 	WhereClause where_clause;

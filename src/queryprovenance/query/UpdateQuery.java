@@ -1,6 +1,6 @@
 package queryprovenance.query;
 
-import queryprovenance.problemsolution.*;
+import queryprovenance.database.DatabaseState;
 
 public class UpdateQuery extends Query{
 	WhereClause where_clause;

@@ -1,10 +1,8 @@
 package queryprovenance.query;
 
 import java.util.ArrayList;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import queryprovenance.problemsolution.DatabaseState;
+import queryprovenance.database.DatabaseState;
 
 public class SetClause {
 	private String set;

@@ -1,4 +1,4 @@
-package queryprovenance.problemsolution;
+package queryprovenance.database;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -36,6 +36,11 @@ public class DataGenerator {
 			writer.newLine();
 		}
 		writer.close();
+		reader.close();
+	}
+	
+	public static void main(String[] args) throws Exception {
+		new DataGenerator();
 	}
 
 }

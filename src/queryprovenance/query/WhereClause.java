@@ -1,18 +1,11 @@
 package queryprovenance.query;
 
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.regex.Pattern;
 import java.util.regex.Matcher;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.util.regex.Pattern;
 
-import queryprovenance.problemsolution.*;
+import queryprovenance.database.DatabaseState;
 
 
 public class WhereClause {

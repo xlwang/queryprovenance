@@ -1,8 +1,5 @@
 package queryprovenance.query;
-import Jama.*; 
-
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -10,7 +7,7 @@ import java.util.regex.Pattern;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
-import queryprovenance.problemsolution.DatabaseState;
+import Jama.Matrix;
 public class JAMAHandler {
 	Matrix A;
 	Matrix b;

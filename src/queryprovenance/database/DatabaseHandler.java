@@ -1,15 +1,15 @@
-package queryprovenance.problemsolution;
+package queryprovenance.database;
 
-import java.util.Properties;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileReader;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileReader;
+import java.util.Properties;
 
 public class DatabaseHandler {
 		

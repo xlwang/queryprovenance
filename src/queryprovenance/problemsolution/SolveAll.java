@@ -1,13 +1,15 @@
 package queryprovenance.problemsolution;
 
-import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import queryprovenance.query.*;
-
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
+import queryprovenance.database.DataGenerator;
+import queryprovenance.database.DatabaseHandler;
+import queryprovenance.database.DatabaseState;
+import queryprovenance.query.DeleteQuery;
+import queryprovenance.query.InsertQuery;
+import queryprovenance.query.Query;
+import queryprovenance.query.UpdateQuery;
 
 public class SolveAll {
 	private DatabaseState[] db_org; // D, a sequence of db states given a seq of queries. 

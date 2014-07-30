@@ -1,10 +1,10 @@
 package queryprovenance.query;
 
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 
-import queryprovenance.problemsolution.DatabaseState;
+import queryprovenance.database.DatabaseState;
 
 public class InsertQuery extends Query {
 	String table_name;
