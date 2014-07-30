@@ -27,7 +27,7 @@ public class Query {
 	public void construct(){
 		String subquery = query; // current subquery
 		for(Partition part:groups){
-			if(subquery.length()>0)
+			if(subquery!=null&&subquery.length()>0)
 				subquery = part.getContentSplit(subquery); // process partition into partition name and content sets
 			else
 				break;

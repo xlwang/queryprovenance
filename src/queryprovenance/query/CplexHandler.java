@@ -26,7 +26,6 @@ public class CplexHandler {
 		
 		// add objective function
 		this.prepareObj(where, method);
-		
 		// solve cplex
 		if(cplex.solve()){
 			cplex.output().println("Solution status = " + cplex.getStatus());

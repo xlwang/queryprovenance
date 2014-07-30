@@ -115,7 +115,7 @@ public class DatabaseState {
 					check_list[count] = "g";
 			}
 			else
-				check_list[count] = "g";
+				check_list[count] = "b";
 			count++;
 		}
 		return check_list;
@@ -192,5 +192,10 @@ public class DatabaseState {
 	/* get state size*/
 	public int size(){
 		return state.size();
+	}
+	
+	/* get primary key set */
+	public HashSet<String> getPrimaryKey(){
+		return this.primary_key;
 	}
 }

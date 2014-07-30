@@ -29,13 +29,37 @@ public class SolveAll {
 		database.executePrepFile("./data/setup.sql");
 		database.executePrepFile("./data/inserts.sql");
 		String querytype = getType(wrong_query);
-		if(querytype.equals("update")){
-			Query current = new UpdateQuery(wrong_query, getType(wrong_query));
-			current.queryInitialize();
-			DatabaseState pre = new DatabaseState(database, current);		
-			database.queryExecution(true_query);
-			DatabaseState next = new DatabaseState(database, current);
+		Query current;
+		DatabaseState pre, next;		
+		
+		switch(querytype){
+		case("update"):
+			current = new UpdateQuery(wrong_query, getType(wrong_query));
+			current.queryInitialize();			
+			pre = new DatabaseState(database, current);	
+			if(true_query.length()>0)
+				database.queryExecution(true_query);
+			next = new DatabaseState(database, current);
 			result = current.solve(pre, next, options);
+			break;
+		case("insert"):
+			current = new InsertQuery(wrong_query, getType(wrong_query));
+			current.queryInitialize();
+			pre = new DatabaseState(database, current);	
+			if(true_query.length()>0)
+				database.queryExecution(true_query);
+			next = new DatabaseState(database, current);
+			result = current.solve(pre, next, options);
+			break;	
+		case("delete"):
+			current = new DeleteQuery(wrong_query, getType(wrong_query));
+			current.queryInitialize();
+			pre = new DatabaseState(database, current);	
+			if(true_query.length()>0)
+				database.queryExecution(true_query);
+			next = new DatabaseState(database, current);
+			result = current.solve(pre, next, options);
+			break;
 		}
 		return result;
 	}
@@ -43,7 +67,7 @@ public class SolveAll {
 		query = query.trim().toLowerCase();
 		if(matchtype(query, "(insert into) (.+) (values) (.+)"))
 			return "insert";
-		if(matchtype(query, "(delete from) (,+)"))
+		if(matchtype(query, "(delete from) (.+)"))
 			return "delete";
 		if(matchtype(query, "(update) (.+) (set) (.+)"))
 			return "update";
@@ -63,15 +87,44 @@ public class SolveAll {
 	public static void main(String[] arg) throws Exception{
 		DataGenerator datagenerator = new DataGenerator();
 		SolveAll solver = new SolveAll();
-		String wquery = "UPDATE employee SET Salary = salary+1100, level = level+1 WHERE level >= 2 and salary < 80000;";
-		String tquery = "UPDATE employee SET Salary = salary+1260, level = level+1 WHERE level >= 2 and salary < 80000;";
-		// test for MILP
-		arg = new String[]{"-M","1"};
-		// arg = new String[]{"-M", "0"}; // for Decision Tree
+		// check insert query
+		System.out.println("INSERT QUERY DEMO: ");
+		String wquery = "INSERT INTO Employee VALUES (101,3,153716);";
+		String tquery = "INSERT INTO Employee VALUES (101,3,153726);";
+		
 		String fquery = solver.solveOnQ(wquery, tquery, arg);
 		
 		System.out.println("WRONG QUERY: "+wquery);
 		System.out.println("TRUE QUERY: "+tquery);
 		System.out.print("FIXED QUERY: "+fquery);
+		
+		// check update query
+		System.out.println();
+		System.out.println("###################");
+		System.out.println("UPDATE QUERY DEMO: ");
+		wquery = "UPDATE employee SET Salary = salary+1100, level = level+1 WHERE level >= 2 and salary < 80000;";
+		tquery = "UPDATE employee SET Salary = salary+1260, level = level+1 WHERE level >= 2 and salary < 80000;";
+		// test for MILP
+		arg = new String[]{"-M","1"};
+		// arg = new String[]{"-M", "0"}; // for Decision Tree
+		fquery = solver.solveOnQ(wquery, tquery, arg);
+		
+		System.out.println("WRONG QUERY: "+wquery);
+		System.out.println("TRUE QUERY: "+tquery);
+		System.out.print("FIXED QUERY: "+fquery);
+		
+		// check delete query
+		System.out.println();
+		System.out.println("###################");
+		System.out.println("DELETE QUERY DEMO: ");
+		wquery = "DELETE FROM employee WHERE salary > 130000;";
+		tquery = "DELETE FROM employee WHERE salary > 120000;";
+		arg = new String[]{"-M","1"};
+		fquery = solver.solveOnQ(wquery, tquery, arg);
+		
+		System.out.println("WRONG QUERY: "+wquery);
+		System.out.println("TRUE QUERY: "+tquery);
+		System.out.print("FIXED QUERY: "+fquery);
+				
 	} 
 }
