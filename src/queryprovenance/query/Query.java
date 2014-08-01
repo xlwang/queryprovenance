@@ -1,8 +1,11 @@
 package queryprovenance.query;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import queryprovenance.database.DatabaseState;
+import queryprovenance.harness.QueryParams;
 
 
 public class Query {
@@ -72,4 +75,97 @@ public class Query {
 		return null;
 	}
 	
+	
+	public static Query generate(QueryParams params) {
+		String s = null;
+		String clause = null, set = null;
+		switch(params.queryType) {
+		case "insert":
+			// generate values
+			s = String.format("INSERT INTO %1 VALUES(%2)", null, Util.join(null, ", "));
+		case "update":
+			clause = Where.generate(params).toString();
+			set = SetExpr.generate(params).toString();
+			s = String.format("UPDATE %1 SET %2 WHERE %3", null, set, clause);
+		case "delete":
+			clause = Where.generate(params).toString();
+			set = SetExpr.generate(params).toString();
+			s = String.format("DELETE %1 SET %2 WHERE %3", null, set, clause);
+		}
+		if (s != null)
+			return new Query(s, params.queryType);
+		return null;
+	}
+	}
+
+class SetExpr extends ArrayList<SClause> {
+	public static SetExpr generate(QueryParams params) {
+		return null;
+	}
+	
+	public String toString() {
+		return Util.join(this, ", ");
+	}
+}
+
+class SClause {
+	public String toString() {
+		return "";
+	}
+}
+	
+class Where extends ArrayList<Object>{
+	public static Where generate(QueryParams params) {
+		Where ret = new Where();
+		for (int i = 0; i < params.nclauses; i++) {
+			if (true) {
+				ret.add(new WClause(null, false, new float[]{1}));
+			} else {
+				
+			}			
+		}
+		return ret;
+	}
+	
+	public String toString() {
+		return Util.join(this, " and ");
+	}
+}
+	
+class WClause {
+	public String attr;
+	public boolean is_continuous;
+	public float[] values;
+	public WClause(String attr, boolean is_continuous, float[] values) {
+		this.attr = attr;
+		this.is_continuous = is_continuous;
+		this.values = values;
+	}
+	
+	public String toString() {
+		List<String> arr = new ArrayList<String>();
+		if (this.is_continuous) {
+			if (this.values[0] != Float.MIN_VALUE)
+				arr.add(String.format("%1 >= %2", this.attr, this.values[0]));
+			if (this.values[1] != Float.MAX_VALUE)
+				arr.add(String.format("%1 < %2", this.attr, this.values[1]));
+			return Util.join(arr, " and ");
+		} else {
+			return Util.join(Arrays.asList(values), ", ");
+		}
+	}
+}
+
+class Util {
+	static String join(List<? extends Object> l, String sep) {
+		String s = "";
+		for (int i = 0; i < l.size(); i++) {
+			s += l.get(i).toString();
+			if (i < l.size() - 1) {
+				s += sep;
+			}		
+		}
+		return s;
+
+	}
 }

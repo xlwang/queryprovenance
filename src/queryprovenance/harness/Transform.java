@@ -1,11 +1,10 @@
 package queryprovenance.harness;
 
-import java.util.Hashtable;
 
 
 class Transformation {
 	public enum Type {
-		DELETE, INSERT, SET, WHERE
+		DELETE, VALUES, SET, WHERE
 	}
 	protected int qidx;
 	protected Type type;
@@ -19,20 +18,35 @@ class Transformation {
 		// change where clause
 		//   change predicate
 		//     set constant value
+		this.qidx = qidx;
+		this.type = type;
 	}
 
 	/*
 	 * Apply this transformation to a query log
 	 */
 	public QueryLog apply(QueryLog ql) {
+		switch (this.type) {
+		case DELETE:
+			ql.remove(qidx);
+		case VALUES:
+			if (ql.get(qidx).getType() != "insert") 
+				throw new RuntimeException();
+			// XXX: change query structure
+		case SET:
+			// XXX: change set clause
+		case WHERE:
+			// XXX: replace where clause completely with new clause
+			
+		}
 		return ql;
 	}
 
 	/*
 	 * Create a transformation for our experiments
 	 */
-	public static Transformation generate(Hashtable<String, String> params) {
-
+	public static Transformation generate(ExpParams params) {
+		
 		return null;
 	}
 }

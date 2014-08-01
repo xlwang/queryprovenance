@@ -1,7 +1,5 @@
 package queryprovenance.harness;
 
-import java.util.Hashtable;
-
 import queryprovenance.database.DatabaseHandler;
 import queryprovenance.database.DatabaseStates;
 import queryprovenance.problemsolution.Complaint;
@@ -11,7 +9,7 @@ public class Harness {
 	public static void main(String[] args) throws Exception {
 		
 		// TODO: somehow generate initial dataset
-		Hashtable<String, String> params = null;
+		ExpParams params = null;
 		DatabaseHandler handler = null;
 		
 		// correct query log

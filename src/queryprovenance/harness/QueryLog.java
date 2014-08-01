@@ -1,18 +1,13 @@
 package queryprovenance.harness;
 
 import java.util.ArrayList;
-import java.util.Hashtable;
 
 import queryprovenance.database.DatabaseHandler;
 import queryprovenance.database.DatabaseState;
 import queryprovenance.database.DatabaseStates;
 import queryprovenance.query.Query;
 
-public class QueryLog {
-	protected Query[] queries;
-	public QueryLog(Query[] queries) {
-		this.queries = queries;
-	}
+public class QueryLog extends ArrayList<Query>{
 	
 	/*
 	 * Run the queries in the query log on the database in sequence.
@@ -23,7 +18,7 @@ public class QueryLog {
 	public DatabaseStates execute(DatabaseHandler handler) throws Exception {
 		String base_table_name = "";  // table that queries reference
 		ArrayList<String> tablenames = new ArrayList<String>();
-		for (Query q : queries) {
+		for (Query q : this) {
 			// execute q using handler
 			tablenames.add("");
 		}
@@ -44,7 +39,10 @@ public class QueryLog {
 	 * params passed in
 	 * @param params 
 	 */
-	public static QueryLog generate(Hashtable<String,String> params) {
+	public static QueryLog generate(ExpParams params) {
+		QueryLog ql = new QueryLog();
+		for (int i = 0; i < params.ql_nqueries; i++) {
+		}
 		int nqueries;
 		float[] percs;  // probabilities for each query type
 		//query type mixture
