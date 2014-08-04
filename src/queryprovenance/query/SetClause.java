@@ -1,31 +1,31 @@
 package queryprovenance.query;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import queryprovenance.database.DatabaseState;
+import queryprovenance.harness.QueryParams;
+import queryprovenance.harness.Util;
 
 public class SetClause {
-	private String set;
-	private Condition[] set_conditions; // a set of conditions
+	private List<Condition> set_conditions; // a set of conditions
 	private String fixed_set; 
 	
 	/* construct the where clause given a query*/
-	public SetClause(ArrayList<Partition> groups_){
-		for(Partition part: groups_){
-			if(part.getPartitionName().equals("set")){
-				set = part.getContent();
-				ArrayList<String> contents = part.getSplitedContent();
-				set_conditions = new Condition[contents.size()];
-				for(int i=0; i<contents.size(); ++i){
-					set_conditions[i] = new Condition(contents.get(i));
-				}
-				break;
-			}
-		}
+	public SetClause(List<Condition> conditions) {
+		set_conditions = conditions;
+	}
+	
+	public String toString() {
+		return Util.join(set_conditions, ", ");
+	}
+	
+	public static SetClause generate(QueryParams params) {
+		return new SetClause(null);
 	}
 	
 	/* solve the where clause given the previous/next db states */
-	public String solve(DatabaseState pre, DatabaseState next) throws Exception{
+	public SetClause solve(DatabaseState pre, DatabaseState next) throws Exception{
 		
 		String[] classinfo;
 		
@@ -86,7 +86,7 @@ public class SetClause {
 	} 
 	
 	/* return conditions*/
-	public Condition[] getConditions(){
+	public List<Condition> getConditions(){
 		return this.set_conditions;
 	}
 }

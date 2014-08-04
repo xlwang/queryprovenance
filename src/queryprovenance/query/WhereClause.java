@@ -2,56 +2,54 @@ package queryprovenance.query;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.List;
 
 import queryprovenance.database.DatabaseState;
+import queryprovenance.harness.QueryParams;
+import queryprovenance.harness.Util;
 
 
 public class WhereClause {
-	private String where; // original where clause
-	private Condition[] where_conditions; // a set of conditions
-	private String operator; // disjunction/conjunction
-	private ArrayList<String> table_names; // tables involved in the where clause
+	public static enum Op {
+		DISJ, // disjunction 
+		CONJ  // conjunction
+	};
+	
+	private List<Condition> where_conditions; // a set of conditions
+	private Op operator; // disjunction/conjunction
 	private HashMap<String, Condition> attribute_condition_map; // 
 	private String fixed_where; // fixed where clasue
 	
 	/* construct the where clause given a query*/
-	public WhereClause(ArrayList<Partition> groups_, ArrayList<String> querytables){
+	public WhereClause(List<Condition> conditions, Op operator) {
+		where_conditions = conditions;
+		this.operator = operator;
 		
-		// find where clause partition in the query 
-		for(Partition part: groups_){
-			
-			if(part.getPartitionName().equals("where")){
-				where = part.getContent();
-				
-				// decompose where clause into condition rules 
-				Pattern pattern = Pattern.compile("(and|or)");
-				Matcher matcher = pattern.matcher(where);
-				
-				if(matcher.find())
-					operator = matcher.group();
-				else
-					operator = "";
-				
-				// get a list of condition rules;
-				ArrayList<String> contents = part.getSplitedContent();
-				
-				// initialize each condition rules
-				where_conditions = new Condition[contents.size()];
-				for(int i=0; i<contents.size(); ++i){
-					where_conditions[i] = new Condition(contents.get(i));
-				}
-				
-				// get table names
-				table_names = querytables;
-				break;
-			}
+		for (Condition c : conditions) {
+			// TODO: populate attribute_condition_map
 		}
 	}
 	
+	
+	public static WhereClause generate(QueryParams params) {
+		List<Condition> conds = new ArrayList<Condition>();
+		for (int i = 0; i < params.nclauses; i++) {
+			if (true) {
+				// TODO: ewu: verify this format is correct
+				conds.add(new Condition("x", Condition.Op.eq, "99"));
+			} else {
+				
+			}			
+		}
+		return new WhereClause(conds, Op.CONJ);
+	}
+	
+	public String toString() {
+		return Util.join(where_conditions, " and ");
+	}
+	
 	/* solve the where clause given the previous/next db states */
-	public String solve(DatabaseState pre, DatabaseState next, String[] option) throws Exception{
+	public WhereClause solve(DatabaseState pre, DatabaseState next, String[] option) throws Exception{
 		
 		String result = "";
 		
@@ -79,7 +77,7 @@ public class WhereClause {
 	}
 	
 	/* solve the where clause by MILP cplex*/
-	public String solveMILP(DatabaseState pre, DatabaseState next, double ep) throws Exception{
+	public WhereClause solveMILP(DatabaseState pre, DatabaseState next, double ep) throws Exception{
 		// build cplex solver
 		CplexHandler cplex = new CplexHandler(ep);
 		// prepare class information
@@ -110,7 +108,7 @@ public class WhereClause {
 		return fixed_where;
 	}
 	/* solve the where clause by decision tree */
-	public String solveDT(DatabaseState pre, DatabaseState next) throws Exception{
+	public WhereClause solveDT(DatabaseState pre, DatabaseState next) throws Exception{
 		// prepare input for Decision Tree solver
 		// buid tree
 		DecisionTreeHandler tree = new DecisionTreeHandler();
@@ -169,12 +167,12 @@ public class WhereClause {
 	}
 	
 	/* get operator */
-	public String getOperator(){
+	public Op getOperator(){
 		return this.operator;
 	}
 	
 	/* get condition sets*/
-	public Condition[] getConditions(){
+	public List<Condition> getConditions(){
 		return this.where_conditions;
 	}
 

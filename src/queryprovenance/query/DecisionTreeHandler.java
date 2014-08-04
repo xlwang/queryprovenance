@@ -103,7 +103,7 @@ public class DecisionTreeHandler {
 		ArrayList<String> fixed_contents = fixed_where_part.getSplitedContent();
 		//System.out.println(String.valueOf(fixed_contents.size()));
 		//System.out.println(String.valueOf(where_conditions.length));
-		if(!(fixed_contents.size() == where.getConditions().length)){
+		if(!(fixed_contents.size() == where.getConditions().size())){
 			return null;
 		}
 		return fixed_where;
@@ -126,9 +126,9 @@ public class DecisionTreeHandler {
 		writer.write("@RELATION test"); writer.newLine();
 		
 		// write feature/attributes names
-		for(int i = 0; i < where.getConditions().length; ++i){
+		for(int i = 0; i < where.getConditions().size(); ++i){
 			writer.write("@ATTRIBUTE" + " col"+String.valueOf(i) + " NUMERIC"); writer.newLine();
-			attribute_condition_map.put("col"+String.valueOf(i) , where.getConditions()[i]);
+			attribute_condition_map.put("col"+String.valueOf(i) , where.getConditions().get(i));
 		}
 		
 		// write class information

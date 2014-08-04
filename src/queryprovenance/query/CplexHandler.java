@@ -19,7 +19,7 @@ public class CplexHandler {
 	}
 	/* solve cplex */
 	public double[] solve(WhereClause where, ArrayList<String[]> values_all, String[] classinfo, String method) throws Exception{
-		double[] fixed_values = new double[where.getConditions().length];
+		double[] fixed_values = new double[where.getConditions().size()];
 		
 		// add constraints
 		this.addAllConstraint(where, values_all, classinfo);
@@ -40,14 +40,14 @@ public class CplexHandler {
 	/* prepare objective function */
 	public void prepareObj(WhereClause where, String method) throws Exception{
 		// prepare input parameters
-		Condition[] conditions = where.getConditions();
-		int size = conditions.length;
+		List<Condition> conditions = where.getConditions();
+		int size = conditions.size();
 		obj = cplex.numVarArray(size, Double.MIN_VALUE, Double.MAX_VALUE);
 		
 		switch(method){
 		case "abs":
-			for(int i = 0; i < conditions.length; ++i){
-				double orgvar = Double.valueOf(conditions[i].getRight());
+			for(int i = 0; i < conditions.size(); ++i){
+				double orgvar = Double.valueOf(conditions.get(i).getRight());
 				cplex.add(cplex.eq(obj[i], cplex.abs(cplex.sum(var[i], -orgvar))));
 			}
 		}
@@ -62,7 +62,7 @@ public class CplexHandler {
 			return;
 		}
 		// prepare cplex variables
-		var = cplex.numVarArray(where.getConditions().length, Double.MIN_VALUE, Double.MAX_VALUE);
+		var = cplex.numVarArray(where.getConditions().size(), Double.MIN_VALUE, Double.MAX_VALUE);
 		int current = 0;
 		double[] values = new double[values_all.size()];
 		// for each tuple, add constraints
@@ -79,15 +79,15 @@ public class CplexHandler {
 	public void addConstraint(WhereClause where, double[] values, boolean isTrue) throws Exception{
 		// check input parameters
 		// values length must equals to where clause condition size
-		if(where.getConditions().length != values.length){
+		if(where.getConditions().size() != values.length){
 			System.out.println("Where Clause Error: value length not equals to condition size");
 			return;
 		}
 		
 		// prepare input parameters
-		Condition[] conditions = where.getConditions();
-		int size = conditions.length;
-		String operation = where.getOperator();
+		List<Condition> conditions = where.getConditions();
+		int size = conditions.size();
+		WhereClause.Op operation = where.getOperator();
 
 		//IloNumVar[] obj = cplex.numVarArray(size, Double.MIN_VALUE, Double.MAX_VALUE);
 		
@@ -95,39 +95,39 @@ public class CplexHandler {
 		IloConstraint[] cons = new IloConstraint[size];
 		for(int i = 0; i < size; ++i){
 			// for every constraint
-			String op = conditions[i].getOperator();
+			Condition.Op op = conditions.get(i).getOperator();
 			switch(op){
-			case ">": 
+			case g:
 				if(isTrue)
 					cons[i] = cplex.le(var[i], values[i]-epsilon);
 				else
 					cons[i] = cplex.ge(var[i], values[i]);
 				break;
-			case "<":
+			case l:
 				if(isTrue)
 					cons[i] = cplex.ge(var[i], values[i]+epsilon);
 				else
 					cons[i] = cplex.le(var[i], values[i]);
 				break;
-			case ">=":
+			case ge:
 				if(isTrue)
 					cons[i] = cplex.le(var[i], values[i]);
 				else
 					cons[i] = cplex.ge(var[i], values[i]+epsilon);
 				break;
-			case "<=":
+			case le:
 				if(isTrue)
 					cons[i] = cplex.ge(var[i], values[i]);
 				else
 					cons[i] = cplex.le(var[i], values[i]-epsilon);
 				break;
-			case "=":
+			case eq:
 				if(isTrue)
 					cons[i] = cplex.eq(var[i], values[i]);
 				else
 					cons[i] = cplex.eq(cplex.eq(var[i], values[i]), 0);
 				break;
-			case "!=": 
+			case ne: 
 				if(isTrue)
 					cons[i] = cplex.eq(cplex.eq(var[i], values[i]), 0);
 				else
@@ -149,14 +149,14 @@ public class CplexHandler {
 	/* return fixed where clause: transfer cplex results into condition rules */
 	public String toConditionRules(WhereClause where, double[] fixed_values){
 		String fixed_where = "";
-		int size =  where.getConditions().length;
+		int size =  where.getConditions().size();
 		// for each condition
 		for(int i = 0; i < size-1; ++i){
-			Condition condition = where.getConditions()[i];
+			Condition condition = where.getConditions().get(i);
 			fixed_where = fixed_where + condition.getLeft() + condition.getOperator() + String.valueOf(fixed_values[i++]);
 			fixed_where = fixed_where +" " + where.getOperator()+" ";
 		}
-		Condition condition = where.getConditions()[where.getConditions().length-1];
+		Condition condition = where.getConditions().get(where.getConditions().size() - 1);
 		fixed_where = fixed_where + condition.getLeft() + condition.getOperator() + String.valueOf(fixed_values[size-1]);
 		
 		return fixed_where;

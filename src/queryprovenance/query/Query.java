@@ -1,31 +1,48 @@
 package queryprovenance.query;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import queryprovenance.database.DatabaseState;
 import queryprovenance.harness.QueryParams;
+import queryprovenance.harness.Util;
 
 
 public class Query {
-	protected String query; // query content
-	protected String type; // query type: Insert, Delete, Update, Select
-	protected ArrayList<Partition> groups; // a set of groups, select from, set, where, insert into,etc.
+	public static enum Type {
+		INSERT, DELETE, UPDATE, SELECT
+	};
+	
+	//protected String query; // query content
+	protected Query.Type type; 
+	protected SetClause select;
+	protected Table from;
+	protected WhereClause where;
+	protected List<String> values; // values for INSERT query
 	
 	public Query(){
 	}
+	
 	/* initialize query with query string and query type*/
-	public Query(String query_, String type_){
+	public Query(SetClause select, Table from, WhereClause where, Query.Type type_){
 		// preprocess the query
-		query = query_;
-		query = query.trim().toLowerCase();
-		type = type_;
-		groups = new ArrayList<Partition>();
+		this.select = select;
+		this.from = from;
+		this.where = where;
+		this.type = type_;
+	}
+	
+	// insert query constructor
+	public Query(Table from, List<String> values) {
+		this.type = Type.INSERT;
+		this.from = from;
+		this.values = values;
 	}
 	
 	/* construct query groups*/
 	public void construct(){
+		// XXX: do we support subqueries?
+		/*
 		String subquery = query; // current subquery
 		for(Partition part:groups){
 			if(subquery!=null&&subquery.length()>0)
@@ -33,33 +50,64 @@ public class Query {
 			else
 				break;
 		}
+		*/
 	}
 	/* get query initialized */
 	public void queryInitialize(){
 		System.out.println("type not supported");
 	}
-	/* add partition regular expressions, and content split regular expression */
-	public void addPartition(String contentSplitPattern_, String bodySplitPattern_){
-		groups.add(new Partition(contentSplitPattern_, bodySplitPattern_));
-	}
-	/* return groups */
-	public ArrayList<Partition> getGroups(){
-		return groups;
-	}
-	/* reture query type */
-	public String getType(){
+
+	/* return query type */
+	public Query.Type getType(){
 		return type;
 	}
 	/* return original query */
-	public String getQuery(){
-		return query;
+	public String toString(){
+		List<String> l = new ArrayList<String>();
+		if (type == Type.INSERT) {
+			l.add("INSERT INTO");
+			l.add(from.toString());
+			l.add("VALUES(");
+			l.add(Util.join(values, ", "));  //XXX: not exactly right...
+			l.add(")");
+		} else if (type == Type.DELETE) {
+			l.add("DELETE FROM");
+			l.add(from.toString());
+			l.add("WHERE");
+			l.add(where.toString());
+		} else if (type == Type.UPDATE) {		
+			l.add("UPDATE");
+			l.add(select.toString());
+			l.add("FROM");
+			l.add(from.toString());
+			l.add("WHERE");
+			l.add(where.toString());
+		} else {
+			l.add("SELECT");
+			l.add(select.toString());
+			l.add("FROM");
+			l.add(from.toString());
+			if (where.toString() != "") {
+				l.add("WHERE");
+				l.add(where.toString());
+			};
+		}
+		return Util.join(l,  " ");
 	}
+	
 	/* solve query by previous database state and next database state*/
-	public String solve(DatabaseState pre, DatabaseState next, String[] options) throws Exception{
+	public Query solve(DatabaseState pre, DatabaseState next, String[] options) throws Exception{
 		return null;
 	}
+	
+	public Table setTable(Table t) { 
+		from = t;
+		return from;
+	}
 	/* return table names involved in this query*/
-	public ArrayList<String> getTables(){
+	public Table getTable(){
+		return from;
+		/*
 		if(type.equals("insert"))
 			for(Partition part:groups)
 				if(part.getPartitionName().equals("insert into"))
@@ -73,99 +121,28 @@ public class Query {
 				if(part.getPartitionName().equals("delete from"))
 					return part.getSplitedContent();
 		return null;
+		*/
 	}
 	
+	public Query clone() {
+		Query q = new Query(select, from, where, type);
+		q.values = values;
+		return q;
+	}
 	
 	public static Query generate(QueryParams params) {
-		String s = null;
-		String clause = null, set = null;
+		Query q = null;
+		WhereClause clause = WhereClause.generate(params);
+		SetClause set = SetClause.generate(params);
 		switch(params.queryType) {
-		case "insert":
+		case INSERT:
 			// generate values
-			s = String.format("INSERT INTO %1 VALUES(%2)", null, Util.join(null, ", "));
-		case "update":
-			clause = Where.generate(params).toString();
-			set = SetExpr.generate(params).toString();
-			s = String.format("UPDATE %1 SET %2 WHERE %3", null, set, clause);
-		case "delete":
-			clause = Where.generate(params).toString();
-			set = SetExpr.generate(params).toString();
-			s = String.format("DELETE %1 SET %2 WHERE %3", null, set, clause);
+			q = new Query(params.from, null);
+		case UPDATE:
+			q = new Query(set, params.from, clause, Type.UPDATE);
+		case DELETE:
+			q = new Query(null, params.from, clause, Type.DELETE);
 		}
-		if (s != null)
-			return new Query(s, params.queryType);
-		return null;
-	}
-	}
-
-class SetExpr extends ArrayList<SClause> {
-	public static SetExpr generate(QueryParams params) {
-		return null;
-	}
-	
-	public String toString() {
-		return Util.join(this, ", ");
-	}
-}
-
-class SClause {
-	public String toString() {
-		return "";
-	}
-}
-	
-class Where extends ArrayList<Object>{
-	public static Where generate(QueryParams params) {
-		Where ret = new Where();
-		for (int i = 0; i < params.nclauses; i++) {
-			if (true) {
-				ret.add(new WClause(null, false, new float[]{1}));
-			} else {
-				
-			}			
-		}
-		return ret;
-	}
-	
-	public String toString() {
-		return Util.join(this, " and ");
-	}
-}
-	
-class WClause {
-	public String attr;
-	public boolean is_continuous;
-	public float[] values;
-	public WClause(String attr, boolean is_continuous, float[] values) {
-		this.attr = attr;
-		this.is_continuous = is_continuous;
-		this.values = values;
-	}
-	
-	public String toString() {
-		List<String> arr = new ArrayList<String>();
-		if (this.is_continuous) {
-			if (this.values[0] != Float.MIN_VALUE)
-				arr.add(String.format("%1 >= %2", this.attr, this.values[0]));
-			if (this.values[1] != Float.MAX_VALUE)
-				arr.add(String.format("%1 < %2", this.attr, this.values[1]));
-			return Util.join(arr, " and ");
-		} else {
-			return Util.join(Arrays.asList(values), ", ");
-		}
-	}
-}
-
-class Util {
-	static String join(List<? extends Object> l, String sep) {
-		String s = "";
-		for (int i = 0; i < l.size(); i++) {
-			s += l.get(i).toString();
-			if (i < l.size() - 1) {
-				s += sep;
-			}		
-		}
-		return s;
-
+		return q;
 	}
 }

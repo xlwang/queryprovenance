@@ -3,6 +3,7 @@ package queryprovenance.query;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 
 import queryprovenance.database.DatabaseState;
 
@@ -13,47 +14,12 @@ public class InsertQuery extends Query {
 	HashMap<String, String[]> prevalues;
 	HashMap<String, String[]> nextvalues;
 	
-	public InsertQuery(String query_, String type_){
-		super(query_,type_);
+	public InsertQuery(Table from, List<String>values) {
+		super(from, values);
 	}
 	
-	/* initialize query */
-	public void queryInitialize(){
-		super.addPartition("(insert into) (.+) (values) (.+)", "[(]");
-		super.addPartition("(values) ([(].+[)];)","(\\)\\s*,\\s*\\()");
-		super.construct();
-		this.getTable();
-	}
 	
-	/* get involved tables */
-	public ArrayList<String> getTables(){
-		ArrayList<String> table_list = new ArrayList<String>();
-		table_list.add(table_name);
-		return table_list;	
-	}
 	
-	/* get table name for this insert query*/
-	public void getTable(){
-		// find where clause partition in the query 
-		for(Partition part: groups){				
-			if(part.getPartitionName().equals("insert into")){
-				ArrayList<String> splited_content = part.getSplitedContent();
-				// get table name
-				table_name = splited_content.get(0);
-				if(splited_content.size()>1){
-					String column_list = splited_content.get(1);
-					column_list = column_list.replaceAll("\\)", "").trim();
-					column_names = column_list.split(",");
-					for(int i = 0; i < column_names.length; ++i){
-						column_names[i] = column_names[i].trim();
-					}
-				}
-				else
-					column_names = null;
-				break;
-			}
-		}
-	}
 	
 	/* prepare data for insert query*/
 	public HashMap<String, String[]> prepareData(DatabaseState stat){
@@ -121,7 +87,7 @@ public class InsertQuery extends Query {
 	}
 	
 	/* solve insert query by previous correct db state and next correct db state, return fixed query or null if not solvable*/
-	public String solve(DatabaseState pre, DatabaseState next, String[] options) throws Exception{
+	public Query solve(DatabaseState pre, DatabaseState next, String[] options) throws Exception{
 		// check whether this query should be deleted or not
 		if(pre.size() == next.size())
 			return "DELETE:"+super.query;

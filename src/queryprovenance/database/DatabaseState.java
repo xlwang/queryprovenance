@@ -3,7 +3,6 @@ package queryprovenance.database;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -12,7 +11,7 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
 import queryprovenance.problemsolution.Complaint;
-import queryprovenance.query.Query;
+import queryprovenance.query.Table;
 
 public class DatabaseState {
 	//private ResultSet state; // tuple values in this state
@@ -20,34 +19,34 @@ public class DatabaseState {
 	private String[] column_names;	// column/attribute names in the state
 	private String state_query; // query to retrieve state from database
 	private HashSet<String> primary_key; // primary keys of tuples in this state
-	private ArrayList<String> table_names; // tables involved in this state
+	private String table_name; // tables involved in this state
 	
 	/* initialize database state*/
-	public DatabaseState(DatabaseHandler database, Query query) throws Exception{
+	public DatabaseState(DatabaseHandler database, String table_name) throws Exception{
 		
 		state = new HashMap<String, String[]>(); // initialize state information
-		table_names = query.getTables(); // get tables involved in this query
+		this.table_name = table_name;
 		primary_key = new HashSet<String>(); // get primaryKey from the data
 		
 		DatabaseMetaData dbmd = database.getMetaData(); // get meta data from the database, initialize primary key, involved column information
 		ResultSet result;
-		if(table_names!=null&&table_names.size()>0){
+		if(table_name !=null) {
 			state_query = "select * from "; // initialize state query
-			for(String tabname:table_names){   // for each involved table
-				state_query = state_query + tabname +","; 
-				ResultSet tabkeys = dbmd.getPrimaryKeys(
-					    null, null, tabname);  // retrieve primary key in this table
-				boolean keyISFound = false;
-				while(tabkeys.next()){
-					primary_key.add(tabkeys.getString(4));
-					keyISFound = true;
-				}
-				if(!keyISFound){ //if primary key not set for this table, add every column
-					ResultSet tabcol = dbmd.getColumns(null, null, tabname, null);
-					while(tabcol.next())
-						primary_key.add(tabcol.getString("COLUMN_NAME"));
-				}
+			state_query = state_query + table_name +",";
+			
+			// retrieve primary key in this table
+			ResultSet tabkeys = dbmd.getPrimaryKeys(null, null, table_name);  
+			boolean keyISFound = false;
+			while(tabkeys.next()){
+				primary_key.add(tabkeys.getString(4));
+				keyISFound = true;
 			}
+			if(!keyISFound){ //if primary key not set for this table, add every column
+				ResultSet tabcol = dbmd.getColumns(null, null, table_name, null);
+				while(tabcol.next())
+					primary_key.add(tabcol.getString("COLUMN_NAME"));
+			}
+
 			// get state query prepared
 			state_query = (String) state_query.subSequence(0, state_query.length()-1);
 			state_query = state_query+";";

@@ -6,47 +6,37 @@ public class UpdateQuery extends Query{
 	WhereClause where_clause;
 	SetClause set_clause;
 	
-	public UpdateQuery(String query_, String type_){
-		super(query_,type_);
+	public UpdateQuery(SetClause set, Table table, WhereClause where){
+		super(set, table, where, Query.Type.UPDATE);
 	}
 	
-	/* initialize update query by a set of regular expressions*/
-	public void queryInitialize(){
-		
-		super.addPartition("(update) (.+) (set) (.+)", "[,]");
-		super.addPartition("(set) (.+) (where|;) (.+)","[,]");
-		super.addPartition("(where) (.+;)","(and|or)");
-		
-		// construct query
-		super.construct();
-		
-		// prepare where clause and set clause
-		where_clause = new WhereClause(groups, this.getTables());
-		set_clause = new SetClause(groups);
-	}
+
 	
 	/* solve insert query by previous correct db state and next correct db state, return fixed query or null if not solvable*/
-	public String solve(DatabaseState pre, DatabaseState next, String[] options) throws Exception{
+	public Query solve(DatabaseState pre, DatabaseState next, String[] options) throws Exception{
 		
 		String result = "";
 		
 		// send to where clause. 
-		result = where_clause.solve(pre, next, options);
-		String fixed_query = super.query;
-		if(result!=null&&result.length()>0){
-			fixed_query = fixed_query.replaceAll("(where.*;)", "where "+result+";");
+		WhereClause fixedWhere = where_clause.solve(pre, next, options);
+		Query q = clone();
+		if(fixedWhere != null) {
+			q.where = fixedWhere;
 		}
 		
 		// send to set clause
-		result = set_clause.solve(pre, next);
-		if(result!=null && result.length()>0){
+		SetClause fixedSet = set_clause.solve(pre, next);
+		if(fixedSet != null) {
+			q.select = fixedSet;
+			/*
 			String temp = fixed_query.replaceAll("set.*where", "set "+result+" where");
 			if(!temp.equals(fixed_query))
 				fixed_query = temp;
 			else
 				fixed_query = fixed_query.replaceAll("set.*;", "set "+result+";");
+			 */
 		}
-		//System.out.println(result);
-		return fixed_query;
+		// System.out.println(q.toString());
+		return q;
 	}
 }

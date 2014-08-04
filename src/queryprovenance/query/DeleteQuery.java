@@ -5,21 +5,14 @@ import queryprovenance.database.DatabaseState;
 public class DeleteQuery extends Query{
 	WhereClause where_clause;
 	
-	public DeleteQuery(String query_, String type_){
-		super(query_,type_);
+	public DeleteQuery(Table from, WhereClause where) {
+		super(null, from, where, Query.Type.DELETE);
+		where_clause = where;
 	}
 	
-	public void queryInitialize(){
-		super.addPartition("(delete from) (.+) (where|;) (.+)", "[,]");
-		super.addPartition("(where) (.+;)","(and|or)");
-		super.construct();
-		
-		// prepare where clause
-		where_clause = new WhereClause(groups, this.getTables());
-	}
 	
 	/* solve insert query by previous correct db state and next correct db state, return fixed query or null if not solvable*/
-	public String solve(DatabaseState pre, DatabaseState next, String[] options) throws Exception{
+	public Query solve(DatabaseState pre, DatabaseState next, String[] options) throws Exception{
 		// check whether this query should be deleted or not
 		if(pre.size() == next.size())
 			return "DELETE:"+super.query;

@@ -47,7 +47,7 @@ public class JAMAHandler {
 		arrayA = new double[0][0];
 		arrayb = new double[0][1]; 
 		// get matrix size information
-		int sizem = set.getConditions().length;
+		int sizem = set.getConditions().size();
 		int sizen = 0;
 		for(Condition con: set.getConditions())
 			sizen += con.getVariableCount();
@@ -84,7 +84,7 @@ public class JAMAHandler {
 	/* prepare single tuple parameters */
 	public void getPar(SetClause set, HashMap<String, String> preValues, HashMap<String, String> nextValues, double[][] arrayA, double[][] arrayb) throws Exception{
 		int sizem = arrayb.length;
-		Condition[] conditions = set.getConditions();
+		Condition[] conditions = (Condition[])set.getConditions().toArray();
 	    int count = 0;
 		// process each condition in Set clause
 		for(int i = 0; i< sizem; i++){
@@ -128,7 +128,7 @@ public class JAMAHandler {
 	public String toConditionRules(SetClause set){
 		
 		int sizem = arrayA[0].length;
-		Condition[] conditions = set.getConditions();
+		Condition[] conditions = (Condition[])set.getConditions().toArray();
 	    String fixed_set = "";
 	    int count = 0;
 		// process each condition in Set clause

@@ -1,34 +1,38 @@
 package queryprovenance.query;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import queryprovenance.harness.Util;
+
 public class Condition {
+	public static enum Op {
+		l,  // <
+		le, // <=
+		g,  // >
+		ge, // >=
+		eq, // =
+		ne  // !=
+	}
 	protected String left; // left side of equation or inequality; fixed;
 	protected HashMap<String, String> variables;
-	protected String operator; // operator connects left and right side; =/>/</>=/<=.
+	protected Op operator; // operator connects left and right side; =/>/</>=/<=.
 	protected String right; // variables to be solved;
 	protected String revised;
-	protected String condition;
 	protected int variablecount;
 	
 	/* Construct condition: separate left, right, and operator */
-	public Condition(String condition_){
-		variables = new HashMap<String, String>();
-		condition = condition_;
-		revised = "";
-		variablecount = 0;
-		Pattern pattern = Pattern.compile("(.+)\\s*([><!]=?)\\s*(.+)");
-		Pattern pattern2 = Pattern.compile("(.+)\\s*(=)\\s*(.+)");
-		Matcher matcher = pattern.matcher(condition);
-		if(matcher.find()||(matcher = pattern2.matcher(condition)).find()){
-			left = matcher.group(1).trim();
-			operator = matcher.group(2).trim();
-			right = matcher.group(3).trim();
-			//processVar(left);
-			//revised = revised + operator;
-			processVar(right);
-		}
+	public Condition(String left, Op op, String right){
+		this.left = left;
+		this.operator = op;
+		this.right = right;
+		
+		// XXX: I don't understand the format you expect left and right to be.  
+		//      Need to talk about it.
+		processVar(right);
 	}
 	
 	/* rewrite right side of the condition into the form of columns + variables */
@@ -59,6 +63,22 @@ public class Condition {
 		revised = revised.replaceAll("/var", "\\*var");
 	}
 	
+	public String toString() {
+		List<String> arr = new ArrayList<String>();
+		String _op = "=";
+		switch(this.operator) {
+		case l: _op = "<";
+		case le: _op = "<=";
+		case g: _op = ">";
+		case ge: _op = ">=";
+		case eq: _op = "=";
+		case ne: _op = "!=";
+		};
+		
+		// XXX: not sure how to implement this function
+		return "";
+	}
+	
 	/* return whether a string is a number */
 	public boolean isNumber(String str){
 		Pattern pattern3 = Pattern.compile(".*\\D.*");
@@ -82,7 +102,7 @@ public class Condition {
 	}
 	
 	/* return operator connects left and right side */
-	public String getOperator(){
+	public Op getOperator(){
 		return this.operator;
 	}
 	

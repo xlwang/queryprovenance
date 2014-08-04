@@ -1,5 +1,9 @@
 package queryprovenance.harness;
 
+import queryprovenance.query.Query;
+
+
+
 
 
 class Transformation {
@@ -30,7 +34,7 @@ class Transformation {
 		case DELETE:
 			ql.remove(qidx);
 		case VALUES:
-			if (ql.get(qidx).getType() != "insert") 
+			if (ql.get(qidx).getType() != Query.Type.INSERT) 
 				throw new RuntimeException();
 			// XXX: change query structure
 		case SET:
