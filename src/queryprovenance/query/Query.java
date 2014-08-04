@@ -14,8 +14,9 @@ public class Query {
 	};
 	
 	//protected String query; // query content
-	protected Query.Type type; 
-	protected SetClause select;
+	protected Query.Type type;
+	protected Select select;
+	protected SetClause set;
 	protected Table from;
 	protected WhereClause where;
 	protected List<String> values; // values for INSERT query
@@ -23,10 +24,17 @@ public class Query {
 	public Query(){
 	}
 	
-	/* initialize query with query string and query type*/
-	public Query(SetClause select, Table from, WhereClause where, Query.Type type_){
-		// preprocess the query
+	public Query(Select select, Table from, WhereClause where) {
 		this.select = select;
+		this.from = from;
+		this.where = where;
+		this.type = Type.SELECT;
+	}
+	
+	// For UPDATE/DELETE queries
+	public Query(SetClause set, Table from, WhereClause where, Query.Type type_){
+		// preprocess the query
+		this.set = set;
 		this.from = from;
 		this.where = where;
 		this.type = type_;
@@ -77,7 +85,7 @@ public class Query {
 			l.add(where.toString());
 		} else if (type == Type.UPDATE) {		
 			l.add("UPDATE");
-			l.add(select.toString());
+			l.add(set.toString());
 			l.add("FROM");
 			l.add(from.toString());
 			l.add("WHERE");
