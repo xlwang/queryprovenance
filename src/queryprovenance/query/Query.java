@@ -10,7 +10,7 @@ import queryprovenance.harness.Util;
 
 public class Query {
 	public static enum Type {
-		INSERT, DELETE, UPDATE, SELECT
+		INSERT, DELETE, UPDATE, SELECT, EMPTY
 	};
 	
 	//protected String query; // query content
@@ -20,10 +20,13 @@ public class Query {
 	protected Table from;
 	protected WhereClause where;
 	protected List<String> values; // values for INSERT query
+	protected List<String> attr_names; // attribute names for INSERT query
 	
 	public Query(){
 	}
-	
+	public Query(Query.Type type){
+		this.type = type;
+	}
 	public Query(Select select, Table from, WhereClause where) {
 		this.select = select;
 		this.from = from;
@@ -31,10 +34,17 @@ public class Query {
 		this.type = Type.SELECT;
 	}
 	
-	// For UPDATE/DELETE queries
+	// For UPDATE queries
 	public Query(SetClause set, Table from, WhereClause where, Query.Type type_){
 		// preprocess the query
 		this.set = set;
+		this.from = from;
+		this.where = where;
+		this.type = type_;
+	}
+	// For DELETE query
+	public Query(Table from, WhereClause where, Query.Type type_){
+		// preprocess the query
 		this.from = from;
 		this.where = where;
 		this.type = type_;
@@ -45,6 +55,14 @@ public class Query {
 		this.type = Type.INSERT;
 		this.from = from;
 		this.values = values;
+	}
+	
+	public Query(Select select, SetClause set, Table from, WhereClause where, Query.Type type){
+		this.select = select;
+		this.set = set;
+		this.from = from;
+		this.where = where;
+		this.type = type;
 	}
 	
 	/* construct query groups*/
@@ -85,12 +103,12 @@ public class Query {
 			l.add(where.toString());
 		} else if (type == Type.UPDATE) {		
 			l.add("UPDATE");
-			l.add(set.toString());
-			l.add("FROM");
 			l.add(from.toString());
+			l.add("SET");
+			l.add(set.toString());
 			l.add("WHERE");
 			l.add(where.toString());
-		} else {
+		} else  if(type == Type.SELECT) {
 			l.add("SELECT");
 			l.add(select.toString());
 			l.add("FROM");
@@ -99,12 +117,13 @@ public class Query {
 				l.add("WHERE");
 				l.add(where.toString());
 			};
-		}
+		} else
+			return "EMPTY";
 		return Util.join(l,  " ");
 	}
 	
 	/* solve query by previous database state and next database state*/
-	public Query solve(DatabaseState pre, DatabaseState next, String[] options) throws Exception{
+	public Query solve(DatabaseState pre, DatabaseState next, DatabaseState bad, String[] options) throws Exception{
 		return null;
 	}
 	
@@ -132,10 +151,21 @@ public class Query {
 		*/
 	}
 	
+	public List<String> getValue(){
+		return this.values;
+	}
 	public Query clone() {
-		Query q = new Query(select, from, where, type);
+		Query q = new Query(select, set, from, where, type);
 		q.values = values;
 		return q;
+	}
+	
+	public SetClause getSet(){
+		return this.set;
+	}
+	
+	public WhereClause getWhere(){
+		return this.where;
 	}
 	
 	public static Query generate(QueryParams params) {

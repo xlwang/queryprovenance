@@ -1,29 +1,25 @@
 package queryprovenance.problemsolution;
 
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import queryprovenance.database.DataGenerator;
 import queryprovenance.database.DatabaseHandler;
 import queryprovenance.database.DatabaseState;
+import queryprovenance.database.DatabaseStates;
 import queryprovenance.harness.QueryLog;
-import queryprovenance.query.DeleteQuery;
-import queryprovenance.query.InsertQuery;
-import queryprovenance.query.Query;
-import queryprovenance.query.UpdateQuery;
+import queryprovenance.query.*;
 
 public class SolveAll {
-	private DatabaseState[] db_org; // D, a sequence of db states given a seq of queries. 
-	private DatabaseState[] db_fix; // D*, a sequence of correct db states
 	
-	private Query[] query_seq; // a seq of queries includes errors. 
-	private Query[] query_seq_fix; // a seq of queries with no error, ground truth, (optional)
+	String[] options;
 	
-	
-	public SolveAll(){
-
+	public SolveAll(String[] options){
+		this.options = options;
 	}
-	
 	public QueryLog solve(QueryLog wrong_query_log, DatabaseState[] database_states, Complaint complaint_set){
 		// to be implemented
 		return null;
@@ -32,6 +28,31 @@ public class SolveAll {
 	public QueryLog solve(QueryLog wrong_query_log, DatabaseState[] database_states, DatabaseState[] true_database_states){
 		// to be implemented
 				return null;
+	}
+	
+	public QueryLog solve(QueryLog qlog, DatabaseStates ds, DatabaseStates badds, Complaint complaint) throws Exception{
+		QueryLog fixed_qlog = new QueryLog();
+		// prepare data
+		if(ds == null || ds.size()<1)
+			ds = new DatabaseStates(badds, complaint);
+		
+		// check inputs
+		if(qlog.size() != ds.size()-1 || ds.size() != badds.size())
+			return null;
+		
+		for(int i = 0; i < qlog.size(); ++i){
+			// for each query in the query log
+			Query query = qlog.get(i);
+			Query fix;
+			switch(query.getType()){
+			case INSERT: fix = new InsertQuery(query.getTable(), query.getValue()); fix.solve(ds.get(i), ds.get(i+1), badds.get(i+1), options); break;
+			case DELETE: fix = new DeleteQuery(query.getTable(), query.getWhere()); fix.solve(ds.get(i), ds.get(i+1), badds.get(i+1), options); break;
+			case UPDATE: fix = new UpdateQuery(query.getSet(),query.getTable(), query.getWhere()); fix.solve(ds.get(i), ds.get(i+1), badds.get(i+1), options); break;
+			default: fix = query.clone();
+			}
+			fixed_qlog.add(fix);
+		}
+		return fixed_qlog;
 	}
 	/*
 	public void Initialize(String wrong_query_path, String true_query_path) throws Exception{
@@ -73,116 +94,105 @@ public class SolveAll {
  
 	}
 	*/
-	/* initialize problem given a sequence of wrong queries, and a sequence of corresponding true queries*/
-	public String solveOnQ(String wrong_query, String true_query, String[] options) throws Exception {
+	/* Single query fix test
+	public Query solveOnQ(Query wrong_query, Query true_query) throws Exception {
 		String result = "";
 		DatabaseHandler database = new DatabaseHandler();
 		database.getConnected();
 		database.executePrepFile("./data/setup.sql");
 		database.executePrepFile("./data/inserts.sql");
-		String querytype = getType(wrong_query);
+		DatabaseState pre, next, bad;		
+		pre = new DatabaseState(database, wrong_query.getTable());
+		if(true_query.getTable()!=null)
+			database.queryExecution(true_query.toString());
+		next = new DatabaseState(database, wrong_query.getTable());
+		database.executePrepFile("./data/setup.sql");
+		database.executePrepFile("./data/inserts.sql");
+		if(wrong_query.getTable()!=null)
+			database.queryExecution(wrong_query.toString());
+		bad = new DatabaseState(database, wrong_query.getTable());
 		Query current;
-		DatabaseState pre, next;		
-		
-		switch(querytype){
-		case("update"):
-			current = new UpdateQuery(wrong_query, getType(wrong_query));
-			current.queryInitialize();			
-			pre = new DatabaseState(database, current);	
-			if(true_query.length()>0)
-				database.queryExecution(true_query);
-			next = new DatabaseState(database, current);
-			result = current.solve(pre, next, options);
-			break;
-		case("insert"):
-			current = new InsertQuery(wrong_query, getType(wrong_query));
-			current.queryInitialize();
-			pre = new DatabaseState(database, current);	
-			if(true_query.length()>0)
-				database.queryExecution(true_query);
-			next = new DatabaseState(database, current);
-			result = current.solve(pre, next, options);
-			break;	
-		case("delete"):
-			current = new DeleteQuery(wrong_query, getType(wrong_query));
-			current.queryInitialize();
-			pre = new DatabaseState(database, current);	
-			if(true_query.length()>0)
-				database.queryExecution(true_query);
-			next = new DatabaseState(database, current);
-			result = current.solve(pre, next, options);
-			break;
-		default: 
-			System.out.println("Error: Query type not supported");
+		switch(wrong_query.getType()){
+		case INSERT: current = new InsertQuery(wrong_query.getTable(), wrong_query.getValue()); return current.solve(pre, next, bad, options); 
+		case DELETE: current = new DeleteQuery(wrong_query.getTable(), wrong_query.getWhere()); return current.solve(pre, next, bad, options);
+		case UPDATE: current = new UpdateQuery(wrong_query.getSet(),wrong_query.getTable(), wrong_query.getWhere()); return current.solve(pre, next, bad, options);
 		}
-		return result;
+		return null;
 	}
-	
-	/* get query type */
-	public String getType(String query){
-		query = query.trim().toLowerCase();
-		if(matchtype(query, "(insert into) (.+) (values) (.+)"))
-			return "insert";
-		if(matchtype(query, "(delete from) (.+)"))
-			return "delete";
-		if(matchtype(query, "(update) (.+) (set) (.+)"))
-			return "update";
-		if(matchtype(query, "(select) (.+) (from) (.+)"))
-			return "select";
-		if(matchtype(query, "(insert into) (.+) (select) (.+) (from) (.+)"))
-			return "insertselect";
-		return "Error: Invalid query type";
-	}
-	
-	/* whether the query fit a given type based on its regular expression*/
-	public boolean matchtype(String query, String regex){
-		Pattern p = Pattern.compile(regex);
-		Matcher m = p.matcher(query);
-		return m.find();
-	}
-	
+    // Continued Single query test
 	public static void main(String[] arg) throws Exception{
 		int tuple_count = 100;
 		//DataGenerator datagenerator = new DataGenerator(tuple_count);
-		SolveAll solver = new SolveAll();
+		arg = new String[]{"-M","1"};
+		SolveAll solver = new SolveAll(arg);
+		String[] attributes = {"employeeid", "level", "salary"};
+		Table t = new Table("employee",attributes, 0);
 		// check insert query
+		/*
 		System.out.println("INSERT QUERY DEMO: ");
-		String wquery = "INSERT INTO Employee VALUES (101,3,153716);";
-		String tquery = "";
 		
-		String fquery = solver.solveOnQ(wquery, tquery, arg);
+		List<String> value = new ArrayList<String>();
+		value.add("201,3,153716");
+		Query wquery = new Query(t, value);
+		List<String> value2 = new ArrayList<String>();
+		value2.add("201,3,153726");
+		Query tquery = new Query(t,value2);
 		
-		System.out.println("WRONG QUERY: "+wquery);
-		System.out.println("TRUE QUERY: "+tquery);
-		System.out.print("FIXED QUERY: "+fquery);
+		Query fquery = solver.solveOnQ(wquery, tquery, arg);
+		
+		System.out.println("WRONG QUERY: "+wquery.toString());
+		System.out.println("TRUE QUERY: "+tquery.toString());
+		System.out.print("FIXED QUERY: "+fquery.toString());
 		
 		// check update query
 		System.out.println();
 		System.out.println("###################");
 		System.out.println("UPDATE QUERY DEMO: ");
-		wquery = "UPDATE employee SET Salary = salary+1200, level = level+1 WHERE salary >130000;";
-		tquery = "UPDATE employee SET Salary = salary+12550, level = level+1 WHERE salary >130000;";
+		List<SetExpr> set_clause = new ArrayList<SetExpr>();
+		set_clause.add(new SetExpr("salary","salary+1200"));
+		SetClause set = new SetClause(set_clause);
+		List<WhereExpr> where_clause = new ArrayList<WhereExpr>();
+		where_clause.add(new WhereExpr("salary",WhereExpr.Op.g, "130000"));
+		WhereClause where = new WhereClause(where_clause,WhereClause.Op.CONJ);
+		Query wquery = new Query(set, t,where,Query.Type.UPDATE);
+		List<SetExpr> set_clause1 = new ArrayList<SetExpr>();
+		set_clause1.add(new SetExpr("salary","salary+1230"));
+		SetClause set1 = new SetClause(set_clause1);
+		List<WhereExpr> where_clause1 = new ArrayList<WhereExpr>();
+		where_clause1.add(new WhereExpr("salary",WhereExpr.Op.g, "130000"));
+		WhereClause where1 = new WhereClause(where_clause1,WhereClause.Op.CONJ);
+		Query tquery = new Query(set1, t,where1,Query.Type.UPDATE);
 		// test for MILP
 		arg = new String[]{"-M","1"};
 		// arg = new String[]{"-M", "0"}; // for Decision Tree
-		fquery = solver.solveOnQ(wquery, tquery, arg);
+		Query fquery = solver.solveOnQ(wquery, tquery, arg);
 		
 		System.out.println("WRONG QUERY: "+wquery);
 		System.out.println("TRUE QUERY: "+tquery);
 		System.out.print("FIXED QUERY: "+fquery);
-		
+		 
 		// check delete query
 		System.out.println();
 		System.out.println("###################");
 		System.out.println("DELETE QUERY DEMO: ");
-		wquery = "DELETE FROM employee WHERE salary > 130000;";
-		tquery = "";
-		arg = new String[]{"-M","1"};
-		fquery = solver.solveOnQ(wquery, tquery, arg);
+		
+		List<WhereExpr> where_clause = new ArrayList<WhereExpr>();
+		where_clause.add(new WhereExpr("salary",WhereExpr.Op.g, "130000"));
+		WhereClause where = new WhereClause(where_clause,WhereClause.Op.CONJ);
+		
+		List<WhereExpr> where_clause1 = new ArrayList<WhereExpr>();
+		where_clause1.add(new WhereExpr("salary",WhereExpr.Op.g, "135000"));
+		WhereClause where1 = new WhereClause(where_clause1,WhereClause.Op.CONJ);
+		
+		Query wquery = new Query(t, where, Query.Type.DELETE);
+	    Query tquery = new Query(t, where1, Query.Type.DELETE);
+		
+		Query fquery = solver.solveOnQ(wquery, tquery);
 		
 		System.out.println("WRONG QUERY: "+wquery);
 		System.out.println("TRUE QUERY: "+tquery);
 		System.out.print("FIXED QUERY: "+fquery);
-				
+		 		
 	} 
+	*/
 }

@@ -18,15 +18,54 @@ public class DatabaseState {
 	private HashMap<String, String[]> state; 
 	private String[] column_names;	// column/attribute names in the state
 	private String state_query; // query to retrieve state from database
-	private HashSet<String> primary_key; // primary keys of tuples in this state
+	private String primary_key; // primary keys of tuples in this state
 	private String table_name; // tables involved in this state
 	
 	/* initialize database state*/
+	public DatabaseState(DatabaseHandler database, Table table) throws Exception{
+		
+		state = new HashMap<String, String[]>(); // initialize state information
+		this.table_name = table.getName();
+		primary_key = table.getPrimaryKey(); // get primaryKey from the data
+		
+		DatabaseMetaData dbmd = database.getMetaData(); // get meta data from the database, initialize primary key, involved column information
+		ResultSet result;
+		if(table_name !=null) {
+			state_query = "select * from "; // initialize state query
+			state_query = state_query + table_name +",";
+
+			// get state query prepared
+			state_query = "select * from "+table_name+";";
+			
+			// execute the state query and get returned result set
+			result = database.queryExecution(state_query);
+			
+			// get meta data
+			ResultSetMetaData rsmd = (ResultSetMetaData) result.getMetaData();
+			int columncount = rsmd.getColumnCount();
+			column_names = new String[columncount];
+			for(int i=1; i<=columncount; ++i){
+				column_names[i-1] = rsmd.getColumnLabel(i);
+			}
+			// prepare state information
+			while(result.next()){
+				String[] tuple = new String[columncount];
+				String tuplekey = "";
+				for(int i = 1; i<=columncount; ++i){
+					tuple[i-1] = result.getString(i);
+					if(primary_key.equals(column_names[i-1]))
+						tuplekey = result.getString(i);
+				}
+				state.put(tuplekey, tuple);
+			}			
+		}
+	}
+	
 	public DatabaseState(DatabaseHandler database, String table_name) throws Exception{
 		
 		state = new HashMap<String, String[]>(); // initialize state information
 		this.table_name = table_name;
-		primary_key = new HashSet<String>(); // get primaryKey from the data
+		HashSet<String> primary_key = new HashSet<String>(); // get primaryKey from the data
 		
 		DatabaseMetaData dbmd = database.getMetaData(); // get meta data from the database, initialize primary key, involved column information
 		ResultSet result;
@@ -74,7 +113,8 @@ public class DatabaseState {
 			}			
 		}
 	}
-	
+
+
 	/* return D*, a correct database state by given a set of complaints*/
 	public DatabaseState getTrueState(Complaint complaint_set){
 		// to be implemented
@@ -202,7 +242,7 @@ public class DatabaseState {
 	}
 	
 	/* get primary key set */
-	public HashSet<String> getPrimaryKey(){
+	public String getPrimaryKey(){
 		return this.primary_key;
 	}
 }

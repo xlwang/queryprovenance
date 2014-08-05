@@ -76,7 +76,7 @@ public class DatabaseHandler {
 		}
 		
 		public ResultSet queryExecution(String query) throws Exception{
-			PreparedStatement preparedquery = db.prepareStatement(query);
+			PreparedStatement preparedquery = db.prepareStatement(query+";");
 			preparedquery.clearParameters();
 			ResultSet result = null;
 			try{

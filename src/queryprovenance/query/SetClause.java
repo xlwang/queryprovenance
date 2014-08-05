@@ -8,16 +8,18 @@ import queryprovenance.harness.QueryParams;
 import queryprovenance.harness.Util;
 
 public class SetClause {
-	private List<Condition> set_conditions; // a set of conditions
-	private String fixed_set; 
+	private List<SetExpr> set_exprs; // a set of conditions
 	
+	public SetClause(){
+		set_exprs = new ArrayList<SetExpr>();
+	}
 	/* construct the where clause given a query*/
-	public SetClause(List<Condition> conditions) {
-		set_conditions = conditions;
+	public SetClause(List<SetExpr> conditions) {
+		set_exprs = conditions;
 	}
 	
 	public String toString() {
-		return Util.join(set_conditions, ", ");
+		return Util.join(set_exprs, ", ");
 	}
 	
 	public static SetClause generate(QueryParams params) {
@@ -25,7 +27,7 @@ public class SetClause {
 	}
 	
 	/* solve the where clause given the previous/next db states */
-	public SetClause solve(DatabaseState pre, DatabaseState next) throws Exception{
+	public SetClause solve(DatabaseState pre, DatabaseState next, String[] options) throws Exception{
 		
 		String[] classinfo;
 		
@@ -52,8 +54,11 @@ public class SetClause {
 		}
 		this.updateValues(pre_values_all, next_values_all, classinfo);
 		
+		// prepare set information
+		for(SetExpr expr:set_exprs)
+			expr.processVar();
 		JAMAHandler jama = new JAMAHandler();
-		fixed_set = jama.solve(this, value_names, pre_values_all, next_values_all);
+		SetClause fixed_set = new SetClause(jama.solve(this, value_names, pre_values_all, next_values_all));
 				
 		return fixed_set;
 	}
@@ -86,7 +91,7 @@ public class SetClause {
 	} 
 	
 	/* return conditions*/
-	public List<Condition> getConditions(){
-		return this.set_conditions;
+	public List<SetExpr> getSetExprs(){
+		return this.set_exprs;
 	}
 }

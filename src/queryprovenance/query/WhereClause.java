@@ -15,28 +15,25 @@ public class WhereClause {
 		CONJ  // conjunction
 	};
 	
-	private List<Condition> where_conditions; // a set of conditions
+	private List<WhereExpr> where_exprs; // a set of WhereExprs
 	private Op operator; // disjunction/conjunction
-	private HashMap<String, Condition> attribute_condition_map; // 
-	private String fixed_where; // fixed where clasue
 	
+	public WhereClause(Op operator_){
+		this.where_exprs = new ArrayList<WhereExpr>();
+		this.operator = operator_;
+	}
 	/* construct the where clause given a query*/
-	public WhereClause(List<Condition> conditions, Op operator) {
-		where_conditions = conditions;
-		this.operator = operator;
-		
-		for (Condition c : conditions) {
-			// TODO: populate attribute_condition_map
-		}
+	public WhereClause(List<WhereExpr> where_exprs_, Op operator_) {
+		this.where_exprs = where_exprs_;
+		this.operator = operator_;
 	}
 	
-	
 	public static WhereClause generate(QueryParams params) {
-		List<Condition> conds = new ArrayList<Condition>();
+		List<WhereExpr> conds = new ArrayList<WhereExpr>();
 		for (int i = 0; i < params.nclauses; i++) {
 			if (true) {
 				// TODO: ewu: verify this format is correct
-				conds.add(new Condition("x", Condition.Op.eq, "99"));
+				conds.add(new WhereExpr("x", WhereExpr.Op.eq, "99"));
 			} else {
 				
 			}			
@@ -45,13 +42,18 @@ public class WhereClause {
 	}
 	
 	public String toString() {
-		return Util.join(where_conditions, " and ");
+		switch(this.operator){
+		case DISJ: return Util.join(where_exprs, " or ");
+		case CONJ: return Util.join(where_exprs, " and ");
+		}
+		return null;
+		// return Util.join(where_exprs, " and ");
 	}
 	
 	/* solve the where clause given the previous/next db states */
-	public WhereClause solve(DatabaseState pre, DatabaseState next, String[] option) throws Exception{
+	public WhereClause solve(DatabaseState pre, DatabaseState next, DatabaseState bad, String[] option) throws Exception{
 		
-		String result = "";
+		WhereClause result = null;
 		
 		// prepare for options
 		if(option.length%2>0){
@@ -63,9 +65,9 @@ public class WhereClause {
 			switch(op){
 			case "-M": // method choosed for where clause solver
 				if(option[i+1].equals("0")) // "0" for Decision tree solver
-					result = solveDT(pre,next);
+					result = solveDT(pre,next, bad);
 				else if(option[i+1].equals("1")) //"1" for MILP solver
-					result = solveMILP(pre,next, 0.1);
+					result = solveMILP(pre,next, bad, 0.1);
 				else
 					result = null;
 				break;
@@ -77,7 +79,8 @@ public class WhereClause {
 	}
 	
 	/* solve the where clause by MILP cplex*/
-	public WhereClause solveMILP(DatabaseState pre, DatabaseState next, double ep) throws Exception{
+	public WhereClause solveMILP(DatabaseState pre, DatabaseState next, DatabaseState bad, double ep) throws Exception{
+		WhereClause fixed_where = null;
 		// build cplex solver
 		CplexHandler cplex = new CplexHandler(ep);
 		// prepare class information
@@ -89,6 +92,19 @@ public class WhereClause {
 		
 		// gather class information
 		classinfo = pre.compare(next);
+		// gather class information for bad db state
+		String[] badclassinfo = pre.compare(bad);
+		
+		boolean isSame = true;
+		for(int i = 0; i < classinfo.length; ++i){
+			if(!classinfo[i].equals(badclassinfo[i])){
+				isSame = false;
+				break;
+			}
+		}
+		
+		if(isSame)
+			return fixed_where;
 		
 		// gather feature information
 		for(String fname:value_names){
@@ -102,15 +118,19 @@ public class WhereClause {
 		
 		// get fixed where
 		if(fixed_values != null)
-			fixed_where = cplex.toConditionRules(this, fixed_values);
+			fixed_where = new WhereClause(cplex.toConditionRules(this, fixed_values), this.operator);
 		else
 			fixed_where = null;
 		return fixed_where;
+	
 	}
+	
 	/* solve the where clause by decision tree */
-	public WhereClause solveDT(DatabaseState pre, DatabaseState next) throws Exception{
+	public WhereClause solveDT(DatabaseState pre, DatabaseState next, DatabaseState bad) throws Exception{
 		// prepare input for Decision Tree solver
 		// buid tree
+		WhereClause fixed_where = null;
+		
 		DecisionTreeHandler tree = new DecisionTreeHandler();
 		
 		// prepare class information
@@ -137,7 +157,7 @@ public class WhereClause {
 		String rulelist = tree.buildTree("./data/feature.arff");
 		
 		//convertIntoRules(rulelist);
-		fixed_where = tree.toConditionRules(rulelist, this);
+		fixed_where = new WhereClause(tree.toConditionRules(rulelist, this), this.operator);
 		
 		//System.out.println(getFixedClause());
 		return fixed_where;
@@ -146,8 +166,8 @@ public class WhereClause {
 	/* get decision tree features: represented as arithmetic expressions, connected by "," */
 	public String getFeature(){
 		String feature = "";
-		for(Condition subcond:where_conditions){
-			feature = feature + subcond.getLeft()+",";
+		for(WhereExpr subexpr:where_exprs){
+			feature = feature + subexpr.getAttrExpr() + ",";
 		}
 		return feature;
 	}
@@ -156,24 +176,16 @@ public class WhereClause {
 	public int getNodeType(String str){
 		return 0;
 	}
-	/* get fixed where clause*/
-	public String getFixedClause(){
-		return fixed_where;
-	}
 	
-	/* get list of feature - attributes mapping list*/
-	public HashMap<String, Condition> getAttributeMap(){
-		return this.attribute_condition_map;
-	}
 	
 	/* get operator */
 	public Op getOperator(){
 		return this.operator;
 	}
 	
-	/* get condition sets*/
-	public List<Condition> getConditions(){
-		return this.where_conditions;
+	/* get WhereExpr sets*/
+	public List<WhereExpr> getWhereExprs(){
+		return this.where_exprs;
 	}
 
 }

@@ -22,7 +22,9 @@ public class Harness {
 		DatabaseStates badds = badqlog.execute(handler);
 		Complaint complaint = null;  // ds.difference(badqlog)
 		
-		QueryLog fixedqlog = SolveAll.solve(qlog, ds, badds, complaint);
+		String[] options = new String[]{"-M","1"};
+		SolveAll instance = new SolveAll(options);
+		QueryLog fixedqlog = instance.solve(qlog, ds, badds, complaint);
 		
 		// evaluate fixedqlog vs qlog
 		

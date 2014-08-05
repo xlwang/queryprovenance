@@ -1,6 +1,7 @@
 package queryprovenance.query;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -21,7 +22,7 @@ public class JAMAHandler {
 	}
 	
 	/* Solve set clause*/
-	public String solve(SetClause set, String[] column_names, ArrayList<String[]> pre_values_all, ArrayList<String[]> next_values_all) throws Exception {
+	public List<SetExpr> solve(SetClause set, String[] column_names, ArrayList<String[]> pre_values_all, ArrayList<String[]> next_values_all) throws Exception {
 		for(String[] vallist:pre_values_all){
 			if(!(vallist.length > 0))
 				return null;
@@ -34,7 +35,7 @@ public class JAMAHandler {
 		x = A.solve(b);
 		arrayx = x.getArray();
 		// convert back
-		String fixed_set = this.toConditionRules(set);
+		List<SetExpr> fixed_set = this.toConditionRules(set);
 		return fixed_set;
 		} catch (RuntimeException e){
 			return null;
@@ -47,9 +48,9 @@ public class JAMAHandler {
 		arrayA = new double[0][0];
 		arrayb = new double[0][1]; 
 		// get matrix size information
-		int sizem = set.getConditions().size();
+		int sizem = set.getSetExprs().size();
 		int sizen = 0;
-		for(Condition con: set.getConditions())
+		for(SetExpr con: set.getSetExprs())
 			sizen += con.getVariableCount();
 		// for each tuple
 		for(int i = 0; i < numOfTuple; ++i){
@@ -84,24 +85,23 @@ public class JAMAHandler {
 	/* prepare single tuple parameters */
 	public void getPar(SetClause set, HashMap<String, String> preValues, HashMap<String, String> nextValues, double[][] arrayA, double[][] arrayb) throws Exception{
 		int sizem = arrayb.length;
-		Condition[] conditions = (Condition[])set.getConditions().toArray();
 	    int count = 0;
 		// process each condition in Set clause
 		for(int i = 0; i< sizem; i++){
 			int j = 0;
 			String preop = "";
 			
-			// process the left side
-			String left = conditions[i].getLeft();
-			arrayb[i][0] = Double.valueOf(nextValues.get(left));
+			// process the attribute
+			String attr = set.getSetExprs().get(i).getAttr();
+			arrayb[i][0] = Double.valueOf(nextValues.get(attr));
 			
-			// process the right side
-			String right = conditions[i].getRevisedRight();
-			while(right.length()>0){
+			// process the expression
+			String expr = set.getSetExprs().get(i).getRevisedExpr();
+			while(expr.length()>0){
 				
 				// check every components
 				Pattern pattern = Pattern.compile("(.+)\\s*(\\+|-)\\s*(.+)");
-				Matcher matcher = pattern.matcher(right);
+				Matcher matcher = pattern.matcher(expr);
 				if(matcher.find()){
 					String current = matcher.group(1);
 					if(current.length()>0){
@@ -111,13 +111,13 @@ public class JAMAHandler {
 						}					
 					}
 					preop = matcher.group(2);
-					right = matcher.group(3);
+					expr = matcher.group(3);
 				}
 				else
 					break;
 			}
-			if(right.length()>0){
-				if(j < updateMatrix(arrayA, arrayb, i, j, count, right, preop, preValues)){
+			if(expr.length()>0){
+				if(j < updateMatrix(arrayA, arrayb, i, j, count, expr, preop, preValues)){
 					j++; count++;
 				}
 			}
@@ -125,29 +125,27 @@ public class JAMAHandler {
 	}
 	
 	/* convert solved values into set clause */
-	public String toConditionRules(SetClause set){
+	public List<SetExpr> toConditionRules(SetClause set){
 		
 		int sizem = arrayA[0].length;
-		Condition[] conditions = (Condition[])set.getConditions().toArray();
-	    String fixed_set = "";
+		List<SetExpr> fixed_set_conditions = new ArrayList<SetExpr>();
+		List<SetExpr> set_conditions = set.getSetExprs();
+	   
 	    int count = 0;
 		// process each condition in Set clause
 		for(int i = 0; i< sizem; i++){
 			
 			// process the right side
-			fixed_set = fixed_set + conditions[i].getLeft() + " = ";
-			String right = conditions[i].getRevisedRight();
-			for(int j = 0; j < conditions[i].getVariableCount(); ++j){
+			String fixed_expr = set_conditions.get(i).getRevisedExpr();
+			for(int j = 0; j <set_conditions.get(i).getVariableCount(); ++j){
 				double variable = arrayx[count++][0];
 				variable = Math.round(variable*100)/100;
-				right = right.replaceAll("var"+String.valueOf(j), String.valueOf(variable));
+				fixed_expr = fixed_expr.replaceAll("var"+String.valueOf(j), String.valueOf(variable));
 			}
-			
-			fixed_set = fixed_set + right +",";
+			fixed_set_conditions.add(new SetExpr(set_conditions.get(i).getAttr(), fixed_expr));
 		}
-		fixed_set = fixed_set.substring(0, fixed_set.length()-1);
-		
-		return fixed_set;
+
+		return fixed_set_conditions;
 	}
 	
 	/* update values in the parameter matrix*/

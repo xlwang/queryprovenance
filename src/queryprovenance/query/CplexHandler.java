@@ -19,13 +19,14 @@ public class CplexHandler {
 	}
 	/* solve cplex */
 	public double[] solve(WhereClause where, ArrayList<String[]> values_all, String[] classinfo, String method) throws Exception{
-		double[] fixed_values = new double[where.getConditions().size()];
+		double[] fixed_values = new double[where.getWhereExprs().size()];
 		
 		// add constraints
 		this.addAllConstraint(where, values_all, classinfo);
 		
 		// add objective function
 		this.prepareObj(where, method);
+		
 		// solve cplex
 		if(cplex.solve()){
 			cplex.output().println("Solution status = " + cplex.getStatus());
@@ -40,14 +41,14 @@ public class CplexHandler {
 	/* prepare objective function */
 	public void prepareObj(WhereClause where, String method) throws Exception{
 		// prepare input parameters
-		List<Condition> conditions = where.getConditions();
-		int size = conditions.size();
+		List<WhereExpr> where_exprs = where.getWhereExprs();
+		int size = where_exprs.size();
 		obj = cplex.numVarArray(size, Double.MIN_VALUE, Double.MAX_VALUE);
 		
 		switch(method){
 		case "abs":
-			for(int i = 0; i < conditions.size(); ++i){
-				double orgvar = Double.valueOf(conditions.get(i).getRight());
+			for(int i = 0; i < where_exprs.size(); ++i){
+				double orgvar = Double.valueOf(where_exprs.get(i).getVar());
 				cplex.add(cplex.eq(obj[i], cplex.abs(cplex.sum(var[i], -orgvar))));
 			}
 		}
@@ -62,7 +63,7 @@ public class CplexHandler {
 			return;
 		}
 		// prepare cplex variables
-		var = cplex.numVarArray(where.getConditions().size(), Double.MIN_VALUE, Double.MAX_VALUE);
+		var = cplex.numVarArray(where.getWhereExprs().size(), Double.MIN_VALUE, Double.MAX_VALUE);
 		int current = 0;
 		double[] values = new double[values_all.size()];
 		// for each tuple, add constraints
@@ -79,14 +80,14 @@ public class CplexHandler {
 	public void addConstraint(WhereClause where, double[] values, boolean isTrue) throws Exception{
 		// check input parameters
 		// values length must equals to where clause condition size
-		if(where.getConditions().size() != values.length){
+		if(where.getWhereExprs().size() != values.length){
 			System.out.println("Where Clause Error: value length not equals to condition size");
 			return;
 		}
 		
 		// prepare input parameters
-		List<Condition> conditions = where.getConditions();
-		int size = conditions.size();
+		List<WhereExpr> where_exprs = where.getWhereExprs();
+		int size = where_exprs.size();
 		WhereClause.Op operation = where.getOperator();
 
 		//IloNumVar[] obj = cplex.numVarArray(size, Double.MIN_VALUE, Double.MAX_VALUE);
@@ -95,7 +96,7 @@ public class CplexHandler {
 		IloConstraint[] cons = new IloConstraint[size];
 		for(int i = 0; i < size; ++i){
 			// for every constraint
-			Condition.Op op = conditions.get(i).getOperator();
+			WhereExpr.Op op = where_exprs.get(i).getOperator();
 			switch(op){
 			case g:
 				if(isTrue)
@@ -147,18 +148,14 @@ public class CplexHandler {
 	}
 	
 	/* return fixed where clause: transfer cplex results into condition rules */
-	public String toConditionRules(WhereClause where, double[] fixed_values){
-		String fixed_where = "";
-		int size =  where.getConditions().size();
+	public List<WhereExpr> toConditionRules(WhereClause where, double[] fixed_values){
+		List<WhereExpr> fixed_where_exprs = new ArrayList<WhereExpr>();
+		int size =  where.getWhereExprs().size();
 		// for each condition
-		for(int i = 0; i < size-1; ++i){
-			Condition condition = where.getConditions().get(i);
-			fixed_where = fixed_where + condition.getLeft() + condition.getOperator() + String.valueOf(fixed_values[i++]);
-			fixed_where = fixed_where +" " + where.getOperator()+" ";
+		for(int i = 0; i < size; ++i){
+			WhereExpr where_expr = where.getWhereExprs().get(i);
+			fixed_where_exprs.add(new WhereExpr(where_expr.getAttrExpr(), where_expr.getOperator(), String.valueOf(fixed_values[i])));
 		}
-		Condition condition = where.getConditions().get(where.getConditions().size() - 1);
-		fixed_where = fixed_where + condition.getLeft() + condition.getOperator() + String.valueOf(fixed_values[size-1]);
-		
-		return fixed_where;
+		return fixed_where_exprs;
 	}
 }
