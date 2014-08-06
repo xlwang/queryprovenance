@@ -14,7 +14,27 @@ Status
 
 * harness generates very simple set of queries based on Employee dataset in insert.sql
 * executes, creates, and loads the databasestate for good and bad query logs
+* data generator not connected with harness, so can't control dataset size/ncols etc yet
+* generated queries are very simple
 * Query.toString() seems to be correct
+
+
+Next Steps
+
+* Get it running
+  * control which solve algorithm (simplex vs dt) to use
+* evaluation metrics for now
+  * db state distance
+  * structural similarity
+  * query log distance (in terms of query)
+  * value similarity (if structures are the same)
+* More expressive 
+  * implement roll back function
+  * incomplete complaint sets
+  * multiple transformatinos
+  * more complex algebraic expressions
+* Faster
+  * pruning the query log
 
 
 # Meeting Jul 23, 2014
