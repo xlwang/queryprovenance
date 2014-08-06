@@ -15,7 +15,7 @@ public class QueryLog extends ArrayList<Query>{
 	 */
 	private static final long serialVersionUID = 5327786044304140040L;
 
-
+	
 	/*
 	 * Run the queries in the query log on the database in sequence.
 	 * For each query, create a unique table for the state
@@ -28,22 +28,24 @@ public class QueryLog extends ArrayList<Query>{
 		String prevTable = baseTableName;
 		String qstr = "";
 		int i = 0;
+		
+
 		for (Query q : this) {
-			String tmpName = baseTableName + "_" + i; 
+			String curTable = baseTableName + "_" + i;
+			qstr = "SELECT * from " + prevTable;
+			try {
+				handler.queryExecution("DROP TABLE " + curTable);
+			} catch(Exception e) {}
+			handler.queryExecution("CREATE TABLE " + curTable + " AS (" + qstr + ");");
 			
 			q = q.clone();
-			q.setTable(new Table(prevTable, null, -1));
+			q.setTable(new Table(curTable, null, null, null, -1));
 			qstr = q.toString();
-			qstr = "CREATE TABLE " + tmpName + " AS ("+ qstr +")";
-			try {
-				handler.queryExecution("DROP TABLE " + tmpName);
-			} catch (Exception e) {
-				// meh
-			}
+			System.out.println(qstr);
 			handler.queryExecution(qstr);
 			
-			prevTable = tmpName;
-			tablenames.add(tmpName);
+			prevTable = curTable;
+			tablenames.add(curTable);
 			i++;
 		}
 		
@@ -65,14 +67,16 @@ public class QueryLog extends ArrayList<Query>{
 	public static QueryLog generate(ExpParams params) {
 		QueryLog ql = new QueryLog();
 		for (int i = 0; i < params.ql_nqueries; i++) {
+			// generate a QueryParam
+			QueryParams qparams = new QueryParams();
+			qparams.from = params.table;
+			qparams.nclauses = 1;
+			qparams.queryType = Query.Type.UPDATE;
+			Query q = Query.generate(qparams);
+			ql.add(q);
+			
 		}
-		int nqueries;
-		float[] percs;  // probabilities for each query type
-		//query type mixture
-		//number of tuples
-		//number of similar queries with similar structure
-		//query log length
-		return null;
+		return ql;
 	}
 	
 	

@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+// ewu: I don't understand what SetExpr.expr is...
 public class SetExpr {
 
 	protected String attr;

@@ -3,6 +3,7 @@ package queryprovenance.query;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 
 import queryprovenance.database.DatabaseState;
 import queryprovenance.harness.QueryParams;
@@ -29,14 +30,29 @@ public class WhereClause {
 	}
 	
 	public static WhereClause generate(QueryParams params) {
+		Random rand = new Random();
+		Table t = params.from;
+		String[] cols = t.getColumns();
+		int ncols = cols.length;
+		
 		List<WhereExpr> conds = new ArrayList<WhereExpr>();
 		for (int i = 0; i < params.nclauses; i++) {
-			if (true) {
-				// TODO: ewu: verify this format is correct
-				conds.add(new WhereExpr("x", WhereExpr.Op.eq, "99"));
+			// pick 1 right col
+			// pick a random value from the col's domain
+			// pick an operator
+			WhereExpr.Op op = WhereExpr.Op.le;
+			int idx = rand.nextInt(ncols);
+			String attr = cols[idx];
+			Table.Type type = t.getType(idx);
+			if (type == Table.Type.NUM) {
+				int[] dom = t.getNumDomain(idx);
+				int v = rand.nextInt(dom[1]-dom[0]) + dom[0];
+				conds.add(new WhereExpr(v+"", op, attr));
 			} else {
-				
-			}			
+				String[] dom = t.getStrDomain(idx);
+				conds.add(new WhereExpr(dom[rand.nextInt(dom.length)], WhereExpr.Op.eq, attr));
+			}
+			
 		}
 		return new WhereClause(conds, Op.CONJ);
 	}

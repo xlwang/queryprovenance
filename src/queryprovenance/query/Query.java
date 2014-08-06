@@ -22,6 +22,7 @@ public class Query {
 	protected List<String> values; // values for INSERT query
 	protected List<String> attr_names; // attribute names for INSERT query
 	
+	
 	public Query(){
 	}
 	public Query(Query.Type type){
@@ -83,10 +84,7 @@ public class Query {
 		System.out.println("type not supported");
 	}
 
-	/* return query type */
-	public Query.Type getType(){
-		return type;
-	}
+	
 	/* return original query */
 	public String toString(){
 		List<String> l = new ArrayList<String>();
@@ -127,6 +125,32 @@ public class Query {
 		return null;
 	}
 	
+	
+	public void setWhere(WhereClause where) {
+		this.where = where;
+	}
+	public Select getSelect() {
+		return select;
+	}
+
+	public void setSelect(Select select) {
+		this.select = select;
+	}
+
+	public void setType(Query.Type type) {
+		this.type = type;
+	}
+
+	public void setSet(SetClause set) {
+		this.set = set;
+	}
+
+	/* return query type */
+	public Query.Type getType(){
+		return type;
+	}
+	
+	
 	public Table setTable(Table t) { 
 		from = t;
 		return from;
@@ -149,6 +173,10 @@ public class Query {
 					return part.getSplitedContent();
 		return null;
 		*/
+	}
+	
+	public void setValue(List<String> values) {
+		this.values = values;
 	}
 	
 	public List<String> getValue(){
@@ -176,10 +204,13 @@ public class Query {
 		case INSERT:
 			// generate values
 			q = new Query(params.from, null);
+			break;
 		case UPDATE:
 			q = new Query(set, params.from, clause, Type.UPDATE);
+			break;
 		case DELETE:
 			q = new Query(null, params.from, clause, Type.DELETE);
+			break;
 		}
 		return q;
 	}

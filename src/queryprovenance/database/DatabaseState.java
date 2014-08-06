@@ -91,6 +91,7 @@ public class DatabaseState {
 			state_query = state_query+";";
 			
 			// execute the state query and get returned result set
+			System.out.println(state_query);
 			result = database.queryExecution(state_query);
 			
 			// get meta data

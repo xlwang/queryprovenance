@@ -2,6 +2,7 @@ package queryprovenance.query;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import queryprovenance.database.DatabaseState;
 import queryprovenance.harness.QueryParams;
@@ -23,7 +24,25 @@ public class SetClause {
 	}
 	
 	public static SetClause generate(QueryParams params) {
-		return new SetClause(null);
+		// generate <random col> = <random col> + <random value>
+		Table t = params.from;
+		String[] cols = t.getColumns();
+		int ncols = t.getColumns().length;
+		Random rand = new Random();
+		List<SetExpr> conds = new ArrayList<SetExpr>();
+		
+		int idx = rand.nextInt(ncols);
+		if (t.getType(idx) == Table.Type.NUM) {
+			int[] dom = t.getNumDomain(idx);
+			int v = rand.nextInt(dom[1]-dom[0]) + dom[0];
+			conds.add(new SetExpr(cols[idx], cols[idx] + "+" + v));  
+		} else {
+			String[] dom = t.getStrDomain(idx);
+			String v = dom[rand.nextInt(dom.length)];
+			conds.add(new SetExpr(cols[idx], v));
+		}
+		
+		return new SetClause(conds);
 	}
 	
 	/* solve the where clause given the previous/next db states */

@@ -1,4 +1,16 @@
+# Meeting Aug 6
 
+Code Questions 
+
+* Don't use regular expressions to parse Strings.  Explicitly pass what you're going to parse into the constructor
+  * if you must, comments plz
+* explain SetExpr
+
+Status
+
+* harness generates very simple set of queries based on Employee dataset in insert.sql
+* executes, creates, and loads the databasestate for good and bad query logs
+* Query.toString() seems to be correct
 
 
 # Meeting Jul 23, 2014

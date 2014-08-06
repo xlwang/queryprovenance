@@ -1,7 +1,12 @@
 package queryprovenance.harness;
 
+import queryprovenance.query.Table;
+
 public class ExpParams {
 	protected static ExpParams _instance = new ExpParams();
+	
+	public Table table = null;
+	public QueryLog qlog = null;
 	
 	/*
 	 * QueryLog generator configs

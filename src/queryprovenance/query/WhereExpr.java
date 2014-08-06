@@ -1,5 +1,7 @@
 package queryprovenance.query;
 
+import queryprovenance.harness.QueryParams;
+
 public class WhereExpr {
 	public static enum Op {
 		l,  // <
@@ -25,6 +27,8 @@ public class WhereExpr {
 		this.operator = this.getOperator(op_);
 		this.var = var_;
 	}
+	
+	
 	public String getAttrExpr(){
 		return this.attr_expr;
 	}
