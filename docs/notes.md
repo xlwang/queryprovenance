@@ -3,8 +3,12 @@
 Code Questions 
 
 * Don't use regular expressions to parse Strings.  Explicitly pass what you're going to parse into the constructor
+--xl: I will remove most of the regular expressions by replacing the arithmetic expression in WhereClause, SetClause from "String" to "Expression". 
   * if you must, comments plz
+--xl: Only for Decision Tree, we need to parse Strings from results into condition rules. All the others will be removed.  
+
 * explain SetExpr
+--xl: see comments in SetExpr. 
 
 Status
 

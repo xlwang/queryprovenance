@@ -1,7 +1,7 @@
 package queryprovenance.query;
 
 import queryprovenance.harness.QueryParams;
-
+import queryprovenance.expression.*;
 public class WhereExpr {
 	public static enum Op {
 		l,  // <
@@ -12,7 +12,7 @@ public class WhereExpr {
 		ne  // !=
 	}
 	// Assume the given expression in the form of <attribute arithmetic expression> <Op> <variable>
-	protected String attr_expr;
+	protected Expression attr_expr;
 	protected Op operator;
 	protected String var;
 	
