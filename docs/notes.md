@@ -1,9 +1,3 @@
-# Note on Aug 11
-TODO list: 
-* harness: generate m queries and *m+1* database states for ds and badds; Transformation not change query structure (only numbers are allowed to change at this stage). 
-(* STR type not supported in WhereExpr and SetExpr (cplex, JAMA do not support STR data type). Conversion from STR into NUM needed. )
-
-
 # Meeting Aug 6
 
 Code Questions 

@@ -6,9 +6,6 @@ import java.util.List;
 import java.util.Random;
 
 import queryprovenance.database.DatabaseState;
-import queryprovenance.expression.AdditionExpression;
-import queryprovenance.expression.Expression;
-import queryprovenance.expression.VariableExpression;
 import queryprovenance.harness.QueryParams;
 import queryprovenance.harness.Util;
 
@@ -45,19 +42,15 @@ public class WhereClause {
 			// pick an operator
 			WhereExpr.Op op = WhereExpr.Op.le;
 			int idx = rand.nextInt(ncols);
-			//String attr = cols[idx];
+			String attr = cols[idx];
 			Table.Type type = t.getType(idx);
 			if (type == Table.Type.NUM) {
 				int[] dom = t.getNumDomain(idx);
 				int v = rand.nextInt(dom[1]-dom[0]) + dom[0];
-				// conds.add(new WhereExpr(v+"", op, attr));
-				Expression attr = new VariableExpression(cols[idx], true); 
-				Expression expr = new VariableExpression(v, false);
-				conds.add(new WhereExpr(attr, op, expr));
+				conds.add(new WhereExpr(v+"", op, attr));
 			} else {
-				//TODO: function not supported. 
-				// String[] dom = t.getStrDomain(idx);
-				// conds.add(new WhereExpr(dom[rand.nextInt(dom.length)], WhereExpr.Op.eq, attr));
+				String[] dom = t.getStrDomain(idx);
+				conds.add(new WhereExpr(dom[rand.nextInt(dom.length)], WhereExpr.Op.eq, attr));
 			}
 			
 		}
