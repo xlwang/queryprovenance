@@ -71,23 +71,38 @@ public class WhereClause {
 		
 		WhereClause result = null;
 		
-		// prepare for options
-		if(option.length%2>0){
-			System.out.println("option not supported by Where clause solver");
-			return null;
+		// gather class information
+		HashMap<String, String> classinfo = pre.compare(next);
+		// gather class information for bad db state
+		HashMap<String, String> badclassinfo = pre.compare(bad);
+		
+		boolean isSame = true;
+		for(String key:classinfo.keySet()){
+			if(!classinfo.get(key).equals(badclassinfo.get(key))){
+				isSame = false;
+				break;
+			}
 		}
-		for(int i=0; i<option.length; i=i+2){
+		
+		// check whether bad dbstate is the same with good dbstate
+		if(isSame)
+			return null;
+		
+		int i = 0;
+		while(i < option.length){
 			String op = option[i];
 			switch(op){
 			case "-M": // method choosed for where clause solver
-				if(option[i+1].equals("0")) // "0" for Decision tree solver
-					result = solveDT(pre,next, bad);
-				else if(option[i+1].equals("1")) //"1" for MILP solver
-					result = solveMILP(pre,next, bad, 0.1);
+				i++;
+				if(option[i].equals("0")) // "0" for Decision tree solver
+					result = solveDT(pre,next, bad, classinfo);
+				else if(option[i].equals("1")) //"1" for MILP solver
+					result = solveMILP(pre,next, bad, classinfo, option);
 				else
 					result = null;
 				break;
 			}
+			i++;
 		}
 		
 		// return results as a revised query
@@ -95,98 +110,77 @@ public class WhereClause {
 	}
 	
 	/* solve the where clause by MILP cplex*/
-	public WhereClause solveMILP(DatabaseState pre, DatabaseState next, DatabaseState bad, double ep) throws Exception{
+	public WhereClause solveMILP(DatabaseState pre, DatabaseState next, DatabaseState bad, HashMap<String, String> classinfo, String[] option) throws Exception{
+		// define parameters
+		double ep = Double.MAX_VALUE;
+		String objFuc = null;
+		// prepare parameters
+		int i = 0;
+		while(i < option.length){
+			String op = option[i];
+			switch(op){
+			case "-E": 
+				try{
+					ep = Double.parseDouble(option[++i]);
+				} catch (Exception e){
+					throw new IllegalArgumentException("MILP parameter error: epsilon must be a number. ");
+				}
+				break;
+			case "-O":
+				objFuc = option[++i];
+				break;
+			default: 
+			}
+			i++;
+		}
+		if(ep == Double.MAX_VALUE || objFuc == null)
+			throw new IllegalArgumentException("MILP parameter error: not enough parameters. ");
+		
+		// solve WhereClause
 		WhereClause fixed_where = null;
+		
 		// build cplex solver
 		CplexHandler cplex = new CplexHandler(ep);
-		// prepare class information
-		String[] classinfo;
-		
-		// prepare feature information
-		ArrayList<String[]> valuesAll = new ArrayList<String[]>();
-		String[] value_names = this.getFeature().split(",");
-		
-		// gather class information
-		classinfo = pre.compare(next);
-		// gather class information for bad db state
-		String[] badclassinfo = pre.compare(bad);
-		
-		boolean isSame = true;
-		for(int i = 0; i < classinfo.length; ++i){
-			if(!classinfo[i].equals(badclassinfo[i])){
-				isSame = false;
-				break;
-			}
-		}
-		
-		if(isSame)
-			return fixed_where;
-		
-		// gather feature information
-		for(String fname:value_names){
-			fname.trim();
-			String[] value = pre.getFeature(fname);
-			valuesAll.add(value);
-		}
 		
 		// prepare cplex
-		double[] fixed_values = cplex.solve(this, valuesAll, classinfo, "abs");
+		List<WhereExpr> fixed_values = cplex.solve(this, pre, classinfo, objFuc);
 		
 		// get fixed where
 		if(fixed_values != null)
-			fixed_where = new WhereClause(cplex.toConditionRules(this, fixed_values), this.operator);
+			fixed_where = new WhereClause(fixed_values, this.operator);
 		else
 			fixed_where = null;
+		
+		// return result
 		return fixed_where;
 	
 	}
 	
 	/* solve the where clause by decision tree */
-	public WhereClause solveDT(DatabaseState pre, DatabaseState next, DatabaseState bad) throws Exception{
+	public WhereClause solveDT(DatabaseState pre, DatabaseState next, DatabaseState bad, HashMap<String, String> classinfo) throws Exception{
 		// prepare input for Decision Tree solver
-		// buid tree
 		WhereClause fixed_where = null;
 		
+		// buid tree
 		DecisionTreeHandler tree = new DecisionTreeHandler();
 		
-		// prepare class information
-		String[] classinfo;
-		
-		// prepare feature information
-		ArrayList<String[]> features = new ArrayList<String[]>();
-		String[] feature_names = this.getFeature().split(",");
-		
-		// gather class information
-		classinfo = pre.compare(next);
-		
-		// gather feature information
-		for(String fname:feature_names){
-			fname.trim();
-			String[] value = pre.getFeature(fname);
-			features.add(value);
-		}
 		
 		//ResultSet features = database.queryExecution(featurequery);
-		tree.prepareARFF(features, classinfo, this);
+		tree.prepareARFF(this, pre, classinfo);
 		
 		// solve 
-		String rulelist = tree.buildTree("./data/feature.arff");
+		List<WhereExpr> fixed_values = tree.buildTree(this, "./data/feature.arff");
 		
-		//convertIntoRules(rulelist);
-		fixed_where = new WhereClause(tree.toConditionRules(rulelist, this), this.operator);
+		// get fixed where
+		if(fixed_values != null)
+			fixed_where = new WhereClause(fixed_values, this.operator);
+		else
+			fixed_where = null;
 		
-		//System.out.println(getFixedClause());
+		// return result
 		return fixed_where;
 	}
 	
-	/* get decision tree features: represented as arithmetic expressions, connected by "," */
-	public String getFeature(){
-		String feature = "";
-		for(WhereExpr subexpr:where_exprs){
-			feature = feature + subexpr.getAttrExpr() + ",";
-		}
-		return feature;
-	}
 	
 	/* return node type */
 	public int getNodeType(String str){

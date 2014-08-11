@@ -2,30 +2,32 @@ package queryprovenance.expression;
 
 import java.util.List;
 
-public class NegationExpression extends Expression{
-
-	@Override
+public class NegationExpression extends OperationExpression{
+	
+	public NegationExpression(Expression expr){
+		this.left = expr;
+		super.type = Type.NAGATION;
+	}
+	
 	public double Evaluate() {
-		// TODO Auto-generated method stub
-		return 0;
+		return -this.left.Evaluate();
 	}
 
-	@Override
-	public String toString() {
-		// TODO Auto-generated method stub
-		return null;
+	public String toString() {	 
+		return "-" + this.left.toString();
 	}
 
-	@Override
-	public void setVariable(Expression ex, Double val) {
-		// TODO Auto-generated method stub
-		
+	public double getPar(Expression ex) {
+		double par = -left.getPar(ex);
+		return par;
 	}
 
-	@Override
-	public List<Expression> getVariable() {
-		// TODO Auto-generated method stub
-		return null;
+	public double getAssignedEval() {
+		double lefteval = left.getAssignedEval();
+		return -lefteval;
 	}
 
+	public Expression clone(){
+		return new NegationExpression(this.left.clone());
+	}
 }

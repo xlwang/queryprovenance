@@ -1,6 +1,7 @@
 package queryprovenance.query;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
@@ -48,7 +49,6 @@ public class SetClause {
 	/* solve the where clause given the previous/next db states */
 	public SetClause solve(DatabaseState pre, DatabaseState next, String[] options) throws Exception{
 		
-		String[] classinfo;
 		
 		// prepare feature information
 		ArrayList<String[]> pre_values_all = new ArrayList<String[]>();
@@ -61,21 +61,10 @@ public class SetClause {
 		
 		
 		// gather class information
-		classinfo = pre.compare(next);
-				
-		// gather feature information
-		for(String fname:value_names){
-			fname.trim();
-			String[] value = pre.getFeature(fname);
-			pre_values_all.add(value);
-			String[] value2 = next.getFeature(fname, pre.getKeySet());
-			next_values_all.add(value2);
-		}
-		this.updateValues(pre_values_all, next_values_all, classinfo);
-		
-		// prepare set information
-		for(SetExpr expr:set_exprs)
-			expr.processVar();
+		HashMap<String, String> classinfo = pre.compare(next);
+
+		this.updateValues(pre_values_all, next_values_all, pre, next, classinfo);
+
 		JAMAHandler jama = new JAMAHandler();
 		SetClause fixed_set = new SetClause(jama.solve(this, value_names, pre_values_all, next_values_all));
 				
@@ -83,30 +72,16 @@ public class SetClause {
 	}
 	
 	/* update previous state, next state with only relevant tuples*/
-	public void updateValues(ArrayList<String[]> pre_values_all, ArrayList<String[]> next_values_all, String[] classinfo){
-		ArrayList<String[]> preRevised = new ArrayList<String[]>();
-		ArrayList<String[]> nextRevised = new ArrayList<String[]>();
+	public void updateValues(ArrayList<String[]> pre_values_all, ArrayList<String[]> next_values_all, DatabaseState pre, DatabaseState next, HashMap<String, String> classinfo){
 		
-		// for each column name
-		for(int i = 0; i < pre_values_all.size(); ++i){
-			String[] preval = pre_values_all.get(i);
-			String[] nextval = next_values_all.get(i);
- 			ArrayList<String> temppre = new ArrayList<String>();
-			ArrayList<String> tempnext = new ArrayList<String>();
-			for(int j = 0; j < classinfo.length; ++j){
-				if(classinfo[j].equals("b")){
-					temppre.add(preval[j]);
-					tempnext.add(nextval[j]);
-				}
+		for(String key:classinfo.keySet()){
+			// if the values are changed
+			if(classinfo.get(key).equals("b")){
+				pre_values_all.add(pre.getTuple(key));
+				next_values_all.add(next.getTuple(key));
 			}
-			// update preRevised, nextRevised
-			preRevised.add((String[]) temppre.toArray(new String[temppre.size()]));
-			nextRevised.add((String[]) tempnext.toArray(new String[tempnext.size()]));
 		}
-		
-		// update previous, next state value list
-		pre_values_all.clear(); pre_values_all.addAll(preRevised);
-		next_values_all.clear(); next_values_all.addAll(nextRevised);
+
 	} 
 	
 	/* return conditions*/

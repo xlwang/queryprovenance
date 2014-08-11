@@ -1,31 +1,42 @@
 package queryprovenance.expression;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class AdditionExpression extends Expression{
-
-	@Override
+public class AdditionExpression extends OperationExpression{
+	 
+	public AdditionExpression(Expression left_, Expression right_){
+		this.left = left_;
+		this.right = right_;
+		super.type = Type.ADDITION;
+	}
 	public double Evaluate() {
-		// TODO Auto-generated method stub
-		return 0;
+		return this.left.Evaluate() + this.right.Evaluate();
 	}
 
-	@Override
+ 
 	public String toString() {
-		// TODO Auto-generated method stub
-		return null;
+		return "("+ this.left.toString() + "+" + this.right.toString()+")";
 	}
-
-	@Override
-	public void setVariable(Expression ex, Double val) {
-		// TODO Auto-generated method stub
-		
+	
+	public double getPar(Expression ex){
+		// Expression ex and either in left side or right side
+		double par = 0;
+		if(left.containsVar(ex))
+			par = left.getPar(ex);
+		if(right.containsVar(ex))
+			par += right.getPar(ex);
+		return par;
 	}
-
-	@Override
-	public List<Expression> getVariable() {
-		// TODO Auto-generated method stub
-		return null;
+ 
+	public double getAssignedEval() {
+		double lefteval = left.getAssignedEval();
+		double rightevel = right.getAssignedEval();
+		return lefteval + rightevel;
+	}
+	
+	public Expression clone(){
+		return new AdditionExpression(this.left.clone(), this.right.clone());
 	}
 
 }

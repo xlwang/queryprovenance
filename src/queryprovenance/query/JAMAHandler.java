@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
+import queryprovenance.expression.Expression;
 import Jama.Matrix;
 public class JAMAHandler {
 	Matrix A;
@@ -16,13 +17,17 @@ public class JAMAHandler {
 	double[][] arrayA;
 	double[][] arrayb;
 	double[][] arrayx;
+	List<Expression> variables;
 	
 	/* JAMA solver */
-	public JAMAHandler(){		
+	public JAMAHandler(){	
+		variables = new ArrayList<Expression>();
 	}
 	
 	/* Solve set clause*/
 	public List<SetExpr> solve(SetClause set, String[] column_names, ArrayList<String[]> pre_values_all, ArrayList<String[]> next_values_all) throws Exception {
+		if(pre_values_all == null || next_values_all == null || pre_values_all.size() == 0 || next_values_all.size() == 0)
+			return null;
 		for(String[] vallist:pre_values_all){
 			if(!(vallist.length > 0))
 				return null;
@@ -44,7 +49,7 @@ public class JAMAHandler {
 	
  	/* Initialize solver by assign A, b matrix values*/
 	public void prepareData(SetClause set, String[] column_names, ArrayList<String[]> pre_values_all, ArrayList<String[]> next_values_all) throws Exception{
-		int numOfTuple = pre_values_all.get(0).length;
+		int numOfTuple = pre_values_all.size();
 		arrayA = new double[0][0];
 		arrayb = new double[0][1]; 
 		// get matrix size information
@@ -52,6 +57,16 @@ public class JAMAHandler {
 		int sizen = 0;
 		for(SetExpr con: set.getSetExprs())
 			sizen += con.getVariableCount();
+		// get variables
+		int varcount = 0;
+		for(int i = 0; i < sizem; ++i){
+			Expression expr = set.getSetExprs().get(i).getExpr();
+			List<Expression> list_of_var = expr.getUnassignedVariable();
+			for(Expression var: list_of_var){
+				expr.setName(var, "var"+String.valueOf(varcount++));
+				variables.add(var);
+			}
+		}
 		// for each tuple
 		for(int i = 0; i < numOfTuple; ++i){
 			// initialize matrix
@@ -62,8 +77,8 @@ public class JAMAHandler {
 			HashMap<String, String> preValues = new HashMap<String, String>();
 			HashMap<String, String> nextValues = new HashMap<String, String>();
 			for(int j = 0; j < column_names.length; ++j){
-				preValues.put(column_names[j], pre_values_all.get(j)[i]);
-				nextValues.put(column_names[j], next_values_all.get(j)[i]);
+				preValues.put(column_names[j], pre_values_all.get(i)[j]);
+				nextValues.put(column_names[j], next_values_all.get(i)[j]);
 			}
 			// prepare for the parameters: matrix
 			getPar(set, preValues, nextValues, temparrayA, temparrayb);
@@ -88,96 +103,49 @@ public class JAMAHandler {
 	    int count = 0;
 		// process each condition in Set clause
 		for(int i = 0; i< sizem; i++){
-			int j = 0;
-			String preop = "";
 			
 			// process the attribute
-			String attr = set.getSetExprs().get(i).getAttr();
-			arrayb[i][0] = Double.valueOf(nextValues.get(attr));
-			
-			// process the expression
-			String expr = set.getSetExprs().get(i).getRevisedExpr();
-			while(expr.length()>0){
-				
-				// check every components
-				Pattern pattern = Pattern.compile("(.+)\\s*(\\+|-)\\s*(.+)");
-				Matcher matcher = pattern.matcher(expr);
-				if(matcher.find()){
-					String current = matcher.group(1);
-					if(current.length()>0){
-						if(j < updateMatrix(arrayA, arrayb, i, j, count, current, preop, preValues)){
-							j++;
-							count++;
-						}					
-					}
-					preop = matcher.group(2);
-					expr = matcher.group(3);
-				}
-				else
-					break;
+			Expression attr = set.getSetExprs().get(i).getAttr();
+			Expression expr = set.getSetExprs().get(i).getExpr();
+			// set value for attribute
+			for(String key:nextValues.keySet())
+				attr.setVariable(key, Double.valueOf(nextValues.get(key)));
+			// update matrix b
+			arrayb[i][0] = attr.Evaluate();
+			// set value for set expression
+			for(String key:preValues.keySet())
+				expr.setVariable(key, Double.valueOf(preValues.get(key)));
+			// update matrix a
+			for(int j=0; j < variables.size(); ++j){
+				Expression var = variables.get(j);
+				double par = expr.getPar(var);
+				arrayA[i][j] = par;
 			}
-			if(expr.length()>0){
-				if(j < updateMatrix(arrayA, arrayb, i, j, count, expr, preop, preValues)){
-					j++; count++;
-				}
-			}
+			arrayb[i][0] -= expr.getAssignedEval();
 		}		
 	}
 	
 	/* convert solved values into set clause */
 	public List<SetExpr> toConditionRules(SetClause set){
 		
-		int sizem = arrayA[0].length;
-		List<SetExpr> fixed_set_conditions = new ArrayList<SetExpr>();
-		List<SetExpr> set_conditions = set.getSetExprs();
-	   
+		int sizem = set.getSetExprs().size();
+		List<SetExpr> fixed_set_exprs = new ArrayList<SetExpr>();
+		List<SetExpr> set_exprs = set.getSetExprs();
+	    for(SetExpr expr:set_exprs)
+	    	fixed_set_exprs.add(expr.clone());
 	    int count = 0;
 		// process each condition in Set clause
 		for(int i = 0; i< sizem; i++){
-			
-			// process the right side
-			String fixed_expr = set_conditions.get(i).getRevisedExpr();
-			for(int j = 0; j <set_conditions.get(i).getVariableCount(); ++j){
+			Expression expr = fixed_set_exprs.get(i).getExpr();
+			for(int j = 0; j < arrayx.length; ++j){
 				double variable = arrayx[count++][0];
-				variable = Math.round(variable*100)/100;
-				fixed_expr = fixed_expr.replaceAll("var"+String.valueOf(j), String.valueOf(variable));
-			}
-			fixed_set_conditions.add(new SetExpr(set_conditions.get(i).getAttr(), fixed_expr));
+				variable = (double) Math.round(variable*100)/100;
+				expr.setVariable("var"+String.valueOf(j), variable);
+			}	
 		}
+		return fixed_set_exprs;
+	}
 
-		return fixed_set_conditions;
-	}
-	
-	/* update values in the parameter matrix*/
-	public int updateMatrix(double[][] arrayA, double[][] arrayb, int i, int j, int count, String str, String preop, HashMap<String, String> preValues) throws Exception{
-		// equation solver
-		ScriptEngineManager mgr = new ScriptEngineManager();
-	    ScriptEngine engine = mgr.getEngineByName("JavaScript");
-	    
-		// check whether it contains a variable or not
-		Pattern pattern2 = Pattern.compile("var"+String.valueOf(j));
-		Matcher matcher2 = pattern2.matcher(str);
-		
-		// prepare values: replace column names with tuple values in previous state
-		String currentval = str.replaceAll("var"+String.valueOf(j), "");
-		for(String colname: preValues.keySet())
-			currentval = currentval.replaceAll(colname, preValues.get(colname));
-		double val;
-		if(this.isNumeric(currentval))
-			val = Double.valueOf(engine.eval(preop+currentval).toString());
-		else
-			val = 1;
-		
-		if(matcher2.find()){
-			// if this component contains a variable
-			arrayA[i][count] = val;
-			j++;
-		}
-		else{
-			arrayb[i][0] -= val;
-		}
-		return j;
-	}
 	public boolean isNumeric(String str)  
 	{  
 	  try  

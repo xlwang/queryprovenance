@@ -14,20 +14,34 @@ import weka.core.Instances;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
+import java.util.Map;
+
+import context.arch.discoverer.query.ClassifierWrapper;
+import context.arch.intelligibility.expression.Comparison;
+import context.arch.intelligibility.expression.DNF;
+import context.arch.intelligibility.expression.Parameter;
+import context.arch.intelligibility.expression.Reason;
+import queryprovenance.J48.J48Parser;
+import queryprovenance.database.DatabaseState;
+import queryprovenance.expression.Expression;
+import queryprovenance.expression.VariableExpression;
 
 public class DecisionTreeHandler {
 
-	private JRip rule; // J48 tree classification type
-	HashMap<String, WhereExpr> attribute_condition_map;
+	private J48 tree; // J48 tree 
+	Map<String, WhereExpr> map;
 	
 	public DecisionTreeHandler(){
-		rule = new JRip();
+		//initialize J48 decidion tree
+		tree = new J48();
+		map = new HashMap<String, WhereExpr>();
 	}
 	
 	/* build decision tree given fileanme and parameters */
-	public String buildTree(String filename) throws Exception{
+	public List<WhereExpr> buildTree(WhereClause where, String filename) throws Exception{
+		// define fixed where expression list
+		List<WhereExpr> fixed_values;
+		
 		// read file 
 		BufferedReader reader = new BufferedReader( 
 				 new FileReader(filename));
@@ -36,91 +50,58 @@ public class DecisionTreeHandler {
 		
 		// Prepare parameters
 		data.setClassIndex(data.numAttributes() - 1); 
-			
-		//ClassifierTree 
-		rule.buildClassifier(data);
 		
-		// print tree
-		return rule.toString();
+		// ClassifierTree 
+		tree.buildClassifier(data);
+		
+		// convert into conditional rules
+        Map<String, DNF> valueTraces = J48Parser.parse(tree, data);
+		
+        // return result
+		return this.toConditionRules(where, valueTraces);
 	}
 	
 	/* convert tree into a set of condition rules*/
-	public List<WhereExpr> toConditionRules(String rulelist, WhereClause where){
-		String fixed_rule = "";
-		// process generated rules
-		String[] lines = rulelist.split(System.getProperty("line.separator"));
-		Pattern pattern = Pattern.compile("(.+)(=> class=b)");
-		for(String line:lines){
-			Matcher matcher = pattern.matcher(line);
-			if(matcher.find())
-				fixed_rule = matcher.group(1).trim();
-		}
-		if(fixed_rule == null||fixed_rule.length()<1){
-			pattern = Pattern.compile("(.+)(=> class=g)");
-			for(String line:lines){
-				Matcher matcher = pattern.matcher(line);
-				if(matcher.find())
-					fixed_rule = matcher.group(1);
-			}
-			fixed_rule = fixed_rule.replace(">=", "<=");
-			fixed_rule = fixed_rule.replace("<=", ">=");
-			fixed_rule = fixed_rule.replace("and", "or");
-			fixed_rule = fixed_rule.replace("or", "and");
-		}
-		// replace feature by attributes
-		for(String feature: attribute_condition_map.keySet()){
-			Pattern pattern3 = Pattern.compile(feature);
-			Matcher matcher = pattern3.matcher(fixed_rule);
-			if(matcher.find())
-				fixed_rule = fixed_rule.replaceAll(feature, attribute_condition_map.get(feature).getAttrExpr());
-			else{
-				return null;
-			}
-		}
-		// processing fixed_where 
-		fixed_rule = fixed_rule.replaceAll("[\\(\\)]", "");
-		fixed_rule.trim();
+	public List<WhereExpr> toConditionRules(WhereClause where, Map<String, DNF> valueTraces){
+		List<WhereExpr> fixed_values = new ArrayList<WhereExpr>(); 
+		// check structure
+		int orgsize = where.getWhereExprs().size();
+		int dtsize = 0;
+		DNF traces = null;
 		
-		// check structure: operator must be the same with given query
-		// decompose fixed_rule clause
-		Pattern pattern2 = Pattern.compile("(and|or)");
-		Matcher matcher = pattern2.matcher(fixed_rule);
-		WhereClause.Op fixed_operator=null;
-		if(matcher.find())
-			fixed_operator = matcher.group().trim().equals("and")?WhereClause.Op.CONJ:WhereClause.Op.DISJ;
-		else
-			fixed_operator = null;
+		// get DNF traces for class "b"
+		for(String key:valueTraces.keySet())
+			if(key.equals("b"))
+				traces = valueTraces.get(key);
 		
-		// condition rules connection must be the same
-		if(!(fixed_operator == null && where.getOperator() == null) || fixed_operator != where.getOperator()){
+		// traces must exist
+		if(traces == null || traces.size() < 1)
 			return null;
-		}
 		
-		// cardinality must be the same
-		String[] conditionrules = fixed_rule.split("(and|or");
-		//System.out.println(String.valueOf(fixed_contents.size()));
-		//System.out.println(String.valueOf(where_conditions.length));
-		if(!(conditionrules.length == where.getWhereExprs().size())){
+		// check overall structure; operation connects each condition rules must be the same
+		if((traces.size()>1 && where.getOperator() != WhereClause.Op.DISJ) ||(traces.size() == 1 && where.getOperator() != WhereClause.Op.CONJ)){
 			return null;
+			
 		}
-		
-		List<WhereExpr> fixed_where_rules = new ArrayList<WhereExpr>();
-		for(int i = 0; i < conditionrules.length; ++i){
-			Pattern pattern3 = Pattern.compile("(>=|<=)");
-			Matcher matcher3 = pattern3.matcher(fixed_rule);
-			if(matcher3.find()){
-				String[] attr_var = conditionrules[i].split("(>=|<=)");
-				fixed_where_rules.add(new WhereExpr(attr_var[0], matcher3.group(), attr_var[1]));
+		// compose conditions
+		for(int i = 0; i < traces.size(); ++i){
+			Reason sub_reason = traces.get(i); // each sub_reason in DISJ relationship
+			for(int j = 0; j < sub_reason.size(); ++j){
+				Comparison condition = (Comparison) sub_reason.get(j); // each condition in CONJ relationship
+				WhereExpr orgexpr = map.get(condition.getName()); // get original where expression
+				String operation = condition.getRelationship().toString();
+				Expression value = new VariableExpression(Double.valueOf(condition.getValue().toString()), false);
+				WhereExpr newexpr = new WhereExpr(orgexpr.getAttrExpr().clone(), operation, value);
+				fixed_values.add(newexpr);
 			}
 		}
-		return fixed_where_rules;
+		if(fixed_values.size() != where.getWhereExprs().size())
+			return null;
+		return fixed_values;
 	}
 	
 	/* prepare input file for Decision tree solver */
-	public void prepareARFF(ArrayList<String[]> features, String[] classinfo, WhereClause where) throws Exception {
-		
-		// prepare map between featureID and original condition
-		attribute_condition_map = new HashMap<String, WhereExpr>();
+	public void prepareARFF(WhereClause where, DatabaseState pre, HashMap<String, String> classinfo) throws Exception {
 		
 		// prepare file for Decision tree solver
 		File filename = new File("./data/feature.arff");
@@ -135,19 +116,34 @@ public class DecisionTreeHandler {
 		// write feature/attributes names
 		for(int i = 0; i < where.getWhereExprs().size(); ++i){
 			writer.write("@ATTRIBUTE" + " col"+String.valueOf(i) + " NUMERIC"); writer.newLine();
-			attribute_condition_map.put("col"+String.valueOf(i) , where.getWhereExprs().get(i));
+			map.put("col" + String.valueOf(i), where.getWhereExprs().get(i));
 		}
 		
 		// write class information
-		writer.write("@ATTRIBUTE class {g,b}"); writer.newLine();
+		writer.write("@ATTRIBUTE class {'g','b'}"); writer.newLine();
 		
 		// write data
 		writer.write("@DATA"); writer.newLine();
-		for(int i = 0; i < classinfo.length; ++i){
-			for(int j = 0; j < features.size(); ++j)
-				writer.write(features.get(j)[i]+",");
-			writer.write(classinfo[i]); writer.newLine();
+		
+		// write data from dbstate
+		String[] column_names = pre.getColumnNames();
+		for(String key: pre.getKeySet()){
+			// for every tuple
+			String[] tuple_values = pre.getTuple(key);
+			
+			// get feature info from each where expression
+			for(WhereExpr expr: where.getWhereExprs()){
+				// update attributes' values
+				for(int i = 0; i < column_names.length; ++i)
+					expr.getAttrExpr().setVariable(column_names[i], Double.valueOf(tuple_values[i]));
+				writer.write(String.valueOf(expr.getAttrExpr().Evaluate()) + ",");
+			}
+			
+			// write class info
+			writer.write("'"+classinfo.get(key)+"'"); 
+			writer.newLine();
 		}
+		
 		// finish prepare file for DT solver
 		writer.close();	
 	}
