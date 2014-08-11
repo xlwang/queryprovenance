@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.Random;
 
 import queryprovenance.database.DatabaseState;
+import queryprovenance.expression.AdditionExpression;
+import queryprovenance.expression.Expression;
+import queryprovenance.expression.VariableExpression;
 import queryprovenance.harness.QueryParams;
 import queryprovenance.harness.Util;
 
@@ -36,11 +39,15 @@ public class SetClause {
 		if (t.getType(idx) == Table.Type.NUM) {
 			int[] dom = t.getNumDomain(idx);
 			int v = rand.nextInt(dom[1]-dom[0]) + dom[0];
-			conds.add(new SetExpr(cols[idx], cols[idx] + "+" + v));  
+			// conds.add(new SetExpr(cols[idx], cols[idx] + "+" + v)); 
+			Expression attr = new VariableExpression(cols[idx], true); 
+			Expression expr = new AdditionExpression(new VariableExpression(cols[idx], true), new VariableExpression(v, false));
+			conds.add(new SetExpr(attr, expr));
 		} else {
-			String[] dom = t.getStrDomain(idx);
-			String v = dom[rand.nextInt(dom.length)];
-			conds.add(new SetExpr(cols[idx], v));
+			// TODO: function not supported for STR type
+			// String[] dom = t.getStrDomain(idx);
+			// String v = dom[rand.nextInt(dom.length)];
+			// conds.add(new SetExpr(cols[idx], v));
 		}
 		
 		return new SetClause(conds);
