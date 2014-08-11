@@ -29,13 +29,19 @@ public class Harness {
 		params.qlog = qlog;
 				
 		// bad query log
+		// xl: transformation will not change query structure
 		Transformation trans = Transformation.generate(params);
 		QueryLog badqlog = trans.apply(qlog);
 		DatabaseStates badds = badqlog.execute(handler);
-		Complaint complaint = Complaint.generateComplaintSet(ds.get(ds.size()-1), badds.get(badds.size()-1));
-		
-		String[] options = new String[]{"-M","1"};
+		//Complaint complaint = Complaint.generateComplaintSet(ds.get(ds.size()-1), badds.get(badds.size()-1));
+		Complaint complaint = null;
+		String[] options = new String[]{"-M", "1", "-E", "0.1", "-O", "abs"};
 		SolveAll instance = new SolveAll(options);
+		
+		// xl: need for input
+		// 1. query log; size m
+		// 2. ds: size m+1: initial states with no query execute
+		// 3. badds: size m+1. 
 		QueryLog fixedqlog = instance.solve(qlog, ds, badds, complaint);
 		
 		// evaluate fixedqlog vs qlog
