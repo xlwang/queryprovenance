@@ -42,6 +42,8 @@ public abstract class Expression {
 	
 	public abstract boolean containsVar(Expression ex); // check whether given VariableExpression is included
 	
+	public abstract boolean containsVar(String ex_name); // check whether given VariableExpression is included
+	
 	public abstract double getPar(Expression ex); // get parameters for a given VariableExpression
 	
 	public abstract double getAssignedEval(); // get accumulated sum of variables that do not need to solve

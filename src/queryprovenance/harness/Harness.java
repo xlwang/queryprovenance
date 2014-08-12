@@ -4,6 +4,7 @@ import queryprovenance.database.DatabaseHandler;
 import queryprovenance.database.DatabaseStates;
 import queryprovenance.problemsolution.Complaint;
 import queryprovenance.problemsolution.SolveAll;
+import queryprovenance.query.Query;
 import queryprovenance.query.Table;
 
 public class Harness {
@@ -24,6 +25,7 @@ public class Harness {
 		params.ql_qtypes = null;
 		
 		// correct query log
+		System.out.println("True Query Log: ");
 		QueryLog qlog = QueryLog.generate(params);
 		DatabaseStates ds = qlog.execute(handler);
 		params.qlog = qlog;
@@ -33,8 +35,11 @@ public class Harness {
 		// for example,
 		// we don't support transfer from UPDATE Employee SET level = (level+1.0) WHERE employeeId<=4.0 to UPDATE Employee SET level = (level+1.0) WHERE salary<=273963.0.
 		// but support transfer from UPDATE Employee SET level = (level+1.0) WHERE employeeId<=4.0 to UPDATE Employee SET level = (level+1.0) WHERE employeeId<=3.0 . 
+		// revert db state to original
+		System.out.println("Transformation: ");
 		Transformation trans = Transformation.generate(params);
 		QueryLog badqlog = trans.apply(qlog);
+		System.out.println("Wrong Query Log: ");
 		DatabaseStates badds = badqlog.execute(handler);
 		//Complaint complaint = Complaint.generateComplaintSet(ds.get(ds.size()-1), badds.get(badds.size()-1));
 		Complaint complaint = null;
@@ -45,8 +50,17 @@ public class Harness {
 		// 1. query log; size m
 		// 2. ds: size m+1: initial states with no query execute
 		// 3. badds: size m+1. 
-		QueryLog fixedqlog = instance.solve(qlog, ds, badds, complaint);
+		boolean validtrans= true;
+		for(int i = 0; i < ds.size(); ++i)
+			validtrans &= ds.get(i).isSame(badds.get(i));
+		if(validtrans)
+			return;
+	    QueryLog fixedqlog = instance.solve(badqlog, ds, badds, complaint);
 		
+	    System.out.println("Fixed Query Log: ");
+	    for(Query q:fixedqlog)
+	    	System.out.println(q.toString());
+	    	
 		// evaluate fixedqlog vs qlog
 		
 	}

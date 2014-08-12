@@ -28,11 +28,8 @@ public class DatabaseState {
 		this.table_name = table.getName();
 		primary_key = table.getPrimaryKey(); // get primaryKey from the data
 		
-		DatabaseMetaData dbmd = database.getMetaData(); // get meta data from the database, initialize primary key, involved column information
 		ResultSet result;
 		if(table_name !=null) {
-			state_query = "select * from "; // initialize state query
-			state_query = state_query + table_name +",";
 
 			// get state query prepared
 			state_query = "select * from "+table_name+";";
@@ -63,35 +60,26 @@ public class DatabaseState {
 	
 	public DatabaseState(DatabaseHandler database, String table_name) throws Exception{
 		
+		table_name = table_name.toLowerCase().trim();
 		state = new HashMap<String, String[]>(); // initialize state information
 		this.table_name = table_name;
-		HashSet<String> primary_key = new HashSet<String>(); // get primaryKey from the data
+		//HashSet<String> primary_key = new HashSet<String>(); // get primaryKey from the data
 		
 		DatabaseMetaData dbmd = database.getMetaData(); // get meta data from the database, initialize primary key, involved column information
 		ResultSet result;
 		if(table_name !=null) {
 			state_query = "select * from "; // initialize state query
-			state_query = state_query + table_name +",";
+			state_query = state_query + table_name +";";
 			
 			// retrieve primary key in this table
 			ResultSet tabkeys = dbmd.getPrimaryKeys(null, null, table_name);  
-			boolean keyISFound = false;
+			
 			while(tabkeys.next()){
-				primary_key.add(tabkeys.getString(4));
-				keyISFound = true;
+				primary_key = tabkeys.getString(4);
 			}
-			if(!keyISFound){ //if primary key not set for this table, add every column
-				ResultSet tabcol = dbmd.getColumns(null, null, table_name, null);
-				while(tabcol.next())
-					primary_key.add(tabcol.getString("COLUMN_NAME"));
-			}
-
-			// get state query prepared
-			state_query = (String) state_query.subSequence(0, state_query.length()-1);
-			state_query = state_query+";";
 			
 			// execute the state query and get returned result set
-			System.out.println(state_query);
+			// System.out.println(state_query);
 			result = database.queryExecution(state_query);
 			
 			// get meta data
@@ -107,8 +95,8 @@ public class DatabaseState {
 				String tuplekey = "";
 				for(int i = 1; i<=columncount; ++i){
 					tuple[i-1] = result.getString(i);
-					if(primary_key.contains(column_names[i-1]))
-						tuplekey = tuplekey +","+result.getString(i);
+					if(primary_key.equals(column_names[i-1]))
+						tuplekey = result.getString(i);
 				}
 				state.put(tuplekey, tuple);
 			}			
@@ -142,31 +130,52 @@ public class DatabaseState {
 	}
 	
 	/* compare two database state */
-	public String[] compare(DatabaseState compare_to_state){
-		String[] check_list = new String[this.state.size()];
-		int count = 0;
+	public HashMap<String, String> compare(DatabaseState compare_to_state){
+		HashMap<String, String> check_list = new HashMap<String, String>();
+		for(String key:this.state.keySet()){
+			String[] compare_to_value, value;
+			String isSame;
+			if(compare_to_state.containTuple(key)){
+				compare_to_value = compare_to_state.getTuple(key);
+				value = state.get(key);
+				if(compare_to_value.length == value.length){
+					isSame = "g";
+					for(int i=0; i< value.length; ++i){
+						if(!compare_to_value[i].equals(value[i])){
+							isSame = "b";
+							break;
+						}
+					}
+				}
+				else
+					isSame = "g";
+			}
+			else
+				isSame = "b";
+			check_list.put(key, isSame);
+		}
+		return check_list;
+	}
+	
+	/* compare two database state */
+	public boolean isSame(DatabaseState compare_to_state){
 		for(String key:this.state.keySet()){
 			String[] compare_to_value, value;
 			if(compare_to_state.containTuple(key)){
 				compare_to_value = compare_to_state.getTuple(key);
 				value = state.get(key);
 				if(compare_to_value.length == value.length){
-					check_list[count] = "g";
 					for(int i=0; i< value.length; ++i){
 						if(!compare_to_value[i].equals(value[i])){
-							check_list[count] = "b";
-							break;
+							return false;
 						}
 					}
 				}
-				else
-					check_list[count] = "g";
 			}
 			else
-				check_list[count] = "b";
-			count++;
+				return false;
 		}
-		return check_list;
+		return true;
 	}
 	
 	/* get values for selected column*/
@@ -230,6 +239,15 @@ public class DatabaseState {
 	/* get tuple values*/
 	public String[] getTuple(String key){
 		return this.state.get(key);
+	}
+	
+	/* get tuple values*/
+	public String getValue(String key, String col){
+		String[] values = this.state.get(key);
+		for(int i = 0; i < column_names.length; ++i)
+			if(column_names[i].equals(col))
+				return values[i];
+		return null;
 	}
 	
 	/* get column/attribute names */

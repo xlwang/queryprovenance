@@ -17,7 +17,8 @@ class Transformation {
 	protected Type type;
 	protected WhereClause where;
 	protected SetClause set;
-	public Transformation(int qidx, Type type, WhereClause where, SetClause set) {
+	protected QueryParams params;
+	public Transformation(int qidx, Type type, WhereClause where, SetClause set, QueryParams params) {
 		// delete query
 		// change insert value
 		//   change values at indexes idxs
@@ -32,6 +33,7 @@ class Transformation {
 		
 		this.where = where;
 		this.set = set;
+		this.params = params;
 	}
 
 	/*
@@ -39,23 +41,40 @@ class Transformation {
 	 */
 	public QueryLog apply(QueryLog ql) {
 		ql = (QueryLog)ql.clone();
+		Query q;
 		switch (this.type) {
 		case DELETE:
 			ql.remove(qidx);
+			break;
 		case VALUES:
 			if (ql.get(qidx).getType() != Query.Type.INSERT) 
 				throw new RuntimeException();
+			break;
 			// XXX: change query structure
 		case SET:
 			// XXX: change set clause
+			set = SetClause.generate(ql.get(qidx).getSet(), params);
+			while(ql.get(qidx).getSet().toString().equals(set.toString()))
+				set = SetClause.generate(ql.get(qidx).getSet(), params);
+			q = ql.get(qidx);
+			q = q.clone();
+			System.out.println(q);
+			q.setSet(set);
+			System.out.println(q);
+			ql.set(qidx, q);
+			break;
 		case WHERE:
 			// XXX: replace where clause completely with new clause
-			Query q = ql.get(qidx);
+			where = WhereClause.generate(ql.get(qidx).getWhere(), params);
+			while(ql.get(qidx).getWhere().toString().equals(where.toString()))
+				where = WhereClause.generate(ql.get(qidx).getWhere(), params);
+			q = ql.get(qidx);
 			q = q.clone();
 			System.out.println(q);
 			q.setWhere(where);
 			System.out.println(q);
 			ql.set(qidx, q);
+			break;
 		}
 		return ql;
 	}
@@ -70,7 +89,8 @@ class Transformation {
 		qparams.from = params.table;
 		qparams.nclauses = 1;
 		qparams.queryType = Query.Type.UPDATE;
-		WhereClause newWhere = WhereClause.generate(qparams);
-		return new Transformation(idx, Transformation.Type.WHERE, newWhere, null);
+		//WhereClause newWhere = WhereClause.generate(qparams);
+		Transformation.Type transtype = (((Math.random()<0.5)?0:1) == 0)?Transformation.Type.WHERE:Transformation.Type.SET;
+		return new Transformation(idx, transtype, null, null, qparams);
 	}
 }

@@ -37,6 +37,11 @@ public abstract class OperationExpression extends Expression{
 		return this.left.containsVar(ex) || this.right.containsVar(ex);
 	}
 	
+	/* return whether this expression contain some variable expression */
+	public boolean containsVar(String ex_name){
+		return this.left.containsVar(ex_name) || this.right.containsVar(ex_name);
+	}
+	
 	 /* set variable expression value given expression name */
 	public void setVariable(String ex_name, Double val) {
 		this.left.setVariable(ex_name, val);

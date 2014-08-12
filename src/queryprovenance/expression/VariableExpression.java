@@ -48,7 +48,7 @@ public class VariableExpression extends Expression{
 	
 	/* set variable expression value */
 	public void setVariable(String ex_name, Double val) {
-		if(ex_name.equals(this.name))
+		if(ex_name.toLowerCase().equals(this.name.toLowerCase()))
 			value = val;
 	}
 	
@@ -86,6 +86,14 @@ public class VariableExpression extends Expression{
 	/* check whether it is the same with a given variable */
 	public boolean containsVar(Expression ex){
 		if(ex.equals(this))
+			return true;
+		else
+			return false;
+	}
+	
+	/* check whether it is the same with a given variable */
+	public boolean containsVar(String ex_name){
+		if(this.name.equals(ex_name))
 			return true;
 		else
 			return false;

@@ -43,6 +43,7 @@ public class JAMAHandler {
 		List<SetExpr> fixed_set = this.toConditionRules(set);
 		return fixed_set;
 		} catch (RuntimeException e){
+			System.out.print("error");
 			return null;
 		}
 	}

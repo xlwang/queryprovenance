@@ -11,6 +11,7 @@ import queryprovenance.expression.Expression;
 import queryprovenance.expression.VariableExpression;
 import queryprovenance.harness.QueryParams;
 import queryprovenance.harness.Util;
+import queryprovenance.query.WhereClause.Op;
 
 public class SetClause {
 	private List<SetExpr> set_exprs; // a set of conditions
@@ -36,9 +37,12 @@ public class SetClause {
 		List<SetExpr> conds = new ArrayList<SetExpr>();
 		
 		int idx = rand.nextInt(ncols);
+		while(idx == t.keyidx)
+			idx = rand.nextInt(ncols);
 		if (t.getType(idx) == Table.Type.NUM) {
 			int[] dom = t.getNumDomain(idx);
 			int v = rand.nextInt(dom[1]-dom[0]) + dom[0];
+			v = v == 0? v+1 : v;
 			// conds.add(new SetExpr(cols[idx], cols[idx] + "+" + v)); 
 			Expression attr = new VariableExpression(cols[idx], true); 
 			Expression expr = new AdditionExpression(new VariableExpression(cols[idx], true), new VariableExpression(v, false));
@@ -52,6 +56,33 @@ public class SetClause {
 		
 		return new SetClause(conds);
 	}
+	
+	public static SetClause generate(SetClause set, QueryParams params){
+		Table t = params.from;
+		String[] cols = t.getColumns();
+		Random rand = new Random();
+		
+		List<SetExpr> conds = new ArrayList<SetExpr>();
+		// for each set expression in original set clause
+		for(SetExpr expr : set.getSetExprs()){
+			// duplicate attribute , attribute index
+			String attr = expr.getAttr().toString();
+			int idx = -1;
+			for(int i = 0; i < cols.length; ++i)
+				if(cols[i].equals(attr))
+					idx = i;
+			if(idx == -1)
+				return set;
+			int[] dom = t.getNumDomain(idx);
+			// generate new random number
+			int v = rand.nextInt(dom[1]-dom[0]) + dom[0];
+			v = v == 0? v+1 : v;
+			Expression varexpr = new VariableExpression(v, false);
+			conds.add(new SetExpr(expr.getAttr().clone(), new AdditionExpression(expr.getAttr().clone(), varexpr)));
+		}
+		return new SetClause(conds);
+	}
+	
 	
 	/* solve the where clause given the previous/next db states */
 	public SetClause solve(DatabaseState pre, DatabaseState next, String[] options) throws Exception{
@@ -80,7 +111,8 @@ public class SetClause {
 	
 	/* update previous state, next state with only relevant tuples*/
 	public void updateValues(ArrayList<String[]> pre_values_all, ArrayList<String[]> next_values_all, DatabaseState pre, DatabaseState next, HashMap<String, String> classinfo){
-		
+		String[] colname_pre = pre.getColumnNames();
+		String[] colname_next = next.getColumnNames();
 		for(String key:classinfo.keySet()){
 			// if the values are changed
 			if(classinfo.get(key).equals("b")){

@@ -50,6 +50,7 @@ public class WhereClause {
 			if (type == Table.Type.NUM) {
 				int[] dom = t.getNumDomain(idx);
 				int v = rand.nextInt(dom[1]-dom[0]) + dom[0];
+				v = v == 0? v+1 : v;
 				// conds.add(new WhereExpr(v+"", op, attr));
 				Expression attr = new VariableExpression(cols[idx], true); 
 				Expression expr = new VariableExpression(v, false);
@@ -60,6 +61,33 @@ public class WhereClause {
 				// conds.add(new WhereExpr(dom[rand.nextInt(dom.length)], WhereExpr.Op.eq, attr));
 			}
 			
+		}
+		return new WhereClause(conds, Op.CONJ);
+	}
+	
+	public static WhereClause generate(WhereClause where, QueryParams params){
+		Table t = params.from;
+		String[] cols = t.getColumns();
+		Random rand = new Random();
+		
+		List<WhereExpr> conds = new ArrayList<WhereExpr>();
+		// for each where expression in original where clause
+		for(WhereExpr expr:where.getWhereExprs()){
+			// duplicate attribute , attribute index
+			String attr = expr.getAttrExpr().getVariable().get(0).toString();
+			int idx = -1;
+			for(int i = 0; i < cols.length; ++i)
+				if(cols[i].equals(attr))
+					idx = i;
+			if(idx == -1)
+				return where;
+			int[] dom = t.getNumDomain(idx);
+			// generate new random number
+			int v = rand.nextInt(dom[1]-dom[0]) + dom[0];
+			v = v==0?v+1:v;
+			WhereExpr.Op op = expr.getOperator();
+			Expression varexpr = new VariableExpression(v, false);
+			conds.add(new WhereExpr(expr.getAttrExpr().clone(), op, varexpr));
 		}
 		return new WhereClause(conds, Op.CONJ);
 	}
