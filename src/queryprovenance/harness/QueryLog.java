@@ -46,7 +46,7 @@ public class QueryLog extends ArrayList<Query>{
 			q = q.clone();
 			q.setTable(new Table(curTable, null, null, null, -1));
 			qstr = q.toString();
-			System.out.println(qstr);
+			//System.out.println(qstr);
 			
 			handler.queryExecution(qstr);
 			prevTable = curTable;
