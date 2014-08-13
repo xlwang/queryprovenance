@@ -3,7 +3,11 @@ package queryprovenance.query;
 import ilog.concert.IloConstraint;
 import ilog.concert.IloNumVar;
 import ilog.cplex.IloCplex;
+
 import java.util.*;
+
+import queryprovenance.database.DatabaseState;
+import queryprovenance.expression.Expression;
 
 public class CplexHandler {
 	// build cplex solver
@@ -18,11 +22,11 @@ public class CplexHandler {
 		epsilon = ep;
 	}
 	/* solve cplex */
-	public double[] solve(WhereClause where, ArrayList<String[]> values_all, String[] classinfo, String method) throws Exception{
+	public List<WhereExpr> solve(WhereClause where, DatabaseState pre, HashMap<String, String> classinfo, String method) throws Exception{
 		double[] fixed_values = new double[where.getWhereExprs().size()];
 		
 		// add constraints
-		this.addAllConstraint(where, values_all, classinfo);
+		this.addAllConstraint(where, pre, classinfo);
 		
 		// add objective function
 		this.prepareObj(where, method);
@@ -32,11 +36,12 @@ public class CplexHandler {
 			cplex.output().println("Solution status = " + cplex.getStatus());
 			cplex.output().println("Solution value = " + cplex.getObjValue());
 			for(int i = 0; i < fixed_values.length; ++i)
-				fixed_values[i] = Math.round(cplex.getValue(var[i])*100)/100;
-			return fixed_values;
+				fixed_values[i] = (double) Math.round(cplex.getValue(var[i])*100)/100;
+			return this.toConditionRules(where, fixed_values);
 		}
 		else
 			return null;
+		
 	}
 	/* prepare objective function */
 	public void prepareObj(WhereClause where, String method) throws Exception{
@@ -46,9 +51,9 @@ public class CplexHandler {
 		obj = cplex.numVarArray(size, Double.MIN_VALUE, Double.MAX_VALUE);
 		
 		switch(method){
-		case "abs":
+		case "abs": // minimize the differences
 			for(int i = 0; i < where_exprs.size(); ++i){
-				double orgvar = Double.valueOf(where_exprs.get(i).getVar());
+				double orgvar = where_exprs.get(i).getVar();
 				cplex.add(cplex.eq(obj[i], cplex.abs(cplex.sum(var[i], -orgvar))));
 			}
 		}
@@ -56,35 +61,26 @@ public class CplexHandler {
 	}
 	
 	/* prepare all constraints */
-	public void addAllConstraint(WhereClause where, ArrayList<String[]> values_all, String[] classinfo) throws Exception {
+	public void addAllConstraint(WhereClause where, DatabaseState pre, HashMap<String, String> classinfo) throws Exception {
 		// check input parameters
-		if(values_all.get(0).length != classinfo.length){
+		if(pre.size() != classinfo.size()){
 			System.out.println("Where Clause Error: value length not equals to class information");
 			return;
 		}
 		// prepare cplex variables
 		var = cplex.numVarArray(where.getWhereExprs().size(), Double.MIN_VALUE, Double.MAX_VALUE);
-		int current = 0;
-		double[] values = new double[values_all.size()];
+
 		// for each tuple, add constraints
-		for(int i = 0; i < values_all.get(0).length; ++i){
-			
-			for(int j = 0; j < values_all.size(); ++j)
-				values[j] = Double.valueOf(values_all.get(j)[i]);
-			boolean isTrue = classinfo[current++].equals("b")?true:false;
-			this.addConstraint(where, values, isTrue);
+		for(String key:pre.getKeySet()){			
+			String[] values = pre.getTuple(key);
+			boolean isTrue = classinfo.get(key).equals("b")?true:false;
+			this.addConstraint(where, pre.getColumnNames(), values, isTrue);
 		}
 			
 	}
 	/* prepare constraints for cplex solver */
-	public void addConstraint(WhereClause where, double[] values, boolean isTrue) throws Exception{
-		// check input parameters
-		// values length must equals to where clause condition size
-		if(where.getWhereExprs().size() != values.length){
-			System.out.println("Where Clause Error: value length not equals to condition size");
-			return;
-		}
-		
+	public void addConstraint(WhereClause where, String[] column_names, String[] values, boolean isTrue) throws Exception{
+
 		// prepare input parameters
 		List<WhereExpr> where_exprs = where.getWhereExprs();
 		int size = where_exprs.size();
@@ -97,42 +93,47 @@ public class CplexHandler {
 		for(int i = 0; i < size; ++i){
 			// for every constraint
 			WhereExpr.Op op = where_exprs.get(i).getOperator();
+			// calculate value for left side
+			Expression leftexpr = where_exprs.get(i).getAttrExpr();
+			for(int j = 0; j < column_names.length; ++j)
+				leftexpr.setVariable(column_names[j], Double.valueOf(values[j]));
+			double leftvalue = leftexpr.Evaluate();
 			switch(op){
 			case g:
 				if(isTrue)
-					cons[i] = cplex.le(var[i], values[i]-epsilon);
+					cons[i] = cplex.le(var[i], leftvalue-epsilon);
 				else
-					cons[i] = cplex.ge(var[i], values[i]);
+					cons[i] = cplex.ge(var[i], leftvalue);
 				break;
 			case l:
 				if(isTrue)
-					cons[i] = cplex.ge(var[i], values[i]+epsilon);
+					cons[i] = cplex.ge(var[i], leftvalue+epsilon);
 				else
-					cons[i] = cplex.le(var[i], values[i]);
+					cons[i] = cplex.le(var[i], leftvalue);
 				break;
 			case ge:
 				if(isTrue)
-					cons[i] = cplex.le(var[i], values[i]);
+					cons[i] = cplex.le(var[i], leftvalue);
 				else
-					cons[i] = cplex.ge(var[i], values[i]+epsilon);
+					cons[i] = cplex.ge(var[i], leftvalue+epsilon);
 				break;
 			case le:
 				if(isTrue)
-					cons[i] = cplex.ge(var[i], values[i]);
+					cons[i] = cplex.ge(var[i], leftvalue);
 				else
-					cons[i] = cplex.le(var[i], values[i]-epsilon);
+					cons[i] = cplex.le(var[i], leftvalue-epsilon);
 				break;
 			case eq:
 				if(isTrue)
-					cons[i] = cplex.eq(var[i], values[i]);
+					cons[i] = cplex.eq(var[i], leftvalue);
 				else
-					cons[i] = cplex.eq(cplex.eq(var[i], values[i]), 0);
+					cons[i] = cplex.eq(cplex.eq(var[i], leftvalue), 0);
 				break;
 			case ne: 
 				if(isTrue)
-					cons[i] = cplex.eq(cplex.eq(var[i], values[i]), 0);
+					cons[i] = cplex.eq(cplex.eq(var[i], leftvalue), 0);
 				else
-					cons[i] = cplex.eq(var[i], values[i]);
+					cons[i] = cplex.eq(var[i], leftvalue);
 				break;
 			}
 		}
@@ -154,7 +155,13 @@ public class CplexHandler {
 		// for each condition
 		for(int i = 0; i < size; ++i){
 			WhereExpr where_expr = where.getWhereExprs().get(i);
-			fixed_where_exprs.add(new WhereExpr(where_expr.getAttrExpr(), where_expr.getOperator(), String.valueOf(fixed_values[i])));
+			// clone where expression
+			WhereExpr fixed_expr = where_expr.clone();
+			// fix value
+			fixed_expr.getVarExpr().setVariable(fixed_expr.getVarExpr().getVariable().get(0), fixed_values[i]);
+			
+			// add into result
+			fixed_where_exprs.add(fixed_expr);		
 		}
 		return fixed_where_exprs;
 	}

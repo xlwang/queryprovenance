@@ -27,32 +27,37 @@ public class QueryLog extends ArrayList<Query>{
 		ArrayList<String> tablenames = new ArrayList<String>();
 		String prevTable = baseTableName;
 		String qstr = "";
-		int i = 0;
-		
-
-		for (Query q : this) {
+		DatabaseStates dss = new DatabaseStates();
+		DatabaseState ds = new DatabaseState(handler, baseTableName);
+		dss.add(ds);
+		String primarykey = ds.getPrimaryKey();
+		//this.add(0, null);
+		for (int i = 0; i < this.size(); ++i) {
+			
 			String curTable = baseTableName + "_" + i;
 			qstr = "SELECT * from " + prevTable;
 			try {
 				handler.queryExecution("DROP TABLE " + curTable);
 			} catch(Exception e) {}
 			handler.queryExecution("CREATE TABLE " + curTable + " AS (" + qstr + ");");
+			handler.queryExecution("ALTER TABLE " +  curTable + " ADD PRIMARY KEY (" + primarykey +");");
 			
+			Query q = this.get(i);
 			q = q.clone();
 			q.setTable(new Table(curTable, null, null, null, -1));
 			qstr = q.toString();
-			System.out.println(qstr);
-			handler.queryExecution(qstr);
+			//System.out.println(qstr);
 			
+			handler.queryExecution(qstr);
 			prevTable = curTable;
 			tablenames.add(curTable);
-			i++;
 		}
 		
 		// turn tablenames into a list of DatabaseStates
-		DatabaseStates dss = new DatabaseStates();
+		
 		for (String tablename : tablenames) {
-			DatabaseState ds = new DatabaseState(handler, tablename);
+			ds = new DatabaseState(handler, tablename);
+			//System.out.println(ds.size());
 			dss.add(ds);
 		}
 		return dss;

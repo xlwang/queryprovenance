@@ -20,21 +20,14 @@ public class UpdateQuery extends Query{
 		Query q = clone();
 		if(fixed_where!=null && fixed_where.getWhereExprs() != null) {
 			q.where = fixed_where;
+			return q;
 		}
 		
 		// send to set clause
 		SetClause fixed_set = set.solve(pre, next, options);
 		if(fixed_set !=null && fixed_set.getSetExprs() != null) {
 			q.set = fixed_set;
-			/*
-			String temp = fixed_query.replaceAll("set.*where", "set "+result+" where");
-			if(!temp.equals(fixed_query))
-				fixed_query = temp;
-			else
-				fixed_query = fixed_query.replaceAll("set.*;", "set "+result+";");
-			 */
 		}
-		// System.out.println(q.toString());
 		return q;
 	}
 }

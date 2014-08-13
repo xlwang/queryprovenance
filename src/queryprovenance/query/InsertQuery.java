@@ -60,6 +60,8 @@ public class InsertQuery extends Query {
 		// try to fix insert query
 		HashMap<String, String[]> prevalues = this.prepareData(pre);
 		HashMap<String, String[]> nextvalues = this.prepareData(next);
+		
+		// update insert query
 		if(prevalues.size() == nextvalues.size()){
 			for(String key:prevalues.keySet()){
 				if(!nextvalues.containsKey(key))

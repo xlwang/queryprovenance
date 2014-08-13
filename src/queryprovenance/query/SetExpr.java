@@ -13,12 +13,11 @@ import queryprovenance.expression.*;
 
 public class SetExpr {
 
-	protected String attr;
+	protected Expression attr;
 	protected Expression expr;
-	//protected String revised; // expression with variable index
-	//protected int variablecount;
 	
-	public SetExpr(String attr_, String expr_){
+	
+	public SetExpr(Expression attr_, Expression expr_){
 		this.attr = attr_;
 		this.expr = expr_; 
 	}
@@ -26,33 +25,11 @@ public class SetExpr {
 	public String toString(){
 		return attr+" = "+ expr;
 	}
-	public void processVar(){
-		variablecount = 0;
-		revised = "";
-		String current = this.expr;
-		while(current.length()>0){
-			Pattern pattern2 = Pattern.compile("(.+)\\s*(\\+|-|\\*|/)\\s*(.+)");
-			Matcher matcher2 = pattern2.matcher(current);
-			if(!matcher2.find())
-				break;
-			String temp;
-			if(isNumber(temp = matcher2.group(1).trim())){
-				revised = revised+"var"+String.valueOf(variablecount++);
-			}
-			else
-				revised = revised+temp;
-			revised = revised + matcher2.group(2);
-			current = matcher2.group(3);
-		}
-		if(current.length()>0)
-			if(isNumber(current)){
-				revised = revised+"var"+String.valueOf(variablecount++);
-			}
-			else
-				revised = revised + current;
-		revised = revised.replaceAll("/var", "\\*var");
-	}
 	
+	public SetExpr clone(){
+		return new SetExpr(this.attr.clone(), this.expr.clone());
+	}
+
 	/* return whether a string is a number */
 	public boolean isNumber(String str){
 		Pattern pattern3 = Pattern.compile(".*\\D.*");
@@ -60,20 +37,19 @@ public class SetExpr {
 		return !matcher3.find();
 	}
 	
+	/* return number of unassigned variables */
 	public int getVariableCount(){
-		return this.variablecount;
+		return this.expr.getUnassignedVariable().size();
 	}
 	
-	public String getAttr(){
+	/* return attribute that is updated */
+	public Expression getAttr(){
 		return this.attr;
 	}
 	
-	public String getExpr(){
+	/* get expression */
+	public Expression getExpr(){
 		return this.expr;
-	}
-	
-	public String getRevisedExpr(){
-		return this.revised;
 	}
 	
 }
