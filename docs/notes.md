@@ -1,3 +1,18 @@
+# Meeting Aug 13
+
+Cplex returns wrong results for >1 clause WHERE predicates
+* why?
+* if it is incorrect
+  * need metric for how incorrect
+    * diff = diff fixed database state and correct state
+    * diff intersect complaint set
+    * diff - complaint set
+  * can incorrect solution be estimated?
+    * any signals?
+* speed
+* define a test table schema for collecting statistics
+
+
 # Meeting Aug 6
 
 Code Questions 
