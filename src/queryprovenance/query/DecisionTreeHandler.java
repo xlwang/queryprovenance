@@ -5,26 +5,20 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
-
-import weka.classifiers.rules.JRip;
-import weka.classifiers.trees.J48;
-import weka.classifiers.trees.j48.ClassifierTree;
-import weka.core.Instances;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import context.arch.discoverer.query.ClassifierWrapper;
-import context.arch.intelligibility.expression.Comparison;
-import context.arch.intelligibility.expression.DNF;
-import context.arch.intelligibility.expression.Parameter;
-import context.arch.intelligibility.expression.Reason;
-import queryprovenance.J48.J48Parser;
 import queryprovenance.database.DatabaseState;
 import queryprovenance.expression.Expression;
 import queryprovenance.expression.VariableExpression;
+import weka.classifiers.trees.J48;
+import weka.core.Instances;
+import context.arch.intelligibility.expression.Comparison;
+import context.arch.intelligibility.expression.DNF;
+import context.arch.intelligibility.expression.Reason;
+import context.arch.intelligibility.weka.j48.J48Parser;
 
 public class DecisionTreeHandler {
 
