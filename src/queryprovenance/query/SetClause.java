@@ -2,6 +2,7 @@ package queryprovenance.query;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 
@@ -35,25 +36,28 @@ public class SetClause {
 		int ncols = t.getColumns().length;
 		Random rand = new Random();
 		List<SetExpr> conds = new ArrayList<SetExpr>();
-		
-		int idx = rand.nextInt(ncols);
-		while(idx == t.keyidx)
-			idx = rand.nextInt(ncols);
-		if (t.getType(idx) == Table.Type.NUM) {
-			int[] dom = t.getNumDomain(idx);
-			int v = rand.nextInt(dom[1]-dom[0]) + dom[0];
-			v = v == 0? v+1 : v;
-			// conds.add(new SetExpr(cols[idx], cols[idx] + "+" + v)); 
-			Expression attr = new VariableExpression(cols[idx], true); 
-			Expression expr = new AdditionExpression(new VariableExpression(cols[idx], true), new VariableExpression(v, false));
-			conds.add(new SetExpr(attr, expr));
-		} else {
-			// TODO: function not supported for STR type
-			// String[] dom = t.getStrDomain(idx);
-			// String v = dom[rand.nextInt(dom.length)];
-			// conds.add(new SetExpr(cols[idx], v));
+		HashSet<Integer> selected = new HashSet<Integer>();
+		for (int i = 0; i < 1; i++) {
+			int idx = rand.nextInt(ncols);
+			while(idx == t.keyidx|| selected.contains(idx))
+				idx = rand.nextInt(ncols);
+			selected.add(idx);
+			
+			if (t.getType(idx) == Table.Type.NUM) {
+				int[] dom = t.getNumDomain(idx);
+				int v = rand.nextInt(dom[1]-dom[0]) + dom[0];
+				v = v == 0? v+1 : v;
+				// conds.add(new SetExpr(cols[idx], cols[idx] + "+" + v)); 
+				Expression attr = new VariableExpression(cols[idx], true); 
+				Expression expr = new AdditionExpression(new VariableExpression(cols[idx], true), new VariableExpression(v, false));
+				conds.add(new SetExpr(attr, expr));
+			} else {
+				// TODO: function not supported for STR type
+				// String[] dom = t.getStrDomain(idx);
+				// String v = dom[rand.nextInt(dom.length)];
+				// conds.add(new SetExpr(cols[idx], v));
+			}
 		}
-		
 		return new SetClause(conds);
 	}
 	

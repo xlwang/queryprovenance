@@ -1,5 +1,6 @@
 package queryprovenance.query;
 
+import ilog.concert.IloAnd;
 import ilog.concert.IloConstraint;
 import ilog.concert.IloNumVar;
 import ilog.cplex.IloCplex;
@@ -33,10 +34,9 @@ public class CplexHandler {
 		
 		// solve cplex
 		if(cplex.solve()){
-			cplex.output().println("Solution status = " + cplex.getStatus());
-			cplex.output().println("Solution value = " + cplex.getObjValue());
+
 			for(int i = 0; i < fixed_values.length; ++i)
-				fixed_values[i] = (double) Math.round(cplex.getValue(var[i])*100)/100;
+				fixed_values[i] = (double) cplex.getValue(var[i]);
 			return this.toConditionRules(where, fixed_values);
 		}
 		else
@@ -138,8 +138,9 @@ public class CplexHandler {
 			}
 		}
 		
-		if((isTrue && operation.equals("and"))||(!isTrue && operation.equals("or"))){
+		if((isTrue && operation.equals(WhereClause.Op.CONJ))||(!isTrue && operation.equals(WhereClause.Op.DISJ))){
 			// every condition must satisfy 'isTrue' value
+			
 			cplex.add(cplex.and(cons));
 		}
 		else{

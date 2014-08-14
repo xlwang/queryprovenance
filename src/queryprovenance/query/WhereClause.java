@@ -2,6 +2,7 @@ package queryprovenance.query;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 
@@ -39,12 +40,16 @@ public class WhereClause {
 		int ncols = cols.length;
 		
 		List<WhereExpr> conds = new ArrayList<WhereExpr>();
+		HashSet<Integer> selected = new HashSet<Integer>();
 		for (int i = 0; i < params.nclauses; i++) {
 			// pick 1 right col
 			// pick a random value from the col's domain
 			// pick an operator
 			WhereExpr.Op op = WhereExpr.Op.le;
 			int idx = rand.nextInt(ncols);
+			while(selected.contains(idx))
+				idx = rand.nextInt(ncols);
+			selected.add(idx);
 			//String attr = cols[idx];
 			Table.Type type = t.getType(idx);
 			if (type == Table.Type.NUM) {
