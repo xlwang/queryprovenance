@@ -7,12 +7,12 @@ import queryprovenance.database.DatabaseState;
 public class Complaint {
 	
 	public class SingleComplaint{
-	public String key;
-	public String[] values;
-	SingleComplaint(String key_, String[] values_){
-		key = key_;
-		values = values_;
-	}
+		public String key;
+		public String[] values;
+		SingleComplaint(String key_, String[] values_){
+			key = key_;
+			values = values_;
+		}
 	}
 	
 	ArrayList<SingleComplaint> complaint_set;

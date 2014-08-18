@@ -34,20 +34,23 @@ public class QueryLog extends ArrayList<Query>{
 		//this.add(0, null);
 		for (int i = 0; i < this.size(); ++i) {
 			
+			// create a copy of the previous table so we can run update query
+			// on it
 			String curTable = baseTableName + "_" + i;
 			qstr = "SELECT * from " + prevTable;
 			try {
 				handler.queryExecution("DROP TABLE " + curTable);
-			} catch(Exception e) {}
+			} catch(Exception e) {
+				// XXX: should do something with this?
+			}
 			handler.queryExecution("CREATE TABLE " + curTable + " AS (" + qstr + ");");
 			handler.queryExecution("ALTER TABLE " +  curTable + " ADD PRIMARY KEY (" + primarykey +");");
 			
+			// execute
 			Query q = this.get(i);
 			q = q.clone();
 			q.setTable(new Table(curTable, null, null, null, -1));
 			qstr = q.toString();
-			//System.out.println(qstr);
-			
 			handler.queryExecution(qstr);
 			prevTable = curTable;
 			tablenames.add(curTable);

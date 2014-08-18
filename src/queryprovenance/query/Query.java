@@ -14,6 +14,7 @@ public class Query {
 	};
 	
 	//protected String query; // query content
+	protected int id;  // need ID to equate the same query in different qlogs
 	protected Query.Type type;
 	protected Select select;
 	protected SetClause set;
@@ -23,12 +24,15 @@ public class Query {
 	protected List<String> attr_names; // attribute names for INSERT query
 	
 	
-	public Query(){
+	public Query(int id){
+		this.id = id;
 	}
-	public Query(Query.Type type){
+	public Query(int id, Query.Type type){
+		this.id = id;
 		this.type = type;
 	}
-	public Query(Select select, Table from, WhereClause where) {
+	public Query(int id, Select select, Table from, WhereClause where) {
+		this.id = id;
 		this.select = select;
 		this.from = from;
 		this.where = where;
@@ -36,7 +40,8 @@ public class Query {
 	}
 	
 	// For UPDATE queries
-	public Query(SetClause set, Table from, WhereClause where, Query.Type type_){
+	public Query(int id, SetClause set, Table from, WhereClause where, Query.Type type_){
+		this.id = id;
 		// preprocess the query
 		this.set = set;
 		this.from = from;
@@ -44,7 +49,8 @@ public class Query {
 		this.type = type_;
 	}
 	// For DELETE query
-	public Query(Table from, WhereClause where, Query.Type type_){
+	public Query(int id, Table from, WhereClause where, Query.Type type_){
+		this.id = id;
 		// preprocess the query
 		this.from = from;
 		this.where = where;
@@ -52,13 +58,15 @@ public class Query {
 	}
 	
 	// insert query constructor
-	public Query(Table from, List<String> values) {
+	public Query(int id, Table from, List<String> values) {
+		this.id = id;
 		this.type = Type.INSERT;
 		this.from = from;
 		this.values = values;
 	}
 	
-	public Query(Select select, SetClause set, Table from, WhereClause where, Query.Type type){
+	public Query(int id, Select select, SetClause set, Table from, WhereClause where, Query.Type type){
+		this.id = id;
 		this.select = select;
 		this.set = set;
 		this.from = from;
@@ -66,19 +74,7 @@ public class Query {
 		this.type = type;
 	}
 	
-	/* construct query groups*/
-	public void construct(){
-		// XXX: do we support subqueries?
-		/*
-		String subquery = query; // current subquery
-		for(Partition part:groups){
-			if(subquery!=null&&subquery.length()>0)
-				subquery = part.getContentSplit(subquery); // process partition into partition name and content sets
-			else
-				break;
-		}
-		*/
-	}
+	
 	/* get query initialized */
 	public void queryInitialize(){
 		System.out.println("type not supported");
@@ -125,6 +121,33 @@ public class Query {
 		return null;
 	}
 	
+	public boolean equals(Object o) {
+		if (o == null) return false;
+		if (o instanceof Query) {
+			return this.toString() == o.toString();
+		}
+		return super.equals(o);
+	}
+	
+	public List<String> difference(Query q) {
+		List<String> diffs = new ArrayList<String>();
+		if (this.equals(q)) return diffs;
+		if (this.type != q.type) {
+			diffs.add(this.type.toString());
+		}
+		
+		
+		if (this.select != null && q.select != null) {
+			diffs.addAll(this.select.difference(q.select));			
+		} else if (this.select != null) {
+			diffs.addAll(this.select.difference(null));
+		} else if (q.select != null) {
+			diffs.addAll(q.select.difference(null));
+		}
+
+		return diffs;
+	}
+	
 	
 	public void setWhere(WhereClause where) {
 		this.where = where;
@@ -150,29 +173,18 @@ public class Query {
 		return type;
 	}
 	
+	public int getId() {
+		return id;
+	}
+	
 	
 	public Table setTable(Table t) { 
 		from = t;
 		return from;
 	}
-	/* return table names involved in this query*/
+	
 	public Table getTable(){
 		return from;
-		/*
-		if(type.equals("insert"))
-			for(Partition part:groups)
-				if(part.getPartitionName().equals("insert into"))
-					return part.getSplitedContent();
-		if(type.equals("update"))
-			for(Partition part:groups)
-				if(part.getPartitionName().equals("update"))
-					return part.getSplitedContent();
-		if(type.equals("delete"))
-			for(Partition part:groups)
-				if(part.getPartitionName().equals("delete from"))
-					return part.getSplitedContent();
-		return null;
-		*/
 	}
 	
 	public void setValue(List<String> values) {
@@ -183,7 +195,7 @@ public class Query {
 		return this.values;
 	}
 	public Query clone() {
-		Query q = new Query(select, set, from, where, type);
+		Query q = new Query(id, select, set, from, where, type);
 		q.values = values;
 		return q;
 	}
@@ -196,6 +208,11 @@ public class Query {
 		return this.where;
 	}
 	
+	/*
+	 * Genereate a random Query object.
+	 * NOTE: if params doesn't set an id field, the query's 
+	 *       id field is initialized to -1
+	 */
 	public static Query generate(QueryParams params) {
 		Query q = null;
 		WhereClause clause = WhereClause.generate(params);
@@ -203,13 +220,13 @@ public class Query {
 		switch(params.queryType) {
 		case INSERT:
 			// generate values
-			q = new Query(params.from, null);
+			q = new Query(-1, params.from, null);
 			break;
 		case UPDATE:
-			q = new Query(set, params.from, clause, Type.UPDATE);
+			q = new Query(-1, set, params.from, clause, Type.UPDATE);
 			break;
 		case DELETE:
-			q = new Query(null, params.from, clause, Type.DELETE);
+			q = new Query(-1, null, params.from, clause, Type.DELETE);
 			break;
 		}
 		return q;

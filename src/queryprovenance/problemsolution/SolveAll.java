@@ -49,9 +49,9 @@ public class SolveAll {
 			if(!fixed && !badds.get(i+1).isSame(ds.get(i+1))){
 				
 				switch(query.getType()){
-				case INSERT: fix = new InsertQuery(query.getTable(), query.getValue()); fix = fix.solve(ds.get(i), ds.get(i+1), badds.get(i+1), options); break;
-				case DELETE: fix = new DeleteQuery(query.getTable(), query.getWhere()); fix = fix.solve(ds.get(i), ds.get(i+1), badds.get(i+1), options); break;
-				case UPDATE: fix = new UpdateQuery(query.getSet(),query.getTable(), query.getWhere()); fix = fix.solve(ds.get(i), ds.get(i+1), badds.get(i+1), options); break;
+				case INSERT: fix = new InsertQuery(query.getId(), query.getTable(), query.getValue()); fix = fix.solve(ds.get(i), ds.get(i+1), badds.get(i+1), options); break;
+				case DELETE: fix = new DeleteQuery(query.getId(), query.getTable(), query.getWhere()); fix = fix.solve(ds.get(i), ds.get(i+1), badds.get(i+1), options); break;
+				case UPDATE: fix = new UpdateQuery(query.getId(), query.getSet(),query.getTable(), query.getWhere()); fix = fix.solve(ds.get(i), ds.get(i+1), badds.get(i+1), options); break;
 				default: fix = query.clone();
 				}
 				
@@ -84,9 +84,9 @@ public class SolveAll {
 		bad = new DatabaseState(database, wrong_query.getTable());
 		Query current;
 		switch(wrong_query.getType()){
-		case INSERT: current = new InsertQuery(wrong_query.getTable(), wrong_query.getValue()); return current.solve(pre, next, bad, options); 
-		case DELETE: current = new DeleteQuery(wrong_query.getTable(), wrong_query.getWhere()); return current.solve(pre, next, bad, options);
-		case UPDATE: current = new UpdateQuery(wrong_query.getSet(),wrong_query.getTable(), wrong_query.getWhere()); return current.solve(pre, next, bad, options);
+		case INSERT: current = new InsertQuery(wrong_query.getId(), wrong_query.getTable(), wrong_query.getValue()); return current.solve(pre, next, bad, options); 
+		case DELETE: current = new DeleteQuery(wrong_query.getId(), wrong_query.getTable(), wrong_query.getWhere()); return current.solve(pre, next, bad, options);
+		case UPDATE: current = new UpdateQuery(wrong_query.getId(), wrong_query.getSet(),wrong_query.getTable(), wrong_query.getWhere()); return current.solve(pre, next, bad, options);
 		}
 		return null;
 	}
@@ -120,7 +120,7 @@ public class SolveAll {
 		Expression var2 = new VariableExpression("var", 143284, false);
 		where_clause.add(new WhereExpr(var1,WhereExpr.Op.ne, var2));
 		WhereClause where = new WhereClause(where_clause,WhereClause.Op.CONJ);
-		Query wquery = new Query(set, t,where,Query.Type.UPDATE);
+		Query wquery = new Query(-1, set, t,where,Query.Type.UPDATE);
 		
 		// set up true query
 		List<SetExpr> set_clause_t = new ArrayList<SetExpr>();
@@ -138,7 +138,7 @@ public class SolveAll {
 		Expression var2_t = new VariableExpression("var", 178024, false);
 		where_clause1.add(new WhereExpr(var1_t,WhereExpr.Op.ne, var2_t));		
 		WhereClause where1 = new WhereClause(where_clause1,WhereClause.Op.CONJ);
-		Query tquery = new Query(set1, t,where1,Query.Type.UPDATE);
+		Query tquery = new Query(-1, set1, t,where1,Query.Type.UPDATE);
 		// test for MILP
 		// arg = new String[]{"-M", "0"}; // for Decision Tree
 		Query fquery = solver.solveOnQ(wquery, tquery);

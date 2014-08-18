@@ -2,16 +2,14 @@ package queryprovenance.query;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 
 import queryprovenance.database.DatabaseState;
-import queryprovenance.harness.Util;
 
 public class InsertQuery extends Query {
 	
-	public InsertQuery(Table from, List<String>values) {
-		super(from, values);
+	public InsertQuery(int id, Table from, List<String>values) {
+		super(id, from, values);
 	}
 	
 	
@@ -87,7 +85,7 @@ public class InsertQuery extends Query {
 		// check whether this query should be deleted or not
 		Query q = clone();
 		if(pre.size() == next.size())
-			return new Query();
+			return new Query(q.id);
 		else{
 			
 			List<String> fixed_values = fixValues(pre, next);

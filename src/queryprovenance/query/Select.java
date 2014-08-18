@@ -1,5 +1,6 @@
 package queryprovenance.query;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
@@ -15,6 +16,10 @@ public class Select {
 	
 	public List<String> clauses() {
 		throw new NotImplementedException();
+	}
+	
+	public List<String> difference(Select o) {
+		return new ArrayList<String>();
 	}
 	
 	public String toString() {

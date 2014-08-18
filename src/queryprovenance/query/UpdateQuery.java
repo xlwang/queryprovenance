@@ -4,8 +4,8 @@ import queryprovenance.database.DatabaseState;
 
 public class UpdateQuery extends Query{
 	
-	public UpdateQuery(SetClause set, Table table, WhereClause where){
-		super(set, table, where, Query.Type.UPDATE);
+	public UpdateQuery(int id, SetClause set, Table table, WhereClause where){
+		super(id, set, table, where, Query.Type.UPDATE);
 	}
 	
 
