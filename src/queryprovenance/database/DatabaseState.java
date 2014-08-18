@@ -260,6 +260,11 @@ public class DatabaseState {
 		return state.size();
 	}
 	
+	public boolean equals(DatabaseState o) {
+		if (o == null) return false;
+		return (new Complaint(this, o)).size() == 0;
+	}
+	
 	/* get primary key set */
 	public String getPrimaryKey(){
 		return this.primary_key;

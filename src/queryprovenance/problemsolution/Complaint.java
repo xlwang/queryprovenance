@@ -1,6 +1,8 @@
 package queryprovenance.problemsolution;
 
 import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.Set;
 
 import queryprovenance.database.DatabaseState;
 
@@ -16,9 +18,16 @@ public class Complaint {
 	}
 	
 	ArrayList<SingleComplaint> complaint_set;
+	Hashtable<String, SingleComplaint> complaint_ht;
+	
+	public Complaint() {
+		complaint_set = new ArrayList<SingleComplaint>();
+		complaint_ht = new Hashtable<String, SingleComplaint>();
+	}
 	
 	/* generateComplaintSet(databasestate1, databasestate2) */
 	public Complaint(DatabaseState db_state_clean, DatabaseState db_state){
+		complaint_ht = new Hashtable<String, SingleComplaint>();
 		
 		// initialize a complaint set by providing a "dirty" database state and a "clean" database state
 		complaint_set = new ArrayList<SingleComplaint>();
@@ -43,6 +52,45 @@ public class Complaint {
 			if(!db_state_clean.containTuple(key))
 				complaint_set.add(new SingleComplaint(key, null));
 		}
+		
+		for (SingleComplaint sc: complaint_set) {
+			complaint_ht.put(sc.key, sc);
+		}
+	}
+	
+	public void add(SingleComplaint sc) {
+		complaint_set.add(sc);
+		complaint_ht.put(sc.key,  sc);
+	}
+	
+	public boolean contains(String key) {
+		return complaint_ht.contains(key);
+	}
+	
+	public SingleComplaint get(String key) {
+		return complaint_ht.get(key);
+	}
+	
+	public Set<String> keySet() {
+		return complaint_ht.keySet();
+	}
+	
+	public Complaint difference(Complaint o) {
+		Complaint ret = new Complaint();
+		for (String key : keySet()) {
+			if (!o.contains(key)) {
+				ret.add(this.get(key));
+			}
+		}
+		return ret;
+	}
+	
+	public Complaint intersect(Complaint o) {
+		return o.difference(this.difference(o));
+	}
+	
+	public int size() {
+		return complaint_set.size();
 	}
 	
 }

@@ -1,6 +1,8 @@
 package queryprovenance.harness;
 
 import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.List;
 
 import queryprovenance.database.DatabaseHandler;
 import queryprovenance.database.DatabaseState;
@@ -64,6 +66,26 @@ public class QueryLog extends ArrayList<Query>{
 			dss.add(ds);
 		}
 		return dss;
+	}
+	
+	public List<String> difference(QueryLog o) {
+		Hashtable<Integer, Query> ht = new Hashtable<Integer, Query>();
+		List<String> diffs = new ArrayList<String>();
+		for (Query q : o) {
+			ht.put(q.getId(), q);
+		}
+		for (Query q : this) {
+			if (ht.contains(q.getId())) {
+				Query q2 = ht.get(q.getId());
+				if (!q.equals(q2)) {
+					diffs.add(q.toString());
+				}
+			} else {
+				// query should exist but doesn't
+				diffs.add("deleted: " + this.toString());
+			}
+		}
+		return diffs;
 	}
 	
 	
