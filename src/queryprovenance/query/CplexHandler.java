@@ -35,11 +35,8 @@ public class CplexHandler {
 		// solve cplex
 		if(cplex.solve()){
 
-            for(int i = 0; i < fixed_values.length; ++i){
-				int digits = (int) Math.pow(10, (double) (String.valueOf(epsilon).length() - String.valueOf(epsilon).lastIndexOf(".") + 1));
-				fixed_values[i] = (double) Math.round(cplex.getValue(var[i])*digits)/digits;
-			}
-            
+			for(int i = 0; i < fixed_values.length; ++i)
+				fixed_values[i] = (double) cplex.getValue(var[i]);
 			return this.toConditionRules(where, fixed_values);
 		}
 		else
