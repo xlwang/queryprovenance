@@ -18,11 +18,12 @@ import weka.core.Instances;
 import context.arch.intelligibility.expression.Comparison;
 import context.arch.intelligibility.expression.DNF;
 import context.arch.intelligibility.expression.Reason;
-import context.arch.intelligibility.weka.j48.J48Parser;
+//import context.arch.intelligibility.weka.j48.J48Parser;
+import queryprovenance.J48.J48Parser;
 
 public class DecisionTreeHandler {
-
-	private J48 tree; // J48 tree 
+    
+	private J48 tree; // J48 tree
 	Map<String, WhereExpr> map;
 	
 	public DecisionTreeHandler(){
@@ -36,16 +37,16 @@ public class DecisionTreeHandler {
 		// define fixed where expression list
 		List<WhereExpr> fixed_values;
 		
-		// read file 
-		BufferedReader reader = new BufferedReader( 
-				 new FileReader(filename));
-		Instances data = new Instances(reader); 
-		reader.close(); 
+		// read file
+		BufferedReader reader = new BufferedReader(
+                                                   new FileReader(filename));
+		Instances data = new Instances(reader);
+		reader.close();
 		
 		// Prepare parameters
-		data.setClassIndex(data.numAttributes() - 1); 
+		data.setClassIndex(data.numAttributes() - 1);
 		
-		// ClassifierTree 
+		// ClassifierTree
 		tree.buildClassifier(data);
 		
 		// convert into conditional rules
@@ -57,7 +58,7 @@ public class DecisionTreeHandler {
 	
 	/* convert tree into a set of condition rules*/
 	public List<WhereExpr> toConditionRules(WhereClause where, Map<String, DNF> valueTraces){
-		List<WhereExpr> fixed_values = new ArrayList<WhereExpr>(); 
+		List<WhereExpr> fixed_values = new ArrayList<WhereExpr>();
 		// check structure
 		int orgsize = where.getWhereExprs().size();
 		int dtsize = 0;
@@ -102,7 +103,7 @@ public class DecisionTreeHandler {
 		if(!filename.exists())
 			filename.createNewFile();
 		FileWriter filewriter = new FileWriter(filename);
-		BufferedWriter writer = new BufferedWriter(filewriter); 
+		BufferedWriter writer = new BufferedWriter(filewriter);
 		
 		// write data name
 		writer.write("@RELATION test"); writer.newLine();
@@ -134,12 +135,12 @@ public class DecisionTreeHandler {
 			}
 			
 			// write class info
-			writer.write("'"+classinfo.get(key)+"'"); 
+			writer.write("'"+classinfo.get(key)+"'");
 			writer.newLine();
 		}
 		
 		// finish prepare file for DT solver
-		writer.close();	
+		writer.close();
 	}
 	
 }
