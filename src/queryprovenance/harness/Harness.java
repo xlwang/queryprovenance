@@ -62,12 +62,14 @@ public class Harness {
 		Complaint complaint = new Complaint(ds.get(ds.size()-1), badds.get(badds.size()-1));
 
 		// set parameters for solver
-		String[] options = new String[]{"-M", "1", "-E", "0.1", "-O", "abs"};
+		String[] options = new String[]{"-M", "0", "-E", "0.1", "-O", "abs"};
 		SolveAll instance = new SolveAll(options);
 
 		// solve bad query log
 		QueryLog fixedqlog = instance.solve(badqlog, ds, badds, complaint);
 		DatabaseStates fixedds = fixedqlog.execute(handler);
+		
+		Metrics.evaluateAll(qlog, ds, badqlog, badds, fixedqlog, fixedds);
 		
 		
 		// get complaint set: good ds vs. fixed ds

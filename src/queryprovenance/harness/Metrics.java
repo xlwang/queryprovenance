@@ -26,6 +26,7 @@ public class Metrics {
 		
 		
 		// XXX: assume the NUMBER of queries in each qlog has not changed
+		HashMap<Type, String> metrics = new HashMap<Type, String>();
 		
 		for (int i = 0; i < qlog.size(); i++) {
 			Complaint true2badc = new Complaint(ds.get(i), badds.get(i));	

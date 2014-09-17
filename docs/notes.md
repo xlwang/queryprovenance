@@ -43,10 +43,25 @@ Next Steps
 * Get it running
   * control which solve algorithm (simplex vs dt) to use
 * evaluation metrics for now
-  * db state distance
-  * structural similarity
-  * query log distance (in terms of query)
+  * db state distances 
+    * (errors in fixed) intersect (errors in bad)
+    * (errors in fixed) - (errors in bad)
+    * (errors in bad) - (errors in fixed)
+  * structural similarity for each query in query log
+    * number of clauses different
+    * string edit (e.g., jaccard) distance
   * value similarity (if structures are the same)
+  * query log distance 
+    * number of queries the same / total number of queries
+    * should be <= 1 for now
+* Experiment parameters
+  * query type (delete vs update) mixture
+  * number of tuples (1, 10, 100, 1000, 5000)
+  * query log length
+  * % of similar queries with similar structure
+
+Steps for later
+
 * More expressive 
   * implement roll back function
   * incomplete complaint sets
@@ -54,6 +69,7 @@ Next Steps
   * more complex algebraic expressions
 * Faster
   * pruning the query log
+
 
 
 # Meeting Jul 23, 2014
@@ -76,8 +92,3 @@ TODOS
   * parametrs for each DT/milp algorithm
   * whether to solve for SET/WHERE clause
   * preference/scoring function
-* Data generation parameters
-  * query type mixture
-  * numebr of tuples
-  * number of similar queries with similar structure
-  * query log length
