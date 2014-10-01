@@ -1,3 +1,13 @@
+# Meeting Sep 24
+
+1. #bad_complaints avg number of complaints over 100 runs
+2. #fixedcomplaints number of compaints not fixed.  should be 0
+3. fix rate: # fixed / #bad
+4. noise_rate: # extra complaints that were introduced by the fixes
+5. prep-time: time to create the problem in ms
+6. solve_time: solver time
+
+
 # Meeting Aug 13
 
 Cplex returns wrong results for >1 clause WHERE predicates
