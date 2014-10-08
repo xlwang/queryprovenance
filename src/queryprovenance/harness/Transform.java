@@ -82,15 +82,19 @@ class Transformation {
 	/*
 	 * Create a transformation for our experiments
 	 */
-	public static Transformation generate(ExpParams params) {
+	public static Transformation generate(ExpParams params, double percentage) {
 		Random rand = new Random();
-		int idx = rand.nextInt(params.ql_nqueries);
+		int lowerbd = (int) (params.ql_nqueries*( (double) (percentage-0.2) >0 ? percentage - 0.2: 0));
+		int upperbd = (int) (params.ql_nqueries*((double) (percentage+0.2) <1 ? percentage + 0.2: 1));
+		upperbd = upperbd == 0?1:upperbd;
+		int idx = rand.nextInt(upperbd-lowerbd) + lowerbd;
 		QueryParams qparams = new QueryParams();
 		qparams.from = params.table;
 		qparams.nclauses = 1;
 		qparams.queryType = Query.Type.UPDATE;
 		//WhereClause newWhere = WhereClause.generate(qparams);
-		Transformation.Type transtype = (((Math.random()<0.5)?0:1) == 0)?Transformation.Type.WHERE:Transformation.Type.SET;
+		//Transformation.Type transtype = (((Math.random()<0.5)?0:1) == 0)?Transformation.Type.WHERE:Transformation.Type.SET;
+		Transformation.Type transtype = Transformation.Type.WHERE;
 		return new Transformation(idx, transtype, null, null, qparams);
 	}
 }

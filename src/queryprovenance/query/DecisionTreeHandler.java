@@ -26,6 +26,8 @@ public class DecisionTreeHandler {
 	private J48 tree; // J48 tree
 	Map<String, WhereExpr> map;
 	
+	long[] timestamps = new long[4];
+	
 	public DecisionTreeHandler(){
 		//initialize J48 decidion tree
 		tree = new J48();
@@ -37,6 +39,7 @@ public class DecisionTreeHandler {
 		// define fixed where expression list
 		List<WhereExpr> fixed_values;
 		
+		timestamps[1] = System.nanoTime(); // get time stamp
 		// read file
 		BufferedReader reader = new BufferedReader(
                                                    new FileReader(filename));
@@ -49,11 +52,21 @@ public class DecisionTreeHandler {
 		// ClassifierTree
 		tree.buildClassifier(data);
 		
+		timestamps[2] = System.nanoTime(); // get time stamp
+		
 		// convert into conditional rules
         Map<String, DNF> valueTraces = J48Parser.parse(tree, data);
 		
         // return result
-		return this.toConditionRules(where, valueTraces);
+		List<WhereExpr> result = this.toConditionRules(where, valueTraces);
+		
+		timestamps[3] = System.nanoTime(); // get time stamp
+		
+		return result;
+	}
+	
+	public long[] getTimeStamps(){
+		return timestamps;
 	}
 	
 	/* convert tree into a set of condition rules*/
@@ -74,10 +87,9 @@ public class DecisionTreeHandler {
 			return null;
 		
 		// check overall structure; operation connects each condition rules must be the same
-		if((traces.size()>1 && where.getOperator() != WhereClause.Op.DISJ) ||(traces.size() == 1 && where.getOperator() != WhereClause.Op.CONJ)){
-			return null;
-			
-		}
+		//if((traces.size()>1 && where.getOperator() != WhereClause.Op.DISJ) ||(traces.size() == 1 && where.getOperator() != WhereClause.Op.CONJ)){
+		//	return null	
+		//}
 		// compose conditions
 		for(int i = 0; i < traces.size(); ++i){
 			Reason sub_reason = traces.get(i); // each sub_reason in DISJ relationship
@@ -90,8 +102,8 @@ public class DecisionTreeHandler {
 				fixed_values.add(newexpr);
 			}
 		}
-		if(fixed_values.size() != where.getWhereExprs().size())
-			return null;
+		//if(fixed_values.size() != where.getWhereExprs().size())
+			//return null;
 		return fixed_values;
 	}
 	

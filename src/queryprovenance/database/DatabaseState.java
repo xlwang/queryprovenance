@@ -57,7 +57,9 @@ public class DatabaseState {
 			}			
 		}
 	}
-	
+	public void clear(){
+		this.state.clear();
+	}
 	public DatabaseState(DatabaseHandler database, String table_name) throws Exception{
 		
 		table_name = table_name.toLowerCase().trim();

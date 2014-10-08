@@ -16,8 +16,14 @@ import queryprovenance.query.*;
 
 public class SolveAll {
 	
-	String[] options;
-	
+	public String[] options;
+	public long[] computetime = new long[4];
+	public int qidx = -1;
+	public int badclausesize = -1;
+	public int fixedclausesize = -1;
+	public SolveAll(){
+		
+	}
 	public SolveAll(String[] options){
 		this.options = options;
 	}
@@ -31,7 +37,8 @@ public class SolveAll {
 				return null;
 	}
 	
-	public QueryLog solve(QueryLog qlog, DatabaseStates ds, DatabaseStates badds, Complaint complaint) throws Exception{
+	public QueryLog solve(CplexHandler cplex, QueryLog qlog, DatabaseStates ds, DatabaseStates badds, Complaint complaint) throws Exception{
+		this.initialComputeTime();
 		QueryLog fixed_qlog = new QueryLog();
 		// prepare data
 		if(ds == null || ds.size()<1)
@@ -45,18 +52,30 @@ public class SolveAll {
 		for(int i = 0; i < qlog.size(); ++i){
 			// for each query in the query log
 			Query query = qlog.get(i);
-			Query fix;
+			Query fix, fix2;
+			int temp1 = -1, temp2 = -1;
 			if(!fixed && !badds.get(i+1).isSame(ds.get(i+1))){
-				
+				long[] compute_time = new long[4];
 				switch(query.getType()){
-				case INSERT: fix = new InsertQuery(query.getId(), query.getTable(), query.getValue()); fix = fix.solve(ds.get(i), ds.get(i+1), badds.get(i+1), options); break;
-				case DELETE: fix = new DeleteQuery(query.getId(), query.getTable(), query.getWhere()); fix = fix.solve(ds.get(i), ds.get(i+1), badds.get(i+1), options); break;
-				case UPDATE: fix = new UpdateQuery(query.getId(), query.getSet(),query.getTable(), query.getWhere()); fix = fix.solve(ds.get(i), ds.get(i+1), badds.get(i+1), options); break;
+				case INSERT: fix = new InsertQuery(query.getId(), query.getTable(), query.getValue());   fix2 = fix.solve(cplex, ds.get(i), ds.get(i+1), badds.get(i+1), options); compute_time = this.getComputeTime(fix.getTimeStamps()); fix = fix2; break;
+				case DELETE: fix = new DeleteQuery(query.getId(), query.getTable(), query.getWhere());fix2 = fix.solve(cplex, ds.get(i), ds.get(i+1), badds.get(i+1), options); compute_time = this.getComputeTime(fix.getTimeStamps()); fix = fix2; break;
+				case UPDATE: fix = new UpdateQuery(query.getId(), query.getSet(),query.getTable(), query.getWhere());
+				fix2 = fix.solve(cplex, ds.get(i), ds.get(i+1), badds.get(i+1), options);
+				temp1 = query.getWhere().getWhereExprs().size();
+				temp2 = fix.getWhere().getWhereExprs().size();
+				compute_time = this.getComputeTime(fix.getTimeStamps());
+				fix = fix2; 
+				break;
 				default: fix = query.clone();
 				}
 				
-				if(!fix.toString().toLowerCase().trim().equals(query.toString().toLowerCase().trim()))
+				if(!fix.toString().toLowerCase().trim().equals(query.toString().toLowerCase().trim())){
+					qidx = i;
+					badclausesize = temp1;
+					fixedclausesize = temp2;
 					fixed = true;
+				}
+				this.addComputeTime(compute_time);
 			}
 			else
 				fix = query.clone();
@@ -65,6 +84,30 @@ public class SolveAll {
 		return fixed_qlog;
 	}
 
+	public long[] computeTime(){
+		return computetime;
+	}	
+	public long[] getComputeTime(long[] timestamps){
+		long[] compute_time = new long[4];
+		compute_time[0] = (timestamps[1] - timestamps[0]);  // in milliseconds
+		compute_time[1] = (timestamps[2] - timestamps[1]);
+		compute_time[2] = (timestamps[3] - timestamps[2]);
+		compute_time[3] = compute_time[0] + compute_time[1] + compute_time[2];
+		return compute_time;	
+	}
+	
+	public void addComputeTime(long[] compute_time){
+		computetime[0] += compute_time[0];
+		computetime[1] += compute_time[1];
+		computetime[2] += compute_time[2];
+		computetime[3] += compute_time[3];
+	}
+	
+	public void initialComputeTime(){
+		for(int i = 0; i < 4; ++i)
+			computetime[i] = 0;
+	}
+	/*
 	//Single query fix test
 	public Query solveOnQ(Query wrong_query, Query true_query) throws Exception {
 		String result = "";
@@ -148,5 +191,5 @@ public class SolveAll {
 		System.out.print("FIXED QUERY: "+fquery);
 	
 	} 
-	 
+	*/ 
 }

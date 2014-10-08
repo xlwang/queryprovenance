@@ -18,6 +18,7 @@ public class JAMAHandler {
 	double[][] arrayb;
 	double[][] arrayx;
 	List<Expression> variables;
+	long[] timestamps = new long[4];
 	
 	/* JAMA solver */
 	public JAMAHandler(){	
@@ -32,15 +33,20 @@ public class JAMAHandler {
 			if(!(vallist.length > 0))
 				return null;
 		}
+		timestamps[0] = System.nanoTime();
 		// prepare data
 		this.prepareData(set, column_names, pre_values_all, next_values_all);
 		A = new Matrix(arrayA);
 		b = new Matrix(arrayb);
+		timestamps[1] = System.nanoTime();
 		try{
 		x = A.solve(b);
+		
+		timestamps[2] = System.nanoTime();
 		arrayx = x.getArray();
 		// convert back
 		List<SetExpr> fixed_set = this.toConditionRules(set);
+		timestamps[3] = System.nanoTime();
 		return fixed_set;
 		} catch (RuntimeException e){
 			System.out.print("error");
@@ -48,6 +54,9 @@ public class JAMAHandler {
 		}
 	}
 	
+	public long[] getTimeStamps(){
+		return timestamps;
+	}
  	/* Initialize solver by assign A, b matrix values*/
 	public void prepareData(SetClause set, String[] column_names, ArrayList<String[]> pre_values_all, ArrayList<String[]> next_values_all) throws Exception{
 		int numOfTuple = pre_values_all.size();

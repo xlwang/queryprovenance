@@ -13,8 +13,8 @@ import queryprovenance.problemsolution.Complaint;
  */
 public class Metrics {
 	// list of metric types
-	public static enum Type {
-		
+	public enum Type {
+		BADCOMPLAINT, FIXEDCOMPLAINT, REMOVEDRATE, NOISERATE, QLOGDIST
 	}
 	
 	// wrapper to compute _all_ metrics we can think of
@@ -57,5 +57,39 @@ public class Metrics {
 		}
 	
 		return null;
+	}
+	public static HashMap<Type, Double> evaluateAll2(
+			QueryLog qlog, DatabaseStates ds,
+			QueryLog badqlog, DatabaseStates badds, 
+			QueryLog fixedqlog, DatabaseStates fixedds) {
+	
+		HashMap<Type, Double> metrics = new HashMap<Type, Double>();
+		// compare database state differences
+		Complaint true2badc = new Complaint(ds.get(ds.size()-1), badds.get(badds.size()-1));	 // complaint set from true db state to bad db state
+		Complaint true2fixc = new Complaint(ds.get(ds.size()-1), fixedds.get(fixedds.size()-1));	// complaint set from true db state to fixed db state
+		metrics.put(Type.BADCOMPLAINT, (double) true2badc.size()); // insert # of complaints in bad db state
+		metrics.put(Type.FIXEDCOMPLAINT, (double) true2fixc.size()); // insert # of complaints in fixed db state
+		if(true2fixc.size() > 0){
+			int inter_fixbad = true2badc.intersect(true2fixc).size(); // get # of overlap complaints between fixed and bad
+			int fix2bad_diff = true2fixc.difference(true2badc).size(); 
+			int bad2fix_diff = true2badc.difference(true2fixc).size();
+			metrics.put(Type.REMOVEDRATE, (double) bad2fix_diff/true2badc.size());
+			metrics.put(Type.NOISERATE, (double) fix2bad_diff/true2badc.size());
+			//metrics.put(Type.REMAINRATE, (double) inter_fixbad/true2badc.size());
+		}
+		else{
+			metrics.put(Type.REMOVEDRATE, 1.0);
+			metrics.put(Type.NOISERATE, 0.0);
+			//metrics.put(Type.REMAINRATE, 0.0);
+		}
+		
+		// compare query log difference
+		
+		return metrics;
+	}
+	
+	public static String toString(HashMap<Type, Double> metrics){
+		String out = metrics.get(Type.BADCOMPLAINT) + "," + metrics.get(Type.FIXEDCOMPLAINT) + "," + metrics.get(Type.REMOVEDRATE) + "," + metrics.get(Type.NOISERATE) + ",";
+		return out;
 	}
 }

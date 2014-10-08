@@ -14,6 +14,7 @@ public class ExpParams {
 	 */
 	public int ql_nqueries = 0;
 	public float[] ql_qtypes = null;
+	public int ql_nclauses = 0;
 	
 	/*
 	 * Transform selection configs

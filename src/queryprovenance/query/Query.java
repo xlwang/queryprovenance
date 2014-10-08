@@ -23,6 +23,9 @@ public class Query {
 	protected List<String> values; // values for INSERT query
 	protected List<String> attr_names; // attribute names for INSERT query
 	
+	//computation time
+	protected long[] timestamps = new long[4];
+	
 	
 	public Query(int id){
 		this.id = id;
@@ -117,7 +120,7 @@ public class Query {
 	}
 	
 	/* solve query by previous database state and next database state*/
-	public Query solve(DatabaseState pre, DatabaseState next, DatabaseState bad, String[] options) throws Exception{
+	public Query solve(CplexHandler cplex, DatabaseState pre, DatabaseState next, DatabaseState bad, String[] options) throws Exception{
 		return null;
 	}
 	
@@ -230,5 +233,9 @@ public class Query {
 			break;
 		}
 		return q;
+	}
+	
+	public long[] getTimeStamps(){
+		return timestamps;
 	}
 }

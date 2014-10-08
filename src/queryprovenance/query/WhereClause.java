@@ -22,6 +22,7 @@ public class WhereClause {
 	
 	private List<WhereExpr> where_exprs; // a set of WhereExprs
 	private Op operator; // disjunction/conjunction
+	private long[] timestamps = new long[4]; // computation time: preparation time; solving time; finishing time; total time
 	
 	public WhereClause(Op operator_){
 		this.where_exprs = new ArrayList<WhereExpr>();
@@ -107,7 +108,7 @@ public class WhereClause {
 	}
 	
 	/* solve the where clause given the previous/next db states */
-	public WhereClause solve(DatabaseState pre, DatabaseState next, DatabaseState bad, String[] option) throws Exception{
+	public WhereClause solve(CplexHandler cplex,DatabaseState pre, DatabaseState next, DatabaseState bad, String[] option) throws Exception{
 		
 		WhereClause result = null;
 		
@@ -137,7 +138,7 @@ public class WhereClause {
 				if(option[i].equals("0")) // "0" for Decision tree solver
 					result = solveDT(pre,next, bad, classinfo);
 				else if(option[i].equals("1")) //"1" for MILP solver
-					result = solveMILP(pre,next, bad, classinfo, option);
+					result = solveMILP(cplex, pre,next, bad, classinfo, option);
 				else
 					result = null;
 				break;
@@ -150,7 +151,7 @@ public class WhereClause {
 	}
 	
 	/* solve the where clause by MILP cplex*/
-	public WhereClause solveMILP(DatabaseState pre, DatabaseState next, DatabaseState bad, HashMap<String, String> classinfo, String[] option) throws Exception{
+	public WhereClause solveMILP(CplexHandler cplex, DatabaseState pre, DatabaseState next, DatabaseState bad, HashMap<String, String> classinfo, String[] option) throws Exception{
 		// define parameters
 		double ep = Double.MAX_VALUE;
 		String objFuc = null;
@@ -180,7 +181,7 @@ public class WhereClause {
 		WhereClause fixed_where = null;
 		
 		// build cplex solver
-		CplexHandler cplex = new CplexHandler(ep);
+		cplex.initial(ep);
 		
 		// prepare cplex
 		List<WhereExpr> fixed_values = cplex.solve(this, pre, classinfo, objFuc);
@@ -191,7 +192,10 @@ public class WhereClause {
 		else
 			fixed_where = null;
 		
+		timestamps = cplex.getTimeStamps();
+		
 		// return result
+		cplex = null;
 		return fixed_where;
 	
 	}
@@ -204,7 +208,7 @@ public class WhereClause {
 		// buid tree
 		DecisionTreeHandler tree = new DecisionTreeHandler();
 		
-		
+		long tempstamp = System.nanoTime();
 		//ResultSet features = database.queryExecution(featurequery);
 		tree.prepareARFF(this, pre, classinfo);
 		
@@ -217,10 +221,16 @@ public class WhereClause {
 		else
 			fixed_where = null;
 		
+		timestamps = tree.getTimeStamps();
+		timestamps[0] = tempstamp;
 		// return result
+		tree = null;
 		return fixed_where;
 	}
 	
+	public long[] getTimeStamps(){
+		return timestamps;
+	}
 	
 	/* return node type */
 	public int getNodeType(String str){

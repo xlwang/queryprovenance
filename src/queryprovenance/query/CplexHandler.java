@@ -2,6 +2,7 @@ package queryprovenance.query;
 
 import ilog.concert.IloAnd;
 import ilog.concert.IloConstraint;
+import ilog.concert.IloException;
 import ilog.concert.IloNumVar;
 import ilog.cplex.IloCplex;
 
@@ -15,35 +16,57 @@ public class CplexHandler {
 	IloCplex cplex;
 	IloNumVar[] var;
 	IloNumVar[] obj;
-
+	
 	double epsilon;
+	
+	long[] timestamps = new long[4];
+	
 	/* Initialize cplex solver */
-	public CplexHandler(double ep) throws Exception{
+	public CplexHandler() throws Exception{
 		cplex = new IloCplex();
+		//epsilon = ep;
+	}
+	
+	public void initial(double ep) throws IloException{
 		epsilon = ep;
+		cplex.clearModel();
 	}
 	/* solve cplex */
 	public List<WhereExpr> solve(WhereClause where, DatabaseState pre, HashMap<String, String> classinfo, String method) throws Exception{
 		double[] fixed_values = new double[where.getWhereExprs().size()];
 		
+		timestamps[0] = System.nanoTime(); // get time stamp
 		// add constraints
 		this.addAllConstraint(where, pre, classinfo);
 		
 		// add objective function
 		this.prepareObj(where, method);
 		
+		timestamps[1] = System.nanoTime(); // get time stamp
+		
 		// solve cplex
 		if(cplex.solve()){
 
+			timestamps[2] = System.nanoTime(); // get time stamp
             for(int i = 0; i < fixed_values.length; ++i){
 				int digits = (int) Math.pow(10, (double) (String.valueOf(epsilon).length() - String.valueOf(epsilon).lastIndexOf(".") - 1));
 				fixed_values[i] = (double) Math.round(cplex.getValue(var[i])*digits)/digits;
 			}
-			return this.toConditionRules(where, fixed_values);
+            List<WhereExpr> result = this.toConditionRules(where, fixed_values);
+            timestamps[3] = System.nanoTime(); // get time stamp
+            
+            return result;
 		}
-		else
+		else{
+			timestamps[2] = System.nanoTime();
+			timestamps[3] = timestamps[2];
 			return null;
+		}
 		
+	}
+	
+	public long[] getTimeStamps(){
+		return timestamps;
 	}
 	/* prepare objective function */
 	public void prepareObj(WhereClause where, String method) throws Exception{

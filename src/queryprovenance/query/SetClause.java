@@ -16,6 +16,7 @@ import queryprovenance.query.WhereClause.Op;
 
 public class SetClause {
 	private List<SetExpr> set_exprs; // a set of conditions
+	private long[] timestamps = new long[4];
 	
 	public SetClause(){
 		set_exprs = new ArrayList<SetExpr>();
@@ -91,7 +92,6 @@ public class SetClause {
 	/* solve the where clause given the previous/next db states */
 	public SetClause solve(DatabaseState pre, DatabaseState next, String[] options) throws Exception{
 		
-		
 		// prepare feature information
 		ArrayList<String[]> pre_values_all = new ArrayList<String[]>();
 		ArrayList<String[]> next_values_all = new ArrayList<String[]>();
@@ -109,10 +109,15 @@ public class SetClause {
 
 		JAMAHandler jama = new JAMAHandler();
 		SetClause fixed_set = new SetClause(jama.solve(this, value_names, pre_values_all, next_values_all));
-				
+		
+		timestamps = jama.getTimeStamps();
+		
 		return fixed_set;
 	}
 	
+	public long[] getTimeStamps(){
+		return timestamps;
+	}
 	/* update previous state, next state with only relevant tuples*/
 	public void updateValues(ArrayList<String[]> pre_values_all, ArrayList<String[]> next_values_all, DatabaseState pre, DatabaseState next, HashMap<String, String> classinfo){
 		String[] colname_pre = pre.getColumnNames();

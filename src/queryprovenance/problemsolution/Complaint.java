@@ -78,7 +78,7 @@ public class Complaint {
 	public Complaint difference(Complaint o) {
 		Complaint ret = new Complaint();
 		for (String key : keySet()) {
-			if (!o.contains(key)) {
+			if (!o.complaint_ht.containsKey(key)) {
 				ret.add(this.get(key));
 			}
 		}

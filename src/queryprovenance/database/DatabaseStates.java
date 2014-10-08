@@ -14,4 +14,7 @@ public class DatabaseStates extends ArrayList<DatabaseState> {
 		// TODO: given a complaint set, a set of bad databasestates, generate a set of clean databasestates
 		
 	}
+	public void clear(){
+		super.clear();
+	}
 }

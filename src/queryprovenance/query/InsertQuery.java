@@ -8,6 +8,7 @@ import queryprovenance.database.DatabaseState;
 
 public class InsertQuery extends Query {
 	
+	long[] timestamps = new long[4];
 	public InsertQuery(int id, Table from, List<String>values) {
 		super(id, from, values);
 	}
@@ -54,11 +55,12 @@ public class InsertQuery extends Query {
 	
 	/* fix the value content for the insert query */
 	public List<String> fixValues(DatabaseState pre, DatabaseState next){
+		timestamps[0] = System.nanoTime();
 		List<String> fixed_values = new ArrayList<String>();
 		// try to fix insert query
 		HashMap<String, String[]> prevalues = this.prepareData(pre);
 		HashMap<String, String[]> nextvalues = this.prepareData(next);
-		
+		timestamps[1] = System.nanoTime();
 		// update insert query
 		if(prevalues.size() == nextvalues.size()){
 			for(String key:prevalues.keySet()){
@@ -67,7 +69,8 @@ public class InsertQuery extends Query {
 				fixed_values.add(getValueStr(nextvalues.get(key)));
 			}
 		}
-
+		timestamps[2] = System.nanoTime();
+		timestamps[3] = timestamps[2];
 		return fixed_values;
 	}
 	
@@ -96,5 +99,9 @@ public class InsertQuery extends Query {
 			else
 				return null;
 		}
+	}
+	
+	public long[] getTimeStamps(){
+		return timestamps;
 	}
 }

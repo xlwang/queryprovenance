@@ -9,7 +9,7 @@ import java.util.Random;
 
 public class DataGenerator {
 
-	public DataGenerator(int tuple_count) throws Exception{
+	public static void generatorData(int tuple_count) throws Exception{
 		BufferedReader reader = new BufferedReader( 
 				 new FileReader("./data/names.txt"));
 		String str;
@@ -27,19 +27,21 @@ public class DataGenerator {
 		BufferedWriter writer = new BufferedWriter(filewriter); 
 		for(int i=0; i<tuple_count; ++i){
 			Random rand = new Random();
-			int val1 = rand.nextInt(count-1);
-			int val2 = rand.nextInt(100);
-			int val3 = rand.nextInt(departments.length-1);
-			int val4 = rand.nextInt(6);
-			int val5 = rand.nextInt(150000)+50000;
-			writer.write("INSERT INTO Employee VALUES ("+String.valueOf(i)+","+String.valueOf(val4)+","+String.valueOf(val5)+");");
+			int val0 = rand.nextInt(20) + 20;
+			int val2 = rand.nextInt(60-val0) ;  //employment year
+			int val1 = val2 + val0; //age
+			
+			
+			int val4 = rand.nextInt(6); // level
+			int val5 = rand.nextInt(150000)+50000; // salary
+			
+			int val3 = (int) (((double)rand.nextInt(30)/100.0)*val5); //tax
+			writer.write("INSERT INTO Employee VALUES ("+String.valueOf(i)+"," + String.valueOf(val4)+","+ String.valueOf(val1) + "," + String.valueOf(val2) + "," + String.valueOf(val3) + "," + String.valueOf(val5)+");");
 			writer.newLine();
 		}
 		writer.close();
 		reader.close();
 	}
 	
-	public static void main(String[] args) throws Exception {
-	}
 
 }

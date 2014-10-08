@@ -15,7 +15,7 @@ public class QueryLog extends ArrayList<Query>{
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 5327786044304140040L;
+	private final long serialVersionUID = 5327786044304140040L;
 
 	
 	/*
@@ -100,7 +100,7 @@ public class QueryLog extends ArrayList<Query>{
 			// generate a QueryParam
 			QueryParams qparams = new QueryParams();
 			qparams.from = params.table;
-			qparams.nclauses = 1;
+			qparams.nclauses = params.ql_nclauses;
 			qparams.queryType = Query.Type.UPDATE;
 			Query q = Query.generate(qparams);
 			ql.add(q);

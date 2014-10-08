@@ -49,7 +49,7 @@ public class DatabaseHandler {
 	                }  
 	            }      
 	        }catch(Exception e){
-	        	
+	        	System.out.print(e);
 	        }
 		}
 		public DatabaseMetaData getMetaData() throws Exception{
