@@ -39,7 +39,7 @@ plotit = function(aes, basedat, dat) {
     yname = paste(colname, '(log)')
     sy = scale_y_log10
   } 
-  jitter = position_jitter(width = .08, height= .05)
+  jitter = position_jitter(width = .08, height= .0)
   data = dat
   basedata = basedat
   a = aes(x=dbsize, color=solver)
@@ -69,16 +69,16 @@ plotit = function(aes, basedat, dat) {
 }
 
 
-#plotit(aes(y=totaltime), basedata, data)
-#plotit(aes(y=badcomplaints), basedata, data)
-#plotit(aes(y=remaincomplaints), basedata, data)
-#plotit(aes(y=fixedrate), basedata, data)
-#plotit(aes(y=noiserate), basedata, data)
-#plotit(aes(y=correctidx), basedata, data)
-#plotit(aes(y=correctsize), basedata, data)
-#plotit(aes(y=preptime), basedata, data)
-#plotit(aes(y=solvetime), basedata, data)
-#plotit(aes(y=finishtime), basedata, data)
+plotit(aes(y=totaltime), basedata, data)
+plotit(aes(y=badcomplaints), basedata, data)
+plotit(aes(y=remaincomplaints), basedata, data)
+plotit(aes(y=fixedrate), basedata, data)
+plotit(aes(y=noiserate), basedata, data)
+plotit(aes(y=correctidx), basedata, data)
+plotit(aes(y=correctsize), basedata, data)
+plotit(aes(y=preptime), basedata, data)
+plotit(aes(y=solvetime), basedata, data)
+plotit(aes(y=finishtime), basedata, data)
 plotit(aes(y=diffidx), basedata, data)
 
 
