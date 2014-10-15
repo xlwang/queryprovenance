@@ -1,3 +1,37 @@
+# Meeting Oct 15
+
+Agenda
+
+* talk about complete set graphs
+* talk about incomplete set graphs
+  * why does quality and totaltime not degrade propotionally with incompleteness?
+* talk about incomplete complaint sets
+
+Summary
+
+* make sure each solver uses same data
+* rerun with smaller complaint set because CPLEX should
+  * drop in quality
+  * prefer later queries in the log (diffidx < 0)
+* added two new solvers
+  * directly compute bounding boxes of the complaint sets 
+    but computing min/maxes should be much faster than simplex, though less accurate.  
+    Worth comparing
+  * above may be equivalent to the cplex solver
+  * Density based post-processing step
+    * assuming incomplete complaint set is a uniform sample of unknown percentage
+    * for each edge in the query bounding box, sample the density of tuples outside the edge
+    * if the density is high, then we should have a lot of examples, and less likely to expand in that direction
+    * if density is low, our sample may have missed tuples in that direction, and expanding may be a good idea
+    * there should be a ~closed form formulation to this problem
+* Talked about supporting multiple errors
+  * if we recieve multiple distinct complaint sets, they could be
+    * part of the same error
+    * or of a different error
+  * how to support disjunctions?
+    * for N complaint sets, and Q queries in the log, is it an Q^N problem?
+  * streaming version where complaint sets come in a streaming fashion
+
 # Meeting Sep 24
 
 1. #bad_complaints avg number of complaints over 100 runs
