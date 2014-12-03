@@ -1,3 +1,23 @@
+# Meeting Dec 3
+
+Summary
+
+* Last week, talked about order of complaints to use to resize bounding box based on distance to boundary
+* looked at approximation approach can't find approximation ratio (err possibly unbounded)
+
+Basic bounding box alg
+
+* for each complaint
+  * figure out solutions for each edge (predicate clause)
+* three scores to "prioritize" each complaint in the set
+  * distance from each edge.  Prioritize further ones.
+  * variance of distances of complaint from each edge (higher the better)
+  * density of complaints in the neighborhood.  The more neighbors the better.
+* maybe works for positive and negative complaints
+* asked to extend to false pos and negs
+* too many parameters for the scores
+  * ideally a simplier model that nicely captures them
+
 # Meeting Oct 15
 
 Agenda
