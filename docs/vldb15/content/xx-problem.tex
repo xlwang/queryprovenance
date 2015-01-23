@@ -1,0 +1,35 @@
+\section{Problem Statement}
+
+\paragraph{Definition 1 (Database, State, Query)}: Let $D$ be a database with a
+set of relational schemas named as $\{R1, ..., Rn\}$. A state of $D, D_i$,
+is an instance of $D$ consists of values of all the tuples in D. The
+initial state of $D$ is $D_0$. Let $Q_{seq}=\{Q1,..., Qm\}$ as a sequence of
+queries over $D$ such that the state of $D$ changes to $\{D1,..., Dm\}$.
+
+
+\paragraph{Definition 2 (Complaint, Complete Complaint Set, Incomplete
+Complaint Set)}:
+Given a database D, a complaint c={t, trevised}provides an incorrect
+record (tuple) tD on an instance of Di, and the correct value,
+trevised, of this record. Let C={c1,...,ck} as a set of complaints,
+we say Cis a complete complaint set if there exists a complaint
+cjC for every incorrect record in Di; otherwise, we say Cis a
+incomplete complaint set. A complaint set Cchanges the state of D
+from Di to Di*.
+
+\paragraph{Problem definition}: Given a database D, its initial
+state D0, a sequence of queries Qseq={Q1,..., Qm}and the corresponding
+states {D1,..., Dm}, a complete(incomplete) complaint set  Con Dm
+(that changes the state of D to Dm*), we want a transformation
+(delete/swapping/update), T, changes Qseqto Qseq* such that the
+final state of D change from Dmto Dm*. We say  Qseq*is optimal when
+diff( Qseq, Qseq*) is minimized.
+
+
+\subsection{Basic Formulation}
+
+\subsection{Incomplete Complaints}
+
+\subsection{Multi-query Resolution}
+
+

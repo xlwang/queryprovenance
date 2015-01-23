@@ -1,0 +1,49 @@
+%!TEX root=main.tex
+
+
+\input{content/01-introduction}
+\input{content/xx-problem}
+\input{content/xx-solutions}
+\input{content/xx-impl}
+\input{content/xx-experiments}
+\input{content/xx-discussion}
+\input{content/xx-related}
+\balance
+
+% Balancing columns in a ref list is a bit of a pain because you
+% either use a hack like flushend or balance, or manually insert
+% a column break.  http://www.tex.ac.uk/cgi-bin/texfaq2html?label=balance
+% multicols doesn't work because we're already in two-column mode,
+% and flushend isn't awesome, so I choose balance.  See this
+% for more info: http://cs.brown.edu/system/software/latex/doc/balance.pdf
+%
+% Note that in a perfect world balance wants to be in the first
+% column of the last page.
+%
+% If balance doesn't work for you, you can remove that and
+% hard-code a column break into the bbl file right before you
+% submit:
+%
+% http://stackoverflow.com/questions/2149854/how-to-manually-equalize-columns-
+% in-an-ieee-paper-if-using-bibtex
+%
+% Or, just remove \balance and give up on balancing the last page.
+%
+
+
+\newpage
+{
+% If you want to use smaller typesetting for the reference list,
+% uncomment the following line:
+% \small
+%\bibliographystyle{acm-sigchi}
+\bibliographystyle{abbrv}
+\bibliography{main}
+}
+
+\techreport{\input{content/appendix.tex}}
+
+
+
+
+
