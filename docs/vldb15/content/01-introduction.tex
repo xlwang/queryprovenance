@@ -6,15 +6,34 @@ While exploring data, its natural to come across surprising or unexpected data.
 For example, visual data analysis explores the current state of the database and users may be surprised by outliers in a visualization.
 Similarly, enterprise customers (e.g., billing) may find outliers in their monthly bills and be surprised by the amount they are asked to pay.
 
-A recent wave of research has been focused on deriving explanations that describe influential factors of outliers of aggregaito queries.
-However, this line of work is focused on the {\it current state} of the database, and does not resolve {\it how} the anomalous data came to be.
+When presented with these surprises, users want to better understand the reasons behind the anomalies.
+A recent wave of research focuses on deriving predicate-based explanations for outliers for statistical aggregation queries.
+For example, if the user wants to understand why the total sales in the past few months have gone up, these systems can general explanations such as ``most related to customers in California between the ages of 12 to 18.''
+However, these approaches simply generate predicates that describe {\it current state} of the database, and do not resolve {\it how} the anomalous data came to be.
 
+Specifically, the user may also be interested to understand what past database modification was specifically responsible for these explanations.
+Describe why this makes sense to want.  In this form of the problem, we are interested in historical database queries whose modifications, when propogated to the current database state, 
 
-A paragraph about possible alternative .pproaches to explaining and dealing with outliers.
 
 In this paper, we approach anomaly explanation from the persepctive of the query log and seek to
 both {\it identify}  historical database modification queries that most likely caused user complaints 
 in the current state of the database, and suggest replacement queries that will resolve these complaints.
+
+Given a database query log and a set of {\it complaints} (e.g., tuple 1's attribute B should be 20\% lower) about records in the current state of the database,
+we seek to identify the subset of queries in the log that, by modifying their parameters and propogating the new effects of the queries, 
+will best resolve the complaints.  
+
+One way to solve this problem is to try modifying the most recent query until it fixes the complaints.  If not, then try the second most recent query.  The problem with this approach is the number of possible modifications is unbounded.
+
+Our contributions include
+
+\begin{enumerate}
+\item Developing and formalizing the problem of Query-oriented explanation in contrast to data-oriented explanation
+\item Prove that the general problem is impossible.
+\item Designing alogirthems to solve the problem for complete complaint sets
+\item Extending the algorithms to support incomplete complaint sets
+\item Extending to support multiple queries
+\end{enumerate}
 
 
 
