@@ -1,17 +1,65 @@
 \section{Basic Solution}
 
-\subsection{Approaches}
+In this section we will introduce a simple approach to solve Prob-Complete.
 
-\subsubsection{Constraint-solver (CPLEX)}
-\subsubsection{Bounding Box}
-\subsubsection{Decision Tree}
+
+Given $D^'_n = C(D_n)$, able to roll back to fixed intermediate state $D^'_i$.
+
+
+\subsection{Single-Query Case}
+
+In this section, we walk through the core techniques in the case of a query sequence containing a single query.
+\xxx{Walk through solution for each error type for each query type.}
+
+Inserts and deletes are straight forward, however modifying WHERE clause is harder because
+\xxx{why?}.  To deal with this challenge, we tried three algorithmic approaches.
+
+\stitle{Constraint-solver (CPLEX)}
+Describe how to encode problem as CPLEX
+
+\stitle{Bounding Box}
+
+
+\stitle{Decision Tree}
+Describe how to encode as decision tree, what algorithm, and how to interpret learned tree.
+
+Also, how to encode constraint that structure needs to be the same.
+
+\subsubsection{Comparing these approaches}
+
+To understand the tradeoffs between these approachse, we ran a simple experiment for a single query.
+
+Here are the results.
+
+
+CPLEX takes the longest, however produces exact results.  However, it fails to produce any results if there are conflicting complaints.
+Decision tree is fastest, however the quality of the results are poor.
+Bounding box is similar to CPLEX in quality, however it generates results even if there are conflicting complaints.
+
+
+\section{Prob-Complete}
+
+Given the above, the algorithm for solving the complete complaint set problem is straightforward (Algorithm~\ref{alg:basic}).
+We can simply try each query and return the one for which the best solution is found.
 
 \section{Incomplete Complaints}
 
+Incomplete complaints are a challenge because the exesting algorithms fail.  We ran a simple experiment
+where the complaint set contains only M\% of the true complaint set, and has N randomly generated erroneous complaints.
+Figure~\ref{} shows that none of the algorithms work.
+
+Describe assumptions for why a cleaning-based approach makes sense.
+
+We use a cleaning-based method to deal with false positives, and some magic to deal with false negatives.
+
 \subsection{False Positives}
+
+Describe density, bi-partite graph, consistency, tuples affected scores.  Which ones work well, which ones don't.
 
 \subsection{False Negatives}
 
+
+
 \section{Multi-query Resolution}
 
-
+We use a dynamic programming-based algorithm to support multiple queries.

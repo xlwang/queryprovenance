@@ -21,12 +21,15 @@ Describe why this makes sense to want.  In this form of the problem, we are inte
 In this paper, we approach anomaly explanation from the persepctive of the query log and seek to
 both {\it identify}  historical database modification queries that most likely caused user complaints 
 in the current state of the database, and suggest replacement queries that will resolve these complaints.
+We call this problem the {\it Query-based Complaint-Satisfaction Problem}.
 
 Given a database query log and a set of {\it complaints} (e.g., tuple 1's attribute B should be 20\% lower) about records in the current state of the database,
 we seek to identify the subset of queries in the log that, by modifying their parameters and propogating the new effects of the queries, 
 will best resolve the complaints.  
 
-One way to solve this problem is to try modifying the most recent query until it fixes the complaints.  If not, then try the second most recent query.  The problem with this approach is the number of possible modifications is unbounded.
+One way to solve this problem is to try modifying the most recent query until it fixes the complaints.  
+If not, then try the second most recent query.  
+The problem with this approach is the number of possible modifications is unbounded.
 
 Our contributions include
 

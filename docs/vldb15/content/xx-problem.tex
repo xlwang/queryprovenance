@@ -1,4 +1,4 @@
-\section{Problem Statement}
+\section{Problem Description}
 
 First, some notation used in the rest of the paper.
 
@@ -24,14 +24,22 @@ In addition, for ease of exposition, we assume that the database contains a sing
 ($T^*$ in the true database) containing $m$ numerical attributes $a_1,\ldots,a_m$, 
 where the primary key is $a_1$.  
 In Section~\ref{blah}, we will describe how our techniques extend to multi-table databases.
+\xxx{Define the scope of queries supported}
 
 
 
 \stitle{Def 2 (Complaints and Complaint Sets)}:
 The tuple-wise difference between two databases $D_1$ and $D_2$ can be viewed as a patch
 $P_{D_1, D_2}$ that contains {\it difference pairs} $(t_i \in T, t^*_i \in T^*)$.
-The non-null entries represent tuple modifications, whereas a null entry for $t_i$ ($t'_i$) represent a tuple addition (deletion) to $D_n$.
 Similar to source code patches, patches can be applied to a database $P(D_n) = D^*_n$.
+Each pair in a patch describes one of three error types that can be present in $D_n$:
+
+\begin{itemize}
+\item {\it ADD}: $t^*_i$ should be added to the database $(\textrm{null}, t^*_i)$
+\item {\it DELETE}: $t_i$ should be removed from the database $(t_i, \textrm{null})$
+\item {\it WRONG}: $t_i$ should be modified into $t^*_i$
+\end{itemize}
+
 
 The user provides a {\it complaint set} $C$ that specify the perceived incorrect tuples in $D_n$.
 $C$ is simply a patch.
@@ -40,6 +48,7 @@ In contrast, an {\it incomplete complaint set}  may contain complaints that are 
 false positives (deletions that are not present), and errors (proposed value of a $t'$ is incorrect).
 
 The accuracy of an incomplete complaint set can be measured by the ratio $acc_C = \frac{|C \cap \Delta|}{|\Delta|}$.
+
 
 
 \begin{figure}[h]
@@ -51,7 +60,9 @@ The accuracy of an incomplete complaint set can be measured by the ratio $acc_C 
 
 
 
-\stitle{Problem Statement}: The most general version of the problem
+\subsection{Naive Formulation}
+
+The most general version of the problem
 (depicted in Figure~\ref{f:probtransform}) is to find a sequence of
 transformations $T$ that insert, delete, and/or modify queries in $Q_{seq}$ 
 such that the resulting sequence, $Q^'_{seq} = T(Q_{seq})$, resolves the user's complaint set. 
@@ -61,13 +72,29 @@ can resolve the user's complaint set.  A naive solution is to append to the quer
 that deletes all the records in the database, followed by a query that insert all of the correct records.
 Unfortunately this naive solution does not help explain the complaints in any way!
 
-For this reason, we constrain the set of possible transformations $\mathcal{T}$,
-and define a metric evaluate the quality of a transformation.
+\subsection{Constraints}
+
+For this reason, we constrain the set of possible transformations $\mathcal{T}$ to the following:
+
+\begin{itemize}
+\item delete query
+\item modify insert statement constants
+\item modify constants in WHERE clause
+\end{itemize}
+
+Our transformations don't include adding new queries, synthesizing arbitrary queries, or modifying the
+number of clauses in a WHERE condition.  We apply these restrictions because we believe it is more likely
+for the user to mis-type a constant value as opposed to having an error in the query structure.
+
+Futhermore we define a distance metric between two query logs in order to evaluate
+the qulatiy of a transformation.
 \xxx{define $\mathcal{T}$ here.}
 
-%\xxx{understand how different than materialized view/query synthesis}.
 
-In this paper, we describe solutions to three versions of this problem.
+
+\subsection{Problem Statements}
+
+In this paper, we present three variants of this problem.
 
 \begin{problem}[Prob-Complete]\label{prob:complete}
 Given $C = P_{D_n, D^*_n}$, $Q_{seq}$, and the sequence of database states $D_0,\ldots,D_n$, 
@@ -105,25 +132,8 @@ identify a sequence of transformations $T$ such that:
 
 
 
- Given a database D, its initial
-state D0, a sequence of queries Qseq={Q1,..., Qm}and the corresponding
-states {D1,..., Dm}, a complete(incomplete) complaint set  Con Dm
-(that changes the state of D to Dm*), we want a transformation
-(delete/swapping/update), T, changes Qseqto Qseq* such that the
-final state of D change from Dmto Dm*. We say  Qseq*is optimal when
-diff( Qseq, Qseq*) is minimized.
 
+\subsection{A Naive Approach}
 
-\subsection{Basic Formulation}
-
-
-\subsubsection{A Naive Approach}
-
-
-\subsection{Extensions}
-
-\subsubsection{Incomplete Complaints}
-
-\subsubsection{Multi-query Resolution}
-
+\xxx{describe naive approach and why it fails}
 
