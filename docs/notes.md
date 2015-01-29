@@ -1,3 +1,43 @@
+# Timeline
+
+Jan 28
+
+* have experimental setup down
+  * dataset
+    * confer didn't keep logs :(
+    * anonymized grading system?
+  * how to run complaint generation and noise
+* SQL-based bipartite
+* Wu pass at paper
+
+Feb 1st
+
+* Start paper.  draft by Feb 15
+
+Feb 4
+
+* Experiments designed
+
+Feb 11
+
+* Draft of paper without experiments
+* Running experiments
+
+
+TODOs
+
+* better complaints gen
+* experiments
+* ask anant for query logs
+* multi-query case
+* why do we do well for false negatives?
+  * when would it fail?
+  * assume complaints are uniformly sampled
+    * suggests pushing verizon use case example
+  * if not, then no guarantees?
+* argument for cleaning FP instead of embedding in algorithm?
+* Which complaints are most important?
+
 # Meeting Dec 3
 
 Summary
