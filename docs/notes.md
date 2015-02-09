@@ -16,6 +16,8 @@ Feb 1st
 
 Feb 4
 
+* done:
+  * theorem for max-density-finding algorithm
 * Experiments designed
 
 Feb 11
@@ -37,6 +39,24 @@ TODOs
   * if not, then no guarantees?
 * argument for cleaning FP instead of embedding in algorithm?
 * Which complaints are most important?
+
+# Meeting Feb 4
+
+TODOs
+
+* Xiaolan
+  * region algorithm
+  * intermediate state
+* Eugene
+  * talk to conquer
+  * make up experimental section
+
+
+# Meeting Jan 29
+
+* false positives density-based algorithm
+  * O(# complaints) algorithm for computing best density subgraph in bipartite tuple-complaint graph
+* write the experimental section with fake graphs
 
 # Meeting Dec 3
 

@@ -135,5 +135,14 @@ identify a sequence of transformations $T$ such that:
 
 \subsection{A Naive Approach}
 
-\xxx{describe naive approach and why it fails}
+\begin{itemize}
+\item roll back complaints to penultimate state using algebraic expressions 
+\item perturb each expression in query until the query result matches correct state
+\item if an expression cannot be found, iterate
+\end{itemize}
+
+
+Not clear how to roll back complaints
+
+Ways to perturb query expressions is unbounded
 

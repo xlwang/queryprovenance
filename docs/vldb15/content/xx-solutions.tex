@@ -6,6 +6,15 @@ In this section we will introduce a simple approach to solve Prob-Complete.
 Given $D^'_n = C(D_n)$, able to roll back to fixed intermediate state $D^'_i$.
 
 
+\subsection{Metrics}
+
+Metrics we use to measure how good a fix is.
+
+Used in the optimization problem.
+
+
+
+
 \subsection{Single-Query Case}
 
 In this section, we walk through the core techniques in the case of a query sequence containing a single query.
@@ -23,7 +32,8 @@ Describe how to encode problem as CPLEX
 \stitle{Decision Tree}
 Describe how to encode as decision tree, what algorithm, and how to interpret learned tree.
 
-Also, how to encode constraint that structure needs to be the same.
+Also, how to encode constraint that structure needs to be the same, by simply limiting the possible attribute
+choices at each step in the learning algorithm.
 
 \subsubsection{Comparing these approaches}
 
@@ -37,12 +47,28 @@ Decision tree is fastest, however the quality of the results are poor.
 Bounding box is similar to CPLEX in quality, however it generates results even if there are conflicting complaints.
 
 
+
+
+
+
+
+
 \section{Prob-Complete}
 
 Given the above, the algorithm for solving the complete complaint set problem is straightforward (Algorithm~\ref{alg:basic}).
 We can simply try each query and return the one for which the best solution is found.
 
+\subsection{Provenance-based Log Filtering}
+
+Use provenance information (tuple-level or query level) to filter out queries that do not 
+affect the complaint tuples at all.
+
+
+
+
+
 \section{Incomplete Complaints}
+\label{s:incomplete-algs}
 
 Incomplete complaints are a challenge because the exesting algorithms fail.  We ran a simple experiment
 where the complaint set contains only M\% of the true complaint set, and has N randomly generated erroneous complaints.
@@ -56,6 +82,9 @@ We use a cleaning-based method to deal with false positives, and some magic to d
 
 Describe density, bi-partite graph, consistency, tuples affected scores.  Which ones work well, which ones don't.
 
+NP-completeness of density-based approach.
+
+
 \subsection{False Negatives}
 
 
@@ -63,3 +92,5 @@ Describe density, bi-partite graph, consistency, tuples affected scores.  Which 
 \section{Multi-query Resolution}
 
 We use a dynamic programming-based algorithm to support multiple queries.
+
+
