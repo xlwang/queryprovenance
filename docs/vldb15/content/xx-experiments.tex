@@ -60,9 +60,10 @@ using incomplete complaint sets with varying percentages of false positive and n
 
 \subsubsection{Complete Complaints}
 
-Vary DBSize
+{\it Vary DBSize
 
 Vary NClauses, corrupt 1 and 2 clauses
+}
 
 We found that CPLEX and BBOX identify the correct fix, however their
 running times are significantly higher than DTree.  This is because
@@ -72,11 +73,13 @@ splitting decisions can adversely affect the final tree structure.
 \subsubsection{Incomplete Complaints}
 
 
+{\it 
 Vary DBSize
 
 Vary NClauses, corrupt 1 and 2 clauses
 
-Each line varies perc FP
+Each line is plots has different perc FP
+}
 
 We first increased the number of false positives in the complaint set (no false negatives).
 Figure~\ref{f:single_incomplete_fp} shows how the fix quality and running time vary as the
@@ -101,11 +104,14 @@ in Section~\ref{s:incomplete-algs}.  We then evaluate the efficacy
 of of provenance-based query log filtering, which reduces the running
 time without affecting the result quality.
 
-To generate the false-positive data
+To generate the false-positives, we randomly sample without replacement
+from the tuples in the database that are not in the true complaint
+set.
 
 \subsection{False Positive}
 
 Vary false positives (1 graph)
+
 
 \subsection{False Negative}
 
