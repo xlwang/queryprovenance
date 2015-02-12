@@ -40,6 +40,15 @@ TODOs
 * argument for cleaning FP instead of embedding in algorithm?
 * Which complaints are most important?
 
+# Meeting Feb 11
+
+TODOS
+
+* Xiaolan
+  * make rollback work for constrained types of errors SET, WHERE 
+* Wu add more fluff to paper
+  * jot down density and optimization ideas
+
 # Meeting Feb 4
 
 TODOs
