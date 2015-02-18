@@ -40,6 +40,24 @@ TODOs
 * argument for cleaning FP instead of embedding in algorithm?
 * Which complaints are most important?
 
+
+# Meeting Feb 18
+
+Eugene:
+
+* get data from anant
+* design synthetic experiments
+
+Xiaolan
+
+* write up density
+* implement constraint-based rollback
+  * exhaustive and greedy
+
+Meliou
+
+* write
+
 # Meeting Feb 11
 
 TODOS
