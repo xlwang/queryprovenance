@@ -46,6 +46,12 @@ TODOs
 Eugene:
 
 * get data from anant
+
+         ssh ubuntu@confer.csail.mit.edu
+         psql -U postgres -W -h localhost -d confer
+         password is postgres
+         > select * from likes;
+
 * design synthetic experiments
 
 Xiaolan
