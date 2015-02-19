@@ -42,6 +42,63 @@ Our contributions include
 \item Extending to support multiple queries
 \end{enumerate}
 
+%%%%%%%%%%%%%%% Clean up.... %%%%%%%%%%%%%%
+
+Sometimes, data starts clean but gets tainted due to erroneous
+updates. Errors in queries need to be handled differently than errors
+in data, since they pose their own unique challenges:
+
+\begin{description}[leftmargin=5mm, topsep=0mm, itemsep=0mm]
+    \item[Systemic errors.] The errors created by bad queries are
+    systemic. The link between the resulting errors is the query
+    that created them; cleaning techniques should leverage this
+    connection to diagnose and fix the problem.
+    
+    \item[Large impact.] Erroneous queries cause errors in a large
+    scale. This means that the potential impact of the error is high,
+    which has been manifested in several real-world
+    cases.%~\cite{Yates10, Grady13, sakalerrors}
+    
+    \item[Obscurity.] Detection of the resulting errors often leads to
+    partial fixes that further complicate the eventual diagnosis and
+    resolution of the problem. For example, a transaction implementing
+    a change in the state tax law updated tax rates using the wrong
+    rate, affecting a large number of consumers. This causes a large
+    number of complaints to a call center, but each customer agent
+    usually fixes each problem individually, which ends up obscuring
+    the source of the problem.
+    
+    \item[Feasibility.] Query errors can easily remain undetected
+    for a significant amount of time, which, in turn, makes correcting
+    the mistake a huge undertaking. Essentially, a very old
+    transaction would need to be rolled back, which poses obvious
+    hurdles.
+\end{description}
+
+The goal of this paper is to design effective query
+diagnosis techniques and identify possible fixes for query errors. We
+model the problem assuming a log of update workloads over a database,
+and a set of complaints that identify errors in the final database
+state. We organize our contributions as follows:
+
+\begin{description}[leftmargin=5mm, topsep=0mm, itemsep=0mm]        
+    \item[Diagnosis with complete information:] We will first tackle the
+    problem assuming that the complaint set is complete, i.e., all errors in
+    the final data instance have been labeled. In Section~\ref{??}, we will
+    present algorithms that identify the query responsible for all errors in
+    the complaint set.
+    
+    \item[Diagnosis with incomplete information:] We will extend our
+    algorithms to account for incomplete information, which is a more
+    realistic scenario: some complaints have identified errors in the
+    final data instance, but the set is not complete (Section~\ref{??}).
+    
+    \item[Deriving fixes:] We will derive potential fixes to correct
+    the errors.
+    
+    \item[Evaluation:]...
+\end{description}
+
 
 
 \section{Use Case}
