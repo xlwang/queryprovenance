@@ -1,9 +1,6 @@
 \include{header}
 
 
-
-
-
 \definecolor{light-gray}{gray}{0.95}
 \definecolor{darkred}{rgb}{0.7,0.25,0.25}
 \definecolor{darkgreen}{rgb}{0.15,0.55,0.15}
@@ -27,13 +24,8 @@
 \newcommand{\codesize}{\fontsize{7}{8}}
 \newcommand{\xxx}[1]{{\fontsize{13pt}{13pt}\selectfont\textcolor{red}{#1}}}
 \newcommand{\ind}{\hspace{\algorithmicindent}}
-\newcommand{\sys}{{\sc THESYSTEM}\xspace}
+\newcommand{\sys}{{\sc QueryFix}\xspace}
 \newcommand{\gcost}{{\sc Greedy-Cost}\xspace}
-
-
-
-
-
 
 
 
@@ -50,20 +42,22 @@
 %% Debugging query histories through data anomalies
 %% Altering query histories to fix database anomalies
 %% Query history manipulation: Indentifying query errors through data anomalies
+%% Query-driven explanations to database anomalies
 
 \numberofauthors{3}
 \author{
   \alignauthor Xiaolan Wang\\
+    \affaddr{School of Computer Science}\\
     \affaddr{University of Massachusetts}\\
     \email{xlwang@cs.umass.edu}\\
   \alignauthor Alexandra Meliou\\
+  \affaddr{School of Computer Science}\\
     \affaddr{University of Massachusetts}\\
     \email{ameli@cs.umass.edu}\\
-  %  \email{e-mail address}
   \alignauthor Eugene Wu\\
+    \affaddr{Computer Science}\\
     \affaddr{Columbia University}\\
-    \email{Address}\\
-  %  \email{e-mail address}
+    \email{eugenewu@mit.edu}\\
 }
 
 
@@ -77,10 +71,26 @@
 %}
 
 \maketitle
-\vspace{-5in}
 
-\begin{abstract} 
-Abstract
+\begin{abstract}
+Data-driven applications rely on the correctness of their data to function
+properly and effectively. Errors in data can be incredibly costly and
+disruptive, leading to loss of revenue, incorrect conclusions, and
+misguided policy decisions. While data cleaning tools can purge datasets
+of many errors before the data is used, applications and users interacting
+with the data can introduce new errors. Subsequent valid updates can
+obscure these errors and propagate them to the dataset causing more
+discrepancies. Even when some of these discrepancies are discovered, they
+are often corrected superficially, further obscuring the true underlying
+cause, and making detection of the remaining errors harder.
+
+In this paper, we propose \sys, a framework that derives explanations for
+discrepancies in datasets, by analyzing the effect of queries that
+operated on the data and identifying potential mistakes in those queries.
+\sys is flexible, handling scenarios where only a subset of the true
+discrepancies is known, and robust, tolerating incorrectly identified
+discrepancies gracefully. We demonstrate the effectiveness of \sys through
+extensive evaluation over real-world and synthetic data.
 
 \end{abstract}
 

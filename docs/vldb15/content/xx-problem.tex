@@ -99,11 +99,11 @@ In this paper, we present three variants of this problem.
 \begin{problem}[Prob-Complete]\label{prob:complete}
 Given $C = P_{D_n, D^*_n}$, $Q_{seq}$, and the sequence of database states $D_0,\ldots,D_n$, 
 identify a sequence of transformations $T$ such that:
-\begin{CompactItemize}
+\begin{itemize}
 \item $T(Q_{seq})(D_0) = C(D_n)$
 \item $|T| = 1$
 \item $T$ metric is minimized
-\end{CompactItemize}
+\end{itemize}
 \end{problem}
 
 This variation of the problme relaxes the constraint that the complaint set must be complete, and allows
@@ -112,11 +112,11 @@ for both false positives as well as false negatives.  The goal is the same, howe
 \begin{problem}[Prob-Incomplete]\label{prob:incomplete}
 Given $C$ where $acc_C < 1$, $Q_{seq}$, and the sequence of database states $D_0,\ldots,D_n$, 
 identify a sequence of transformations $T$ such that:
-\begin{CompactItemize}
+\begin{itemize}
 \item $T(Q_{seq})(D_0) = D^*_n$
 \item $T$ metric is minimized.
 \item $|T| = 1$
-\end{CompactItemize}
+\end{itemize}
 \end{problem}
 
 Finally, we extend the problem to allow transformations with one or more operations.
@@ -124,10 +124,10 @@ Finally, we extend the problem to allow transformations with one or more operati
 \begin{problem}[Prob-MultiQ]\label{prob:multi}
 Given $C$ where $acc_C < 1$, $Q_{seq}$, and the sequence of database states $D_0,\ldots,D_n$, 
 identify a sequence of transformations $T$ such that:
-\begin{CompactItemize}
+\begin{itemize}
 \item $T(Q_{seq})(D_0) = D^*_n$
 \item $T$ metric is minimized.
-\end{CompactItemize}
+\end{itemize}
 \end{problem}
 
 
