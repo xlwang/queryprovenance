@@ -3,7 +3,23 @@
 \section{Introduction}
 \label{s:intro}
 
-\xxx{Sketch of arguments}
+Poor data quality is estimated to cost the US economy more than \$600 billion
+per year~\cite{eckerson2002} and erroneous price data in retail databases
+alone cost the US consumers \$2.5 billion each year~\cite{Fan2008}. While data
+cleaning tools can purge datasets of many errors before the data is used,
+applications and users interacting with the data can introduce new errors.
+Mistakes in data entry and erroneous updates often affect datasets in complex
+ways and result in data errors that are obscure and hard to trace and correct.
+
+Existing data cleaning techniques use general-purpose tools, such as
+statistics, rules, and constraints, to identify anomalies in the data, but
+they are not explicitly designed to handle the errors introduced through entry
+and updates to an otherwise clean dataset. \alex{Mention integrity constraints
+and update certificates here.} In this paper, we present a specialized data
+cleaning framework that specifically targets data errors caused by mistakes in
+update workloads.
+
+\xxx{====}
 
 While exploring data, its natural to come across surprising or unexpected data.
 For example, visual data analysis explores the current state of the database and users may be surprised by outliers in a visualization.
