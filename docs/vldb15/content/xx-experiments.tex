@@ -39,10 +39,15 @@ final database states to measure perforance and accuracy metrics.
 
 \subsubsection{Algorithms}
 
+\sys fixes query logs in two distinct steps: first, we filter the query log using 
+provenance information and roll back the queries to compute the $ideal$ states of the database.
+Second, we apply the solver algorithms (Section~\ref{}) to speculatively fix the query.
+
+We consider the roll-back algorithm in batches of $n_{rollback}$.
+
 \begin{itemize}
-\item Naive
-\item Box
-\item CPLEX
+\item Combined:  combine rollback and query fixing in a single CPLEX problem
+\item $R_n-CPLEX$: 
 \item DT
 \item Box,Density
 \end{itemize}
