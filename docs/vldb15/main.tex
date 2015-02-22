@@ -77,22 +77,29 @@
 \begin{abstract}
 Data-driven applications rely on the correctness of their data to function
 properly and effectively. Errors in data can be incredibly costly and
-disruptive, leading to loss of revenue, incorrect conclusions, and
-misguided policy decisions. While data cleaning tools can purge datasets
-of many errors before the data is used, applications and users interacting
-with the data can introduce new errors. Subsequent valid updates can
-obscure these errors and propagate them to the dataset causing more
-discrepancies. Even when some of these discrepancies are discovered, they
-are often corrected superficially, further obscuring the true underlying
-cause, and making detection of the remaining errors harder.
+disruptive, leading to loss of revenue, incorrect conclusions, and misguided
+policy decisions. While data cleaning tools can purge datasets of many errors
+before the data is used, applications and users interacting with the data can
+introduce new errors. Subsequent valid updates can obscure these errors and
+propagate them through the dataset causing more discrepancies. Even when some
+of these discrepancies are discovered, they are often corrected superficially,
+on a case-by-case basis, further obscuring the true underlying cause, and
+making detection of the remaining errors harder.
 
 In this paper, we propose \sys, a framework that derives explanations for
-discrepancies in datasets, by analyzing the effect of queries that
-operated on the data and identifying potential mistakes in those queries.
-\sys is flexible, handling scenarios where only a subset of the true
-discrepancies is known, and robust, tolerating incorrectly identified
-discrepancies gracefully. We demonstrate the effectiveness of \sys through
-extensive evaluation over real-world and synthetic data.
+discrepancies in datasets, by analyzing the effect of queries that operated on
+the data and identifying potential mistakes in those queries. \sys is
+flexible, handling scenarios where only a subset of the true discrepancies is
+known, and robust, tolerating incorrectly identified discrepancies gracefully.
+We make four important contributions: (a) we formalize the problem of
+diagnosing the causes of data errors based on the queries that operated on the
+dataset; (b) we develop exact methods for deriving diagnoses and fixes for
+identified errors using state-of-the-art tools; (c) we present several
+performance optimizations that scale diagnosis to large datasets and query
+logs, while achieving near-optimal results; (d) we develop efficient
+heuristics to gracefully handle mis-identified errors. We demonstrate the
+effectiveness of \sys through extensive evaluation over real-world and
+synthetic data.
 
 \end{abstract}
 
