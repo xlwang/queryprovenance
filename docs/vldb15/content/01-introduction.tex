@@ -10,17 +10,130 @@ cleaning tools can purge datasets of many errors before the data is used,
 applications and users interacting with the data can introduce new errors.
 Mistakes in data entry and erroneous updates often affect datasets in complex
 ways and result in data errors that are obscure and hard to trace and correct.
+Traditional data cleaning approaches are not well-suited for this purpose:
+While they provide general-purpose tools to identify anomalies in the data,
+they are not designed to diagnose the causes of these errors, which are rooted
+in erroneous updates.
 
-Existing data cleaning techniques use general-purpose tools, such as
-statistics, rules, and constraints, to identify anomalies in the data, but
-they are not explicitly designed to handle the errors introduced through entry
-and updates to an otherwise clean dataset. \alex{Mention integrity constraints
-and update certificates here.} In this paper, we present a specialized data
-cleaning framework that specifically targets data errors caused by mistakes in
-update workloads.
+Improving data quality and correcting data errors has been an important focus
+for data management research. Yet, handling new errors, introduced during
+regular database interactions, has received little attention. Integrity
+constraints~\cite{Khoussainova2006} can guard against some improper updates,
+but only if the data falls outside rigid, predefined ranges. Certificate-based
+verification~\cite{Chen2011} is impractical as it requires users to answer
+challenge questions before allowing the updates, and it is not applicable to
+updates initiated by applications.
 
-\xxx{====}
+In this paper, we present a specialized data cleaning framework, \sys, that
+specifically targets errors in update workloads. In contrast to traditional
+data cleaning techniques that aim to identify errors in the data directly, the
+goal of \sys is to \emph{explain} how the errors occurred. Our goal is not
+simply to provide explanations; identifying how an error was introduced to a
+dataset, can lead to the identification of additional discrepancies that would
+have otherwise remained undetected.
 
+\begin{example}[Incorrect insurance premiums]
+    After negotiations with health insurance companies, an employer achieved
+    reductions in the premium rates for the upcoming year, for employees at
+    levels 1-4. The administrator who updated the employee database mistakenly
+    implemented the new policy for employees at levels 1-3, due to the
+    incorrect predicate \texttt{level < 4}.
+    
+    In subsequent months, level 4 employees who noticed that their premiums
+    had not been reduced as expected, notified HR of the error. HR corrected
+    employees' records on a case-by-case basis, obscuring the real cause of
+    the problem, and making it harder to identify and correct the error for
+    other employees.
+    
+    To make matters worse, subsequent queries that calculated employee
+    withholdings, resulted in misestimation of the company's revenue and
+    incorrect allocation of bonuses. Correcting errors in the employee
+    premiums is no longer sufficient, as these errors have already had a
+    larger effect on the data.
+    
+        \alex{Needs to be more realistic and convincing.  Ideally grounded on a real scenario.  Do we have more specific info for the use-cases?}
+\end{example}
+
+
+Diagnosing data errors stemming from incorrect updates raises three major
+challenges that make existing data cleaning techniques not applicable.
+
+
+\begin{description}[leftmargin=*, topsep=0mm, itemsep=0mm]
+    
+    \item[Obscurity.] Detection of the resulting errors in the data often
+    leads to partial fixes that further complicate the eventual diagnosis and
+    resolution of the problem. For example, a transaction implementing a
+    change in the state tax law updated tax rates using the wrong rate,
+    affecting a large number of consumers. This causes a large number of
+    complaints to a call center, but each customer agent usually fixes each
+    problem individually, which ends up obscuring the source of the problem.
+    
+    \item[Large impact.] Erroneous queries cause errors in a large scale. The
+    potential impact of the errors is high, as manifested in several
+    real-world cases~\cite{Yates10, Grady13, sakalerrors}. Further, errors
+    that remain undetected for a significant amount of time can instigate
+    additional errors, even through valid updates. This increases both their
+    impact, and their obscurity.
+    
+    \item[Systemic errors.] The errors created by bad queries are
+    \emph{systemic}: they have common characteristics, as they share the same
+    cause. The link between the resulting data errors is the query that
+    created them; cleaning techniques should leverage this connection to
+    diagnose and fix the problem. Diagnosing the cause of the errors, will
+    achieve systematic fixes that will correct all relevant errors, even if
+    they have not been explicitly identified.
+    
+\end{description}
+% 
+\sys addresses these challenges by analyzing the queries that operated on a
+dataset in an efficient and scalable manner. More concretely, we make the
+following contributions:
+
+
+% The goal of this paper is to design effective query
+% diagnosis techniques and identify possible fixes for query errors. We
+% model the problem assuming a log of update workloads over a database,
+% and a set of complaints that identify errors in the final database
+% state. We organize our contributions as follows:
+
+\begin{itemize}[leftmargin=*, topsep=0mm, itemsep=0mm]      
+    \item We formalize the problem of diagnosing a set of errors using log
+    histories of updates that operated on the data. We define
+    \emph{complaints} as representations of data discrepancies in the current
+    state of a dataset. We then transform the problem of diagnosing errors in
+    the data to the problem of identifying minimal changes to queries in the
+    log that would resolve all of the complaints (Section~\ref{???}).
+      
+    \item We provide an exact error-diagnosis solution through a non-trivial
+    transformation of the problem to a mixed integer program (MIP) that
+    analyzes the data provenance of the erroneous tuples at the attribute
+    level. Our approach employs state-of-the-art MIP solvers to identify
+    optimal diagnoses that are guaranteed to resolve all complaints, and is
+    tolerant to incomplete information (missing complaints)
+    (Section~\ref{???}).
+    
+    \item While modern solvers can handle large numbers of variables and
+    constraints, eventually, they fail to scale to very large datasets and
+    large query logs. We present several performance optimizations that allow
+    our diagnostic methods to scale, in many cases without affecting the
+    quality of the produced solutions (Section~\ref{???}).
+    
+    \item We extend our framework to also handle false positives: complaints
+    that mistakenly identify data as erroneous. We define the notion of
+    complaint \emph{density}, which is a query-driven measure of closeness of
+    a complaint to other complaints. The main intuition of our approach is
+    that complaints of low density are likely false positives and thus can be
+    safely ignored (Section~\ref{???}).
+    
+    \item We experimentally evaluate the effectiveness and efficiency of our
+    methods against real-world and synthetic datasets and query logs. We
+    demonstrate that \xxx{... to be completed when we know what we have}
+    (Section~\ref{???}).
+\end{itemize}
+
+
+\deprecate{
 While exploring data, its natural to come across surprising or unexpected data.
 For example, visual data analysis explores the current state of the database and users may be surprised by outliers in a visualization.
 Similarly, enterprise customers (e.g., billing) may find outliers in their monthly bills and be surprised by the amount they are asked to pay.
@@ -60,62 +173,7 @@ Our contributions include
 
 %%%%%%%%%%%%%%% Clean up.... %%%%%%%%%%%%%%
 
-Sometimes, data starts clean but gets tainted due to erroneous
-updates. Errors in queries need to be handled differently than errors
-in data, since they pose their own unique challenges:
-
-\begin{description}[leftmargin=5mm, topsep=0mm, itemsep=0mm]
-    \item[Systemic errors.] The errors created by bad queries are
-    systemic. The link between the resulting errors is the query
-    that created them; cleaning techniques should leverage this
-    connection to diagnose and fix the problem.
-    
-    \item[Large impact.] Erroneous queries cause errors in a large
-    scale. This means that the potential impact of the error is high,
-    which has been manifested in several real-world
-    cases.%~\cite{Yates10, Grady13, sakalerrors}
-    
-    \item[Obscurity.] Detection of the resulting errors often leads to
-    partial fixes that further complicate the eventual diagnosis and
-    resolution of the problem. For example, a transaction implementing
-    a change in the state tax law updated tax rates using the wrong
-    rate, affecting a large number of consumers. This causes a large
-    number of complaints to a call center, but each customer agent
-    usually fixes each problem individually, which ends up obscuring
-    the source of the problem.
-    
-    \item[Feasibility.] Query errors can easily remain undetected
-    for a significant amount of time, which, in turn, makes correcting
-    the mistake a huge undertaking. Essentially, a very old
-    transaction would need to be rolled back, which poses obvious
-    hurdles.
-\end{description}
-
-The goal of this paper is to design effective query
-diagnosis techniques and identify possible fixes for query errors. We
-model the problem assuming a log of update workloads over a database,
-and a set of complaints that identify errors in the final database
-state. We organize our contributions as follows:
-
-\begin{description}[leftmargin=5mm, topsep=0mm, itemsep=0mm]        
-    \item[Diagnosis with complete information:] We will first tackle the
-    problem assuming that the complaint set is complete, i.e., all errors in
-    the final data instance have been labeled. In Section~\ref{??}, we will
-    present algorithms that identify the query responsible for all errors in
-    the complaint set.
-    
-    \item[Diagnosis with incomplete information:] We will extend our
-    algorithms to account for incomplete information, which is a more
-    realistic scenario: some complaints have identified errors in the
-    final data instance, but the set is not complete (Section~\ref{??}).
-    
-    \item[Deriving fixes:] We will derive potential fixes to correct
-    the errors.
-    
-    \item[Evaluation:]...
-\end{description}
-
-
+}
 
 \section{Use Case}
 

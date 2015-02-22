@@ -1,3 +1,5 @@
+%!TEX root = main.tex
+
 \documentclass{vldb}
 \usepackage{paralist}
 % Load basic packages
@@ -50,7 +52,7 @@
 \newcommand{\papertext}[1]{#1}
 \newcommand{\techreport}[1]{}
 
-\newtheorem{definition}{Definition}[section]
+\newtheorem{definition}{Definition}%[section]
 \newtheorem{proposition}[definition]{Proposition}
 \newtheorem{lemma}[definition]{Lemma}
 \newtheorem{remark}[definition]{Remark}
@@ -142,7 +144,7 @@
 % since its job is to redefine many LaTeX commands.
 \usepackage[pdftex]{hyperref}
 \hypersetup{
-  colorlinks=true,
+  colorlinks=false,
   linkcolor=darkred,
   citecolor=darkgreen,
   urlcolor=darkblue
