@@ -5,8 +5,15 @@
 
 Poor data quality is estimated to cost the US economy more than \$600 billion
 per year~\cite{eckerson2002} and erroneous price data in retail databases
-alone cost the US consumers \$2.5 billion each year~\cite{Fan2008}. While data
-cleaning tools can purge datasets of many errors before the data is used,
+alone cost the US consumers \$2.5 billion each year~\cite{Fan2008}. 
+\ewu{
+It is possible to use tools to fix existing errors in the database.
+However, databases are dynamic -- applications and users constantly generate and execute queries that modify the database.
+Any errors in the queries can easily propogate in complex ways and spread errors throughout the database that are hard to reason about.
+Fixing the errors that have been found in the current data is not enough because not all of the errors may have been found because the source of the error could be buried deep in the past.
+No tools exist to both {\it find} the erroneous queries and provide {\it fixes/explanations}.
+}
+While data cleaning tools can purge datasets of many errors before the data is used,
 applications and users interacting with the data can introduce new errors.
 Mistakes in data entry and erroneous updates often affect datasets in complex
 ways and result in data errors that are obscure and hard to trace and correct.
@@ -24,6 +31,18 @@ verification~\cite{Chen2011} is impractical as it requires users to answer
 challenge questions before allowing the updates, and it is not applicable to
 updates initiated by applications.
 
+
+\ewu{
+In this paper, we argue for a new type of data error diagnosis called Data Fracking 
+that targets data modification queries deep in the database transaction log.
+In contrast to existing data cleaning and explanation approaches that aim to
+detect, fix, or explain errors in the current database, Data Fracking both identifies the
+root causes of the errors as past query transactions that {\it introduced} the errors
+into the database, and proposes modifications to those anomalous queries that
+fix the current errors.  By introducing a {\it new dimension} to data error diagnosis,
+data fracking can lead to the identification of additional discrepancies that would
+have otherwise remained undetected.
+}
 In this paper, we present a specialized data cleaning framework, \sys, that
 specifically targets errors in update workloads. In contrast to traditional
 data cleaning techniques that aim to identify errors in the data directly, the
@@ -54,9 +73,24 @@ have otherwise remained undetected.
         \alex{Needs to be more realistic and convincing.  Ideally grounded on a real scenario.  Do we have more specific info for the use-cases?}
 \end{example}
 
+\ewu{In reality, the problems presented to HR were simply a small sample
+of the errors stemming from the anomalous query.  Once HR fixes the errors,
+there are still a potentially large number of employees whose premiums are incorrect that have
+simply not complained to HR yet.
+it is thus desirable to, given HR's fixes, identify candidate queries that may have been the source
+of the error, propose fixes, and subsequently identify the other employees whos premiums are in error.
 
+This problem is fundamentally challenging because ??? and must solve several challenging subproblems.
+1) rollback  2) fix generation  3) fix picking (if there are multiple possible fixes) 4) performance.
+}
+
+
+
+% these characterize the problem
+\ewu{Would say these nicely characterize the problem, not necessarily challenges.}
 Diagnosing data errors stemming from incorrect updates raises three major
 challenges that make existing data cleaning techniques not applicable.
+
 
 
 \begin{description}[leftmargin=*, topsep=0mm, itemsep=0mm]
@@ -97,13 +131,14 @@ following contributions:
 % and a set of complaints that identify errors in the final database
 % state. We organize our contributions as follows:
 
+\ewu{really like this organization}.
+
 \begin{itemize}[leftmargin=*, topsep=0mm, itemsep=0mm]      
-    \item We formalize the problem of diagnosing a set of errors using log
-    histories of updates that operated on the data. We define
+    \item We formalize the Data Fracking problem of diagnosing a set of errors using log
+    histories of updates that operated on the data. Given a set of 
     \emph{complaints} as representations of data discrepancies in the current
-    state of a dataset. We then transform the problem of diagnosing errors in
-    the data to the problem of identifying minimal changes to queries in the
-    log that would resolve all of the complaints (Section~\ref{???}).
+    state of a dataset, \sys identifies the queries in the log that require the  minimal
+    amount of changes that would resolve all of the complaints (Section~\ref{???}).
       
     \item We provide an exact error-diagnosis solution through a non-trivial
     transformation of the problem to a mixed integer program (MIP) that
