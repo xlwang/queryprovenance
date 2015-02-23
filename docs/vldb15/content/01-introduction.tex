@@ -9,18 +9,18 @@ alone cost the US consumers \$2.5 billion each year~\cite{Fan2008}.
 \ewu{
 It is possible to use tools to fix existing errors in the database.
 However, databases are dynamic -- applications and users constantly generate and execute queries that modify the database.
-Any errors in the queries can easily propogate in complex ways and spread errors throughout the database that are hard to reason about.
+Any errors in the queries can easily propagate in complex ways and spread errors throughout the database that are hard to reason about.
 Fixing the errors that have been found in the current data is not enough because not all of the errors may have been found because the source of the error could be buried deep in the past.
 No tools exist to both {\it find} the erroneous queries and provide {\it fixes/explanations}.
 }
-While data cleaning tools can purge datasets of many errors before the data is used,
-applications and users interacting with the data can introduce new errors.
-Mistakes in data entry and erroneous updates often affect datasets in complex
-ways and result in data errors that are obscure and hard to trace and correct.
-Traditional data cleaning approaches are not well-suited for this purpose:
-While they provide general-purpose tools to identify anomalies in the data,
-they are not designed to diagnose the causes of these errors, which are rooted
-in erroneous updates.
+While data cleaning tools can purge datasets of many errors before the data is
+used, applications and users interacting with the data can introduce new
+errors. Mistakes in data entry and erroneous updates often affect datasets in
+complex ways and result in data errors that are obscure and hard to trace and
+correct. Traditional data cleaning approaches are not well-suited for this
+purpose: While they provide general-purpose tools to identify and rectify
+anomalies in the data, they are not designed to diagnose the causes of these
+errors, which are rooted in erroneous updates.
 
 Improving data quality and correcting data errors has been an important focus
 for data management research. Yet, handling new errors, introduced during
@@ -210,15 +210,18 @@ Our contributions include
 
 }
 
-\section{Use Case}
 
-\section{Architecture}
-
+\section{{\Large\textbf{\sys}}: architecture}
 
 
+\begin{figure}[t]
+    \centering
+        \includegraphics[scale=0.35]{figures/architecture}
+    \caption{\sys processes data anomalies in the form of complaints and analyzes logged query histories to identify the causes of error. In the heart of the system, transformation algorithms express the diagnosis problem as a mixed integer program, and optimization modules ensure that the MIP programs can be evaluated efficiently.}
+    \label{fig:architecture}
+\end{figure}
 
 
-
-
+\alex{Do we want to actually describe the architecture in a small section, or should we just include the figure in the front page?}
 
 

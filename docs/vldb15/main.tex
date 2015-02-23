@@ -16,18 +16,20 @@
 \newcommand{\darkblue}[1]{\textcolor{darkblue}{#1}}
 
 
-\newcommand{\alex}[1]{\noindent{\textcolor{darkgreen}{Alexandra: #1}}}
-\newcommand{\xlw}[1]{\noindent{\textcolor{blue}{Xiaolan: #1}}}
-\newcommand{\ewu}[1]{\noindent{\textcolor{red}{EWu: #1}}}
+\newcommand{\alex}[1]{\noindent{\color{darkgreen}{Alexandra: #1}}}
+\newcommand{\xlw}[1]{\noindent{\color{blue}{Xiaolan: #1}}}
+\newcommand{\ewu}[1]{\noindent{\color{red}{EWu: #1}}}
 \newcommand{\stitle}[1]{\vspace{0.5em}\noindent\textbf{#1}}
 \newcommand{\calF}[0]{$\cal{F}$}
 \newcommand{\codesize}{\fontsize{7}{8}}
 \newcommand{\xxx}[1]{{\fontsize{13pt}{13pt}\selectfont\textcolor{red}{#1}}}
 \newcommand{\ind}{\hspace{\algorithmicindent}}
-\newcommand{\sys}{{\sc QueryFix}\xspace}
+\newcommand{\sys}{\textsc{DeepCleanse}\xspace}
+% \newcommand{\sys}{{\sc QueryFix}\xspace}
 \newcommand{\gcost}{{\sc Greedy-Cost}\xspace}
 
-\newcommand{\deprecate}[1]{\noindent{\color{light-gray}{#1}}}
+\newcommand{\deprecate}[1]{}
+% \newcommand{\deprecate}[1]{\noindent{\color{light-gray}{#1}}}
 
 
 
@@ -35,7 +37,7 @@
 \begin{document}
 
 % for 
-\title{Explaining Database Anomalies Via Queries}
+\title{Deep cleanse: Diagnosing errors through query histories}
 %%
 %% Title brainstorming
 %%
@@ -45,6 +47,10 @@
 %% Altering query histories to fix database anomalies
 %% Query history manipulation: Indentifying query errors through data anomalies
 %% Query-driven explanations to database anomalies
+%% Deep diagnosis of anomalies through query histories
+%% Deep cleanse: Diagnosing errors through query histories
+%% QueResolve: Resolving data anomalies through query revision
+%% QueRevise: Resolving data anomalies through query revision
 %%
 %% Eugene's terrible ideas:
 %%  Look deep: data Fracking for the masses

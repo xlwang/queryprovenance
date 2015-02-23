@@ -1,7 +1,7 @@
 %!TEX root = main.tex
 
 \documentclass{vldb}
-\usepackage{paralist}
+% \usepackage{paralist}
 % Load basic packages
 \usepackage{balance}  % to better equalize the last page
 \usepackage{graphicx} % for EPS, load graphicx instead
@@ -11,24 +11,25 @@
 \usepackage{listings}
 %\usepackage{wrapfig}
 \usepackage{graphicx}
-%\usepackage{subcaption}
+\usepackage{subcaption}
+\setlength{\abovecaptionskip}{10pt plus 3pt minus 2pt}
 % \usepackage[english]{babel}
 \usepackage{booktabs}
 \usepackage{graphicx}
-\usepackage{subfigure}
-\usepackage{caption}
+% \usepackage{subfigure}
+% \usepackage{caption}
 % \usepackage[scriptsize, it, IT]{subfigure}
 % \usepackage[font={scriptsize,it}]{caption}
-\usepackage{tikz}
+% \usepackage{tikz}
 %\usepackage{MinionPro}
-\usetikzlibrary{arrows,matrix,positioning}
+% \usetikzlibrary{arrows,matrix,positioning}
 \usepackage[ruled,vlined,algonl,boxed]{algorithm2e}
-\usepackage{framed}
+% \usepackage{framed}
 \usepackage{enumitem}
 \usepackage{xspace}
 \usepackage{xcolor}
 \usepackage{newtxmath}
-
+\usepackage[T1]{fontenc}
 
 % llt: Define a global style for URLs, rather that the default one
 \makeatletter
@@ -69,25 +70,25 @@
 \newtheorem{reduction}[definition]{Reduction}
 \newtheorem{property}[definition]{Property}
 \newtheorem{axiom}[definition]{Axiom}
-
-\tikzset{
-    %Define standard arrow tip
-    >=stealth',
-    %Define style for boxes
-    punkt/.style={
-           rectangle,
-           rounded corners,
-           draw=black, very thick,
-           text width=6.5em,
-           minimum height=2em,
-           text centered},
-    % Define arrow style
-    pil/.style={
-           ->,
-           thick,
-           shorten <=2pt,
-           shorten >=2pt,}
-}
+% 
+% \tikzset{
+%     %Define standard arrow tip
+%     >=stealth',
+%     %Define style for boxes
+%     punkt/.style={
+%            rectangle,
+%            rounded corners,
+%            draw=black, very thick,
+%            text width=6.5em,
+%            minimum height=2em,
+%            text centered},
+%     % Define arrow style
+%     pil/.style={
+%            ->,
+%            thick,
+%            shorten <=2pt,
+%            shorten >=2pt,}
+% }
 
 
 % \setitemize{noitemsep,topsep=0pt,parsep=0pt,partopsep=0pt}
@@ -134,7 +135,7 @@
 
 
 % create a shortcut to typeset table headings
-\newcommand\tabhead[1]{\small\textbf{#1}}
+% \newcommand\tabhead[1]{\small\textbf{#1}}
 
 
 
