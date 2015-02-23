@@ -1,15 +1,47 @@
+%
+% Notes: 
+%
+%  exact implementation
+%  comparison with rollback at batch N
+%  relaxing the solvers
+%  dealing with false positives
+%
+%  running on TPC-C/sanjay's.  equality is easier
+%
+% Need names for
+%  * rollback
+%  * exact solution
+%  * fixing an individual/batch of queries
+%
 \section{Experiments}
 
-We have two goals for our evaluation: First, we study how effectively
-the techniques proposed in this paper are able to identify and fix
-a single corrupt query in various types of query logs.  Second, we
-seek to understand the conditions in which our multi-query techniques
-are effective.  Finally, we want to understand how different
-parameters of our roll-back technique affects the quality of our
-proposed fixes.
+In this paper, we have described an exact, albeit less-scalable,
+constraint-based solution to the \prob problem, as well as several
+extensions to the solution that 1) trade off scalability with
+diagnosis quality, and 2) support noise in the input complaint set.
+Our goals in the evaluation is to understand these trade-offs in
+controlled synthetic scenarios, as well as study the effectiveness
+in typical database applications.
 
-To this end,
-we ran a combination of synthetically generated query logs, and
+To this end, our experiments are organized as follows: First, we
+study \exact on a small controlled, synthetic workload with a single
+corrupted query and explore the parameters that make the problem
+challenging.  Second, we decompose \exact into rollback and \qfix algorithms and study each
+in isolation using a series of micro-experiments, as well as together in an end-to-end-system.  
+Third, we add noise to the input complaint sets to evaluate \density, and study
+number of corrupted queries to understand how our algorithms scale to 
+based.  Lastly, evaluate on real-world workloads based on TPC-C as
+well as a data-cleaning application.
+
+
+
+%
+% NOTE: figures are named <experimentsection>_<subsection>_<xaxis>.pdf
+%
+
+\subsection{Experimental Setup}
+
+We ran a combination of synthetically generated query logs, and
 well as logs generated using a subset of the TPC-C~\cite{tpcc}
 transaction log that consists of inserts and updates.  In each
 experiment, we corrupt the query log as described below, execute
@@ -20,13 +52,6 @@ complaints, and removing true complaints to simulate false negatives.
 Finally, we execute \sys on the complaints and compare the fixed
 query log with the true query log, as well as the fixed and true
 final database states to measure performance and accuracy metrics.
-
-
-%
-% NOTE: figures are named <experimentsection>_<subsection>_<xaxis>.pdf
-%
-
-\subsection{Experimental Setup}
 
 \subsubsection{Metrics}
 
