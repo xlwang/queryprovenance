@@ -49,7 +49,7 @@ def gen_updateCustomer(args):
   cid, cdid, cwid = int(cid), int(cdid), int(cwid)
 
   SET = [ ("C_BALANCE", "C_BALANCE + {0}".format(balance) ) ]
-  SET = [ ("C_BALANCE", balance) ]
+  SET = [ ("C_BALANCE", ("C_BALANCE", "+", balance)) ]
   WHERE = [ ("C_ID", "=", cid), ("C_D_ID", "=", cdid), ("C_W_ID", "=", cwid) ]
   return {
     "type": "UPDATE",
