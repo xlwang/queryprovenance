@@ -8,12 +8,16 @@ def nextval(minv=0, maxv=100):
 
 @click.command()
 @click.option("--ddl", is_flag=True, help="print CREATE TABLE statement")
-@click.option("--schema", is_flag=True, help="print table attributes in first line")
+@click.option("--schema", is_flag=True, help="Print table attributes in first line")
+@click.option("--seed", default=0, help="Seed to set random number generator")
 @click.argument('nattrs', default=4)      
 @click.argument('ntuples', default=10)        
-def main(ddl, schema, nattrs, ntuples):
+def main(ddl, schema, seed, nattrs, ntuples):
   """
+  Data generator for Logavulin
   """
+  random.seed(seed)
+
   attrs = map("a{0}".format, range(nattrs))
 
   if ddl:

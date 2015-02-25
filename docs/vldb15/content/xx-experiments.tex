@@ -35,6 +35,7 @@ well as a data-cleaning application.
 
 
 
+
 %
 % NOTE: figures are named <experimentsection>_<subsection>_<xaxis>.pdf
 %
@@ -92,11 +93,13 @@ We consider the roll-back algorithm in batches of $n_{rollback}$.
 Conditions, given a database ${\cal D}$ and query log $qlog$:
 
 \begin{itemize}
-\item {\bf $N_q$:} Vary number of queries in $qlog$.
 \item {\bf $N_{\cal D}$: } Size of the database (number of tuples)
+\item {\bf $N_{dim}$:} Dimensionality of the database.
+\item {\bf $N_q$:} Vary number of queries in $qlog$.
 \item {\bf $N_{pred}$:} The number of predicates in each UPDATE query's WHERE condition.
 \item {\bf $N_{attrs}$: } When corrupting the log, the number of attributes that are corrupted.
-\item {\bf $Idx$: } The index of the query in the query log that was corrupted.
+\item {\bf $Idx \in [0, 1]$: } The index of the query in the query log that was corrupted as a percentage of the query log.  
+      For example $Idx = 0.0$ is the oldest query in the log, whereas $Idx = 1.0$ is the most recent query position.
 \item {\bf $p_{I}$: } Percentage of INSERT queries in the query log (as compared to UPDATEs).
 \item {\bf $p_{pk}$: } Percentage of UPDATE queries with primary key filter clauses as compared to range clauses over non-primary key attributes.
 \item {\bf $p_{FP}$: } Percentage of false positives in the complaint set.
@@ -107,26 +110,32 @@ Conditions, given a database ${\cal D}$ and query log $qlog$:
 
 % Anant's workload?
 
-\paragraph{TPC-C} We use the data and query workload over the {\it
+\stitle{TPC-C} We use the data and query workload over the {\it
 CUSTOMER} table in TPC-C~\cite{}.  We generate a database at scale
 1 with one warehouse, and keep only the queries that modify the
 {\it CUSTOMER} table.  We then randomly perturb a subset of the
 queries to generate the corrupted query log.
 
-\paragraph{Synthetic} 
+\stitle{Synthetic} 
 We generate an initial database of $N_{\cal D}$ random tuples.  
 The schema contains 5 attributes $a_1\ldots a_5$ with a value
 within $[0, 100]$ and a primary key $id$. 
-Generate $N_q$ queries containing a mixture of insert queries  randomly generated tuples and two types of update
-queries, PK and Range, that have the following respective forms, 
-where the parameters \verb|?| are picked randomly:
+Generate $N_q$ queries containing a mixture of insert queries 
+and two types of update
+queries, Point updates and Range updates, that have the following respective forms, 
+where \verb|?| is a query parameter:
 
 {\scriptsize
 \begin{verbatim}
-UPDATE SET (a_i = ?),.. WHERE id = ?
+UPDATE SET (a_i = ?),.. WHERE a_j = ? AND ...
 UPDATE SET (a_i = ?),.. WHERE a_j in [?, ?+10] AND ...
 \end{verbatim}
 }
+
+The insert queries use randomly generated values.  The SET clauses
+of the update queries either set attributes to random values, or
+increment attributes by a random amount.  The WHERE clauses are a
+conjunction of equality or range predicates.
 
 We first consider three different homogenous query logs: {\it INSERT} only ($p_I = 1$), 
 {\it PK} update only ($p_I = 0, p_{pk} = 1$), and {\it RANGE} update only ($p_I = 0, p_{pk} = 0$).
@@ -141,115 +150,148 @@ location of the query, and the number of attributes that are corrupted
 
 
 
-\subsection{Single-Query Log}
+\subsection{Exact Experiments}
 
-In the first set of experiments, we evaluate the simplest case where there
-is a single update query.  In each experiment, we vary the DBSize,
-NClauses, as well as the number of clauses in the query that have
-been corrupted and report the metrics described above.  We first 
-compare the learning algorithms on a complete complaint set, then evaluate them
-using incomplete complaint sets with varying percentages of false positive and negative complaints.
+\begin{itemize}
+\item $N_\cal{D} \in \{10, 100, 1000\}$
+\item $N_q \in \{10, 20, 50, 100\}$
+\item $N_{dim} = 4$
+\item $N_{pred} \in \{1, 2, 3\}$
+\item $N_{attrs} = \{1, 2\}$
+\item $Idx = \{0, 0.5, 1\}$
+\end{itemize}
 
-\subsubsection{Complete Complaints}
+\subsection{Rollback and \qfix Microexperiments}
 
-{\it Vary DBSize
+\subsection{End-to-end experiments}
 
-Vary NClauses, corrupt 1 and 2 clauses
+\subsubsection{Complete Complaint Set}
+
+\subsubsection{Complaint Set with Noise}
+
+\begin{itemize}
+\item $N_\cal{D} \in \{10, 100, 1000\}$
+\item $N_q \in \{10, 20, 50, 100\}$
+\item $N_{dim} = 4$
+\item $N_{pred} \in \{1, 2, 3\}$
+\item $N_{attrs} = \{1, 2\}$
+\item $Idx = \{0, 0.5, 1\}$
+\end{itemize}
+
+\subsection{TPC-C Experiment}
+
+
+\deprecate{
+  \subsection{Single-Query Log}
+
+  In the first set of experiments, we evaluate the simplest case where there
+  is a single update query.  In each experiment, we vary the DBSize,
+  NClauses, as well as the number of clauses in the query that have
+  been corrupted and report the metrics described above.  We first 
+  compare the learning algorithms on a complete complaint set, then evaluate them
+  using incomplete complaint sets with varying percentages of false positive and negative complaints.
+
+  \subsubsection{Complete Complaints}
+
+  {\it Vary DBSize
+
+  Vary NClauses, corrupt 1 and 2 clauses
+  }
+
+  We found that CPLEX and BBOX identify the correct fix, however their
+  running times are significantly higher than DTree.  This is because
+  CPLEX is an exact solution, as compared to DTree, whose poor early
+  splitting decisions can adversely affect the final tree structure.
+
+  \subsubsection{Incomplete Complaints}
+
+
+  {\it 
+  Vary DBSize
+
+  Vary NClauses, corrupt 1 and 2 clauses
+
+  Each line is plots has different perc FP
+  }
+
+  We first increased the number of false positives in the complaint set (no false negatives).
+  Figure~\ref{f:single_incomplete_fp} shows how the fix quality and running time vary as the
+  percentage of false positives increases.   Compared variations of CPlex and Bounding box with varying
+  density thresholds (?).
+
+  Each line varies perc FN
+
+  We then varied the number of false negatives while keeping the percentage of false positives fixed at 5\%.
+  Figure~\ref{f:single_incomplete_fn} 
+
+
+  \subsection{Increased Query Log Size}
+
+  In the following set of experiments, we increase the number of
+  queries in the log while varying ?.  The number of corrupted queries
+  is still one.  In these experiments, we set the DBSize to 10000,
+  the default NClauses to 4, and the number of corrupted clauses to
+  2.   We first show results for varying the false positives and
+  negatives in the complaint set and comparing the algorithms described
+  in Section~\ref{s:incomplete-algs}.  We then evaluate the efficacy
+  of of provenance-based query log filtering, which reduces the running
+  time without affecting the result quality.
+
+  To generate the false-positives, we randomly sample without replacement
+  from the tuples in the database that are not in the true complaint
+  set.
+
+  \subsection{False Positive}
+
+  Vary false positives (1 graph)
+
+
+  \subsection{False Negative}
+
+  Vary false negatives (1 graph)
+
+  \subsubsection{Filtering Queries}
+
+  We also compared the provenance-based filtering techniques in the above experiments
+  to measure their effectiveness at reducing the running time.  We varied the complexity of the update 
+  WHERE clauses to control the amount that queries in the log overlap in their updates.  The query log contained 50 update WHERE queries.
+  The quality of the suggested fixes were the same,  As the clauses became less complex, the likelihood 
+  of overlap increased, and increased the amount of queries that affected the complaint sets.
+
+
+  \begin{figure}[h]
+  \centering
+  \includegraphics[width = 2in]{figures/complete_qfilter_complexity}
+  \caption{Varying query complexity.}
+  \label{f:complete_qfilter_complexity} 
+  \end{figure}
+
+
+
+  \subsection{Multi-Query}
+
+  Using a previous experimental configuration, we varied the number of queries that are corrupted.  Figures~\ref{}
+  show the quality and running times of the results for a query log of size 1000 and dbsize of 100k.  
+  As we can see, the cost increases quadratically with each corrupted query and the accuracy of the proposed fixes increases marginally.  
+  This is because XXX.
+
+  We focus on two scenarios.  {\bf Try multiple corruptions that don't overlap (provenance-wise) with each other}.  This is the condition of multiple silo'd that
+  corrupt their own logs.  Then {\bf Try multiple corrupted queries where one query modifies the updated state of the other}.  This shows that
+  it is really hard and hopefully we get close?
+
+
+
+  To better understand the algorithm, we plot the quality metrics after each fixed query and measure how quickly \sys converges to the final result. 
+  This suggests that an incremental approach where the user can set a threshold to stop the algorithm may be effective.
+
+
+
+  \subsection{Real Transactional Workload}
+
+  We used the web application workload, and evaluated our alogirthms with artifically injected corruptions.
+  We compared two types of corruptinos.  In figure~\ref{f:real_existing}, we randomly picked a single existing 
+  query and corrupted its value.  If the query was an INSERT, we randomly pick a value and perturbed it.
+  If the transaction was an UPDAET, we randomly varied the SET or WHERE clauses.   We re-ran this
+  100 times and plot the average and standard deviation of the results.
+
 }
-
-We found that CPLEX and BBOX identify the correct fix, however their
-running times are significantly higher than DTree.  This is because
-CPLEX is an exact solution, as compared to DTree, whose poor early
-splitting decisions can adversely affect the final tree structure.
-
-\subsubsection{Incomplete Complaints}
-
-
-{\it 
-Vary DBSize
-
-Vary NClauses, corrupt 1 and 2 clauses
-
-Each line is plots has different perc FP
-}
-
-We first increased the number of false positives in the complaint set (no false negatives).
-Figure~\ref{f:single_incomplete_fp} shows how the fix quality and running time vary as the
-percentage of false positives increases.   Compared variations of CPlex and Bounding box with varying
-density thresholds (?).
-
-Each line varies perc FN
-
-We then varied the number of false negatives while keeping the percentage of false positives fixed at 5\%.
-Figure~\ref{f:single_incomplete_fn} 
-
-
-\subsection{Increased Query Log Size}
-
-In the following set of experiments, we increase the number of
-queries in the log while varying ?.  The number of corrupted queries
-is still one.  In these experiments, we set the DBSize to 10000,
-the default NClauses to 4, and the number of corrupted clauses to
-2.   We first show results for varying the false positives and
-negatives in the complaint set and comparing the algorithms described
-in Section~\ref{s:incomplete-algs}.  We then evaluate the efficacy
-of of provenance-based query log filtering, which reduces the running
-time without affecting the result quality.
-
-To generate the false-positives, we randomly sample without replacement
-from the tuples in the database that are not in the true complaint
-set.
-
-\subsection{False Positive}
-
-Vary false positives (1 graph)
-
-
-\subsection{False Negative}
-
-Vary false negatives (1 graph)
-
-\subsubsection{Filtering Queries}
-
-We also compared the provenance-based filtering techniques in the above experiments
-to measure their effectiveness at reducing the running time.  We varied the complexity of the update 
-WHERE clauses to control the amount that queries in the log overlap in their updates.  The query log contained 50 update WHERE queries.
-The quality of the suggested fixes were the same,  As the clauses became less complex, the likelihood 
-of overlap increased, and increased the amount of queries that affected the complaint sets.
-
-
-\begin{figure}[h]
-\centering
-\includegraphics[width = 2in]{figures/complete_qfilter_complexity}
-\caption{Varying query complexity.}
-\label{f:complete_qfilter_complexity} 
-\end{figure}
-
-
-
-\subsection{Multi-Query}
-
-Using a previous experimental configuration, we varied the number of queries that are corrupted.  Figures~\ref{}
-show the quality and running times of the results for a query log of size 1000 and dbsize of 100k.  
-As we can see, the cost increases quadratically with each corrupted query and the accuracy of the proposed fixes increases marginally.  
-This is because XXX.
-
-We focus on two scenarios.  {\bf Try multiple corruptions that don't overlap (provenance-wise) with each other}.  This is the condition of multiple silo'd that
-corrupt their own logs.  Then {\bf Try multiple corrupted queries where one query modifies the updated state of the other}.  This shows that
-it is really hard and hopefully we get close?
-
-
-
-To better understand the algorithm, we plot the quality metrics after each fixed query and measure how quickly \sys converges to the final result. 
-This suggests that an incremental approach where the user can set a threshold to stop the algorithm may be effective.
-
-
-
-\subsection{Real Transactional Workload}
-
-We used the web application workload, and evaluated our alogirthms with artifically injected corruptions.
-We compared two types of corruptinos.  In figure~\ref{f:real_existing}, we randomly picked a single existing 
-query and corrupted its value.  If the query was an INSERT, we randomly pick a value and perturbed it.
-If the transaction was an UPDAET, we randomly varied the SET or WHERE clauses.   We re-ran this
-100 times and plot the average and standard deviation of the results.
-
