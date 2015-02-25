@@ -71,7 +71,9 @@ DEFAULT = {
     "N_dim": 4, 
     "N_q": 10, 
     "N_pred": 4, 
-    "N_attrs": 2, 
+    "N_ins": 2,
+    "N_set": 2,
+    "N_where": 2, 
     "idx": .9, 
     "p_I": .33, 
     "p_pk": .5, 
@@ -88,26 +90,47 @@ DEFAULT = {
 }
 
 keys = [
-  "N_D", "N_dim", "N_q", "N_pred", "N_attrs", "idx", 
+  "N_D", "N_dim", "N_q", "N_pred", "N_ins", "N_set", "N_where", "idx", 
   "p_I", "p_pk", "p_fp", "p_fn",
   "exptype", "passtype", "optchoice", "qfixtype",
   "epsilon", "M", "approx", "prune"
 ]
 
 def gen_exact_config():
-  options = {
-    "N_D": [10, 100, 1000],
-    "N_q": [5, 10, 20],
-    "N_pred": [1,2],
-    "N_attrs": [1,2],
-    "idx": [0.2, .8],
-    "exptype": 1
-  }
-  for param in create_params(options, {}):
-    d = dict(DEFAULT)
-    d.update(param)
-    param_vals = map(lambda k: d[k], keys)
-    print ",".join(map(str, param_vals))
+  all_options = [
+    {
+      "N_D": [10, 100, 1000],
+      "N_q": [5, 10, 20],
+      "N_pred": [1,2],
+      "N_where": [2],
+      "idx": [.8],
+      "exptype": 1
+    },
+    {
+      "N_D": 1000,
+      "N_q": 20,
+      "N_pred": 2,
+      "N_where": [1, 2],
+      "idx": 0.8,
+      "exptype": 1
+    },
+    {
+      "N_D": 1000,
+      "N_q": 20,
+      "N_pred": 2,
+      "N_where": 2,
+      "idx": [0.2, 05, 0.8, 0.9],
+      "exptype": 1
+    }
+  ]
+
+
+  for options in all_options:
+    for param in create_params(options, {}):
+      d = dict(DEFAULT)
+      d.update(param)
+      param_vals = map(lambda k: d[k], keys)
+      print ",".join(map(str, param_vals))
 
 
 
