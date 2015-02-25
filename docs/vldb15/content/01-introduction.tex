@@ -5,91 +5,85 @@
 
 Poor data quality is estimated to cost the US economy more than \$600 billion
 per year~\cite{eckerson2002} and erroneous price data in retail databases
-alone cost the US consumers \$2.5 billion each year~\cite{Fan2008}. 
-\ewu{
-It is possible to use tools to fix existing errors in the database.
-However, databases are dynamic -- applications and users constantly generate and execute queries that modify the database.
-Any errors in the queries can easily propagate in complex ways and spread errors throughout the database that are hard to reason about.
-Fixing the errors that have been found in the current data is not enough because not all of the errors may have been found because the source of the error could be buried deep in the past.
-No tools exist to both {\it find} the erroneous queries and provide {\it fixes/explanations}.
-}
-While data cleaning tools can purge datasets of many errors before the data is
-used, applications and users interacting with the data can introduce new
-errors. Mistakes in data entry and erroneous updates often affect datasets in
-complex ways and result in data errors that are obscure and hard to trace and
-correct. Traditional data cleaning approaches are not well-suited for this
-purpose: While they provide general-purpose tools to identify and rectify
-anomalies in the data, they are not designed to diagnose the causes of these
-errors, which are rooted in erroneous updates.
+alone cost the US consumers \$2.5 billion each year~\cite{Fan2008}. Data
+cleaning tools can purge datasets of many errors before the data is used.
+However, databases are dynamic: applications and users interact with the
+database constantly, executing queries that modify the data. Mistakes in these
+queries introduce errors in the data; subsequent queries can spread these
+errors in complex ways, making them hard to trace and correct. Identifying and
+correcting errors in the data directly is suboptimal: it treats the symptom,
+rather than the underlying cause. Fixing the manifested data errors on a
+case-by-case basis often obscures the root of the problem other data that was
+affected. Therefore, traditional data cleaning approaches are not well-suited
+for this setting: While they provide general-purpose tools to identify and
+rectify anomalies in the data, they are not designed to diagnose the causes of
+errors that are rooted in erroneous updates.
 
-Improving data quality and correcting data errors has been an important focus
-for data management research. Yet, handling new errors, introduced during
-regular database interactions, has received little attention. Integrity
-constraints~\cite{Khoussainova2006} can guard against some improper updates,
-but only if the data falls outside rigid, predefined ranges. Certificate-based
-verification~\cite{Chen2011} is impractical as it requires users to answer
-challenge questions before allowing the updates, and it is not applicable to
-updates initiated by applications.
+While improving data quality and correcting data errors has been an important
+focus for data management research, handling new errors, introduced during
+regular database interactions, has received little attention. Most work in
+this direction focuses on \emph{guarding against} erroneous updates. For
+example, integrity constraints~\cite{Khoussainova2006} reject some improper
+updates, but only if the data falls outside rigid, predefined ranges.
+Certificate-based verification~\cite{Chen2011} is less rigid, but it is
+impractical and non-scalable as it requires users to answer challenge
+questions before allowing the updates, and it is not applicable to updates
+initiated by applications.
 
 
-\ewu{
-In this paper, we argue for a new type of data error diagnosis called Data Fracking 
-that targets data modification queries deep in the database transaction log.
-In contrast to existing data cleaning and explanation approaches that aim to
-detect, fix, or explain errors in the current database, Data Fracking both identifies the
-root causes of the errors as past query transactions that {\it introduced} the errors
-into the database, and proposes modifications to those anomalous queries that
-fix the current errors.  By introducing a {\it new dimension} to data error diagnosis,
-data fracking can lead to the identification of additional discrepancies that would
-have otherwise remained undetected.
-}
-In this paper, we present a specialized data cleaning framework, \sys, that
-specifically targets errors in update workloads. In contrast to traditional
-data cleaning techniques that aim to identify errors in the data directly, the
-goal of \sys is to \emph{explain} how the errors occurred. Our goal is not
-simply to provide explanations; identifying how an error was introduced to a
-dataset, can lead to the identification of additional discrepancies that would
-have otherwise remained undetected.
+In this paper, we present \sys, a \emph{diagnostic} framework for data errors
+caused by erroneous updates. In contrast to existing approaches in data
+cleaning that aim to detect and correct errors in the data directly, the goal
+of \sys is to identify errors in the queries that introduced errors in the
+data. These diagnoses both \emph{explain} how errors were introduced to a
+dataset, and also lead to the identification of additional discrepancies in
+the data that would have otherwise remained undetected.
 
-\begin{example}[Incorrect insurance premiums]
-    After negotiations with health insurance companies, an employer achieved
-    reductions in the premium rates for the upcoming year, for employees at
-    levels 1-4. The administrator who updated the employee database mistakenly
-    implemented the new policy for employees at levels 1-3, due to the
-    incorrect predicate \texttt{level < 4}.
-    
-    In subsequent months, level 4 employees who noticed that their premiums
-    had not been reduced as expected, notified HR of the error. HR corrected
-    employees' records on a case-by-case basis, obscuring the real cause of
-    the problem, and making it harder to identify and correct the error for
-    other employees.
-    
-    To make matters worse, subsequent queries that calculated employee
-    withholdings, resulted in misestimation of the company's revenue and
-    incorrect allocation of bonuses. Correcting errors in the employee
-    premiums is no longer sufficient, as these errors have already had a
-    larger effect on the data.
-    
-        \alex{Needs to be more realistic and convincing.  Ideally grounded on a real scenario.  Do we have more specific info for the use-cases?}
+
+\begin{example}[Wireless discount policies]\label{ex:telco}
+
+A large US-based wireless provider offers company discounts as incentives for
+corporate customers. There are different types of discounts (flat, percentage,
+fee-based), and their details are specific to corporate agreements. The large
+number of policies and complexities in their rules frequently cause policies
+to be set incorrectly, leading to errors in the application of discounts to
+customers' accounts.
+
+Customers who notice billing errors contact the provider, but the call centers
+do not have the capacity or ability to investigate the complaints deeply. The
+standard course of action is to correct billing mistakes on a case-by-case
+basis for each complaint. As a result, unreported errors remain in the
+database for a long time, or they never get corrected, and their cause becomes
+harder to trace as the cause of the errors is obscured.
+
 \end{example}
 
-\ewu{In reality, the problems presented to HR were simply a small sample
-of the errors stemming from the anomalous query.  Once HR fixes the errors,
-there are still a potentially large number of employees whose premiums are incorrect that have
-simply not complained to HR yet.
-it is thus desirable to, given HR's fixes, identify candidate queries that may have been the source
-of the error, propose fixes, and subsequently identify the other employees whos premiums are in error.
+\begin{example}[Tax bracket adjustment]\label{ex:taxes}
+    
+Tax brackets, which determine tax rates for different income levels, are
+frequently adjusted. Accounting firms implement these changes to their
+databases by appropriately updating the tax rates of their customers. Mistakes
+in these update queries (e.g., Figure~\ref{fig:example}) result in errors in
+the tax rates and computed taxes. 
 
-This problem is fundamentally challenging because ??? and must solve several challenging subproblems.
-1) rollback  2) fix generation  3) fix picking (if there are multiple possible fixes) 4) performance.
-}
-
+\end{example}
 
 
-% these characterize the problem
-\ewu{Would say these nicely characterize the problem, not necessarily challenges.}
-Diagnosing data errors stemming from incorrect updates raises three major
-challenges that make existing data cleaning techniques not applicable.
+In these application scenarios, data errors are typically reported to a
+customer service department, which does not have the resources nor the
+capability to investigate the errors more broadly. Instead, errors are
+resolved on a case-by-case basis. In practice, customer service only deals
+with a small portion of the actual errors. Once these errors are resolved,
+there will still be a large number of incorrect records that were not
+identified. The goal of \sys is to identify the query or queries that caused
+the errors, propose corrections to those queries, and use the modified queries
+to identify other errors.
+
+Diagnosing data errors stemming from incorrect updates is fundamentally
+challenging: the search space of possible mistakes and fixes is large, and the
+amount of information (number of known errors) may be limited. The problem has
+the following important characteristics that render traditional data cleaning
+methods unsuitable:
 
 
 
@@ -131,7 +125,7 @@ following contributions:
 % and a set of complaints that identify errors in the final database
 % state. We organize our contributions as follows:
 
-\ewu{really like this organization}.
+% \ewu{really like this organization}
 
 \begin{itemize}[leftmargin=*, topsep=0mm, itemsep=0mm]      
     \item We formalize the Data Fracking problem of diagnosing a set of errors using log
@@ -168,50 +162,8 @@ following contributions:
 \end{itemize}
 
 
-\deprecate{
-While exploring data, its natural to come across surprising or unexpected data.
-For example, visual data analysis explores the current state of the database and users may be surprised by outliers in a visualization.
-Similarly, enterprise customers (e.g., billing) may find outliers in their monthly bills and be surprised by the amount they are asked to pay.
 
-When presented with these surprises, users want to better understand the reasons behind the anomalies.
-A recent wave of research focuses on deriving predicate-based explanations for outliers for statistical aggregation queries.
-For example, if the user wants to understand why the total sales in the past few months have gone up, these systems can general explanations such as ``most related to customers in California between the ages of 12 to 18.''
-However, these approaches simply generate predicates that describe {\it current state} of the database, and do not resolve {\it how} the anomalous data came to be.
-
-Specifically, the user may also be interested to understand which past database modification was responsible for these explanations.
-Describe why this makes sense to want.  In this form of the problem, we are interested in historical database queries whose modifications, when propogated to the current database state, 
-The goal is to provide diagnostic tools that can peer into past transactions.
-
-
-In this paper, we approach anomaly explanation from the persepctive of the query log and seek to
-both {\it identify}  historical database modification queries that most likely caused user complaints 
-in the current state of the database, and suggest replacement queries that will resolve these complaints.
-We call this problem the {\it Query-based Complaint-Satisfaction Problem}.
-
-Given a database query log and a set of {\it complaints} (e.g., tuple 1's attribute B should be 20\% lower) about records in the current state of the database,
-we seek to identify the subset of queries in the log that, by modifying their parameters and propogating the new effects of the queries, 
-will best resolve the complaints.  
-
-One way to solve this problem is to try modifying the most recent query until it fixes the complaints.  
-If not, then try the second most recent query.  
-The problem with this approach is the number of possible modifications is unbounded.
-
-Our contributions include
-
-\begin{enumerate}
-\item Developing and formalizing the problem of Query-oriented explanation in contrast to data-oriented explanation
-\item Prove that the general problem is impossible.
-\item Designing alogirthems to solve the problem for complete complaint sets
-\item Extending the algorithms to support incomplete complaint sets
-\item Extending to support multiple queries
-\end{enumerate}
-
-%%%%%%%%%%%%%%% Clean up.... %%%%%%%%%%%%%%
-
-}
-
-
-\section{{\Large\textbf{\sys}}: architecture}
+\section{{\large\textbf{\sys}}: architecture}
 
 
 \begin{figure}[t]
@@ -221,8 +173,21 @@ Our contributions include
     \label{fig:architecture}
 \end{figure}
 
+Figure~\ref{fig:architecture} shows the architecture of \sys. The system uses
+two inputs: a log of update queries (including UPDATE, INSERT, and DELETE
+statements) and a set of identified data errors (\emph{complaints}). \sys
+analyzes the data errors and the query logs to trace the causes of the errors
+in queries in the log (diagnoses), and to automatically derive query repairs.
+The query repairs represent corrections to the queries in the log, and can be
+used to identify additional errors in the data that were not reported.
 
-\alex{Do we want to actually describe the architecture in a small section, or should we just include the figure in the front page?}
-\ewu{I like architecture sections because 1) sounds like a system.  I like systems and 2) visualizes the components which turn into sections in the paper.}
+The core of \sys is a transformation module that expresses the query diagnosis
+problem as a Mixed Integer Program (MIP). Two performance optimization modules
+ensure that the system can scale to large datasets efficiently, and while
+maintaining high accuracy. Finally, the density filtering component ensures
+smooth handling of false errors (data that has been identified as erroneous,
+but it is in fact correct).
+
+
 
 

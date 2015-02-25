@@ -1,3 +1,5 @@
+%!TEX root = ../main.tex
+
 %
 % Notes: 
 %
@@ -59,7 +61,7 @@ final database states to measure performance and accuracy metrics.
 \begin{itemize}
 \item {\it Fixrate}: Percentage of true complaints correctly modified
 \item {\it Err}: Percentage of errors introduced
-\item {\it Cost_{all,preproc,prep,solver}}: Execution times overall ($cost_{all}$), 
+\item {\it $Cost_{all,preproc,prep,solver}$}: Execution times overall ($cost_{all}$), 
       pre-processing time for XXX ($cost_{preproc}$), time for constructing the problem that is
       passed to the solver ($cost_{prep}$), and the time to run the simplex solver ($cost_{solver}$).
 \item {\it $Dist_{measure}$}: Distance from corrected modification  
@@ -93,7 +95,7 @@ We consider the roll-back algorithm in batches of $n_{rollback}$.
 Conditions, given a database ${\cal D}$ and query log $qlog$:
 
 \begin{itemize}
-\item {\bf $N_{\cal D}$: } Size of the database (number of tuples)
+\item {\bf $N_\mathcal{D}$: } Size of the database (number of tuples)
 \item {\bf $N_{dim}$:} Dimensionality of the database.
 \item {\bf $N_q$:} Vary number of queries in $qlog$.
 \item {\bf $N_{pred}$:} The number of predicates in each UPDATE query's WHERE condition.
@@ -153,7 +155,7 @@ location of the query, and the number of attributes that are corrupted
 \subsection{Exact Experiments}
 
 \begin{itemize}
-\item $N_\cal{D} \in \{10, 100, 1000\}$
+\item $N_\mathcal{D} \in \{10, 100, 1000\}$
 \item $N_q \in \{10, 20, 50, 100\}$
 \item $N_{dim} = 4$
 \item $N_{pred} \in \{1, 2, 3\}$
@@ -170,7 +172,7 @@ location of the query, and the number of attributes that are corrupted
 \subsubsection{Complaint Set with Noise}
 
 \begin{itemize}
-\item $N_\cal{D} \in \{10, 100, 1000\}$
+\item $N_\mathcal{D} \in \{10, 100, 1000\}$
 \item $N_q \in \{10, 20, 50, 100\}$
 \item $N_{dim} = 4$
 \item $N_{pred} \in \{1, 2, 3\}$
