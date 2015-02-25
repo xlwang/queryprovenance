@@ -1,18 +1,14 @@
 package queryprovenance.problemsolution;
 
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import queryprovenance.database.DataGenerator;
-import queryprovenance.database.DatabaseHandler;
 import queryprovenance.database.DatabaseState;
 import queryprovenance.database.DatabaseStates;
-import queryprovenance.expression.*;
 import queryprovenance.harness.QueryLog;
-import queryprovenance.query.*;
+import queryprovenance.query.CplexHandler;
+import queryprovenance.query.DeleteQuery;
+import queryprovenance.query.InsertQuery;
+import queryprovenance.query.Query;
+import queryprovenance.query.UpdateQuery;
 
 public class SolveAll {
 	
