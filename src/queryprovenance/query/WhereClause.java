@@ -1,5 +1,7 @@
 package queryprovenance.query;
 
+import ilog.concert.IloNumVar;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -7,11 +9,14 @@ import java.util.List;
 import java.util.Random;
 
 import queryprovenance.database.DatabaseState;
+import queryprovenance.database.Table;
 import queryprovenance.expression.AdditionExpression;
 import queryprovenance.expression.Expression;
 import queryprovenance.expression.VariableExpression;
 import queryprovenance.harness.QueryParams;
 import queryprovenance.harness.Util;
+import queryprovenance.problemsolution.Complaint;
+import queryprovenance.problemsolution.SingleComplaint;
 
 
 public class WhereClause {
@@ -22,7 +27,7 @@ public class WhereClause {
 	
 	private List<WhereExpr> where_exprs; // a set of WhereExprs
 	private Op operator; // disjunction/conjunction
-	private long[] timestamps = new long[4]; // computation time: preparation time; solving time; finishing time; total time
+	long[] times = new long[3]; // execution time
 	
 	public WhereClause(Op operator_){
 		this.where_exprs = new ArrayList<WhereExpr>();
@@ -107,18 +112,32 @@ public class WhereClause {
 		// return Util.join(where_exprs, " and ");
 	}
 	
+	public WhereClause solve(CplexHandler cplex, DatabaseState pre, DatabaseState bad, Complaint complaint, String[] options) throws Exception{
+		WhereClause result = null;
+		HashMap<Integer, String> badclassinfo = pre.compare(bad);
+		HashMap<Integer, String> classinfo = new HashMap<Integer, String>();
+		for(Integer key: complaint.keySet()){
+			SingleComplaint comp = complaint.get(key);
+			String originfo = badclassinfo.get(key);
+			originfo = originfo.equals("g")?"b":"g";
+			classinfo.put(key, originfo);		
+		}
+		result = solveMILP(cplex, pre, null, bad, classinfo, options);
+		return result;
+	}
+	
 	/* solve the where clause given the previous/next db states */
 	public WhereClause solve(CplexHandler cplex,DatabaseState pre, DatabaseState next, DatabaseState bad, String[] option) throws Exception{
 		
 		WhereClause result = null;
 		
 		// gather class information
-		HashMap<String, String> classinfo = pre.compare(next);
+		HashMap<Integer, String> classinfo = pre.compare(next);
 		// gather class information for bad db state
-		HashMap<String, String> badclassinfo = pre.compare(bad);
+		HashMap<Integer, String> badclassinfo = pre.compare(bad);
 		
 		boolean isSame = true;
-		for(String key:classinfo.keySet()){
+		for(Integer key:classinfo.keySet()){
 			if(!classinfo.get(key).equals(badclassinfo.get(key))){
 				isSame = false;
 				break;
@@ -151,7 +170,7 @@ public class WhereClause {
 	}
 	
 	/* solve the where clause by MILP cplex*/
-	public WhereClause solveMILP(CplexHandler cplex, DatabaseState pre, DatabaseState next, DatabaseState bad, HashMap<String, String> classinfo, String[] option) throws Exception{
+	public WhereClause solveMILP(CplexHandler cplex, DatabaseState pre, DatabaseState next, DatabaseState bad, HashMap<Integer, String> classinfo, String[] option) throws Exception{
 		// define parameters
 		double ep = Double.MAX_VALUE;
 		String objFuc = null;
@@ -192,7 +211,7 @@ public class WhereClause {
 		else
 			fixed_where = null;
 		
-		timestamps = cplex.getTimeStamps();
+		times = cplex.getTime();
 		
 		// return result
 		cplex = null;
@@ -201,35 +220,29 @@ public class WhereClause {
 	}
 	
 	/* solve the where clause by decision tree */
-	public WhereClause solveDT(DatabaseState pre, DatabaseState next, DatabaseState bad, HashMap<String, String> classinfo) throws Exception{
+	public WhereClause solveDT(DatabaseState pre, DatabaseState next, DatabaseState bad, HashMap<Integer, String> classinfo) throws Exception{
 		// prepare input for Decision Tree solver
 		WhereClause fixed_where = null;
 		
 		// buid tree
 		DecisionTreeHandler tree = new DecisionTreeHandler();
 		
-		long tempstamp = System.nanoTime();
-		//ResultSet features = database.queryExecution(featurequery);
-		tree.prepareARFF(this, pre, classinfo);
-		
 		// solve 
-		List<WhereExpr> fixed_values = tree.buildTree(this, "./data/feature.arff");
+		List<WhereExpr> fixed_values = tree.buildTree(this, pre, classinfo);
 		
 		// get fixed where
 		if(fixed_values != null)
 			fixed_where = new WhereClause(fixed_values, this.operator);
 		else
 			fixed_where = null;
-		
-		timestamps = tree.getTimeStamps();
-		timestamps[0] = tempstamp;
+	
 		// return result
 		tree = null;
 		return fixed_where;
 	}
 	
-	public long[] getTimeStamps(){
-		return timestamps;
+	public long[] getTime(){
+		return times;
 	}
 	
 	/* return node type */
@@ -247,5 +260,16 @@ public class WhereClause {
 	public List<WhereExpr> getWhereExprs(){
 		return this.where_exprs;
 	}
-
+	
+	public void fix(HashMap<IloNumVar, Double> fixedmap, HashMap<Expression, IloNumVar> expressionmap) throws Exception {
+		for(WhereExpr where : where_exprs) {
+			where.fix(fixedmap, expressionmap);
+		}
+	}
+	public WhereClause clone() {
+		WhereClause cloned = new WhereClause(this.operator);
+		for(WhereExpr where : this.where_exprs)
+			cloned.where_exprs.add(where.clone());
+		return cloned;
+	}
 }

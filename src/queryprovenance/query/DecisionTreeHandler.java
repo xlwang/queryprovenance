@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 import queryprovenance.database.DatabaseState;
+import queryprovenance.database.Tuple;
 import queryprovenance.expression.Expression;
 import queryprovenance.expression.VariableExpression;
 import weka.classifiers.trees.J48;
@@ -26,7 +27,7 @@ public class DecisionTreeHandler {
 	private J48 tree; // J48 tree
 	Map<String, WhereExpr> map;
 	
-	long[] timestamps = new long[4];
+	long[] times = new long[3];
 	
 	public DecisionTreeHandler(){
 		//initialize J48 decidion tree
@@ -35,14 +36,20 @@ public class DecisionTreeHandler {
 	}
 	
 	/* build decision tree given fileanme and parameters */
-	public List<WhereExpr> buildTree(WhereClause where, String filename) throws Exception{
+	public List<WhereExpr> buildTree(WhereClause where, DatabaseState pre, HashMap<Integer, String> classinfo) throws Exception{
 		// define fixed where expression list
 		List<WhereExpr> fixed_values;
 		
-		timestamps[1] = System.nanoTime(); // get time stamp
+		// prepare 
+		long starttime = System.nanoTime();
+		prepareARFF(where, pre, classinfo);
+		long endtime = System.nanoTime(); // get time stamp
+		times[0] = (endtime - starttime);
+		
 		// read file
+		starttime = System.nanoTime();
 		BufferedReader reader = new BufferedReader(
-                                                   new FileReader(filename));
+                                                   new FileReader("./data/feature.arff"));
 		Instances data = new Instances(reader);
 		reader.close();
 		
@@ -52,21 +59,24 @@ public class DecisionTreeHandler {
 		// ClassifierTree
 		tree.buildClassifier(data);
 		
-		timestamps[2] = System.nanoTime(); // get time stamp
+		endtime = System.nanoTime(); // get time stamp
+		times[1] = (endtime - starttime);
 		
 		// convert into conditional rules
+		starttime = System.nanoTime();
         Map<String, DNF> valueTraces = J48Parser.parse(tree, data);
 		
         // return result
 		List<WhereExpr> result = this.toConditionRules(where, valueTraces);
 		
-		timestamps[3] = System.nanoTime(); // get time stamp
+		endtime = System.nanoTime(); // get time stamp
+		times[2] = (endtime - starttime);
 		
 		return result;
 	}
 	
-	public long[] getTimeStamps(){
-		return timestamps;
+	public long[] getTime(){
+		return times;
 	}
 	
 	/* convert tree into a set of condition rules*/
@@ -108,7 +118,7 @@ public class DecisionTreeHandler {
 	}
 	
 	/* prepare input file for Decision tree solver */
-	public void prepareARFF(WhereClause where, DatabaseState pre, HashMap<String, String> classinfo) throws Exception {
+	public void prepareARFF(WhereClause where, DatabaseState pre, HashMap<Integer, String> classinfo) throws Exception {
 		
 		// prepare file for Decision tree solver
 		File filename = new File("./data/feature.arff");
@@ -134,15 +144,15 @@ public class DecisionTreeHandler {
 		
 		// write data from dbstate
 		String[] column_names = pre.getColumnNames();
-		for(String key: pre.getKeySet()){
+		for(Integer key: pre.getKeySet()){
 			// for every tuple
-			String[] tuple_values = pre.getTuple(key);
+			Tuple tuple = pre.getTuple(key);
 			
 			// get feature info from each where expression
 			for(WhereExpr expr: where.getWhereExprs()){
 				// update attributes' values
 				for(int i = 0; i < column_names.length; ++i)
-					expr.getAttrExpr().setVariable(column_names[i], Double.valueOf(tuple_values[i]));
+					expr.getAttrExpr().setVariable(column_names[i], Double.valueOf(tuple.getValue(i)));
 				writer.write(String.valueOf(expr.getAttrExpr().Evaluate()) + ",");
 			}
 			

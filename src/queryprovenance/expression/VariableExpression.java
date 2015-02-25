@@ -1,8 +1,17 @@
 package queryprovenance.expression;
 
+import ilog.concert.IloException;
+import ilog.concert.IloNumExpr;
+import ilog.concert.IloNumVar;
+import ilog.cplex.IloCplex;
+
 import java.util.ArrayList;
 import java.util.EmptyStackException;
+import java.util.HashMap;
 import java.util.List;
+
+import queryprovenance.database.Table;
+import queryprovenance.query.CplexHandler;
 
 public class VariableExpression extends Expression{
 	String name;
@@ -48,8 +57,9 @@ public class VariableExpression extends Expression{
 	
 	/* set variable expression value */
 	public void setVariable(String ex_name, Double val) {
-		if(ex_name.toLowerCase().equals(this.name.toLowerCase()))
+		if(ex_name.toLowerCase().trim().equals(this.name.toLowerCase().trim())){
 			value = val;
+		}
 	}
 	
 	/* return variable expression value */
@@ -124,5 +134,56 @@ public class VariableExpression extends Expression{
 	/* clone variable */
 	public Expression clone(){
 		return new VariableExpression(this.name, this.value, this.isTrue);
+	}
+
+	@Override
+	public IloNumExpr convertExpr(IloCplex cplex, HashMap<IloNumVar, Double> varmap, HashMap<Expression, IloNumVar> exprmap, IloNumVar[] preattribute, Table table,
+			boolean option) throws Exception {
+		IloNumExpr expr;
+		IloNumVar para;
+		if(option && !isTrue) {
+			 // is a parameter
+			if(!exprmap.containsKey(this)){
+				para = cplex.numVar(Double.MIN_VALUE, Double.MAX_VALUE);
+				varmap.put(para, value);
+				exprmap.put(this, para);
+			} else {
+				para = exprmap.get(this);
+			}
+		} else {
+			if(isTrue) { // is an attribute
+				if(table.getColumnIdx(name) >= 0)
+					para = preattribute[table.getColumnIdx(name)];
+				else 
+					throw new IllegalArgumentException("BAD expression name " + name);
+			} else {
+				para = cplex.numVar(value, value);
+			}
+		}
+		expr = cplex.sum(para, 0);
+		return expr;
+	}
+	
+	@Override
+	public void fixExpression(HashMap<IloNumVar, Double> fixedmap,
+			HashMap<Expression, IloNumVar> expressionmap) throws Exception {
+		if(expressionmap.containsKey(this)) {
+			IloNumVar var = expressionmap.get(this);
+			double fixedvalue = fixedmap.get(var);
+			this.value = fixedvalue;
+		}
+		
+	}
+	
+	public boolean compare(Expression expr) {
+		if(this.type == expr.type) {
+			VariableExpression expr_o = (VariableExpression) expr;
+			if(!isTrue) {
+				return Math.abs(value - expr_o.value) < 0.1;
+			} else {
+				return name.toLowerCase().equals(expr_o.name.toLowerCase());
+			}
+		}
+		return false;
 	}
 }

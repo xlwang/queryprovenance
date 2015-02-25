@@ -1,4 +1,4 @@
-package queryprovenance.query;
+package queryprovenance.database;
 
 
 public class Table {
@@ -6,15 +6,15 @@ public class Table {
 		STR, NUM  // column types
 	}
 
-	int keyidx = -1;
-	String name;
-	String[] columns;
-	Type[] types;
+	private int keyidx = -1;
+	private String name;
+	private String[] columns;
+	private Type[] types;
 
 	// each element stores the corresponding column's domain
 	// NUM: [minint, maxint]
 	// STR: String[] of all possible string values
-	Object[] domains;  
+	private Object[] domains;  
 
 	// should only be used when sure that name is only attribute that is needed
 	public Table(String name) {
@@ -58,5 +58,28 @@ public class Table {
 	public String getPrimaryKey() {
 		return columns[keyidx];
 	}
+	
+	public void setName(String n_) {
+		this.name = n_;
+	}
+	
+	public void setColumns(String[] c_) {
+		this.columns = c_;
+	}
+	public int getKeyIdx() {
+		return this.keyidx;
+	}
+	
+	public int getColumnIdx(String column_name) {
+		for(int i = 0; i < columns.length; ++i) {
+			if (column_name.toLowerCase().equals(columns[i].toLowerCase()))
+				return i;
+		}
+		return -1;
+	}
 
+	public String getColumnName(int idx) {
+		return this.columns[idx];
+	}
+	
 }

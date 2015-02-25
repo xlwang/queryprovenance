@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 
 import queryprovenance.database.DatabaseState;
+import queryprovenance.database.Table;
+import queryprovenance.database.Tuple;
 
 public class InsertQuery extends Query {
 	
@@ -15,8 +17,8 @@ public class InsertQuery extends Query {
 	
 	
 	/* prepare data for insert query*/
-	public HashMap<String, String[]> prepareData(DatabaseState stat){
-		HashMap<String, String[]> datavalues = new HashMap<String, String[]>();
+	public HashMap<String, Tuple> prepareData(DatabaseState stat){
+		HashMap<String, Tuple> datavalues = new HashMap<String, Tuple>();
 		
 		// get primary keys
 		String keys = super.from.getPrimaryKey();
@@ -43,8 +45,9 @@ public class InsertQuery extends Query {
 				for(int i = 0; i < column_names.length; ++i)
 					if(keys.equals(column_names[i]))
 						key_value = splited_value[i];
-				if(stat.containTuple(key_value))
-					datavalues.put(key_value, stat.getTuple(key_value));
+				Integer keyvalue = Integer.valueOf(key_value);
+				if(stat.containTuple(keyvalue))
+					datavalues.put(key_value, stat.getTuple(keyvalue));
 				else
 					datavalues.put(key_value, null);
 			}
@@ -58,8 +61,8 @@ public class InsertQuery extends Query {
 		timestamps[0] = System.nanoTime();
 		List<String> fixed_values = new ArrayList<String>();
 		// try to fix insert query
-		HashMap<String, String[]> prevalues = this.prepareData(pre);
-		HashMap<String, String[]> nextvalues = this.prepareData(next);
+		HashMap<String, Tuple> prevalues = this.prepareData(pre);
+		HashMap<String, Tuple> nextvalues = this.prepareData(next);
 		timestamps[1] = System.nanoTime();
 		// update insert query
 		if(prevalues.size() == nextvalues.size()){
@@ -75,9 +78,9 @@ public class InsertQuery extends Query {
 	}
 	
 	/* convert string array of values into single string*/
-	public String getValueStr(String[] value){
+	public String getValueStr(Tuple tuple){
 		String valuestr = "";
-		for(String val: value)
+		for(String val: tuple.values)
 			valuestr = valuestr + val + ",";
 		valuestr = valuestr.substring(0, valuestr.length()-1);
 		return valuestr;

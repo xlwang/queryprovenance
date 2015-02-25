@@ -1,4 +1,4 @@
-package queryprovenance.harness;
+package queryprovenance.problemsolution;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -8,6 +8,8 @@ import queryprovenance.database.DatabaseHandler;
 import queryprovenance.database.DatabaseState;
 import queryprovenance.database.DatabaseStates;
 import queryprovenance.database.Table;
+import queryprovenance.harness.ExpParams;
+import queryprovenance.harness.QueryParams;
 import queryprovenance.query.Query;
 
 public class QueryLog extends ArrayList<Query>{

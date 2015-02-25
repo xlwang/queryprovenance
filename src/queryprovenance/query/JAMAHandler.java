@@ -18,7 +18,7 @@ public class JAMAHandler {
 	double[][] arrayb;
 	double[][] arrayx;
 	List<Expression> variables;
-	long[] timestamps = new long[4];
+	long[] times = new long[3];
 	
 	/* JAMA solver */
 	public JAMAHandler(){	
@@ -33,29 +33,35 @@ public class JAMAHandler {
 			if(!(vallist.length > 0))
 				return null;
 		}
-		timestamps[0] = System.nanoTime();
+		long starttime = System.nanoTime();
 		// prepare data
 		this.prepareData(set, column_names, pre_values_all, next_values_all);
 		A = new Matrix(arrayA);
 		b = new Matrix(arrayb);
-		timestamps[1] = System.nanoTime();
+		long endtime = System.nanoTime();
+		times[0] = endtime - starttime;
+		starttime = System.nanoTime();
 		try{
-		x = A.solve(b);
-		
-		timestamps[2] = System.nanoTime();
-		arrayx = x.getArray();
-		// convert back
-		List<SetExpr> fixed_set = this.toConditionRules(set);
-		timestamps[3] = System.nanoTime();
-		return fixed_set;
+			x = A.solve(b);
+			endtime = System.nanoTime();
+			times[1] = endtime - starttime;
+			starttime = System.nanoTime();
+			arrayx = x.getArray();
+			// convert back
+			List<SetExpr> fixed_set = this.toConditionRules(set);
+			endtime = System.nanoTime();
+			times[2] = endtime - starttime;
+			return fixed_set;
 		} catch (RuntimeException e){
+			endtime = System.nanoTime();
+			times[1] = endtime - starttime;
 			System.out.print("error");
 			return null;
 		}
 	}
 	
-	public long[] getTimeStamps(){
-		return timestamps;
+	public long[] getTime(){
+		return times;
 	}
  	/* Initialize solver by assign A, b matrix values*/
 	public void prepareData(SetClause set, String[] column_names, ArrayList<String[]> pre_values_all, ArrayList<String[]> next_values_all) throws Exception{

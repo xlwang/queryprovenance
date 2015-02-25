@@ -99,8 +99,10 @@ Conditions, given a database ${\cal D}$ and query log $qlog$:
 \item {\bf $N_{dim}$:} Dimensionality of the database.
 \item {\bf $N_q$:} Vary number of queries in $qlog$.
 \item {\bf $N_{pred}$:} The number of predicates in each UPDATE query's WHERE condition.
-\item {\bf $N_{attrs}$: } When corrupting the log, the number of attributes that are corrupted.
-\item {\bf $Idx \in [0, 1]$: } The index of the query in the query log that was corrupted as a percentage of the query log.  
+\item {\bf $N_{ins}$: } When corrupting the log, the number of values in INSERT to corrupt.
+\item {\bf $N_{set}$: } When corrupting the log, the number of clauses in SET that are corrupted.
+\item {\bf $N_{where}$: } When corrupting the log, the number of attributes in the WHERE clause that are corrupted.
+\item {\bf $idx \in [0, 1]$: } The index of the query in the query log that was corrupted as a percentage of the query log.  
       For example $Idx = 0.0$ is the oldest query in the log, whereas $Idx = 1.0$ is the most recent query position.
 \item {\bf $p_{I}$: } Percentage of INSERT queries in the query log (as compared to UPDATEs).
 \item {\bf $p_{pk}$: } Percentage of UPDATE queries with primary key filter clauses as compared to range clauses over non-primary key attributes.
@@ -159,7 +161,7 @@ location of the query, and the number of attributes that are corrupted
 \item $N_q \in \{10, 20, 50, 100\}$
 \item $N_{dim} = 4$
 \item $N_{pred} \in \{1, 2, 3\}$
-\item $N_{attrs} = \{1, 2\}$
+\item $N_{where} = \{1, 2\}$
 \item $Idx = \{0, 0.5, 1\}$
 \end{itemize}
 

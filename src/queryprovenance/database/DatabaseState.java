@@ -10,265 +10,242 @@ import java.util.Set;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
+import queryprovenance.database.Table.Type;
 import queryprovenance.problemsolution.Complaint;
-import queryprovenance.query.Table;
 
 public class DatabaseState {
-	//private ResultSet state; // tuple values in this state
-	private HashMap<String, String[]> state; 
-	private String[] column_names;	// column/attribute names in the state
-	private String state_query; // query to retrieve state from database
-	private String primary_key; // primary keys of tuples in this state
-	private String table_name; // tables involved in this state
-	
-	/* initialize database state*/
-	public DatabaseState(DatabaseHandler database, Table table) throws Exception{
-		
-		state = new HashMap<String, String[]>(); // initialize state information
-		this.table_name = table.getName();
-		primary_key = table.getPrimaryKey(); // get primaryKey from the data
-		
-		ResultSet result;
-		if(table_name !=null) {
 
-			// get state query prepared
-			state_query = "select * from "+table_name+";";
+		//private ResultSet state; // tuple values in this state
+		private HashMap<Integer, Tuple> state; 
+		private Table table;
+		
+		/* initialize database state*/
+		public DatabaseState(DatabaseHandler database, Table table) throws Exception{
 			
-			// execute the state query and get returned result set
-			result = database.queryExecution(state_query);
+			state = new HashMap<Integer, Tuple>(); // initialize state information
+			this.table = table;
 			
-			// get meta data
-			ResultSetMetaData rsmd = (ResultSetMetaData) result.getMetaData();
-			int columncount = rsmd.getColumnCount();
-			column_names = new String[columncount];
-			for(int i=1; i<=columncount; ++i){
-				column_names[i-1] = rsmd.getColumnLabel(i);
-			}
-			// prepare state information
-			while(result.next()){
-				String[] tuple = new String[columncount];
-				String tuplekey = "";
-				for(int i = 1; i<=columncount; ++i){
-					tuple[i-1] = result.getString(i);
-					if(primary_key.equals(column_names[i-1]))
-						tuplekey = result.getString(i);
+			ResultSet result;
+			if(table.getName() !=null) {
+
+				// get state query prepared
+				String state_query = "select * from "+table.getName()+";";
+				
+				// execute the state query and get returned result set
+				result = database.queryExecution(state_query);
+				
+				// get table information
+				ResultSetMetaData rsmd = (ResultSetMetaData) result.getMetaData();
+				int columncount = rsmd.getColumnCount();
+				HashMap<String, Integer> column_map = new HashMap<String, Integer>();
+				for(int i=1; i<=columncount; ++i){
+					column_map.put(rsmd.getColumnLabel(i), i);
 				}
-				state.put(tuplekey, tuple);
-			}			
-		}
-	}
-	public void clear(){
-		this.state.clear();
-	}
-	public DatabaseState(DatabaseHandler database, String table_name) throws Exception{
-		
-		table_name = table_name.toLowerCase().trim();
-		state = new HashMap<String, String[]>(); // initialize state information
-		this.table_name = table_name;
-		//HashSet<String> primary_key = new HashSet<String>(); // get primaryKey from the data
-		
-		DatabaseMetaData dbmd = database.getMetaData(); // get meta data from the database, initialize primary key, involved column information
-		ResultSet result;
-		if(table_name !=null) {
-			state_query = "select * from "; // initialize state query
-			state_query = state_query + table_name +";";
-			
-			// retrieve primary key in this table
-			ResultSet tabkeys = dbmd.getPrimaryKeys(null, null, table_name);  
-			
-			while(tabkeys.next()){
-				primary_key = tabkeys.getString(4);
-			}
-			
-			// execute the state query and get returned result set
-			// System.out.println(state_query);
-			result = database.queryExecution(state_query);
-			
-			// get meta data
-			ResultSetMetaData rsmd = (ResultSetMetaData) result.getMetaData();
-			int columncount = rsmd.getColumnCount();
-			column_names = new String[columncount];
-			for(int i=1; i<=columncount; ++i){
-				column_names[i-1] = rsmd.getColumnLabel(i);
-			}
-			// prepare state information
-			while(result.next()){
-				String[] tuple = new String[columncount];
-				String tuplekey = "";
-				for(int i = 1; i<=columncount; ++i){
-					tuple[i-1] = result.getString(i);
-					if(primary_key.equals(column_names[i-1]))
-						tuplekey = result.getString(i);
-				}
-				state.put(tuplekey, tuple);
-			}			
-		}
-	}
-
-
-	/* return D*, a correct database state by given a set of complaints*/
-	public DatabaseState getTrueState(Complaint complaint_set){
-		// to be implemented
-		return null;
-	}
-	
-	/* compose check query of one tuple */
-	public String getCheckQuery(String[] data){
-		if(data.length!=column_names.length)
-			return null;
-		String checkquery = state_query.substring(0,state_query.length()-1) + getCheckCondition(data);
-		return checkquery;
-	}
-	
-	/* compose check conditions given one tuple*/
-	public String getCheckCondition(String[] data){
-		String checkcondition = " where ";
-		for(int i=0;i<column_names.length;++i){
-			if(primary_key.contains(column_names[i]))
-				checkcondition = checkcondition+column_names[i]+"="+data[i]+" and ";
-		}
-		checkcondition = checkcondition.substring(0, checkcondition.length()-4)+";";
-		return checkcondition;
-	}
-	
-	/* compare two database state */
-	public HashMap<String, String> compare(DatabaseState compare_to_state){
-		HashMap<String, String> check_list = new HashMap<String, String>();
-		for(String key:this.state.keySet()){
-			String[] compare_to_value, value;
-			String isSame;
-			if(compare_to_state.containTuple(key)){
-				compare_to_value = compare_to_state.getTuple(key);
-				value = state.get(key);
-				if(compare_to_value.length == value.length){
-					isSame = "g";
-					for(int i=0; i< value.length; ++i){
-						if(!compare_to_value[i].equals(value[i])){
-							isSame = "b";
-							break;
-						}
+				
+				// prepare state information
+				while(result.next()){
+					Tuple tuple = new Tuple(columncount);
+					for(int i = 0; i < table.getColumns().length; ++i) {
+						tuple.setValue(i, result.getString(column_map.get(table.getColumns()[i])));
 					}
+					state.put(Integer.valueOf(tuple.getValue(table.getKeyIdx())), tuple);
+				}			
+			}
+		}
+		
+		/* initialize database state given table name */ 
+		/* initialize database state*/
+		public DatabaseState(DatabaseHandler database, String tablename) throws Exception{
+			
+			state = new HashMap<Integer, Tuple>(); // initialize state information
+			
+			ResultSet result;
+			if(tablename!=null) {
+
+				// get state query prepared
+				String state_query = "select * from " + tablename;
+				
+				// retrieve primary key in this table
+				DatabaseMetaData dbmd = database.getMetaData(); 
+				ResultSet tabkeys = dbmd.getPrimaryKeys(null, null, tablename.toLowerCase());  
+				String tablekey = "";
+				while(tabkeys.next()){
+					tablekey = tabkeys.getString(4);
 				}
+				
+				// execute the state query and get returned result set
+				result = database.queryExecution(state_query);
+				
+				// get table information
+				ResultSetMetaData rsmd = (ResultSetMetaData) result.getMetaData();
+				int columncount = rsmd.getColumnCount();
+				HashMap<String, Integer> column_map = new HashMap<String, Integer>();
+				String[] columnnames = new String[columncount];
+				int tablekeyidx = -1;
+				for(int i=1; i<=columncount; ++i){
+					column_map.put(rsmd.getColumnLabel(i), i);
+					columnnames[i-1] = rsmd.getColumnLabel(i);
+					if(tablekey.equals(columnnames[i-1]))
+						tablekeyidx = i-1;
+				}
+				this.table = new Table(tablename, columnnames, null, null, tablekeyidx);
+			
+				// prepare state information
+				while(result.next()){
+					Tuple tuple = new Tuple(columncount);
+					for(int i = 0; i < table.getColumns().length; ++i) {
+						tuple.setValue(i, result.getString(column_map.get(table.getColumns()[i])));
+					}
+					state.put(Integer.valueOf(tuple.getValue(table.getKeyIdx())), tuple);
+				}			
+			}
+		}
+		
+		public void clear(){
+			this.state.clear();
+		}
+		
+		/* return D*, a correct database state by given a set of complaints*/
+		public DatabaseState getTrueState(Complaint complaint_set){
+			// to be implemented
+			return null;
+		}
+		
+		/* compose check query of one tuple */
+		public String getCheckQuery(String[] data){
+			String state_query = "select * from " + table.getName();
+			if(data.length != table.getColumns().length) {
+				return null;
+			}
+			// add conditions (key) for current data
+			String checkquery = "select * from " + table.getName() + " where " + table.getPrimaryKey() + " = " + data[table.getKeyIdx()];
+			return checkquery;
+		}
+		
+		/* compare two database state */
+		public HashMap<Integer, String> compare(DatabaseState compare_to_state){
+			HashMap<Integer, String> check_list = new HashMap<Integer, String>();
+			// for each tuple
+			for(Integer key:this.state.keySet()){
+				String state_tuple = state.get(key).toString();
+				String compare_tuple = state.get(key).toString();
+				// check if the tuple values are the same
+				if(state_tuple.equals(compare_tuple))
+					check_list.put(key, "g");
 				else
-					isSame = "g";
+					check_list.put(key, "b");
 			}
-			else
-				isSame = "b";
-			check_list.put(key, isSame);
+			return check_list;
 		}
-		return check_list;
-	}
-	
-	/* compare two database state */
-	public boolean isSame(DatabaseState compare_to_state){
-		for(String key:this.state.keySet()){
-			String[] compare_to_value, value;
-			if(compare_to_state.containTuple(key)){
-				compare_to_value = compare_to_state.getTuple(key);
-				value = state.get(key);
-				if(compare_to_value.length == value.length){
-					for(int i=0; i< value.length; ++i){
-						if(!compare_to_value[i].equals(value[i])){
-							return false;
-						}
-					}
+		
+		/* compare two database state */
+		public boolean isSame(DatabaseState compare_to_state){
+			// for each tuple
+			for(Integer key:this.state.keySet()){
+				String state_tuple = state.get(key).toString();
+				String compare_tuple = state.get(key).toString();
+				// check if the tuple values are the same
+				if(!state_tuple.equals(compare_tuple))
+					return false;
+			}
+			return true;
+		}
+		
+		/* get values for selected column*/
+		public String[] getColumn(String column_name){
+			String[] result = new String[state.size()];
+			int colindex = table.getColumnIdx(column_name);
+			if(colindex < 0)
+				return null;
+			int count = 0;
+			for(Tuple tuple : state.values()){
+				result[count++] = tuple.getValue(colindex);
+			}
+			return result;
+		}
+		
+		/* get value for selected feature which is composed by columns */
+		public String[] getFeature(String column_name) throws Exception{
+			String[] result = new String[state.size()];
+			int count = 0;
+		    int idx = table.getColumnIdx(column_name);
+		    if(idx != -1) {
+				for(Integer key : state.keySet()){
+					Tuple tuple = state.get(key);
+					result[count++] = String.valueOf(tuple.getValue(idx));
+				}
+		    }
+			return result;
+		}
+		
+		/* get value for selected feature which is composed by columns with given key list */
+		public String[] getFeature(String column_name, Set<String> tuple_list) throws Exception{
+			String[] result = new String[state.size()];
+			int count = 0;
+			int idx = table.getColumnIdx(column_name);
+			if(idx != -1) {
+				for(String key : tuple_list){
+					Tuple tuple = state.get(key);
+					result[count++] = String.valueOf(tuple.getValue(idx));
 				}
 			}
-			else
-				return false;
+			return result;
 		}
-		return true;
-	}
-	
-	/* get values for selected column*/
-	public String[] getColumn(String colname){
-		String[] result = new String[state.size()];
-		int colindex = -1;
-		for(int i=0; i<column_names.length; ++i){
-			if(colname.equals(column_names[i])){
-				colindex = i;
-				break;
+		/* get key set*/
+		public Set<Integer> getKeySet(){
+			return this.state.keySet();
+		}
+	 	/* check whether a tuple exists in the state based on its key*/
+		public boolean containTuple(Integer key){
+			return this.state.containsKey(key);
+		}
+		
+		/* get tuple values*/
+		public Tuple getTuple(Integer key){
+			if(state.containsKey(key)) {
+				return this.state.get(key);
+			} else {
+				String[] emptyvalue = new String[table.getColumns().length];
+				for(int i = 0; i < emptyvalue.length; ++i)
+					emptyvalue[i] = String.valueOf(Double.MIN_VALUE);
+				Tuple empty = new Tuple(emptyvalue);
+				return empty;
 			}
 		}
-		if(colindex<0)
+		
+		/* get tuple values*/
+		public String getValue(String key, String column_name){
+			Tuple tuple = state.get(key);
+			int idx = table.getColumnIdx(column_name);
+			if(idx != -1)
+				return tuple.getValue(idx);
 			return null;
-		int count = 0;
-		for(String[] values:state.values()){
-			result[count++] = values[colindex];
 		}
-		return result;
-	}
-	/* get value for selected feature which is composed by columns */
-	public String[] getFeature(String feature_name) throws Exception{
-		String[] result = new String[state.size()];
-		int count = 0;
-		ScriptEngineManager mgr = new ScriptEngineManager();
-	    ScriptEngine engine = mgr.getEngineByName("JavaScript");
-		for(String key:state.keySet()){
-			String[] values = state.get(key);
-			String current_feature = feature_name;
-			for(int i=0; i< values.length; ++i){
-				current_feature = current_feature.replaceAll(column_names[i], values[i]);
-			}
-			result[count++] = engine.eval(current_feature).toString();
+		
+		/* get state size*/
+		public int size(){
+			return state.size();
 		}
-		return result;
-	}
-	public String[] getFeature(String feature_name, Set<String> key_list) throws Exception{
-		String[] result = new String[state.size()];
-		int count = 0;
-		ScriptEngineManager mgr = new ScriptEngineManager();
-	    ScriptEngine engine = mgr.getEngineByName("JavaScript");
-		for(String key:key_list){
-			String[] values = state.get(key);
-			String current_feature = feature_name;
-			for(int i=0; i< values.length; ++i){
-				current_feature = current_feature.replaceAll(column_names[i], values[i]);
-			}
-			result[count++] = engine.eval(current_feature).toString();
+		
+		public boolean equals(DatabaseState o) {
+			if (o == null) return false;
+			return (new Complaint(this, o)).size() == 0;
 		}
-		return result;
-	}
-	/* get key set*/
-	public Set<String> getKeySet(){
-		return this.state.keySet();
-	}
- 	/* check whether a tuple exists in the state based on its key*/
-	public boolean containTuple(String key){
-		return this.state.containsKey(key);
-	}
+		
+		/* get primary key set */
+		public String getPrimaryKey(){
+			return table.getPrimaryKey();
+		}
+		
+		public String[] getColumnNames() {
+			return table.getColumns();
+		}
+		
+		/* return table*/
+		public Table getTable() {
+			return this.table;
+		}
 	
-	/* get tuple values*/
-	public String[] getTuple(String key){
-		return this.state.get(key);
-	}
-	
-	/* get tuple values*/
-	public String getValue(String key, String col){
-		String[] values = this.state.get(key);
-		for(int i = 0; i < column_names.length; ++i)
-			if(column_names[i].equals(col))
-				return values[i];
-		return null;
-	}
-	
-	/* get column/attribute names */
-	public String[] getColumnNames(){
-		return column_names;
-	}
-	
-	/* get state size*/
-	public int size(){
-		return state.size();
-	}
-	
-	public boolean equals(DatabaseState o) {
-		if (o == null) return false;
-		return (new Complaint(this, o)).size() == 0;
-	}
-	
-	/* get primary key set */
-	public String getPrimaryKey(){
-		return this.primary_key;
-	}
 }
+
+

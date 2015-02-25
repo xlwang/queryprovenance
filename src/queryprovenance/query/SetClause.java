@@ -1,5 +1,7 @@
 package queryprovenance.query;
 
+import ilog.concert.IloNumVar;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -7,6 +9,7 @@ import java.util.List;
 import java.util.Random;
 
 import queryprovenance.database.DatabaseState;
+import queryprovenance.database.Table;
 import queryprovenance.expression.AdditionExpression;
 import queryprovenance.expression.Expression;
 import queryprovenance.expression.VariableExpression;
@@ -16,7 +19,7 @@ import queryprovenance.query.WhereClause.Op;
 
 public class SetClause {
 	private List<SetExpr> set_exprs; // a set of conditions
-	private long[] timestamps = new long[4];
+	private long[] times = new long[3];
 	
 	public SetClause(){
 		set_exprs = new ArrayList<SetExpr>();
@@ -40,7 +43,7 @@ public class SetClause {
 		HashSet<Integer> selected = new HashSet<Integer>();
 		for (int i = 0; i < 1; i++) {
 			int idx = rand.nextInt(ncols);
-			while(idx == t.keyidx|| selected.contains(idx))
+			while(idx == t.getKeyIdx() || selected.contains(idx))
 				idx = rand.nextInt(ncols);
 			selected.add(idx);
 			
@@ -60,6 +63,12 @@ public class SetClause {
 			}
 		}
 		return new SetClause(conds);
+	}
+	
+	public void fix(HashMap<IloNumVar, Double> fixedmap, HashMap<Expression, IloNumVar> expressionmap) throws Exception {
+		for(SetExpr set : set_exprs) {
+			set.fix(fixedmap, expressionmap);
+		}
 	}
 	
 	public static SetClause generate(SetClause set, QueryParams params){
@@ -103,30 +112,30 @@ public class SetClause {
 		
 		
 		// gather class information
-		HashMap<String, String> classinfo = pre.compare(next);
+		HashMap<Integer, String> classinfo = pre.compare(next);
 
 		this.updateValues(pre_values_all, next_values_all, pre, next, classinfo);
 
 		JAMAHandler jama = new JAMAHandler();
 		SetClause fixed_set = new SetClause(jama.solve(this, value_names, pre_values_all, next_values_all));
 		
-		timestamps = jama.getTimeStamps();
+		times = jama.getTime();
 		
 		return fixed_set;
 	}
 	
-	public long[] getTimeStamps(){
-		return timestamps;
+	public long[] getTime(){
+		return times;
 	}
 	/* update previous state, next state with only relevant tuples*/
-	public void updateValues(ArrayList<String[]> pre_values_all, ArrayList<String[]> next_values_all, DatabaseState pre, DatabaseState next, HashMap<String, String> classinfo){
+	public void updateValues(ArrayList<String[]> pre_values_all, ArrayList<String[]> next_values_all, DatabaseState pre, DatabaseState next, HashMap<Integer, String> classinfo){
 		String[] colname_pre = pre.getColumnNames();
 		String[] colname_next = next.getColumnNames();
-		for(String key:classinfo.keySet()){
+		for(Integer key:classinfo.keySet()){
 			// if the values are changed
 			if(classinfo.get(key).equals("b")){
-				pre_values_all.add(pre.getTuple(key));
-				next_values_all.add(next.getTuple(key));
+				pre_values_all.add(pre.getTuple(key).values);
+				next_values_all.add(next.getTuple(key).values);
 			}
 		}
 
@@ -135,5 +144,12 @@ public class SetClause {
 	/* return conditions*/
 	public List<SetExpr> getSetExprs(){
 		return this.set_exprs;
+	}
+	
+	public SetClause clone() {
+		SetClause cloned = new SetClause();
+		for(SetExpr set : this.set_exprs)
+			cloned.set_exprs.add(set.clone());
+		return cloned;
 	}
 }

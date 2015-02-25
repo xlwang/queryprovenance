@@ -1,7 +1,7 @@
 package queryprovenance.harness;
 
+import queryprovenance.database.Table;
 import queryprovenance.query.Query;
-import queryprovenance.query.Table;
 
 /*
  * Parameters for generating a Query object

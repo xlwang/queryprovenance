@@ -61,8 +61,8 @@ public class TableStats {
 			_str_stats.put(col, new HashSet<String>());
 		}
 		
-		for (String key : db.getKeySet()) {
-			String[] vals = db.getTuple(key);
+		for (Integer key : db.getKeySet()) {
+			String[] vals = db.getTuple(key).values;
 			
 			for (int colidx = 0; colidx < schema.length; colidx++) {
 				String attr = schema[colidx];
