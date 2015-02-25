@@ -71,7 +71,13 @@ public class TableStats {
 					_num_stats.get(attr).add(val);
 					numericColumns.add(attr);
 				} catch(Exception e) {
-					_str_stats.get(attr).add(vals[colidx]);
+					try {
+						int val = (int)Float.parseFloat(vals[colidx]);
+						_num_stats.get(attr).add(val);
+						numericColumns.add(attr);
+					} catch(Exception ee) {
+						_str_stats.get(attr).add(vals[colidx]);
+					}
 				}
 			}
 		}
