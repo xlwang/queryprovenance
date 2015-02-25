@@ -2,9 +2,11 @@ package queryprovenance.problemsolution;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 import queryprovenance.database.DatabaseState;
 
@@ -41,34 +43,53 @@ public class TableStats {
 		
 	}
 	
+	
+	/*
+	 * Compute min/max statistics for numeric attributes, and 
+	 * distinct values for str attributes
+	 */
 	public static TableStats fromDatabaseState(DatabaseState db) {
 		TableStats stats = new TableStats();
 		String[] schema = db.getColumnNames();
-		Hashtable<String, List<Integer>> allstats = new Hashtable<String, List<Integer>>();
+		Hashtable<String, List<Integer>> _num_stats = new Hashtable<String, List<Integer>>();
+		Hashtable<String, Set<String>> _str_stats = new Hashtable<String, Set<String>>();
+		Set<String> numericColumns = new HashSet<String>();
 		
 		// initialize allstats
 		for (String col : schema) {
-			allstats.put(col, new ArrayList<Integer>());
+			_num_stats.put(col, new ArrayList<Integer>());
+			_str_stats.put(col, new HashSet<String>());
 		}
 		
 		for (String key : db.getKeySet()) {
 			String[] vals = db.getTuple(key);
 			
 			for (int colidx = 0; colidx < schema.length; colidx++) {
-				allstats.get(schema[colidx]).add(Integer.parseInt(vals[colidx]));
+				String attr = schema[colidx];
+				try {
+					int val = Integer.parseInt(vals[colidx]);
+					_num_stats.get(attr).add(val);
+					numericColumns.add(attr);
+				} catch(Exception e) {
+					_str_stats.get(attr).add(vals[colidx]);
+				}
 			}
 		}
 		
 		for (String col : schema) {
-			List<Integer> vals = allstats.get(col);
-			int minv = Integer.MAX_VALUE;
-			int maxv = Integer.MIN_VALUE;
-			for (int v : vals) {
-				minv = Math.min(minv, v);
-				maxv = Math.max(maxv, v); 
+			if (numericColumns.contains(col)) {
+				List<Integer> vals = _num_stats.get(col);
+				int minv = Integer.MAX_VALUE;
+				int maxv = Integer.MIN_VALUE;
+				for (int v : vals) {
+					minv = Math.min(minv, v);
+					maxv = Math.max(maxv, v); 
+				}
+
+				stats.add(col,  minv, maxv);
+			} else {
+				stats.add(col, _str_stats.get(col));
 			}
-			
-			stats.add(col,  minv, maxv);
 		}
 		return stats;
 	}

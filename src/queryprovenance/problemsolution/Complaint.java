@@ -160,9 +160,7 @@ public class Complaint {
 
 				// pick random values for each attribute dictated by the Table statistics
 				for (int colidx = 0; colidx < schema.length; colidx++) {
-					int[] colstats = stats.get(schema[colidx]);
-					int val = rand.nextInt(colstats[1] - colstats[0]) + colstats[0];
-					vals[colidx] = String.valueOf(val);
+					vals[colidx] = stats.randomVal(schema[colidx]);
 				}
 			}
 		}
