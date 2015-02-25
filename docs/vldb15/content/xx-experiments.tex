@@ -56,9 +56,11 @@ final database states to measure performance and accuracy metrics.
 \subsubsection{Metrics}
 
 \begin{itemize}
-\item {\it Acc}: Percentage of complaints correctly modified
+\item {\it Fixrate}: Percentage of true complaints correctly modified
 \item {\it Err}: Percentage of errors introduced
-\item {\it Cost}: Execution time
+\item {\it Cost_{all,preproc,prep,solver}}: Execution times overall ($cost_{all}$), 
+      pre-processing time for XXX ($cost_{preproc}$), time for constructing the problem that is
+      passed to the solver ($cost_{prep}$), and the time to run the simplex solver ($cost_{solver}$).
 \item {\it $Dist_{measure}$}: Distance from corrected modification  
       (str distance, clause distance, numerical distance)
 \end{itemize}
@@ -135,7 +137,6 @@ Within each query log, we independently vary the log size, the
 database size, the complexity of the WHERE clause predicates, and
 location of the query, and the number of attributes that are corrupted
 (by replacing the constant with a random value within $[0, 100]$).
-
 
 
 
