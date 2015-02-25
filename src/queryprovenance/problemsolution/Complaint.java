@@ -12,111 +12,120 @@ import queryprovenance.database.DatabaseState;
 
 public class Complaint {
 	
-	public class SingleComplaint{
-		public String key;
-		public String[] values;
-		SingleComplaint(String key_, String[] values_){
-			key = key_;
-			values = values_;
-		}
-		
-		public SingleComplaint clone() {
-			String[] vals = new String[values.length];
-			return new SingleComplaint(key, vals);
-		}
-	}
-	
-	ArrayList<SingleComplaint> complaint_set;
-	Hashtable<String, SingleComplaint> complaint_ht;
+	Hashtable<Integer, SingleComplaint> compmap;
 	
 	public Complaint() {
-		complaint_set = new ArrayList<SingleComplaint>();
-		complaint_ht = new Hashtable<String, SingleComplaint>();
+		//complaint_set = new ArrayList<SingleComplaint>();
+		compmap = new Hashtable<Integer, SingleComplaint>();
 	}
 	
 	/* generateComplaintSet(databasestate1, databasestate2) */
-	public Complaint(DatabaseState db_state_clean, DatabaseState db_state){
-		complaint_ht = new Hashtable<String, SingleComplaint>();
+	public Complaint(DatabaseState ds, DatabaseState badds){
+		compmap = new Hashtable<Integer, SingleComplaint>();
 		
 		// initialize a complaint set by providing a "dirty" database state and a "clean" database state
-		complaint_set = new ArrayList<SingleComplaint>();
 		// add complaints from clean database state
-		for(String key:db_state_clean.getKeySet()){
-			if(db_state.containTuple(key)){
-				String[] values_clean = db_state_clean.getTuple(key);
-				String[] values = db_state.getTuple(key);
+		for(Integer key:ds.getKeySet()){
+			if(badds.containTuple(key)){
+				String[] values_clean = ds.getTuple(key).values;
+				String[] values = badds.getTuple(key).values;
 				boolean isSame = true;
 				for(int i = 0; i < values_clean.length; ++i){
 					if(!values_clean[i].equals(values[i]))
 						isSame = false;
 				}
 				if(!isSame)
-					complaint_set.add(new SingleComplaint(key, values_clean));
+					compmap.put(key, new SingleComplaint(key, values_clean));
 			}
 			else
-				complaint_set.add(new SingleComplaint(key, db_state_clean.getTuple(key)));
+				compmap.put(key, new SingleComplaint(key, ds.getTuple(key).values));
 		}
 		// add complaint from "dirty" database state
-		for(String key:db_state.getKeySet()){
-			if(!db_state_clean.containTuple(key))
-				complaint_set.add(new SingleComplaint(key, null));
+		for(Integer key:badds.getKeySet()){
+			if(!ds.containTuple(key))
+				compmap.put(key, new SingleComplaint(key, null));
 		}
+	}
+	
+	/* get partial complaints */ 
+	public Complaint getPart(double ratio){
 		
-		for (SingleComplaint sc: complaint_set) {
-			complaint_ht.put(sc.key, sc);
+		int size = compmap.size();
+		int reducedsize = (int) (size * ratio); // get size of reduced complaint
+		// must larger than 1
+		if(reducedsize < 1)
+			return this;
+		// define reduced complaint set
+		Object[] keys = compmap.keySet().toArray(); // get key list
+		Complaint reducedcomps = new Complaint(); // initial reduced complaint
+		while(reducedcomps.size() < reducedsize){
+			Random rand = new Random();
+			int ind = rand.nextInt(size);
+			reducedcomps.add(compmap.get(keys[ind]));
 		}
+		return reducedcomps;
 	}
 	
+	/* add single complaint */
 	public void add(SingleComplaint sc) {
-		complaint_set.add(sc);
-		complaint_ht.put(sc.key,  sc);
+		//complaint_set.add(sc);
+		compmap.put(sc.key,  sc);
 	}
 	
-	public Complaint clone() {
-		Complaint ret = new Complaint();
-		for (SingleComplaint sc : complaint_set) {
-			ret.add(sc.clone());
-		}
-		return ret;
+	/* add complaint by key value*/
+	public void add(Integer key, String[] value){
+		SingleComplaint comp = new SingleComplaint(key, value);
+		compmap.put(key, comp);
 	}
 	
-	public boolean contains(String key) {
-		return complaint_ht.contains(key);
+	/* check existance of key */
+	public boolean contains(Integer key) {
+		return compmap.contains(key);
 	}
 	
-	public SingleComplaint get(String key) {
-		return complaint_ht.get(key);
+	/* get single complaint by key */
+	public SingleComplaint get(Integer key) {
+		return compmap.get(key);
 	}
 	
-	public Set<String> keySet() {
-		return complaint_ht.keySet();
+	/* get complaint key set*/
+	public Set<Integer> keySet() {
+		return compmap.keySet();
 	}
 	
-	public SingleComplaint remove(String key) {
-		SingleComplaint sc = complaint_ht.remove(key);
-		complaint_set.remove(sc);
-		return sc;
-	}
-	
+	/* compare two complaints: this - o*/
 	public Complaint difference(Complaint o) {
 		Complaint ret = new Complaint();
-		for (String key : keySet()) {
-			if (!o.complaint_ht.containsKey(key)) {
+		for (Integer key : keySet()) {
+			if (!o.compmap.containsKey(key)) {
 				ret.add(this.get(key));
 			}
 		}
 		return ret;
 	}
 	
-	
+	/* compare two complaint: this intersect o*/
 	public Complaint intersect(Complaint o) {
 		return o.difference(this.difference(o));
 	}
 	
+	/* return the size of complaint */
 	public int size() {
-		return complaint_set.size();
+		return compmap.size();
 	}
 	
+	public Complaint clone() {
+		Complaint ret = new Complaint();
+		for (SingleComplaint sc : compmap.values()) {
+			ret.add(sc.clone());
+		}
+		return ret;
+	}
+	
+	public SingleComplaint remove(Integer key) {
+		SingleComplaint sc = compmap.remove(key);
+		return sc;
+	}
 	/*
 	 * @param stats table statistics 
 	 * First remove complaints randomly according to false negative percentage (fn)
@@ -133,7 +142,7 @@ public class Complaint {
 
 		// remove complaints for false negatives
 		if (fn > 0) {
-			List<String> ckeys = new ArrayList<String>();
+			List<Integer> ckeys = new ArrayList<Integer>();
 			ckeys.addAll(c.keySet());
 			Collections.shuffle(Arrays.asList(c.keySet()));
 			
@@ -146,17 +155,17 @@ public class Complaint {
 		// add false positive complaints
 		if (fp > 0) {
 			// List of tuple IDs that can be used to make false positives 
-			Set<String> allkeysSet = db.getKeySet();
+			Set<Integer> allkeysSet = db.getKeySet();
 			allkeysSet.removeAll(c.keySet());
-			List<String> allkeys = new ArrayList<String>();
+			List<Integer> allkeys = new ArrayList<Integer>();
 			allkeys.addAll(allkeysSet);
 
 			Random rand = new Random();
 			int numPos = (int)(ret.size() * (1 - fp) / fp);
 			String[] schema = db.getColumnNames();
 			for (int i = 0; i < numPos; i++) {
-				String key = allkeys.get(i);
-				String[] vals = db.getTuple(allkeys.get(i)).clone();
+				Integer key = allkeys.get(i);
+				String[] vals = db.getTuple(allkeys.get(i)).values.clone();
 
 				// pick random values for each attribute dictated by the Table statistics
 				for (int colidx = 0; colidx < schema.length; colidx++) {
@@ -167,4 +176,5 @@ public class Complaint {
 				
 		return ret;
 	}	
+
 }

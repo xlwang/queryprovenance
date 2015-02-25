@@ -18,10 +18,12 @@ public class Select {
 		throw new NotImplementedException();
 	}
 	
+	/* compare */
 	public List<String> difference(Select o) {
 		return new ArrayList<String>();
 	}
 	
+	/* convert to string*/
 	public String toString() {
 		return s;
 	}

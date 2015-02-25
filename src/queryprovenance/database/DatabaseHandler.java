@@ -55,9 +55,9 @@ public class DatabaseHandler {
 		public DatabaseMetaData getMetaData() throws Exception{
 			return db.getMetaData();
 		}
-		public void getConnected() throws Exception{
-			configProps.load(new FileInputStream("dbconn.config"));
-	        configProps.load(new FileInputStream("dbconn.config"));
+		public void getConnected(String configfile) throws Exception{
+			configProps.load(new FileInputStream(configfile));
+	        configProps.load(new FileInputStream(configfile));
 	        
 	        
 	        dbUrl        = configProps.getProperty("dbUrl");

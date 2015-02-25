@@ -1,6 +1,7 @@
 package queryprovenance.query;
 
 import queryprovenance.database.DatabaseState;
+import queryprovenance.database.Table;
 
 public class DeleteQuery extends Query{
 	WhereClause where_clause;
@@ -30,7 +31,7 @@ public class DeleteQuery extends Query{
 			WhereClause fixed_where = where_clause.solve(cplex, pre, next, bad, options);
 			if(fixed_where != null){
 				q.where = fixed_where;
-				timestamps = fixed_where.getTimeStamps();
+				super.times = fixed_where.getTime();
 				return q;
 			}
 			else
@@ -38,7 +39,4 @@ public class DeleteQuery extends Query{
 		}
 	}
 	
-	public long[] getTimeStamps(){
-		return timestamps;
-	}
 }

@@ -54,4 +54,12 @@ public abstract class OperationExpression extends Expression{
 		this.right.setName(ex, name_);
 	}
 	
+	public boolean compare(Expression expr) {
+		if(this.type == expr.type) {
+			OperationExpression expr_o = (OperationExpression) expr;
+			return left.compare(expr_o.left) && right.compare(expr_o.right);
+		}
+		return false;
+	}
+	
 }

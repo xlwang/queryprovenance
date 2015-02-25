@@ -1,6 +1,15 @@
 package queryprovenance.expression;
 
+import ilog.concert.IloNumExpr;
+import ilog.concert.IloNumVar;
+import ilog.cplex.IloCplex;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+
+import queryprovenance.database.Table;
+import queryprovenance.query.CplexHandler;
 /**
  * 
  * @author xlwang
@@ -52,6 +61,11 @@ public abstract class Expression {
 	
 	public abstract void setName(Expression ex, String name_); // set VariableExpression name 
 	
+	public abstract IloNumExpr convertExpr(IloCplex cplex, HashMap<IloNumVar, Double> varmap, HashMap<Expression, IloNumVar> exprmap, IloNumVar[] preattribute, Table table, boolean option) throws Exception;
+	
+	public abstract void fixExpression(HashMap<IloNumVar, Double> fixedmap, HashMap<Expression, IloNumVar> expressionmap) throws Exception;
+	
+	public abstract boolean compare(Expression expr);
 	/* return Expression type */
 	public Type getType(){ 
 		return type;

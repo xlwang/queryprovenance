@@ -1,8 +1,11 @@
 package queryprovenance.query;
 
+import ilog.concert.IloNumVar;
+
 import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import queryprovenance.expression.*;
 
 // ewu: I don't understand what SetExpr.expr is...
@@ -50,6 +53,10 @@ public class SetExpr {
 	/* get expression */
 	public Expression getExpr(){
 		return this.expr;
+	}
+	
+	public void fix(HashMap<IloNumVar, Double> fixedmap, HashMap<Expression, IloNumVar> expressionmap) throws Exception {
+		expr.fixExpression(fixedmap, expressionmap);
 	}
 	
 }

@@ -1,7 +1,15 @@
 package queryprovenance.expression;
 
+import ilog.concert.IloNumExpr;
+import ilog.concert.IloNumVar;
+import ilog.cplex.IloCplex;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+
+import queryprovenance.database.Table;
+import queryprovenance.query.CplexHandler;
 
 public class AdditionExpression extends OperationExpression{
 	 
@@ -37,6 +45,21 @@ public class AdditionExpression extends OperationExpression{
 	
 	public Expression clone(){
 		return new AdditionExpression(this.left.clone(), this.right.clone());
+	}
+	@Override
+	public IloNumExpr convertExpr(IloCplex cplex, HashMap<IloNumVar, Double> varmap, HashMap<Expression, IloNumVar> exprmap, IloNumVar[] preattribute, Table table,
+			boolean option) throws Exception {
+		IloNumExpr rightexpr = super.right.convertExpr(cplex, varmap, exprmap, preattribute, table, option);
+		IloNumExpr leftexpr = super.left.convertExpr(cplex, varmap, exprmap, preattribute, table, option);
+		IloNumExpr current = cplex.sum(leftexpr, rightexpr);
+		return current;
+	}
+	@Override
+	public void fixExpression(HashMap<IloNumVar, Double> fixedmap,
+			HashMap<Expression, IloNumVar> expressionmap) throws Exception {
+		right.fixExpression(fixedmap, expressionmap);
+		left.fixExpression(fixedmap, expressionmap);
+		
 	}
 
 }

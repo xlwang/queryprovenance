@@ -1,5 +1,9 @@
 package queryprovenance.query;
 
+import ilog.concert.IloNumVar;
+
+import java.util.HashMap;
+
 import queryprovenance.harness.QueryParams;
 import queryprovenance.expression.*;
 public class WhereExpr {
@@ -80,4 +84,10 @@ public class WhereExpr {
 	public Expression getVarExpr(){
 		return this.var;
 	}
+	
+	public void fix(HashMap<IloNumVar, Double> fixedmap, HashMap<Expression, IloNumVar> expressionmap) throws Exception {
+		// this.attr_expr.fixExpression(fixedmap, expressionmap);
+		this.var.fixExpression(fixedmap, expressionmap);
+	}
+	
 }
