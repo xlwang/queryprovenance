@@ -143,6 +143,7 @@ def gen_templates(nattrs, nset, nwhereeq, nwhererng, nqueries, iperc=0.33, uperc
 
 @click.command()
 @click.option('--bprint', is_flag=True)
+@click.option('--seed', default=0, help="Seed to set the random number generator.")
 @click.argument('nattrs', default=4)      
 @click.argument('nset', default=1)        
 @click.argument('nwhereeq', default=1)    
@@ -155,7 +156,7 @@ def gen_templates(nattrs, nset, nwhereeq, nwhererng, nqueries, iperc=0.33, uperc
 @click.argument('setcorrupt', default=1)
 @click.argument('wherecorrupt', default=1)
 def main(
-    bprint,
+    bprint, seed,
     nattrs, nset, nwhereeq, nwhererng, nqueries, insertperc, equalityperc,
     ncorrupt, insertcorrupt, setcorrupt, wherecorrupt
     ):
@@ -179,6 +180,8 @@ def main(
     wherecorrupt:   # of attrs in WHERE clause of UPDATE query to corrupt\n
 
   """
+  random.seed(seed)
+
   queries = [q for q in gen_templates(
     nattrs, nset, nwhereeq, nwhererng, nqueries, insertperc, equalityperc)]
   corruptedqueries = list(queries)
