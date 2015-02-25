@@ -103,12 +103,15 @@ Conditions, given a database ${\cal D}$ and query log $qlog$:
 
 \subsubsection{Dataset and Workload}
 
-Anant's workload?
+% Anant's workload?
 
-TPC-C
+\paragraph{TPC-C} We use the data and query workload over the {\it
+CUSTOMER} table in TPC-C~\cite{}.  We generate a database at scale
+1 with one warehouse, and keep only the queries that modify the
+{\it CUSTOMER} table.  We then randomly perturb a subset of the
+queries to generate the corrupted query log.
 
-\paragraph{Synthetic}
-
+\paragraph{Synthetic} 
 We generate an initial database of $N_{\cal D}$ random tuples.  
 The schema contains 5 attributes $a_1\ldots a_5$ with a value
 within $[0, 100]$ and a primary key $id$. 
