@@ -1,14 +1,19 @@
 package queryprovenance.problemsolution;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Random;
 
 import queryprovenance.database.DatabaseState;
 
 
 
-public class TableStats extends Hashtable<String, int[]> {
+public class TableStats {
+	Hashtable<String, int[]> num_stats;
+	Hashtable<String, List<String>> str_stats;
+	Random rand;
 	
 	/**
 	 * 
@@ -18,14 +23,25 @@ public class TableStats extends Hashtable<String, int[]> {
 
 
 	public TableStats() {
+		num_stats = new Hashtable<String, int[]>();
+		str_stats = new Hashtable<String, List<String>>();
+		rand = new Random();
+		rand.setSeed(0);
 	}
 	
 	public void add(String attr, int minv, int maxv) {
 		int[] range = new int[]{minv, maxv};
-		this.put(attr, range);
+		num_stats.put(attr, range);
 	}
 	
-	public static TableStats fromTable(DatabaseState db) {
+	public void add(String attr, Collection<String> vals) {
+		List<String> lvals = new ArrayList<String>();
+		lvals.addAll(vals);
+		str_stats.put(attr, lvals);
+		
+	}
+	
+	public static TableStats fromDatabaseState(DatabaseState db) {
 		TableStats stats = new TableStats();
 		String[] schema = db.getColumnNames();
 		Hashtable<String, List<Integer>> allstats = new Hashtable<String, List<Integer>>();
@@ -60,7 +76,12 @@ public class TableStats extends Hashtable<String, int[]> {
 	
 	
 	public String randomVal(String attr) {
-		
-		return null;
+		if (num_stats.contains(attr)) {
+			int[] colstats = num_stats.get(attr);
+			int val = rand.nextInt(colstats[1] - colstats[0]) + colstats[0];
+			return String.valueOf(val);
+		} 
+		List<String> vals = str_stats.get(attr);
+		return vals.get(rand.nextInt(vals.size()));
 	}
 }

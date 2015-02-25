@@ -125,11 +125,11 @@ public class Complaint {
 	public static Complaint addNoise(
 			Complaint c,
 			DatabaseState db,
-			TableStats stats, 
 			float fp, 
 			float fn) {
 		
 		Complaint ret = c.clone();
+		TableStats stats = TableStats.fromDatabaseState(db);
 
 		// remove complaints for false negatives
 		if (fn > 0) {
