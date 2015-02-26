@@ -163,7 +163,9 @@ def main(bprint, ncorrupt, insertcorrupt, setcorrupt, wherecorrupt):
       qtype = vals[0]
       if qtype not in query_funcs: continue
       f = query_funcs[qtype]
-      queries.append(f(vals[1:]))
+      q = f(vals[1:])
+      q["table"] = "CUSTOMER"
+      queries.append(q)
   corruptedqueries = list(queries)
 
   for idx in randrng(len(queries))[:ncorrupt]:

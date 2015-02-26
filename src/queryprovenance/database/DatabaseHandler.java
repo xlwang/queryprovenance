@@ -52,9 +52,11 @@ public class DatabaseHandler {
 	        	System.out.print(e);
 	        }
 		}
+		
 		public DatabaseMetaData getMetaData() throws Exception{
 			return db.getMetaData();
 		}
+		
 		public void getConnected(String configfile) throws Exception{
 			configProps.load(new FileInputStream(configfile));
 	        configProps.load(new FileInputStream(configfile));
@@ -85,6 +87,10 @@ public class DatabaseHandler {
 			}catch(Exception ex){
 			}
 			return result;
+		}
+		
+		public String getUrl() { 
+			return this.dbUrl;
 		}
 
 		//Close database and end connection

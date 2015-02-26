@@ -1,3 +1,4 @@
+import sys
 import json
 import random
 import click
@@ -7,7 +8,7 @@ def nextval(minv=0, maxv=100):
   return random.randint(minv, maxv)
 
 def randrng(n):
-  l = range(n)
+  l = range(int(n))
   random.shuffle(l)
   return l
 
@@ -61,13 +62,13 @@ def gen_delete_rng(attrs):
 def gen_insert(nattrs):
   return {
     "type": "INSERT",
-    "vals": [nextval() for i in xrange(nattrs)]
+    "vals": [nextval() for i in xrange(int(nattrs))]
   }
 
 def gen_create(nattrs):
   return {
     "type": "CREATE",
-    "attrs": map("a{0}".format, range(nattrs))
+    "attrs": map("a{0}".format, range(int(nattrs)))
   }
 
 def corrupt(query, nvcorrupt, nwcorrupt=0, nscorrupt=0):
@@ -117,16 +118,16 @@ def gen_templates(nattrs, nset, nwhereeq, nwhererng, nqueries, iperc=0.33, uperc
   create = gen_create(nattrs)
   setattrs = list(create['attrs'])
   random.shuffle(setattrs)
-  setattrs = setattrs[:nset]
+  setattrs = setattrs[:int(nset)]
   whereeqattrs = list(create['attrs'])
   random.shuffle(whereeqattrs)
-  whereeqattrs = whereeqattrs[:nwhereeq]
+  whereeqattrs = whereeqattrs[:int(nwhereeq)]
   whererngattrs = list(create['attrs'])
   random.shuffle(whererngattrs)
-  whererngattrs = whererngattrs[:nwhererng]
+  whererngattrs = whererngattrs[:int(nwhererng)]
 
 
-  for i in xrange(nqueries):
+  for i in xrange(int(nqueries)):
     if random.random() <= iperc:
       yield clone(gen_insert(nattrs))
     elif random.random() <= uperc:
@@ -143,6 +144,7 @@ def gen_templates(nattrs, nset, nwhereeq, nwhererng, nqueries, iperc=0.33, uperc
 
 @click.command()
 @click.option('--bprint', is_flag=True)
+@click.option("--out", default=None, help="output file name/path")
 @click.option('--seed', default=0, help="Seed to set the random number generator.")
 @click.argument('nattrs', default=4)      
 @click.argument('nset', default=1)        
@@ -156,7 +158,7 @@ def gen_templates(nattrs, nset, nwhereeq, nwhererng, nqueries, iperc=0.33, uperc
 @click.argument('setcorrupt', default=1)
 @click.argument('wherecorrupt', default=1)
 def main(
-    bprint, seed,
+    bprint, out, seed,
     nattrs, nset, nwhereeq, nwhererng, nqueries, insertperc, equalityperc,
     ncorrupt, insertcorrupt, setcorrupt, wherecorrupt
     ):
@@ -180,7 +182,25 @@ def main(
     wherecorrupt:   # of attrs in WHERE clause of UPDATE query to corrupt\n
 
   """
+
+  truemain(
+    bprint, out, seed,
+    nattrs, nset, nwhereeq, nwhererng, nqueries, insertperc, equalityperc,
+    ncorrupt, insertcorrupt, setcorrupt, wherecorrupt
+  )
+
+def truemain(
+    bprint, out, seed,
+    nattrs, nset, nwhereeq, nwhererng, nqueries, insertperc, equalityperc,
+    ncorrupt, insertcorrupt, setcorrupt, wherecorrupt
+    ):
+
   random.seed(seed)
+  if out is None:
+    out = sys.stdout
+  else:
+    out = file(out, "w")
+
 
   queries = [q for q in gen_templates(
     nattrs, nset, nwhereeq, nwhererng, nqueries, insertperc, equalityperc)]
@@ -192,9 +212,9 @@ def main(
 
   if bprint:
     for q in corruptedqueries:
-      print q
+      print>>out, q
 
-  return corruptedqueries
+  return queries, corruptedqueries
 
 
 if __name__ == '__main__':

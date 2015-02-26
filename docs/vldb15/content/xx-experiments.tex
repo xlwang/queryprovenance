@@ -97,7 +97,7 @@ Conditions, given a database ${\cal D}$ and query log $qlog$:
 \begin{itemize}
 \item {\bf $N_\mathcal{D}$: } Size of the database (number of tuples)
 \item {\bf $N_{dim}$:} Dimensionality of the database.
-\item {\bf $N_q$:} Vary number of queries in $qlog$.
+\item {\bf $N_\mathcal{Q}$:} Vary number of queries in $qlog$.
 \item {\bf $N_{pred}$:} The number of predicates in each UPDATE query's WHERE condition.
 \item {\bf $N_{ins}$: } When corrupting the log, the number of values in INSERT to corrupt.
 \item {\bf $N_{set}$: } When corrupting the log, the number of clauses in SET that are corrupted.
@@ -166,6 +166,11 @@ location of the query, and the number of attributes that are corrupted
 \end{itemize}
 
 \subsection{Rollback and \qfix Microexperiments}
+
+
+The first set of experiments seeks to understand the effectiveness of the database rollback
+algorithm.  We use a synthetic dataset (\ewu{describe}) and execute the rollback algorithm
+while varying the query batch size.
 
 \subsection{End-to-end experiments}
 
