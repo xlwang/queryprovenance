@@ -49,7 +49,7 @@ public class WhereExpr {
 		return this.operator;
 	}
 	
-	public Op getOperator(String op){
+	public static Op getOperator(String op){
 		switch(op){
 		case ">=": return Op.ge;
 		case "<=": return Op.le;

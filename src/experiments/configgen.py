@@ -12,7 +12,7 @@ from datetime import *
 from operator import mul
 from itertools import *
 from collections import *
-
+from sqlalchemy import *
 
 
 def create_params(options, base_params={}, keys=None):
@@ -42,6 +42,7 @@ def create_params(options, base_params={}, keys=None):
     param[key] = val
     for param in create_params(options, param, keys[1:]):
       yield param
+
 
 
 
@@ -96,6 +97,12 @@ keys = [
   "epsilon", "M", "approx", "prune"
 ]
 
+qlogkeys = [
+  "N_dim",  "N_set", "N_where", "N_where", "N_q",
+  "p_I", "p_pk"
+]
+
+
 def gen_exact_config():
   all_options = [
     {
@@ -129,17 +136,33 @@ def gen_exact_config():
     for param in create_params(options, {}):
       d = dict(DEFAULT)
       d.update(param)
-      param_vals = map(lambda k: d[k], keys)
-      print ",".join(map(str, param_vals))
+      param_vals = map(lambda k: float(d[k]), keys)
+      yield param_vals
+
 
 
 
 
 @click.command()
+@click.option("--out", default=None)
 @click.argument("exptype", type=click.Choice(["exact", "rollback", "qfix", "endtoend", "noise", "tpcc"]))
-def main(exptype):
+def main(out, exptype):
+  if out is None:
+    out = sys.stdout
+  else:
+    out = file(out, "w")
+
   if exptype == "exact":
-    gen_exact_config()
+    configs = gen_exact_config()
+
+  for config in configs:
+    print>>out, ",".join(map(str, config))
+
+  try:
+    if out is not sys.stdout:
+      out.close()
+  except:
+    pass
 
 if __name__ == "__main__":
   main()

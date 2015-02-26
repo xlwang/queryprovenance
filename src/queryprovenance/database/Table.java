@@ -1,5 +1,11 @@
 package queryprovenance.database;
 
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.Types;
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class Table {
 	public static enum Type {
@@ -82,4 +88,77 @@ public class Table {
 		return this.columns[idx];
 	}
 	
+	public static Table tableFromDB(DatabaseHandler handler, String tname) throws Exception	{
+		Table ret = new Table(tname);
+		ResultSet rset = handler.queryExecution("SELECT * FROM " + tname + " LIMIT 0");
+		ResultSetMetaData rmd = rset.getMetaData();
+		int ncols = rmd.getColumnCount();
+		int pkIdx = -1;
+		String[] cols = new String[ncols];
+		Type[] types = new Type[ncols];
+		Object[] domains = new Object[ncols];
+
+		
+		for (int i = 0; i < ncols; i++) {
+			String col = rmd.getColumnName(i+1);
+			cols[i] = col;
+			System.out.println(col);
+			if ("id".equalsIgnoreCase(col)) {
+				pkIdx = i;
+			}
+			int type = rmd.getColumnType(i+1);
+			Table.Type realtype = null;
+			switch(type) {
+			case Types.BIGINT:
+			case Types.DECIMAL:
+			case Types.INTEGER:
+			case Types.DOUBLE:
+			case Types.NUMERIC:
+			case Types.REAL:
+				realtype = Table.Type.NUM;
+				break;
+			case Types.CHAR:
+			case Types.LONGNVARCHAR:
+			case Types.LONGVARCHAR:
+			case Types.NCHAR:
+			case Types.VARCHAR:
+				realtype = Table.Type.STR;
+				break;
+			default:
+				throw new RuntimeException(col + " has unknown type: " + type);
+			}
+			types[i] = realtype;
+			
+			// get domain information
+			if (realtype == Table.Type.NUM) {
+				String q = "SELECT min(%s) as min, max(%s) as max FROM %s";
+				q = String.format(q, col, col, tname);
+				ResultSet rset2 = handler.queryExecution(q);
+				rset2.next();
+				int[] domain = new int[]{(int)rset2.getFloat(1), (int)rset2.getFloat(2)};
+				domains[i] = domain;
+			} else {
+				String q = "SELECT distinct %s FROM %s";
+				q = String.format(q, col, tname);
+				ResultSet rset2 = handler.queryExecution(q);
+				List<String> strs = new ArrayList<String>();
+				while (rset2.next()) {
+					strs.add(rset2.getString(1));
+				}
+				domains[i] = strs.toArray(new String[strs.size()]);
+			}
+			
+		}
+		return new Table(tname, cols, types, domains, pkIdx);
+	}
+	
+	
+	
+	public static void main(String[] args) throws Exception {
+		DatabaseHandler handler = new DatabaseHandler();
+		handler.getConnected("dbconn.config");
+		Table t = tableFromDB(handler, "test");
+		System.out.println(t.columns);
+		System.out.println(t.keyidx);
+	}
 }
