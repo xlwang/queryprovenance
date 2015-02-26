@@ -21,7 +21,7 @@ from configgen import keys, qlogkeys
 def init_db(db):
   """
   dataset tables should be named:
-    table_<expid>_<clean|dirty|rollback>_idx
+    table_<cid>_<clean|dirty|rollback>_idx
   """
 
   stmts = [
@@ -53,7 +53,7 @@ def init_db(db):
       """
       CREATE TABLE if not exists qlogs (
         id serial primary key,
-        expid int references configs(id),
+        cid int references configs(id),
         qidx int,
         isclean bool,
         type varchar,
@@ -67,7 +67,7 @@ def init_db(db):
       """
       CREATE TABLE if not exists exps (
         id serial primary key,
-        expid int references configs(id)
+        cid int references configs(id)
       )
       """
   ]
@@ -135,6 +135,14 @@ def init_database_state(db, dburl, cid, config):
 def run_query(db, tname, newtname, q):
   sql = "CREATE TABLE %s AS (SELECT * FROM %s)" % (newtname, tname)
   db.execute(sql)
+  sql = "SELECT count(*) FROM %s" % newtname
+  minv = db.execute(sql).fetchone()[0]
+  sql = "CREATE SEQUENCE %s_seq MINVALUE %d;" % (newtname, minv)
+  db.execute(sql)
+  sql = "ALTER TABLE %s ALTER id SET DEFAULT NEXTVAL('%s_seq');"
+  sql = sql % (newtname, newtname)
+  db.execute(sql)
+
   db.execute(to_sql(q, newtname))
 
 

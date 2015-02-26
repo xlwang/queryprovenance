@@ -65,6 +65,10 @@ public class Table {
 		return columns[keyidx];
 	}
 	
+	public Table clone() {
+		return new Table(name, columns.clone(), types.clone(), domains.clone(), keyidx);
+	}
+	
 	public void setName(String n_) {
 		this.name = n_;
 	}
