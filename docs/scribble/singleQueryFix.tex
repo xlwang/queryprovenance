@@ -1,0 +1,48 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{newtxmath}
+
+
+\begin{document}
+
+The problem of the one-pass algorithm is that the objective targets overall
+minimum changes, and leads the algorithm to sometimes pick multi-query fixes.
+We can add some additional constraints to the one-pass program to prevent multi-query fixes.
+
+The intuition is to introduce a new \emph{integer} variable $y_i$ for each
+query. The value of the variable $y_i$ will represent whether the query was changed by the solver. For example, take the following query:
+
+\[
+\text{SET } a=u_0^* \text{ WHERE } b_1\leq u_1^* \text{ AND } b_2\geq u_2^*
+\]
+
+In the above query, $u_0^*$, $u_1^*$, and $u_2^*$ are constants, but they are replaced with
+variables $u_0$, $u_1$, and $u_2$ during our linearization. If $u_1$ is assigned by
+the solver a value different than $u_1^*$, that means that the corresponding predicate in the WHERE clause  was
+modified.  Basically, if any of these variables are assigned by the solver to different values than their original ones, then the query was ``fixed''.
+
+So, we can set the variable $y$ that corresponds to this query to:
+\[
+y= (u_0= u_0^* \text{ AND } u_1= u_1^* \text{ AND } u_2=u_2^*)
+\]
+
+This will give $y=1$ if no variables in the query where assigned values
+different than their original ones, and we will get $y=0$ if any of them
+changed.
+
+So, if we have one $y$ variable for each query, we can set the constraint:
+
+\[
+\sum_i(1-y_i)\leq 1
+\]
+
+This will enforce the condition that at most one $y$ can be 0, which means at most one query will have been modified. 
+
+We can generalize this to allow fixes of up to $k$ queries, by setting the constraint to:
+
+\[
+\sum_i(1-y_i)\leq k
+\]
+
+
+\end{document}
