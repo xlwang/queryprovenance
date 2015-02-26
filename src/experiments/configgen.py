@@ -54,6 +54,8 @@ def create_params(options, base_params={}, keys=None):
 #  passtype:
 #    1: one pass solution
 #    2: rollback only
+#    3: query fix only
+#    4: 2 pass solution
 #  optchoice:
 #    1: no preprocssing
 #    2: preprocessing
@@ -75,6 +77,10 @@ DEFAULT = {
     "N_ins": 2,
     "N_set": 2,
     "N_where": 2, 
+    "N_corrupt": 1,
+    "N_corrupt_vals": 1,
+    "N_corrupt_set": 1,
+    "N_corrupt_where": 1,
     "idx": .9, 
     "p_I": .33, 
     "p_pk": .5, 
@@ -87,20 +93,34 @@ DEFAULT = {
     "epsilon": 0.0001, 
     "M": 1000000, 
     "approx": False, 
-    "prune": False
+    "prune": False,
+    "rollbackbatch": 1
 }
 
 keys = [
-  "N_D", "N_dim", "N_q", "N_pred", "N_ins", "N_set", "N_where", "idx", 
+  "N_D", "N_dim", "N_q", "N_pred", "N_ins", "N_set", "N_where", 
+  "N_corrupt", "N_corrupt_vals", "N_corrupt_set", "N_corrupt_where",
+  "idx", 
   "p_I", "p_pk", "p_fp", "p_fn",
   "exptype", "passtype", "optchoice", "qfixtype",
-  "epsilon", "M", "approx", "prune"
+  "epsilon", "M", "approx", "prune", "rollbackbatch"
 ]
 
 qlogkeys = [
   "N_dim",  "N_set", "N_where", "N_where", "N_q",
-  "p_I", "p_pk"
+  "p_I", "p_pk",
+  "N_corrupt", "N_corrupt_vals", "N_corrupt_set", "N_corrupt_where"
 ]
+
+
+def all_options_to_generator(all_options):
+  for options in all_options:
+    for param in create_params(options, {}):
+      d = dict(DEFAULT)
+      d.update(param)
+      param_vals = map(lambda k: float(d[k]), keys)
+      yield param_vals
+
 
 
 def gen_exact_config():
@@ -131,32 +151,115 @@ def gen_exact_config():
     }
   ]
 
-
-  for options in all_options:
-    for param in create_params(options, {}):
-      d = dict(DEFAULT)
-      d.update(param)
-      param_vals = map(lambda k: float(d[k]), keys)
-      yield param_vals
+  return all_options
 
 
+def gen_rollback_config():
+  all_options = [
+    {
+      "N_D": [1000],
+      "N_q": [20],
+      "N_pred": [2],
+      "N_where": [2],
+      "idx": [.8],
+      "exptype": 1,
+      "passtype": 2,
+      "rollbackbatch": [1, 2, 5]
+    }
+  ]
+
+  return all_options
+
+
+def gen_qfix_config():
+  all_options = [
+    {
+      "N_D": [1000],
+      "N_q": [1],
+      "N_pred": [2],
+      "N_where": [2],
+      "idx": [.8],
+      "exptype": 1,
+      "passtype": 3,
+      "qfixtype": [1, 2]
+    }
+  ]
+
+  return all_options
+
+def gen_endtoend_config():
+  all_options = [
+    {
+      "N_D": [1000],
+      "N_q": [1],
+      "N_pred": [2],
+      "N_where": [2],
+      "idx": [.8],
+      "exptype": 1,
+      "passtype": 4,
+      "qfixtype": 1
+    }
+  ]
+  return all_options
+
+def gen_noise_config():
+  all_options = [
+    {
+      "N_D": [1000],
+      "N_q": [1],
+      "N_pred": [2],
+      "N_where": [2],
+      "idx": [.8],
+      "exptype": 1,
+      "passtype": 4,
+      "qfixtype": 1,
+      "p_fp": [0, 01, 02, 05], 
+      "p_fn": 0
+    },
+    {
+      "N_D": [1000],
+      "N_q": [1],
+      "N_pred": [2],
+      "N_where": [2],
+      "idx": [.8],
+      "exptype": 1,
+      "passtype": 4,
+      "qfixtype": 1,
+      "p_fp": 0,
+      "p_fn": [0, 01, 02, 05], 
+    }
+  ]
+
+  return all_options
 
 
 
 @click.command()
 @click.option("--out", default=None)
-@click.argument("exptype", type=click.Choice(["exact", "rollback", "qfix", "endtoend", "noise", "tpcc"]))
-def main(out, exptype):
+@click.argument("exptypes", type=click.Choice(["all", "exact", "rollback", "qfix", "endtoend", "noise", "tpcc"]), nargs=-1)
+def main(out, exptypes):
   if out is None:
     out = sys.stdout
   else:
     out = file(out, "w")
 
-  if exptype == "exact":
-    configs = gen_exact_config()
+  funcs = set()
+  for exptype in exptypes:
+    if exptype == "exact" or exptype == "all":
+      funcs.add(gen_exact_config)
+    if exptype == "rollback" or exptype == "all":
+      funcs.add(gen_rollback_config)
+    if exptype == "qfix" or exptype == "all":
+      funcs.add(gen_qfix_config)
+    if exptype == "endtoend" or exptype == "all":
+      funcs.add(gen_endtoend_config)
+    if exptype == "noise" or exptype == "all":
+      funcs.add(gen_noise_config)
 
-  for config in configs:
-    print>>out, ",".join(map(str, config))
+  for f in funcs:
+    configs = all_options_to_generator(f())
+    for config in configs:
+      print>>out, ",".join(map(str, config))
 
   try:
     if out is not sys.stdout:

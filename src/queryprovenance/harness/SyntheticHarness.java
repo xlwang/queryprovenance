@@ -37,6 +37,7 @@ public class SyntheticHarness {
 	DatabaseStates dirtyDss = null;
 	
 	int passtype, optchoice, qfixtype;
+	int rollbackbatch;
 	float epsilon, M; 
 	boolean approx, prune;
 	
@@ -51,7 +52,7 @@ public class SyntheticHarness {
 	}
 	
 	public void loadConfigParams() throws Exception {
-		String q = "SELECT passtype, optchoice, qfixtype, epsilon, M, approx, prune FROM configs WHERE cid = " + cid;
+		String q = "SELECT passtype, optchoice, qfixtype, epsilon, M, approx, prune, rollbackbatch FROM configs WHERE cid = " + cid;
 		ResultSet rset = handler.queryExecution(q);
 		passtype = rset.getInt(0);
 		optchoice = rset.getInt(1);
@@ -60,8 +61,13 @@ public class SyntheticHarness {
 		M = rset.getFloat(4);
 		approx = rset.getBoolean(5);
 		prune = rset.getBoolean(6);
+		rollbackbatch = rset.getInt(7);
 	}
 	
+	
+	/*
+	 * XXX: xiaolan: fill in with execution and metrics code
+	 */
 	public void run() throws Exception {
 		QueryLog fixedQueries = new QueryLog();
 		
@@ -75,6 +81,14 @@ public class SyntheticHarness {
 			else {
 
 			}
+		}
+		// rollback only experiment
+		else if (passtype == 2) {
+			
+		}
+		// query fix only, no rollback (single query in the log)
+		else if (passtype == 3) {
+			
 		}
 		// two pass alg
 		else {
@@ -325,7 +339,10 @@ public class SyntheticHarness {
 	
 	/*
 	 * arguments
-	 * 	java SyntheticHarness  dbConfigfile configid, configid, ...  
+	 * 	java SyntheticHarness dbConfigfile configid, configid, ... 
+	 * 
+	 * configid is the id value in the configs table
+	 * 
 	 */
 	public static void main(String[] args) throws Exception {
 		String dbconfigname = args[0];
