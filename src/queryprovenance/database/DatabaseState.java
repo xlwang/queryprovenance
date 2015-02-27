@@ -64,37 +64,7 @@ public class DatabaseState {
 		/* initialize database state given table name */ 
 		/* initialize database state*/
 		public DatabaseState(DatabaseHandler database, String tablename) throws Exception{
-			
-			state = new HashMap<Integer, Tuple>(); // initialize state information
-			this.table = Table.tableFromDB(database, tablename);
-			ResultSet result;
-			if(tablename!=null) {
-
-				// get state query prepared
-				String state_query = "select * from " + tablename;
-				
-				// retrieve primary key in this table
-				DatabaseMetaData dbmd = database.getMetaData(); 
-				ResultSet tabkeys = dbmd.getPrimaryKeys(null, null, tablename.toLowerCase());  
-				String tablekey = "";
-				while(tabkeys.next()){
-					tablekey = tabkeys.getString(4);
-				}
-				
-				// execute the state query and get returned result set
-				result = database.queryExecution(state_query);
-				
-				int columncount = table.size();
-
-				// prepare state information
-				while(result.next()){
-					Tuple tuple = new Tuple(columncount);
-					for(int i = 0; i < table.getColumns().length; ++i) {
-						tuple.setValue(i, result.getString(i)); //column_map.get(table.getColumns()[i])));
-					}
-					state.put(Integer.valueOf(tuple.getValue(table.getKeyIdx())), tuple);
-				}			
-			}
+			this(database, Table.tableFromDB(database, tablename));
 		}
 		
 		public void saveToDatabase(DatabaseHandler handler, String tablename) throws Exception {
