@@ -60,6 +60,8 @@ def init_db(db):
         id serial primary key,
         cid int references configs(id),
         qidx int,
+        oldtname text,
+        newtname text,
         isclean bool,
         type varchar,
         vals text,
@@ -111,22 +113,26 @@ def to_sql(q, tname):
   return qtext
 
 
-def save_qlog(db, cid, tname, queries, isclean):
+def save_qlog(db, cid, oldtname, newtname, queries, isclean):
   for qidx, q in enumerate(queries):
-    qtype = q.get("type")
-    setc = q.get("set", [])
-    wherec = q.get("where", [])
-    valsc = q.get("vals", [])
-    qtext = to_sql(q, tname)
-    
-    q = "INSERT INTO qlogs values(default, %s, %s, %s, %s, %s, %s, %s, %s)"
-    db.execute(q, 
-        cid, qidx, isclean, qtype, 
-        json.dumps(valsc),
-        json.dumps(setc),
-        json.dumps(wherec),
-        qtext
-    )
+    save_query(db, cid, qidx, oldtname, newtname, q, isclean)
+
+
+def save_query(db, cid, qidx, oldtname, newtname, q, isclean):
+  qtype = q.get("type")
+  setc = q.get("set", [])
+  wherec = q.get("where", [])
+  valsc = q.get("vals", [])
+  qtext = to_sql(q, oldtname)
+  
+  q = "INSERT INTO qlogs values(default, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+  db.execute(q, 
+      cid, qidx, oldtname, newtname, isclean, qtype, 
+      json.dumps(valsc),
+      json.dumps(setc),
+      json.dumps(wherec),
+      qtext
+  )
 
 
 def init_database_state(db, dburl, cid, config):
@@ -151,13 +157,11 @@ def run_query(db, tname, newtname, q):
   db.execute(to_sql(q, newtname))
 
 
-def run_querylog(db, tname, queries, mode):
+def run_querylog(db, cid, tname, queries, mode):
   """
   args:
     mode: "clean", "dirty", "rollback"
   """
-
-
   for qidx, q in enumerate(queries):
     if qidx == 0:
       old_tname = "%s_%s_%d" % (tname, mode, 0)
@@ -167,6 +171,7 @@ def run_querylog(db, tname, queries, mode):
 
     new_tname = "%s_%s_%d" % (tname, mode, qidx+1)
     run_query(db, old_tname, new_tname, q)
+    save_query(db, cid, qidx, old_tname, new_tname, q, mode=="clean")
     old_tname = new_tname
 
 
@@ -203,16 +208,16 @@ def save_config(db, dburl, config):
   #
   # save queries
   #
-  save_qlog(db, cid, tname, queries, True)
-  save_qlog(db, cid, tname, corruptqueries, False)
+  #save_qlog(db, cid, tname, queries, True)
+  #save_qlog(db, cid, tname, corruptqueries, False)
 
 
   #
   # Initialize and store every database state
   #
   tname = init_database_state(db, dburl, cid, config)
-  run_querylog(db, tname, queries, "clean")
-  run_querylog(db, tname, corruptqueries, "dirty")
+  run_querylog(db, cid, tname, queries, "clean")
+  run_querylog(db, cid, tname, corruptqueries, "dirty")
 
   return cid
 
