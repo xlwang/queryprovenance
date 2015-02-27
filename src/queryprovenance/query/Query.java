@@ -291,8 +291,12 @@ public class Query {
 	
 	/* clone query */
 	public Query clone() {
-		Query q = new Query(id, select, set.clone(), from, where.clone(), type);
-		q.values = values;
+    SetClause newset = null;
+    WhereClause newwhere = null;
+    if (set != null) newset = set.clone();
+    if (where != null) newwhere = where.clone();
+    Query  q = new Query(id, select, newset, from, newwhere, type);
+    q.values = values;
 		return q;
 	}
 	

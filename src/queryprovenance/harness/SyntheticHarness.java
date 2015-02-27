@@ -56,19 +56,21 @@ public class SyntheticHarness {
 		this.cleanDss = loadDatabaseStates(handler, cleanQueries);
 		this.dirtyDss = loadDatabaseStates(handler, dirtyQueries);
 		this.complaints = new Complaint(cleanDss.get(cleanDss.size()-1), dirtyDss.get(cleanDss.size()-1));
+    loadConfigParams();
 	}
 	
 	public void loadConfigParams() throws Exception {
-		String q = "SELECT passtype, optchoice, qfixtype, epsilon, M, approx, prune, rollbackbatch FROM configs WHERE cid = " + cid;
+		String q = "SELECT passtype, optchoice, qfixtype, epsilon, M, approx, prune, rollbackbatch FROM configs WHERE id = " + cid;
 		ResultSet rset = handler.queryExecution(q);
-		passtype = rset.getInt(0);
-		optchoice = rset.getInt(1);
-		qfixtype = rset.getInt(2);
-		epsilon = rset.getFloat(3);
-		M = rset.getFloat(4);
-		approx = rset.getBoolean(5);
-		prune = rset.getBoolean(6);
-		rollbackbatch = rset.getInt(7);
+    rset.next();
+		passtype = rset.getInt(1);
+		optchoice = rset.getInt(2);
+		qfixtype = rset.getInt(3);
+		epsilon = rset.getFloat(4);
+		M = rset.getFloat(5);
+		approx = rset.getBoolean(6);
+		prune = rset.getBoolean(7);
+		rollbackbatch = rset.getInt(8);
 	}
 	
 	
@@ -104,7 +106,11 @@ public class SyntheticHarness {
 			break;
 		case 4: // two pass algorithm
 			fixedlog = solver.twoPassSolution(cplex, epsilon, M, preproc, feasible, falsepositive, rollbackStepSize, options);
+      break;
 		}
+
+    System.out.println("finished fixeng");
+    System.out.println(fixedlog);
 
 		
 		if (true) return;
@@ -240,7 +246,6 @@ public class SyntheticHarness {
 
 	public static InsertQuery jsonToInsertQuery(int qid, Table table, JSONArray vals) {
 		List<String> realvals = new ArrayList<String>();
-		realvals.add("default");
 		for (Object s : vals) { 
 			realvals.add(String.valueOf(s));
 		}

@@ -75,6 +75,7 @@ public class Linearization {
 		// define fixed query log
 		QueryLog qlogfix = new QueryLog();
 		for(int i = startidx; i < endidx; ++i) {
+      System.out.println(" " + badqlog.get(i));
 			qlogfix.add(badqlog.get(i).clone());
 		}
 		

@@ -197,8 +197,9 @@ public class Solution {
 			int steps, String[] args) throws Exception {
 		
 		// check inputs
-		if(badQueries.size() != badDss.size()-1)
+		if(badQueries.size() != badDss.size()-1) {
 			return null;
+    }
 
 		
 		times = new long[]{0,0,0,0};
