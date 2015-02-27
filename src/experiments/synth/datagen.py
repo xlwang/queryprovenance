@@ -40,7 +40,7 @@ def truemain(ddl, schema, data, out, dburl, table, seed, nattrs, ntuples):
     out = file(out, "w")
 
   if ddl or dburl:
-    sql = "CREATE TABLE %s(id serial primary key, %s);" 
+    sql = "CREATE TABLE %s(id int primary key, %s);" 
     sql = sql % (table, ", ".join(map("{0} int".format, attrs)))
     if dburl:
       db.execute("DROP TABLE IF EXISTS %s" % table)
@@ -55,7 +55,7 @@ def truemain(ddl, schema, data, out, dburl, table, seed, nattrs, ntuples):
   if data:
     tuples = []
     for i in xrange(ntuples):
-      vals = [i] + map(nextval, xrange(nattrs))
+      vals = [-i - 1] + map(nextval, xrange(nattrs))
       tuples.append(vals)
 
 

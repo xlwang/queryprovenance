@@ -94,7 +94,7 @@ def to_sql(q, tname):
   valsc = q.get("vals", [])
 
   if qtype == "INSERT":
-    qtext = "INSERT INTO %s VALUES(default, %s)" 
+    qtext = "INSERT INTO %s VALUES(%s)" 
     qtext = qtext % (tname, ",".join(["%s"] * len(valsc)))
     qtext = qtext % tuple(map(str, valsc))
   else:
@@ -204,7 +204,7 @@ def save_config(db, dburl, config):
   # save queries
   #
   save_qlog(db, cid, tname, queries, True)
-  save_qlog(db, cid, tname, corruptqueries, True)
+  save_qlog(db, cid, tname, corruptqueries, False)
 
 
   #

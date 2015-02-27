@@ -2,10 +2,10 @@ package queryprovenance.harness;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 import queryprovenance.database.DatabaseStates;
 import queryprovenance.problemsolution.Complaint;
+import queryprovenance.problemsolution.QueryLog;
 
 /*
  * Currently just a wrapper for computing a set of metrics for different

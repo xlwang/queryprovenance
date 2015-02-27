@@ -238,6 +238,19 @@ def gen_noise_config():
 @click.option("--out", default=None)
 @click.argument("exptypes", type=click.Choice(["all", "exact", "rollback", "qfix", "endtoend", "noise", "tpcc"]), nargs=-1)
 def main(out, exptypes):
+  """
+  exptypes describes the experiment type to generate parameters for.
+  It can be one of the following:
+  
+    exact
+    rollback
+    qfix
+    endtoend
+    noise
+    tpcc
+    all
+
+  """
   if out is None:
     out = sys.stdout
   else:

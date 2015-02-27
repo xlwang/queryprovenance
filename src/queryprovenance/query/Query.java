@@ -11,10 +11,10 @@ import java.util.Set;
 import queryprovenance.database.DatabaseState;
 import queryprovenance.database.Table;
 import queryprovenance.expression.Expression;
-import queryprovenance.harness.QueryLog;
 import queryprovenance.harness.QueryParams;
 import queryprovenance.harness.Util;
 import queryprovenance.problemsolution.Complaint;
+import queryprovenance.problemsolution.QueryLog;
 
 
 public class Query {
@@ -291,8 +291,12 @@ public class Query {
 	
 	/* clone query */
 	public Query clone() {
-		Query q = new Query(id, select, set.clone(), from, where.clone(), type);
-		q.values = values;
+    SetClause newset = null;
+    WhereClause newwhere = null;
+    if (set != null) newset = set.clone();
+    if (where != null) newwhere = where.clone();
+    Query  q = new Query(id, select, newset, from, newwhere, type);
+    q.values = values;
 		return q;
 	}
 	

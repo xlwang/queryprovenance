@@ -1,5 +1,6 @@
 package queryprovenance.harness;
 
+import queryprovenance.problemsolution.QueryLog;
 import queryprovenance.query.Query;
 import queryprovenance.query.SetClause;
 import queryprovenance.query.WhereClause;

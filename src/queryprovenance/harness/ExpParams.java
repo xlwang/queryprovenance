@@ -1,6 +1,7 @@
 package queryprovenance.harness;
 
 import queryprovenance.database.Table;
+import queryprovenance.problemsolution.QueryLog;
 
 public class ExpParams {
 	protected static ExpParams _instance = new ExpParams();

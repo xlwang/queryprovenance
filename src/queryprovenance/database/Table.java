@@ -92,6 +92,10 @@ public class Table {
 		return this.columns[idx];
 	}
 	
+	public int size() {
+		return columns.length;
+	}
+	
 	public static Table tableFromDB(DatabaseHandler handler, String tname) throws Exception	{
 		Table ret = new Table(tname);
 		ResultSet rset = handler.queryExecution("SELECT * FROM " + tname + " LIMIT 0");

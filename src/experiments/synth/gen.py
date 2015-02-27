@@ -59,10 +59,10 @@ def gen_delete_rng(attrs):
     "where": gen_where_rng(attrs)
 } 
 
-def gen_insert(nattrs):
+def gen_insert(id, nattrs):
   return {
     "type": "INSERT",
-    "vals": [nextval() for i in xrange(int(nattrs))]
+    "vals": [id] + [nextval() for i in xrange(int(nattrs))]
   }
 
 def gen_create(nattrs):
@@ -127,9 +127,11 @@ def gen_templates(nattrs, nset, nwhereeq, nwhererng, nqueries, iperc=0.33, uperc
   whererngattrs = whererngattrs[:int(nwhererng)]
 
 
+  tup_id = 0
   for i in xrange(int(nqueries)):
     if random.random() <= iperc:
-      yield clone(gen_insert(nattrs))
+      yield clone(gen_insert(tup_id, nattrs))
+      tup_id += 1
     elif random.random() <= uperc:
       yield clone(gen_update_eq(setattrs, whereeqattrs))
     else:

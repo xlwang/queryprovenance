@@ -4,8 +4,13 @@ public class Tuple {
 	
 	public String[] values;
 	
+	// for dealing with SET clauses
+	// this tracks the value ranges that each attribute needs to be within
+	public String[][] valueRanges;
+	
 	public Tuple(String[] v_) {
 		values = v_;
+		valueRanges = new String[v_.length][2];
 	}
 	public Tuple(int count) {
 		values = new String[count];

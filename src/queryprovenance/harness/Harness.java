@@ -12,9 +12,8 @@ import queryprovenance.database.DatabaseHandler;
 import queryprovenance.database.DatabaseStates;
 import queryprovenance.database.Table;
 import queryprovenance.problemsolution.Complaint;
-import queryprovenance.problemsolution.Linearization;
+import queryprovenance.problemsolution.QueryLog;
 import queryprovenance.problemsolution.Solution;
-import queryprovenance.query.CplexHandler;
 
 public class Harness {
 	QueryLog qlog = null;
@@ -144,14 +143,14 @@ public class Harness {
 		
 		// solve bad query log with incomplete complaint set
 		// Complaint incomplete = complaint.getPart(complaintpercentage);
-		Solution solver2 = new Solution();
+		Solution solver2 = new Solution(handler, badds, badqlog, complaint);
 		//QueryLog fixedqlog = solver2.onePassSolution(cplex, handler, badds, badqlog, complaint, 0.1, 300000, true, options);
 		QueryLog fixedqlog = new QueryLog();
 		switch(solverind) {
-		case 0: fixedqlog = solver2.onePassSolution(cplex, handler, badds, badqlog, complaint, 0.1, 300000, true, options); break;
-		case 1: fixedqlog = solver2.onePassSolution(cplex, handler, badds, badqlog, complaint, 0.1, 300000, false, options); break;
-		case 2: fixedqlog = solver2.twoPassSolution(cplex, handler, badds, badqlog, complaint, 0.1, 300000, true, 1, options); break;
-		case 3: fixedqlog = solver2.twoPassSolution(cplex, handler, badds, badqlog, complaint, 0.1, 300000, false, 1, options);
+		case 0: fixedqlog = solver2.onePassSolution(cplex, 0.1, 300000, true, false, false, options); break;
+		case 1: fixedqlog = solver2.onePassSolution(cplex, 0.1, 300000, false, false, false, options); break;
+		case 2: fixedqlog = solver2.twoPassSolution(cplex, 0.1, 300000, true, false, false, 1, options); break;
+		case 3: fixedqlog = solver2.twoPassSolution(cplex, 0.1, 300000, false, false, false, 1, options);
 		}
 		/*
 		if(solverind != 1) {
