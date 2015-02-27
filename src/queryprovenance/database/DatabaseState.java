@@ -66,7 +66,7 @@ public class DatabaseState {
 		public DatabaseState(DatabaseHandler database, String tablename) throws Exception{
 			
 			state = new HashMap<Integer, Tuple>(); // initialize state information
-			
+			this.table = Table.tableFromDB(database, tablename);
 			ResultSet result;
 			if(tablename!=null) {
 
@@ -84,27 +84,13 @@ public class DatabaseState {
 				// execute the state query and get returned result set
 				result = database.queryExecution(state_query);
 				
-				// get table information
-				ResultSetMetaData rsmd = (ResultSetMetaData) result.getMetaData();
-				int columncount = rsmd.getColumnCount();
-				HashMap<String, Integer> column_map = new HashMap<String, Integer>();
-				String[] columnnames = new String[columncount];
-				int tablekeyidx = -1;
-				for(int i=1; i<=columncount; ++i){
-					column_map.put(rsmd.getColumnLabel(i), i);
-					columnnames[i-1] = rsmd.getColumnLabel(i);
-          if (tablekeyidx == -1 && "id".equals(columnnames[i-1]))  
-            tablekeyidx = i-1;
-          else if (tablekey.equals(columnnames[i-1]))
-            tablekeyidx = i-1;
-				}
-				this.table = new Table(tablename, columnnames, null, null, tablekeyidx);
-			
+				int columncount = table.size();
+
 				// prepare state information
 				while(result.next()){
 					Tuple tuple = new Tuple(columncount);
 					for(int i = 0; i < table.getColumns().length; ++i) {
-						tuple.setValue(i, result.getString(column_map.get(table.getColumns()[i])));
+						tuple.setValue(i, result.getString(i)); //column_map.get(table.getColumns()[i])));
 					}
 					state.put(Integer.valueOf(tuple.getValue(table.getKeyIdx())), tuple);
 				}			
