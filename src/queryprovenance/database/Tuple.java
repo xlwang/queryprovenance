@@ -48,8 +48,10 @@ public class Tuple {
 	
 	public Tuple clone() {
 		Tuple t = new Tuple(values.clone());
-		for (int i = 0; i < valueRanges.length; i++) {
-			t.valueRanges[i] = valueRanges[i].clone();
+		if (valueRanges != null) {
+			for (int i = 0; i < valueRanges.length; i++) {
+				t.valueRanges[i] = valueRanges[i].clone();
+			}
 		}
 		return t;
 	}
