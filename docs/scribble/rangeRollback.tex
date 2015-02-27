@@ -33,10 +33,10 @@ about the ranges for the tuple $t_s$ in the starting database $D_s$:
 [-\infty, \infty] & \mbox{if } v_{e,e} \in [1, 10]\\
 [1, 1]            & \text{else}
 \end{cases}\]
-\item $r_{s,b} = [min(B), max(B)]$ where $B = \{ f^{-1}(v) | v \in r_{e,b} \}$.  
+\item $$r_{s,b} = [min(B), max(B)] \mbox{ where } B = \{ f^{-1}(v) | v \in r_{e,b} \}$$.\\
       This is simpler to compute if $f$ is monotonic, in which case $r_{s,b}$ can be computed 
       using only the min, max information of the range $r_{e,b}$.
-\item $r_{s,c} = [min_{e,c}-1, max_{e,c}-1]$.  
+\item $$r_{s,c} = [min_{e,c}-1, max_{e,c}-1]$$
       This is a special case of $r_{s,b}$, where we can use the range information directly.
 \item \[r_{s,e} = \begin{cases}
 [-\infty, \infty] - [1,10] & \mbox{if } v_{e,a} \ne 1\\
@@ -44,13 +44,23 @@ about the ranges for the tuple $t_s$ in the starting database $D_s$:
 r_{s,e}                    & \mbox{else }
 \end{cases}
 \]
+Notice in this case we make some assumptions about the accuracy of $t_s.a$'s initial value to infer
+information about $e$'s correct range.
 \end{enumerate}
 
 A more complex query is one that SETs the same attribute that is used in the WHERE clause:
 
 \[
-\text{SET } a=1 \text{ WHERE } a \in [1, 10] 
+\text{SET } a=0 \text{ WHERE } a \in [1, 10] 
 \]
 
+
+$$
+\begin{cases}
+  r_{s,a} = [0,10]              & \mbox{if } v_{e,a} =   0\\
+  \text{ERROR}                  & \mbox{if } v_{e,a} \in [1, 10]\\
+  r_{s,a} = [v_{e,a}, v_{e,a}]  & \mbox{else}
+\end{cases}
+$$
 
 \end{document}
