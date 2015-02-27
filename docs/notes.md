@@ -40,6 +40,17 @@ TODOs
 * argument for cleaning FP instead of embedding in algorithm?
 * Which complaints are most important?
 
+# Feb 27
+
+* CPLEX is not solving the NP-hard problems that we generate correctly
+  * too many infeasibility errors
+* One-pass algorithm while fixing constraints to a single query seems to work ~20 queries
+  * Is it still feasible for larger query logs and
+  * Is it still performant for more complaints?
+  * Does it still work with false negatives?
+  * Does it still work with false positives?
+* Have a single-query solver that works
+  * split complaint sets for that
 
 # Meeting Feb 18
 
