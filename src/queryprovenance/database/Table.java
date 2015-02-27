@@ -15,7 +15,7 @@ public class Table {
 	private int keyidx = -1;
 	private String name;
 	private String[] columns;
-	private Type[] types;
+	public Type[] types;
 
 	// each element stores the corresponding column's domain
 	// NUM: [minint, maxint]
@@ -66,7 +66,13 @@ public class Table {
 	}
 	
 	public Table clone() {
-		return new Table(name, columns.clone(), types.clone(), domains.clone(), keyidx);
+    String[] cols = null;
+    if (columns != null) cols = columns.clone();
+    Type[] typs = null;
+    if (types != null) typs = types.clone();
+    Object[] dmns = null;
+    if (domains != null) dmns = domains.clone();
+		return new Table(name, cols, typs, dmns, keyidx);
 	}
 	
 	public void setName(String n_) {

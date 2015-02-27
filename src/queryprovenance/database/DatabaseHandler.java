@@ -86,6 +86,7 @@ public class DatabaseHandler {
 				result = preparedquery.executeQuery();
 				
 			}catch(Exception ex){
+        System.err.println(ex);
 			}
 			return result;
 		}

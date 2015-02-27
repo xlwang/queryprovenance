@@ -21,7 +21,7 @@ public class DatabaseState {
 		public DatabaseState(DatabaseState ds) throws Exception {
 			state = new HashMap<Integer, Tuple>();
 			for (Integer pk : ds.state.keySet()) {
-				ds.state.put(pk, ds.state.get(pk).clone());
+				this.state.put(pk, ds.state.get(pk).clone());
 			}
 			
 			table = ds.table.clone();
@@ -93,8 +93,10 @@ public class DatabaseState {
 				for(int i=1; i<=columncount; ++i){
 					column_map.put(rsmd.getColumnLabel(i), i);
 					columnnames[i-1] = rsmd.getColumnLabel(i);
-					if(tablekey.equals(columnnames[i-1]))
-						tablekeyidx = i-1;
+          if (tablekeyidx == -1 && "id".equals(columnnames[i-1]))  
+            tablekeyidx = i-1;
+          else if (tablekey.equals(columnnames[i-1]))
+            tablekeyidx = i-1;
 				}
 				this.table = new Table(tablename, columnnames, null, null, tablekeyidx);
 			
@@ -113,15 +115,15 @@ public class DatabaseState {
 			StringBuffer fmtsb = new StringBuffer();
 			StringBuffer sb = new StringBuffer();
 			sb.append(String.format("CREATE SEQUENCE %s_seq MINVALUE %d;", tablename, this.size()+1));
-			sb.append(String.format("CREATE TABLE %s (", tablename));
+			sb.append(String.format("DROP TABLE IF EXISTS %s;", tablename));
+			sb.append(String.format("CREATE TABLE IF NOT EXISTS %s (", tablename));
 			for (int colidx = 0; colidx < table.size(); colidx++) {
 				String col = table.getColumnName(colidx);
 				Table.Type type = table.getType(colidx);
-				sb.append(col);
 				if (type == Table.Type.NUM) {
 					if ("id".equals(col)) {
 						fmtsb.append("default");
-						sb.append(String.format("%s int DEFAULT nextval('%s_seq') NOT NULL", col, tablename));
+						sb.append(String.format("%s int primary key DEFAULT nextval('%s_seq') NOT NULL", col, tablename));
 					}
 					else {
 						fmtsb.append("%s");
@@ -136,17 +138,21 @@ public class DatabaseState {
 					fmtsb.append(", ");
 					sb.append(", ");
 				}
-					
 			}
 			sb.append(");");
 			handler.queryExecution(sb.toString());
+      System.out.println(sb.toString());
 			
 			List<String>valslist = new ArrayList<String>();
 			String valstmpl = String.format("(%s)", fmtsb.toString());
+      int xx = 0;
 			for (Tuple t : state.values()) {
 				valslist.add(String.format(valstmpl, (Object[])t.values));
+        xx ++;
+        if (xx > 3) break;
 			}
-			String sql = String.format("INSERT INTO %s VALUES %s", tablename, Util.join(valslist, ","));
+			String sql = String.format("INSERT INTO %s VALUES %s;", tablename, Util.join(valslist, ","));
+      System.out.println(sql);
 			handler.queryExecution(sql);
 		}
 		

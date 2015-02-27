@@ -53,8 +53,8 @@ public class SyntheticHarness {
 		this.tableBase = "synth_" + cid;		
 		this.cleanQueries = cleanQs;
 		this.dirtyQueries = dirtyQs;
-		this.cleanDss = loadDatabaseStates(handler, cleanQueries);
-		this.dirtyDss = loadDatabaseStates(handler, dirtyQueries);
+		this.cleanDss = loadDatabaseStates(handler, cid, true);  // clean
+		this.dirtyDss = loadDatabaseStates(handler, cid, false); // dirty
 		this.complaints = new Complaint(cleanDss.get(cleanDss.size()-1), dirtyDss.get(cleanDss.size()-1));
     loadConfigParams();
 	}
@@ -154,7 +154,7 @@ public class SyntheticHarness {
 
 	
 	static SyntheticHarness loadHarness(DatabaseHandler handler, Table table, int cid) throws Exception {
-		String q = "SELECT qidx, type, vals, set, wherec, query FROM qlogs WHERE cid = %d AND isclean = %s ORDER BY qidx";
+		String q = "SELECT qidx, type, vals, set, wherec, query, oldtname, newtname FROM qlogs WHERE cid = %d AND isclean = %s ORDER BY qidx";
 		String cleanq = String.format(q, cid, true);
 		String dirtyq = String.format(q, cid, false);
 
@@ -168,6 +168,7 @@ public class SyntheticHarness {
 	
 	static QueryLog loadQueries(DatabaseHandler handler, Table table, String mode, String query) throws Exception {
 		QueryLog queries = new QueryLog();
+    System.out.println("query");
 		ResultSet rset = handler.queryExecution(query);
 		while(rset.next()) {
 			int qidx = rset.getInt("qidx");
@@ -176,12 +177,13 @@ public class SyntheticHarness {
 			String set_str = rset.getString("set");
 			String where_str = rset.getString("wherec");
 			String query_str = rset.getString("query");
+      String curTablename = rset.getString("oldtname");
 			
 			JSONArray valsjson = (JSONArray)JSONValue.parse(vals_str);
 			JSONArray setjson = (JSONArray)JSONValue.parse(set_str);
 			JSONArray wherejson = (JSONArray)JSONValue.parse(where_str);
 			
-			String curTablename = String.format("%s_%s_%d", table.getName(), mode, qidx);
+			//String curTablename = String.format("%s_%s_%d", table.getName(), mode, qidx);
 			Table curTable = table.clone();
 			curTable.setName(curTablename);
 			
@@ -197,10 +199,23 @@ public class SyntheticHarness {
 		return queries;
 	}
 	
-	static DatabaseStates loadDatabaseStates(DatabaseHandler handler, QueryLog queries)  throws Exception{
+	static DatabaseStates loadDatabaseStates(DatabaseHandler handler, int cid, boolean isclean)  throws Exception{
 		DatabaseStates dss = new DatabaseStates();
-		for (Query q : queries) {
-			DatabaseState ds = new DatabaseState(handler, q.getTable());
+
+    String cq = "SELECT oldtname as tname FROM qlogs WHERE qidx = 0 and cid=" + cid + " and isclean = " + isclean;
+    String dq = "SELECT qidx, newtname as tname FROM qlogs WHERE cid=" + cid + " and isclean = " + isclean + " ORDER BY qidx";
+    System.out.println(cq);
+    ResultSet rset = handler.queryExecution(cq);
+    rset.next();
+    System.out.println(rset.getString("tname"));
+    dss.add(new DatabaseState(handler, rset.getString("tname")));
+
+    System.out.println(dq);
+    rset = handler.queryExecution(dq);
+    while (rset.next()) {
+      String tname = rset.getString("tname");
+      System.out.println(" " + tname);
+			DatabaseState ds = new DatabaseState(handler, tname);
 			dss.add(ds);
 		}
 		return dss;
