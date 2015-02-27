@@ -3,14 +3,12 @@ package queryprovenance.database;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-
-import queryprovenance.database.Table.Type;
+import queryprovenance.harness.Util;
 import queryprovenance.problemsolution.Complaint;
 
 public class DatabaseState {
@@ -99,6 +97,47 @@ public class DatabaseState {
 					state.put(Integer.valueOf(tuple.getValue(table.getKeyIdx())), tuple);
 				}			
 			}
+		}
+		
+		public void saveToDatabase(DatabaseHandler handler, String tablename) throws Exception {
+			StringBuffer fmtsb = new StringBuffer();
+			StringBuffer sb = new StringBuffer();
+			sb.append(String.format("CREATE SEQUENCE %s_seq MINVALUE %d;", tablename, this.size()+1));
+			sb.append(String.format("CREATE TABLE %s (", tablename));
+			for (int colidx = 0; colidx < table.size(); colidx++) {
+				String col = table.getColumnName(colidx);
+				Table.Type type = table.getType(colidx);
+				sb.append(col);
+				if (type == Table.Type.NUM) {
+					if ("id".equals(col)) {
+						fmtsb.append("default");
+						sb.append(String.format("%s int DEFAULT nextval('%s_seq') NOT NULL", col, tablename));
+					}
+					else {
+						fmtsb.append("%s");
+						sb.append(String.format("%s %s ", col, "numeric"));
+					}
+				} else {
+					fmtsb.append("'%s'");
+					sb.append(String.format("%s text", col));
+				}
+				
+				if (colidx < table.size()-1) {
+					fmtsb.append(", ");
+					sb.append(", ");
+				}
+					
+			}
+			sb.append(");");
+			handler.queryExecution(sb.toString());
+			
+			List<String>valslist = new ArrayList<String>();
+			String valstmpl = String.format("(%s)", fmtsb.toString());
+			for (Tuple t : state.values()) {
+				valslist.add(String.format(valstmpl, (Object[])t.values));
+			}
+			String sql = String.format("INSERT INTO %s VALUES %s", tablename, Util.join(valslist, ","));
+			handler.queryExecution(sql);
 		}
 		
 		public void clear(){

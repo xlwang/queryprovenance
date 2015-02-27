@@ -11,10 +11,10 @@ import java.util.Set;
 import queryprovenance.database.DatabaseState;
 import queryprovenance.database.Table;
 import queryprovenance.expression.Expression;
-import queryprovenance.harness.QueryLog;
 import queryprovenance.harness.QueryParams;
 import queryprovenance.harness.Util;
 import queryprovenance.problemsolution.Complaint;
+import queryprovenance.problemsolution.QueryLog;
 
 
 public class Query {

@@ -1,5 +1,7 @@
 package queryprovenance.harness;
 
+import ilog.cplex.IloCplex;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.sql.ResultSet;
@@ -18,6 +20,9 @@ import queryprovenance.database.Table;
 import queryprovenance.expression.AdditionExpression;
 import queryprovenance.expression.Expression;
 import queryprovenance.expression.VariableExpression;
+import queryprovenance.problemsolution.Complaint;
+import queryprovenance.problemsolution.QueryLog;
+import queryprovenance.problemsolution.Solution;
 import queryprovenance.query.InsertQuery;
 import queryprovenance.query.Query;
 import queryprovenance.query.SetClause;
@@ -32,9 +37,10 @@ public class SyntheticHarness {
 	int cid = -1;
 	String tableBase = null;
 	QueryLog cleanQueries = null;
-	QueryLog dirtyQueries = null;
+	queryprovenance.problemsolution.QueryLog dirtyQueries = null;
 	DatabaseStates cleanDss = null;
 	DatabaseStates dirtyDss = null;
+	Complaint complaints = null;
 	
 	int passtype, optchoice, qfixtype;
 	int rollbackbatch;
@@ -49,6 +55,7 @@ public class SyntheticHarness {
 		this.dirtyQueries = dirtyQs;
 		this.cleanDss = loadDatabaseStates(handler, cleanQueries);
 		this.dirtyDss = loadDatabaseStates(handler, dirtyQueries);
+		this.complaints = new Complaint(cleanDss.get(cleanDss.size()-1), dirtyDss.get(cleanDss.size()-1));
 	}
 	
 	public void loadConfigParams() throws Exception {
@@ -71,38 +78,35 @@ public class SyntheticHarness {
 	public void run() throws Exception {
 		QueryLog fixedQueries = new QueryLog();
 		
-		// single pass alg
-		if (passtype == 1) {
-			// no preprocessing
-			if (optchoice == 1) {
-				
-			} 
-			// pre processing
-			else {
+		// CPLEX stuff
+		IloCplex cplex = new IloCplex();
+		int solverind = -1;
+		String[] options = new String[]{"-M", String.valueOf(solverind) , "-E", "0.1", "-O", "abs"};
 
-			}
+		Solution solver = new Solution(handler, dirtyDss, dirtyQueries, complaints);
+		boolean preproc = optchoice == 2;
+		boolean usecplex = qfixtype == 1;
+		boolean feasible = false;
+		boolean falsepositive = false;
+		int rollbackStepSize = 1;
+		
+		QueryLog fixedlog = null;
+		DatabaseStates fixeddss = null;
+		switch(passtype) {
+		case 1: // one pass alg
+			fixedlog = solver.onePassSolution(cplex, epsilon, M, preproc, feasible, falsepositive, options);
+			break;
+		case 2: // rollback only
+			fixeddss = solver.rollback(cplex, epsilon, M, preproc, rollbackStepSize, options);
+			break;
+		case 3: // query fix only (no rollback)
+			fixedlog = solver.qfixOnlySolution(cplex, this.cleanDss, epsilon, M, preproc, feasible, falsepositive, rollbackStepSize, options);
+			break;
+		case 4: // two pass algorithm
+			fixedlog = solver.twoPassSolution(cplex, epsilon, M, preproc, feasible, falsepositive, rollbackStepSize, options);
 		}
-		// rollback only experiment
-		else if (passtype == 2) {
-			
-		}
-		// query fix only, no rollback (single query in the log)
-		else if (passtype == 3) {
-			
-		}
-		// two pass alg
-		else {
-			// no preprocessing
-			if (optchoice == 1) {
-				// qfixtype = 1 if CPLEX
-				// qfixtype = 2 if decision tree
-			} 
-			// preprocessing
-			else {
 
-			}
-			
-		}
+		
 		if (true) return;
 		
 		//

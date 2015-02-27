@@ -2,7 +2,6 @@ package queryprovenance.database;
 
 import java.util.ArrayList;
 
-import queryprovenance.harness.QueryLog;
 import queryprovenance.problemsolution.Complaint;
 
 public class DatabaseStates extends ArrayList<DatabaseState> {

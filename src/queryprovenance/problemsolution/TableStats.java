@@ -11,15 +11,17 @@ import java.util.Set;
 import queryprovenance.database.DatabaseState;
 
 
-
+/*
+ * Computes and stores statics about each column in a table
+ * - min/max ranges for numeric type
+ * - distinct values for non-numeric types
+ * 
+ */
 public class TableStats {
 	Hashtable<String, int[]> num_stats;
 	Hashtable<String, List<String>> str_stats;
 	Random rand;
 	
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 
 
