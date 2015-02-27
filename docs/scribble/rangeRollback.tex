@@ -1,0 +1,90 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{newtxmath}
+
+
+\begin{document}
+
+\section{Propagating Attribute Value Ranges Across Rollbacks}
+
+Consider starting and ending database states $D_s$ and $D_e$ where
+$D_e = Q(D_s)$ is the result of executing query $Q$ on the starting
+state.  Let each database $D_i$ contain a single tuple $t_i$, where
+each attribute $t_i.a_j$ is has value $v_{i,j}$.  In addition, each
+attribute $t_i.a_j$ is tagged with a range that defines the values
+the attribute can take $r_i.a_j = [min_{i,j}, max_{i,j}]$.
+
+For the end state $D_e$, the values are all well defined, so the value ranges are
+defined as $r_i.a_j = [v_{i,j}, v_{i,j}]$.  The question is, when rolling back
+across different types of queries, how do we set the ranges?.
+
+\subsection{Update Query 1}
+
+Consider the following UPDATE query with 3 SET clauses $s_1, s_2, s_3$ repsectively,
+and one WHERE clause $w$:
+
+\[
+\text{SET } a=1 \text{ AND } b=f(b) \text{ AND } c=d+1 \text{ WHERE } e \in [1, 10] 
+\]
+
+Given the attribute values in $D_e$, we can infer the following
+about the ranges for the tuple $t_s$ in the starting database $D_s$:
+
+\begin{enumerate}
+\item \[r_{s,a} = \begin{cases}
+[-\infty, \infty] & \mbox{if } v_{e,e} \in [1, 10]\\
+[1, 1]            & \text{else}
+\end{cases}\]
+\item $$r_{s,b} = [min(B), max(B)] \mbox{ where } B = \{ f^{-1}(v) | v \in r_{e,b} \}$$.\\
+      This is simpler to compute if $f$ is monotonic, in which case $r_{s,b}$ can be computed 
+      using only the min, max information of the range $r_{e,b}$.
+\item $$r_{s,c} = [min_{e,c}-1, max_{e,c}-1]$$
+      This is a special case of $r_{s,b}$, where we can use the range information directly.
+\item \[r_{s,e} = \begin{cases}
+[-\infty, \infty] - [1,10] & \mbox{if } v_{e,a} \ne 1\\
+[1,10]                     & \mbox{if } v_{e,a} = 1 \mbox{ AND } v_{s,a} \ne 1\\
+r_{s,e}                    & \mbox{else }
+\end{cases}
+\]
+Notice in this case we make some assumptions about the accuracy of $t_s.a$'s initial value to infer
+information about $e$'s correct range.
+\end{enumerate}
+
+\subsection{UPDATE Query 2}
+
+Consider a query that SETs the same attribute that is used in the WHERE clause:
+
+\[
+\text{SET } a=0 \text{ WHERE } a \in [1, 10] 
+\]
+
+It turns out the rolledback attribute range will not be unbounded!  Nice work.
+
+$$
+\begin{cases}
+  r_{s,a} = [0,10]              & \mbox{if } v_{e,a} =   0\\
+  \text{ERROR}                  & \mbox{if } v_{e,a} \in [1, 10]\\
+  r_{s,a} = [v_{e,a}, v_{e,a}]  & \mbox{else}
+\end{cases}
+$$
+
+\subsection{INSERT Query}
+
+Let the query INSERT data instead:
+
+\[
+\text{INSERT VALUES(}x_1,\ldots\text{)}
+\]
+
+The rollback and the ranges are trivial:
+
+$$r_{s,a_j} = [x_j, x_j]$$
+
+
+\subsection{DELETE Query}
+
+When rolling back a DELETE query, all of the deleted tuples 
+have unbounded ranges.
+
+
+\end{document}
