@@ -1,6 +1,7 @@
 %!TEX root = ../main.tex
 
 \section{Modeling abstractions}
+\label{sec:abstractions}
 
 In this section, we introduce a running example inspired from the use-case of
 Example~\ref{ex:taxes}, and describe the model abstractions that we use to
@@ -10,7 +11,7 @@ formalize the diagnosis problem.
 
 \input{content/example}
 
-\begin{example}
+\begin{example}\label{ex:taxes2}
     
 Figure~\ref{fig:example} demonstrates an example tax bracket adjustment in the
 spirit of Example~\ref{ex:taxes}. The adjustment sets the tax rate to 30\% for
@@ -22,10 +23,33 @@ further obscured by query $q_3$, which inserts a tuple with slightly higher
 income than $t_3$ and the correct (lower) tax rate.
 
 \end{example}
+% 
+While traditional data cleaning techniques seek to identify and correct the
+erroneous values in the table \emph{Taxes} directly, our goal is to diagnose
+the problem, and understand the reasons for these errors. In this case, the
+reason for the data errors is the incorrect predicate value in query $q_1$.
 
+In this paper, we assume that we know \emph{some} errors in the dataset, and
+that these errors were caused by erroneous updates. The errors may be
+obtained in different ways: traditional data cleaning tools may identify
+discrepancies in the data (e.g., a tuple with lower income has higher tax
+rate), or errors can be reported directly from users (e.g., customers
+reporting discrepancies to customer service). \emph{Our goal is not to correct
+the errors directly, but to analyze them as a ``symptom'' and provide a
+diagnosis.} The diagnosis can produce a targeted treatment: knowing how the
+errors were introduced guides the proper way to trace and resolve them.
 
 
 \input{content/notations}
+
+\subsection{The complaint provenance model}
+\label{sec:model}
+
+In our setting, the diagnoses are associated with errors in the queries that
+operated on the data. In Example~\ref{ex:taxes2}, the errors in the dataset
+are due to the digit transposition mistake in the WHERE clause predicate of
+query $q_1$.  Our goal is to infer the errors in a log of queries automatically, given a set of incorrect values in the data.
+
 
 
 \xxx{===}
