@@ -46,6 +46,14 @@ public class Tuple {
 		return values.length;
 	}
 	
+	public Tuple clone() {
+		Tuple t = new Tuple(values.clone());
+		for (int i = 0; i < valueRanges.length; i++) {
+			t.valueRanges[i] = valueRanges[i].clone();
+		}
+		return t;
+	}
+	
 	public String getKey(Table table) {
 		return values[table.getKeyIdx()];
 	}

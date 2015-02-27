@@ -10,12 +10,22 @@ import java.util.Set;
 
 import queryprovenance.harness.Util;
 import queryprovenance.problemsolution.Complaint;
+import queryprovenance.problemsolution.SingleComplaint;
 
 public class DatabaseState {
 
 		//private ResultSet state; // tuple values in this state
 		private HashMap<Integer, Tuple> state; 
 		private Table table;
+		
+		public DatabaseState(DatabaseState ds) throws Exception {
+			state = new HashMap<Integer, Tuple>();
+			for (Integer pk : ds.state.keySet()) {
+				ds.state.put(pk, ds.state.get(pk).clone());
+			}
+			
+			table = ds.table.clone();
+		}
 		
 		/* initialize database state*/
 		public DatabaseState(DatabaseHandler database, Table table) throws Exception{
@@ -145,9 +155,13 @@ public class DatabaseState {
 		}
 		
 		/* return D*, a correct database state by given a set of complaints*/
-		public DatabaseState getTrueState(Complaint complaint_set){
-			// to be implemented
-			return null;
+		public DatabaseState getTrueState(Complaint complaint_set) throws Exception {
+			DatabaseState ds = new DatabaseState(this);
+			for (Integer pk : complaint_set.keySet()) {
+				SingleComplaint sc = complaint_set.get(pk);
+				ds.getTuple(pk).values = sc.values;
+			}
+			return ds;
 		}
 		
 		/* compose check query of one tuple */
