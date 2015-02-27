@@ -58,7 +58,7 @@
     </target>
     <target name="SyntheticHarness">
         <java classname="queryprovenance.harness.SyntheticHarness" failonerror="true" fork="yes">
-            <jvmarg line="-Djava.library.path=/"/>
+          <jvmarg line="-Djava.library.path=/data/sirrice/CPLEX_Studio1261/cplex/bin/x86-64_linux"/>
             <arg line="dbconn.config 1 2 10 15 20"/>
             <classpath refid="QueryProv.classpath"/>
         </java>
