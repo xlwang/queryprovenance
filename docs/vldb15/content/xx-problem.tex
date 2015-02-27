@@ -42,66 +42,87 @@ errors were introduced guides the proper way to trace and resolve them.
 
 \input{content/notations}
 
-\subsection{The complaint provenance model}
+\subsection{Error modeling}
 \label{sec:model}
 
 In our setting, the diagnoses are associated with errors in the queries that
 operated on the data. In Example~\ref{ex:taxes2}, the errors in the dataset
 are due to the digit transposition mistake in the WHERE clause predicate of
-query $q_1$.  Our goal is to infer the errors in a log of queries automatically, given a set of incorrect values in the data.
+query $q_1$. Our goal is to infer the errors in a log of queries
+automatically, given a set of incorrect values in the data. We proceed to
+describe our modeling abstractions for data, queries, and errors, and how we
+use them to define the diagnosis problem.
+
+\subsubsection*{Data and query models}
+
+\noindent
+\emph{Query log ($\mathcal{Q}$):}
+We define a query log as a sequence of \texttt{UPDATE}, \texttt{INSERT}, and
+\texttt{DELETE} queries queries $\mathcal{Q}=\{q_1,\dots,q_n\}$, that have
+operated on a database $D$. In the rest of the paper, we use the term
+\emph{update queries} to refer to any of the queries in $\mathcal(Q)$,
+including insertion and deletion queries.
+
+\smallskip
+\noindent
+\emph{Database state ($D_i$):}
+We use $D_i$ to represent the state of a database $D$ after the application of
+queries $q_1$ through $q_i$ from the log $\mathcal{Q}$. $D_0$ represents the
+original database state, and $D_n$ the final, or current, database state. Out
+of all the states, the system only maintains $D_0$ and $D_n$. In practice,
+$D_0$ can be a checkpoint: a state of the database that we assume is correct;
+we cannot diagnose errors before this state. The intermediate states can be
+derived by repeating the log: $D_i=q_i(q_{i-1}(\dots q_1(D_0)))$. We also
+write $D_n=\mathcal{Q}(D_0)$ to denote that the final database state $D_n$ can
+be derived by applying the sequence of queries in the log to the original
+database state $D_0$.
+
+For ease of
+exposition, in the remainder of the paper we assume that the database contains
+a single relation, but this is not a requirement in our framework.
 
 
+\subsubsection*{Error models}
+
+\noindent
+\emph{Complaint set ($\mathcal{C}$):}
+We model a data error in the final database state $D_n$ as a \emph{complaint}
+$c(t,t^*)$. A complaint is a pair of tuples $(t,t^*)$, such that $t\in D_n$,
+and $t^*$ has the same schema as $t$, but differs in some of the values. In
+the example of Figure~\ref{fig:example}, the complaint that represents the
+errors in tuple $t_3$ is $c(t_3,t_3^*)$, where $t_3^*=(25,\$86000,\$21500)$.  We use complaints to model three types of errors:
+\begin{description}[itemsep=0pt, parsep=0pt]
+    \item[Incorrect values $c(t,t^*)$:] $t$ should be modified to $t^*$.
+    \item[Missing tuples $c(\_,t^*)$:] $t^*$ should be added to $D_n$.
+    \item[Present tuples $c(t,\_)$:] $t$ should be removed from $D_n$.
+\end{description}
+% 
+We use $\mathcal{C}$ to denote the set of all known complaints, and we call it
+\emph{complaint set}. Each complaint in $\mathcal{C}$ represents a
+transformation (addition, deletion, or modification) of a tuple in $D_n$.
+Applying all these transformations to $D_n$ results in a new database instance
+$D_n^*$, and we write $D_n^*=\mathcal{C}(D_n)$. If $D_n^*$ has no remaining
+data errors, we say that $\mathcal{C}$ is a \emph{complete complaint set}. 
+\alex{there is some notion of minimality here...}
+In our work, we do not assume that the complaint set is complete.
+
+\smallskip
+\noindent
+\emph{Log repair ($\mathcal{Q}^*$):}
+Our framework derives a diagnosis as a log repair
+$\mathcal{Q}^*=\{q_1^*,\dots, q_n^*\}$, such that
+$\mathcal{Q}^*(D_0)=\mathcal{C}(D_n)$. In this work, we assume that each query
+$q_i^*$ in $\mathcal{Q}^*$ is either $q_i^*=q_i$ or $q_i^*=\mathcal{T}(q_i)$,
+where $\mathcal{T}(q_i)$ is a \emph{non-structural modification} of $q_i$. A
+non-structural modification $\mathcal{T}$ may alter the constants that appear
+in a query, but it will not change the attributes and functions used in the
+query, or any of its structure. For example, a non-structural modification of
+query $q_1$ in Figure~\ref{fig:example} could be $q_1^*$=\texttt{UPDATE Taxes
+SET rate = 30 WHERE income >= 87500}.
 
 \xxx{===}
 
-First, some notation used in the rest of the paper.
 
-Our goal is to take the user's complaints about the current state
-of the database, and identify transformations over the database
-query log that, when applied to the database, ``fixes'' these
-complaints.  Although the general formulation of the problem that
-we will introduce is intractable, we will reduce the scope of the
-problem to a useful and tractable version.  To begin, we will
-introduce the notation that is used in the rest of the paper.
-
-\stitle{Def 1 (Database, State, Query)}: Let a database
-be defined as the result of applying a sequence of queries in the query log
-$Q_{seq}=\{Q_1,..., Q_n\}$ to an initial database $D_0$.  
-Applying the query log to the initial database 
-results in $n$ intermediate database states $\{D_i = Q_i(D_{i-1}) | i \in [1, n]\}$.  
-where $D_n = Q_{seq}(D_0) = Q_n(\ldots Q_1(D_0))$ is the current state of the database. 
-We assume that a subset of the query log has been replaced with {\it corrupted queries} 
-such that $D_n$ and $Q_{seq}$ differ from the true database state $D^*_n$ and query log $Q^*_{seq}$.
-
-In our current problem, we only deal with non aggregation and non-join queries.
-In addition, for ease of exposition, we assume that the database contains a single table $T$ 
-($T^*$ in the true database) containing $m$ numerical attributes $a_1,\ldots,a_m$, 
-where the primary key is $a_1$.  
-In Section~\ref{blah}, we will describe how our techniques extend to multi-table databases.
-\xxx{Define the scope of queries supported}
-
-
-
-\stitle{Def 2 (Complaints and Complaint Sets)}:
-The tuple-wise difference between two databases $D_1$ and $D_2$ can be viewed as a patch
-$P_{D_1, D_2}$ that contains {\it difference pairs} $(t_i \in T, t^*_i \in T^*)$.
-Similar to source code patches, patches can be applied to a database $P(D_n) = D^*_n$.
-Each pair in a patch describes one of three error types that can be present in $D_n$:
-
-\begin{itemize}
-\item {\it ADD}: $t^*_i$ should be added to the database $(\textrm{null}, t^*_i)$
-\item {\it DELETE}: $t_i$ should be removed from the database $(t_i, \textrm{null})$
-\item {\it WRONG}: $t_i$ should be modified into $t^*_i$
-\end{itemize}
-
-
-The user provides a {\it complaint set} $C$ that specify the perceived incorrect tuples in $D_n$.
-$C$ is simply a patch.
-We define a complete complaint set when $C = P_{D_n, D^*_n}$.
-In contrast, an {\it incomplete complaint set}  may contain complaints that are false negatives (insertions that should be in $C$ but are not),
-false positives (deletions that are not present), and errors (proposed value of a $t'$ is incorrect).
-
-The accuracy of an incomplete complaint set can be measured by the ratio $acc_C = \frac{|C \cap \Delta|}{|\Delta|}$.
 
 
 
