@@ -123,8 +123,8 @@ def all_options_to_generator(all_options):
 
 
 
-def gen_exact_config():
-  all_options = [
+ALL_OPTIONS = {
+  "exact": [
     {
       "N_D": [10, 100, 1000],
       "N_q": [5, 10, 20],
@@ -149,13 +149,8 @@ def gen_exact_config():
       "idx": [0.2, 05, 0.8, 0.9],
       "exptype": 1
     }
-  ]
-
-  return all_options
-
-
-def gen_rollback_config():
-  all_options = [
+  ],
+  "rollback": [
     {
       "N_D": [1000],
       "N_q": [20],
@@ -166,13 +161,8 @@ def gen_rollback_config():
       "passtype": 2,
       "rollbackbatch": [1, 2, 5]
     }
-  ]
-
-  return all_options
-
-
-def gen_qfix_config():
-  all_options = [
+  ],
+  "qfix": [
     {
       "N_D": [1000],
       "N_q": [1],
@@ -183,12 +173,8 @@ def gen_qfix_config():
       "passtype": 3,
       "qfixtype": [1, 2]
     }
-  ]
-
-  return all_options
-
-def gen_endtoend_config():
-  all_options = [
+  ],
+  "endtoend": [
     {
       "N_D": [1000],
       "N_q": [1],
@@ -199,11 +185,8 @@ def gen_endtoend_config():
       "passtype": 4,
       "qfixtype": 1
     }
-  ]
-  return all_options
-
-def gen_noise_config():
-  all_options = [
+  ],
+  "noise": [
     {
       "N_D": [1000],
       "N_q": [1],
@@ -229,14 +212,12 @@ def gen_noise_config():
       "p_fn": [0, 01, 02, 05], 
     }
   ]
-
-  return all_options
-
+}
 
 
 @click.command()
 @click.option("--out", default=None)
-@click.argument("exptypes", type=click.Choice(["all", "exact", "rollback", "qfix", "endtoend", "noise", "tpcc"]), nargs=-1)
+@click.argument("exptypes", type=click.Choice(["all"] + ALL_OPTIONS.keys()), nargs=-1)
 def main(out, exptypes):
   """
   exptypes describes the experiment type to generate parameters for.
@@ -256,23 +237,11 @@ def main(out, exptypes):
   else:
     out = file(out, "w")
 
-  funcs = set()
-  for exptype in exptypes:
-    if exptype == "exact" or exptype == "all":
-      funcs.add(gen_exact_config)
-    if exptype == "rollback" or exptype == "all":
-      funcs.add(gen_rollback_config)
-    if exptype == "qfix" or exptype == "all":
-      funcs.add(gen_qfix_config)
-    if exptype == "endtoend" or exptype == "all":
-      funcs.add(gen_endtoend_config)
-    if exptype == "noise" or exptype == "all":
-      funcs.add(gen_noise_config)
-
-  for f in funcs:
-    configs = all_options_to_generator(f())
-    for config in configs:
-      print>>out, ",".join(map(str, config))
+  for optname, options in ALL_OPTIONS.items():
+    if "all" in exptypes or optname in exptypes:
+      configs = all_options_to_generator(options)
+      for config in configs:
+        print>>out, ",".join(map(str, config))
 
   try:
     if out is not sys.stdout:
