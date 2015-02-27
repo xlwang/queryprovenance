@@ -16,7 +16,7 @@ For the end state $D_e$, the values are all well defined, so the value ranges ar
 defined as $r_i.a_j = [v_{i,j}, v_{i,j}]$.  The question is, when rolling back
 across different types of queries, how do we set the ranges?.
 
-\subsection{Update Queries}
+\subsection{Update Query 1}
 
 Consider the following UPDATE query with 3 SET clauses $s_1, s_2, s_3$ repsectively,
 and one WHERE clause $w$:
@@ -48,12 +48,15 @@ Notice in this case we make some assumptions about the accuracy of $t_s.a$'s ini
 information about $e$'s correct range.
 \end{enumerate}
 
-A more complex query is one that SETs the same attribute that is used in the WHERE clause:
+\subsection{UPDATE Query 2}
+
+Consider a query that SETs the same attribute that is used in the WHERE clause:
 
 \[
 \text{SET } a=0 \text{ WHERE } a \in [1, 10] 
 \]
 
+It turns out the rolledback attribute range will not be unbounded!  Nice work.
 
 $$
 \begin{cases}
@@ -62,5 +65,24 @@ $$
   r_{s,a} = [v_{e,a}, v_{e,a}]  & \mbox{else}
 \end{cases}
 $$
+
+\subsection{INSERT Query}
+
+Let the query INSERT data instead:
+
+\[
+\text{INSERT VALUES(}x_1,\ldots\text{)}
+\]
+
+The rollback and the ranges are trivial:
+
+$$r_{s,a_j} = [x_j, x_j]$$
+
+
+\subsection{DELETE Query}
+
+When rolling back a DELETE query, all of the deleted tuples 
+have unbounded ranges.
+
 
 \end{document}
