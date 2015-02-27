@@ -204,7 +204,7 @@ def save_config(db, dburl, config):
   # save queries
   #
   save_qlog(db, cid, tname, queries, True)
-  save_qlog(db, cid, tname, corruptqueries, True)
+  save_qlog(db, cid, tname, corruptqueries, False)
 
 
   #

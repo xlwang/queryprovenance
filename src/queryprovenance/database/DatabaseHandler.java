@@ -75,6 +75,7 @@ public class DatabaseHandler {
 	        db = DriverManager.getConnection(dbUrl, // database
 	                postgreSQLUser, // user
 	                postgreSQLPassword); // password
+	        
 		}
 		
 		public ResultSet queryExecution(String query) throws Exception{
