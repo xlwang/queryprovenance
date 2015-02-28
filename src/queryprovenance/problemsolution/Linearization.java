@@ -232,7 +232,8 @@ public class Linearization {
 			int count = 0;
 			for(Tuple tuple : rollbackmap.keySet()) {
 				IloNumVar[] vars = rollbackmap.get(tuple); // get variables
-				Tuple init = badds.get(0).getTuple(Integer.valueOf(tuple.getValue(table.getKeyIdx()))); // get original value
+        int tmppk = Float.valueOf(tuple.getValue(table.getKeyIdx())).intValue(); 
+				Tuple init = badds.get(0).getTuple(tmppk);
 				for(int i = 0; i < vars.length; ++i) {
 					IloNumVar var = vars[i];
 					double orgval = Double.valueOf(init.getValue(i));

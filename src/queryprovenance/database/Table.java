@@ -116,7 +116,6 @@ public class Table {
 		for (int i = 0; i < ncols; i++) {
 			String col = rmd.getColumnName(i+1);
 			cols[i] = col;
-			System.out.println(col);
 			if ("id".equalsIgnoreCase(col)) {
 				pkIdx = i;
 			}
@@ -172,7 +171,5 @@ public class Table {
 		DatabaseHandler handler = new DatabaseHandler();
 		handler.getConnected("dbconn.config");
 		Table t = tableFromDB(handler, "test");
-		System.out.println(t.columns);
-		System.out.println(t.keyidx);
 	}
 }

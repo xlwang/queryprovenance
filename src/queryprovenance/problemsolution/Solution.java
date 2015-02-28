@@ -156,6 +156,9 @@ public class Solution {
       System.out.println(x.getTable().getName());
     }
 		
+    for (int cand: candlist) {
+      System.out.println(" candlist: " + cand);
+    }
 		
 		// start the fix
 		DatabaseState[] dss = new DatabaseState[badDss.size()];
@@ -166,13 +169,11 @@ public class Solution {
 		for(int i = candlist.length - 1; i >= 0; --i) {
 			// for each candidate query
 			int idx = candlist[i];
-      System.out.println("idx: " + idx);
+      System.out.println("idx: " + idx + " to " + last);
 
-			Complaint rolledback = linearsolver.rollBack(cplex, badInitialTable, badQueries, badDss, precompset, steps, idx + 1, last);
+			Complaint rolledback = linearsolver.rollBack(cplex, badInitialTable, badQueries, badDss, precompset, steps, idx + 0, last);
 			DatabaseState fixedDs = badDss.get(idx).getTrueState(rolledback);
       System.out.println(fixedDs.getTable());
-      System.out.println(fixedDs.getTable().types);
-      System.out.println(badDss.get(idx).getTable().types);
 			dss[idx] = fixedDs;
 			
 			// roll forward the database state to recover the rest of the database states
@@ -180,11 +181,10 @@ public class Solution {
 			String tmptablename = String.format("%s_rollback_%d", badInitialTable.getName(), idx);
 			fixedDs.saveToDatabase(handler, tmptablename);
 			int h = idx+1;
-      System.out.println(badQueriesSublist);
-      System.out.println(tmptablename);
+      System.out.println("tmptablename " + tmptablename);
 			for (DatabaseState ds : badQueriesSublist.execute(tmptablename, handler)) {
         System.out.println(" " + h);
-				dss[h] = ds;
+				dss[h-1] = ds;
 				h++;
 			}
 
