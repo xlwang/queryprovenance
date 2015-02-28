@@ -1,11 +1,7 @@
 package queryprovenance.expression;
 
-import ilog.concert.IloNumVar;
-
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-
 
 public abstract class OperationExpression extends Expression{
 
@@ -66,11 +62,4 @@ public abstract class OperationExpression extends Expression{
 		return false;
 	}
 	
-	
-	public void fixExpression(HashMap<IloNumVar, Double> fixedmap,
-			HashMap<Expression, IloNumVar> expressionmap) throws Exception {
-		right.fixExpression(fixedmap, expressionmap);
-		left.fixExpression(fixedmap, expressionmap);
-		
-	}
 }

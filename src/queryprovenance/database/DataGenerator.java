@@ -8,10 +8,10 @@ import java.io.FileWriter;
 import java.util.Random;
 
 public class DataGenerator {
-	// static final String dir = "/Users/xlwang/queryprovenance/queryprovenance/jar/";
-	public static void generatorData(String dir, int tuple_count) throws Exception{
+
+	public static void generatorData(int tuple_count) throws Exception{
 		BufferedReader reader = new BufferedReader( 
-				 new FileReader(dir + "/data/names.txt"));
+				 new FileReader("./data/names.txt"));
 		String str;
 		String[] names = new String[7000];
 		int count = 0;
@@ -19,7 +19,7 @@ public class DataGenerator {
 			String[] list = str.split(" ");
 			names[count++] = list[0].toLowerCase().trim();
 		}
-		File filename = new File(dir + "/data/inserts.sql");
+		File filename = new File("./data/inserts.sql");
 		if(!filename.exists())
 			filename.createNewFile();
 		String[] departments = new String[]{"sale","engineer","hr","finance","mangement"};

@@ -59,9 +59,9 @@ class Transformation {
 				set = SetClause.generate(ql.get(qidx).getSet(), params);
 			q = ql.get(qidx);
 			q = q.clone();
-			//System.out.println(q);
+			System.out.println(q);
 			q.setSet(set);
-			//System.out.println(q);
+			System.out.println(q);
 			ql.set(qidx, q);
 			break;
 		case WHERE:
@@ -71,9 +71,9 @@ class Transformation {
 				where = WhereClause.generate(ql.get(qidx).getWhere(), params);
 			q = ql.get(qidx);
 			q = q.clone();
-			//System.out.println(q);
+			System.out.println(q);
 			q.setWhere(where);
-			//System.out.println(q);
+			System.out.println(q);
 			ql.set(qidx, q);
 			break;
 		}
@@ -94,8 +94,8 @@ class Transformation {
 		qparams.nclauses = 1;
 		qparams.queryType = Query.Type.UPDATE;
 		//WhereClause newWhere = WhereClause.generate(qparams);
-		Transformation.Type transtype = (((Math.random()<0.5)?0:1) == 0)?Transformation.Type.WHERE:Transformation.Type.SET;
-		//Transformation.Type transtype = Transformation.Type.SET;
+		//Transformation.Type transtype = (((Math.random()<0.5)?0:1) == 0)?Transformation.Type.WHERE:Transformation.Type.SET;
+		Transformation.Type transtype = Transformation.Type.WHERE;
 		return new Transformation(idx, transtype, null, null, qparams);
 	}
 }

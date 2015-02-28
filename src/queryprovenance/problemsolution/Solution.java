@@ -11,7 +11,7 @@ import queryprovenance.database.DatabaseHandler;
 import queryprovenance.database.DatabaseState;
 import queryprovenance.database.DatabaseStates;
 import queryprovenance.database.Table;
-import queryprovenance.harness.Metrics;
+import queryprovenance.query.Query;
 
 public class Solution {
 	static final String gqlogname = "gqlog"; // filename for good query log
@@ -30,7 +30,6 @@ public class Solution {
 	QueryLog badQueries;
 	Complaint complaints;
 	
-	private boolean print = false;
 	
 	public Solution(DatabaseHandler dbhandler,DatabaseStates badds, QueryLog badqlog, Complaint compset) {
 		this.handler = dbhandler;
@@ -62,8 +61,7 @@ public class Solution {
 		if(preproc) {
 			PreProcess pre = new PreProcess();
 			candidate.addAll(pre.findCandidate(badDss, badQueries, complaints));
-		} 
-		if(!preproc || candidate.size() == 0) {
+		} else {
 			for(int i = 0; i < badQueries.size(); ++i)
 				candidate.add(i);
 		}
@@ -74,11 +72,10 @@ public class Solution {
 	public QueryLog onePassSolution(IloCplex cplex, 
 			double epsilon, double M, 
 			boolean prepos, boolean feasible, 
-			boolean falsepositive, boolean oneerr, String[] args) throws Exception {
+			boolean falsepositive, String[] args) throws Exception {
 		// define linear solver
 		times = new long[]{0,0,0,0};
 		Linearization linearsolver = new Linearization(epsilon, M);
-		linearsolver.setPrint(print);
 		
 		long starttime = System.nanoTime();
 		HashSet<Integer> candidate = preprocess(prepos); 
@@ -87,26 +84,12 @@ public class Solution {
 		// solve the problem
 		QueryLog qlogfix = new QueryLog();
 		DatabaseState badInitialDs = badDss.get(0);
-		if(oneerr) {
-			for(int cand : candidate) {
-				HashSet<Integer> curcand = new HashSet<Integer>();
-				curcand.add(cand);
-				qlogfix = linearsolver.fixParameters(cplex, badInitialDs.getTable(), badQueries, badDss, complaints, curcand, cand, badQueries.size());
-				for(int i = 1; i < linearsolver.getTime().length + 1; ++i) {
-					times[i] += linearsolver.getTime()[i-1];
-				}
-				if(qlogfix != null) {
-					break;
-				}
-			}
-		} else {
-			qlogfix = linearsolver.fixParameters(cplex, badInitialDs.getTable(), badQueries, badDss, complaints, candidate, 0, badQueries.size());
-			// copy time
-			for(int i = 1; i < linearsolver.getTime().length + 1; ++i) {
-				times[i] = linearsolver.getTime()[i-1];
-			}
+		qlogfix = linearsolver.fixParameters(cplex, badInitialDs.getTable(), badQueries, badDss, complaints, candidate, 0, badQueries.size());
+		
+		// copy time
+		for(int i = 1; i < linearsolver.getTime().length + 1; ++i) {
+			times[i] = linearsolver.getTime()[i-1];
 		}
-
 		if(qlogfix != null)
 			return qlogfix;
 		else
@@ -126,7 +109,6 @@ public class Solution {
 		times = new long[]{0,0,0,0};
 		// define linear solver
 		Linearization linearsolver = new Linearization(epsilon, M);
-		linearsolver.setPrint(print);
 		
 		// preprocess
 		long starttime = System.nanoTime();
@@ -265,7 +247,10 @@ public class Solution {
 			QueryLog curfix = linearsolver.fixParameters(cplex, badInitialTable, badQueries, badDss, rolledback, candidate, idx, idx + 1);
 			
 			if(curfix != null) {
-				fixes.add(curfix);
+				QueryLog fix = (QueryLog) badQueries.subList(0, idx);
+				fix.addAll(curfix);
+				fix.addAll(badQueries.subList(idx + 1, badQueries.size()));
+				fixes.add(fix);
 				break;
 			}
 			// copy time
@@ -297,8 +282,6 @@ public class Solution {
 		// -MV: linearize parameter, default 1000000.0
 		// -AP: use approximation if cplex is infeasible
 		// -PRUNE: prone false positives
-		// -ONE: single query error
-		// -PRINT: print status
 		
 		String configfile = null, tablename = null, dir = null;
 		int solution = 1; // default, one pass solution,
@@ -307,8 +290,6 @@ public class Solution {
 		boolean preprocess = true; // true: do preprocess; false no preprocess
 		boolean feasible = false; // do not relax constraints
 		boolean falsepositive = false; // do not prune false positives
-		boolean oneerror = false;
-		boolean print = false;
 		int i = 0;
 		while(i < args.length){
 			String op = args[i];
@@ -337,12 +318,6 @@ public class Solution {
 			case "-T": 
 				tablename = args[++i];
 				break;
-			case "-ONE": 
-				oneerror = true; i++;
-				break;
-			case "-PRINT": 
-				print = true; i++;
-				break;
 			case "-E": 
 				try{
 					epsilon = Double.parseDouble(args[++i]);
@@ -367,9 +342,7 @@ public class Solution {
 						+ "-M: for two pass solution only, 0: cplex; 1: decision tree \n "
 						+ "-EP: epsilon, default: 0.0001 \n "
 						+ "-MV: linearize parameter, default 1000000.0 \n"
-						+ "-AP: use approximation if cplex is infeasible \n"
-						+ "-PRUNE: prone false positives \n"
-						+ " -ONE: single query error");
+						+ "-AP: use approximation if cplex is infeasible");
 			}
 			i++;
 		}
@@ -395,11 +368,10 @@ public class Solution {
 		Complaint compset = new Complaint(ds.get(ds.size()-1), badds.get(badds.size()-1)); // get complaint set
 		
 		Solution solver = new Solution(dbhandler, badds, badqlog, compset);
-		solver.setPrint(print);
 		
 		// solve 
 		if(solution == 1) {
-			fixedqlog = solver.onePassSolution(cplex, epsilon, M, preprocess, feasible, falsepositive, oneerror, args);
+			fixedqlog = solver.onePassSolution(cplex, epsilon, M, preprocess, feasible, falsepositive, args);
 		} else {
 			fixedqlog = solver.twoPassSolution(cplex, epsilon, M, preprocess, feasible, falsepositive, steps, args);
 		}
@@ -414,9 +386,5 @@ public class Solution {
 	
 	public long[] getTime() {
 		return times;
-	}
-	
-	public void setPrint(boolean p_) {
-		print = p_;
 	}
  }

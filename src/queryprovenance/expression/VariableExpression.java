@@ -1,15 +1,17 @@
 package queryprovenance.expression;
 
+import ilog.concert.IloException;
 import ilog.concert.IloNumExpr;
 import ilog.concert.IloNumVar;
 import ilog.cplex.IloCplex;
 
 import java.util.ArrayList;
+import java.util.EmptyStackException;
 import java.util.HashMap;
 import java.util.List;
 
 import queryprovenance.database.Table;
-import queryprovenance.query.Query;
+import queryprovenance.query.CplexHandler;
 
 public class VariableExpression extends Expression{
 	String name;
@@ -153,7 +155,7 @@ public class VariableExpression extends Expression{
 				if(table.getColumnIdx(name) >= 0)
 					para = preattribute[table.getColumnIdx(name)];
 				else 
-					para = cplex.numVar(value, value);
+					throw new IllegalArgumentException("BAD expression name " + name);
 			} else {
 				para = cplex.numVar(value, value);
 			}
@@ -184,46 +186,4 @@ public class VariableExpression extends Expression{
 		}
 		return false;
 	}
-
-	@Override
-	public IloNumExpr convertExpr(IloCplex cplex,
-			HashMap<IloNumVar, Double> varmap,
-			HashMap<Expression, IloNumVar> exprmap,
-			HashMap<Query, ArrayList<IloNumVar>> varquerymap, Query query,
-			IloNumVar[] preattribute, Table table, boolean option)
-			throws Exception {
-		IloNumExpr expr;
-		IloNumVar para;
-		if(option && !isTrue) {
-			 // is a parameter
-			if(!exprmap.containsKey(this)){
-				para = cplex.numVar(Double.MIN_VALUE, Double.MAX_VALUE);
-				varmap.put(para, value);
-				exprmap.put(this, para);
-				ArrayList<IloNumVar> list;
-				if(varquerymap.containsKey(query)) {
-					list = varquerymap.get(query);
-				} else {
-					list = new ArrayList<IloNumVar>();
-				}
-				list.add(para);
-				varquerymap.put(query, list);
-			} else {
-				para = exprmap.get(this);
-			}
-		} else {
-			if(isTrue) { // is an attribute
-				if(table.getColumnIdx(name) >= 0)
-					para = preattribute[table.getColumnIdx(name)];
-				else 
-					para = cplex.numVar(value, value);
-			} else {
-				para = cplex.numVar(value, value);
-			}
-		}
-		expr = cplex.sum(para, 0);
-		return expr;
-	}
-
-
 }

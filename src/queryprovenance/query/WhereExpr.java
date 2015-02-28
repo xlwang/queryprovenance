@@ -4,6 +4,7 @@ import ilog.concert.IloNumVar;
 
 import java.util.HashMap;
 
+import queryprovenance.harness.QueryParams;
 import queryprovenance.expression.*;
 public class WhereExpr {
 	public static enum Op {

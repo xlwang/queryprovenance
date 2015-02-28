@@ -6,9 +6,10 @@ import ilog.cplex.IloCplex;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import queryprovenance.database.Table;
-import queryprovenance.query.Query;
+import queryprovenance.query.CplexHandler;
 
 public class NegationExpression extends OperationExpression{
 	
@@ -47,12 +48,11 @@ public class NegationExpression extends OperationExpression{
 		return current;
 	}
 	
-	public IloNumExpr convertExpr(IloCplex cplex, HashMap<IloNumVar, Double> varmap, HashMap<Expression, IloNumVar> exprmap, HashMap<Query, ArrayList<IloNumVar>> varquerymap, Query query, IloNumVar[] preattribute, Table table,
-			boolean option) throws Exception {
-		IloNumExpr rightexpr = super.right.convertExpr(cplex, varmap, exprmap, varquerymap, query, preattribute, table, option);
-		IloNumExpr leftexpr = super.left.convertExpr(cplex, varmap,exprmap, varquerymap, query, preattribute, table, option);
-		IloNumExpr current = cplex.diff(leftexpr, rightexpr);
-		return current;
+	@Override
+	public void fixExpression(HashMap<IloNumVar, Double> fixedmap,
+			HashMap<Expression, IloNumVar> expressionmap) throws Exception {
+		right.fixExpression(fixedmap, expressionmap);
+		left.fixExpression(fixedmap, expressionmap);
+		
 	}
-	
 }
