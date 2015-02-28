@@ -46,6 +46,10 @@ public class SyntheticHarness {
 	int rollbackbatch;
 	float epsilon, M; 
 	boolean approx, prune;
+	boolean oneerror = false; // true for single error fix. 
+	boolean print = false; // print cplex solver status
+	boolean feasible = false;
+	boolean falsepositive = false;
 	
 	public SyntheticHarness(DatabaseHandler handler, int cid, QueryLog cleanQs, QueryLog dirtyQs) throws Exception {
 		this.handler = handler;
@@ -71,6 +75,10 @@ public class SyntheticHarness {
 		approx = rset.getBoolean(6);
 		prune = rset.getBoolean(7);
 		rollbackbatch = rset.getInt(8);
+		oneerror = rset.getBoolean(9);
+		feasible = rset.getBoolean(10);
+		falsepositive = rset.getBoolean(11);
+		print = rset.getBoolean(12);
 	}
 	
 	
@@ -88,24 +96,23 @@ public class SyntheticHarness {
 		Solution solver = new Solution(handler, dirtyDss, dirtyQueries, complaints);
 		boolean preproc = optchoice == 2;
 		boolean usecplex = qfixtype == 1;
-		boolean feasible = false;
-		boolean falsepositive = false;
-		int rollbackStepSize = 1;
+		//int rollbackStepSize = 1;
+		
 		
 		QueryLog fixedlog = null;
 		DatabaseStates fixeddss = null;
 		switch(passtype) {
 		case 1: // one pass alg
-			fixedlog = solver.onePassSolution(cplex, epsilon, M, preproc, feasible, falsepositive, options);
+			fixedlog = solver.onePassSolution(cplex, epsilon, M, preproc, feasible, falsepositive, oneerror, options);
 			break;
 		case 2: // rollback only
-			fixeddss = solver.rollback(cplex, epsilon, M, preproc, rollbackStepSize, options);
+			fixeddss = solver.rollback(cplex, epsilon, M, preproc, rollbackbatch, options);
 			break;
 		case 3: // query fix only (no rollback)
-			fixedlog = solver.qfixOnlySolution(cplex, this.cleanDss, epsilon, M, preproc, feasible, falsepositive, rollbackStepSize, options);
+			fixedlog = solver.qfixOnlySolution(cplex, this.cleanDss, epsilon, M, preproc, feasible, falsepositive, rollbackbatch, options);
 			break;
 		case 4: // two pass algorithm
-			fixedlog = solver.twoPassSolution(cplex, epsilon, M, preproc, feasible, falsepositive, rollbackStepSize, options);
+			fixedlog = solver.twoPassSolution(cplex, epsilon, M, preproc, feasible, falsepositive, rollbackbatch, options);
       break;
 		}
 

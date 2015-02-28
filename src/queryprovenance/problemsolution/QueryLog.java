@@ -130,4 +130,3 @@ public class QueryLog extends ArrayList<Query>{
 	}
 	
 }
-
