@@ -21,7 +21,7 @@ public class DatabaseState {
 		public DatabaseState(DatabaseState ds) throws Exception {
 			state = new HashMap<Integer, Tuple>();
 			for (Integer pk : ds.state.keySet()) {
-				ds.state.put(pk, ds.state.get(pk).clone());
+				this.state.put(pk, ds.state.get(pk).clone());
 			}
 			
 			table = ds.table.clone();
@@ -64,64 +64,22 @@ public class DatabaseState {
 		/* initialize database state given table name */ 
 		/* initialize database state*/
 		public DatabaseState(DatabaseHandler database, String tablename) throws Exception{
-			
-			state = new HashMap<Integer, Tuple>(); // initialize state information
-			
-			ResultSet result;
-			if(tablename!=null) {
-
-				// get state query prepared
-				String state_query = "select * from " + tablename;
-				
-				// retrieve primary key in this table
-				DatabaseMetaData dbmd = database.getMetaData(); 
-				ResultSet tabkeys = dbmd.getPrimaryKeys(null, null, tablename.toLowerCase());  
-				String tablekey = "";
-				while(tabkeys.next()){
-					tablekey = tabkeys.getString(4);
-				}
-				
-				// execute the state query and get returned result set
-				result = database.queryExecution(state_query);
-				
-				// get table information
-				ResultSetMetaData rsmd = (ResultSetMetaData) result.getMetaData();
-				int columncount = rsmd.getColumnCount();
-				HashMap<String, Integer> column_map = new HashMap<String, Integer>();
-				String[] columnnames = new String[columncount];
-				int tablekeyidx = -1;
-				for(int i=1; i<=columncount; ++i){
-					column_map.put(rsmd.getColumnLabel(i), i);
-					columnnames[i-1] = rsmd.getColumnLabel(i);
-					if(tablekey.equals(columnnames[i-1]))
-						tablekeyidx = i-1;
-				}
-				this.table = new Table(tablename, columnnames, null, null, tablekeyidx);
-			
-				// prepare state information
-				while(result.next()){
-					Tuple tuple = new Tuple(columncount);
-					for(int i = 0; i < table.getColumns().length; ++i) {
-						tuple.setValue(i, result.getString(column_map.get(table.getColumns()[i])));
-					}
-					state.put(Integer.valueOf(tuple.getValue(table.getKeyIdx())), tuple);
-				}			
-			}
+			this(database, Table.tableFromDB(database, tablename));
 		}
 		
 		public void saveToDatabase(DatabaseHandler handler, String tablename) throws Exception {
 			StringBuffer fmtsb = new StringBuffer();
 			StringBuffer sb = new StringBuffer();
 			sb.append(String.format("CREATE SEQUENCE %s_seq MINVALUE %d;", tablename, this.size()+1));
-			sb.append(String.format("CREATE TABLE %s (", tablename));
+			sb.append(String.format("DROP TABLE IF EXISTS %s;", tablename));
+			sb.append(String.format("CREATE TABLE IF NOT EXISTS %s (", tablename));
 			for (int colidx = 0; colidx < table.size(); colidx++) {
 				String col = table.getColumnName(colidx);
 				Table.Type type = table.getType(colidx);
-				sb.append(col);
 				if (type == Table.Type.NUM) {
 					if ("id".equals(col)) {
 						fmtsb.append("default");
-						sb.append(String.format("%s int DEFAULT nextval('%s_seq') NOT NULL", col, tablename));
+						sb.append(String.format("%s int primary key DEFAULT nextval('%s_seq') NOT NULL", col, tablename));
 					}
 					else {
 						fmtsb.append("%s");
@@ -136,17 +94,21 @@ public class DatabaseState {
 					fmtsb.append(", ");
 					sb.append(", ");
 				}
-					
 			}
 			sb.append(");");
 			handler.queryExecution(sb.toString());
+      System.out.println(sb.toString());
 			
 			List<String>valslist = new ArrayList<String>();
 			String valstmpl = String.format("(%s)", fmtsb.toString());
+      int xx = 0;
 			for (Tuple t : state.values()) {
 				valslist.add(String.format(valstmpl, (Object[])t.values));
+        xx ++;
+        if (xx > 3) break;
 			}
-			String sql = String.format("INSERT INTO %s VALUES %s", tablename, Util.join(valslist, ","));
+			String sql = String.format("INSERT INTO %s VALUES %s;", tablename, Util.join(valslist, ","));
+      System.out.println(sql);
 			handler.queryExecution(sql);
 		}
 		

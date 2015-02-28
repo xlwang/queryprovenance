@@ -15,7 +15,7 @@ public class Table {
 	private int keyidx = -1;
 	private String name;
 	private String[] columns;
-	private Type[] types;
+	public Type[] types;
 
 	// each element stores the corresponding column's domain
 	// NUM: [minint, maxint]
@@ -66,7 +66,13 @@ public class Table {
 	}
 	
 	public Table clone() {
-		return new Table(name, columns.clone(), types.clone(), domains.clone(), keyidx);
+    String[] cols = null;
+    if (columns != null) cols = columns.clone();
+    Type[] typs = null;
+    if (types != null) typs = types.clone();
+    Object[] dmns = null;
+    if (domains != null) dmns = domains.clone();
+		return new Table(name, cols, typs, dmns, keyidx);
 	}
 	
 	public void setName(String n_) {
@@ -110,7 +116,6 @@ public class Table {
 		for (int i = 0; i < ncols; i++) {
 			String col = rmd.getColumnName(i+1);
 			cols[i] = col;
-			System.out.println(col);
 			if ("id".equalsIgnoreCase(col)) {
 				pkIdx = i;
 			}
@@ -166,7 +171,5 @@ public class Table {
 		DatabaseHandler handler = new DatabaseHandler();
 		handler.getConnected("dbconn.config");
 		Table t = tableFromDB(handler, "test");
-		System.out.println(t.columns);
-		System.out.println(t.keyidx);
 	}
 }
