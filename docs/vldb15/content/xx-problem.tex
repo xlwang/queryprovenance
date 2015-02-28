@@ -77,64 +77,109 @@ write $D_n=\mathcal{Q}(D_0)$ to denote that the final database state $D_n$ can
 be derived by applying the sequence of queries in the log to the original
 database state $D_0$.
 
-For ease of
-exposition, in the remainder of the paper we assume that the database contains
-a single relation, but this is not a requirement in our framework.
+\smallskip
+\noindent
+\emph{True database state ($D_i^*$):}
+Queries in $\mathcal{Q}$ are possibly erroneous, introducing errors in the
+data. There exists a sequence of \emph{true} database states $\{D_0^*,
+D_1^*\dots, D_n^*\}$, with $D_0^*=D_0$, representing the database states that
+would have occurred if there had been no errors in the queries.
+
+For ease of exposition, in the remainder of the paper we assume that the
+database contains a single relation, but this is not a requirement in our
+framework.
 
 
 \subsubsection*{Error models}
 
-\noindent
-\emph{Complaint set ($\mathcal{C}$):}
-We model a data error in the final database state $D_n$ as a \emph{complaint}
-$c(t,t^*)$. A complaint is a pair of tuples $(t,t^*)$, such that $t\in D_n$,
-and $t^*$ has the same schema as $t$, but differs in some of the values. In
-the example of Figure~\ref{fig:example}, the complaint that represents the
-errors in tuple $t_3$ is $c(t_3,t_3^*)$, where $t_3^*=(25,\$86000,\$21500)$.  We use complaints to model three types of errors:
+Following the examples in our application setting, we model data errors as
+\emph{complaints}. A complaint corresponds to a particular tuple in the data,
+and identifies its correct value assignment. We formally define complaints
+below:
+
+\begin{definition}[Complaint]
+    A complaint $c$ is a pair $c(t,t^*)$, such that $t\in D_n$,
+    $schema(t)=schema(t^*)$, and $t\neq t^*$. A complaint defines a
+    transformation $\mathcal{T}_c$ on a database state $D$: $\mathcal{T}_c(D)
+    = (D\setminus\{t\})\cup\{t^*\}$.
+\end{definition}
+
+In the example of Figure~\ref{fig:example}, the complaint that represents the
+errors in tuple $t_3$ is $c(t_3,t_3^*)$, where $t_3^*=(25,\$86000,\$21500)$.
+We use complaints to model three types of errors:
+
 \begin{description}[itemsep=0pt, parsep=0pt]
-    \item[Incorrect values $c(t,t^*)$:] $t$ should be modified to $t^*$.
-    \item[Missing tuples $c(\_,t^*)$:] $t^*$ should be added to $D_n$.
-    \item[Present tuples $c(t,\_)$:] $t$ should be removed from $D_n$.
+    \item[Incorrect values $\mathbf{c(t,t^*)}$]\strut\\
+     $t$ should be replaced by $t^*$: $\mathcal{T}_c(D_n) =
+     (D_n\setminus\{t\})\cup\{t^*\}$
+    
+    \item[Missing tuples $\mathbf{c(\_,t^*)}$]\strut\\ 
+    $t^*$ should be added to
+    $D_n$: $\mathcal{T}_c(D_n) = D_n\cup\{t^*\}$
+    
+    \item[Present tuples $\mathbf{c(t,\_)}$]\strut\\ 
+    $t$ should be removed from
+    $D_n$: $\mathcal{T}_c(D_n) = D_n\setminus\{t\}$
 \end{description}
+
+\begin{definition}[Complaint satisfaction]
+    We say that a database state $D$ satisfies a complaint $c$ iff $\mathcal{T}_c(D) = D$, and we denote that with $D\models c$.
+    \alex{Only works with set semantics.}
+\end{definition}
 % 
+\emph{Complaint set ($\mathcal{C}$):}
 We use $\mathcal{C}$ to denote the set of all known complaints, and we call it
 \emph{complaint set}. Each complaint in $\mathcal{C}$ represents a
 transformation (addition, deletion, or modification) of a tuple in $D_n$.
 Applying all these transformations to $D_n$ results in a new database instance
-$D_n^*$, and we write $D_n^*=\mathcal{C}(D_n)$. If $D_n^*$ has no remaining
-data errors, we say that $\mathcal{C}$ is a \emph{complete complaint set}. 
+$D_n'$, and we write $D_n'=\mathcal{T}_\mathcal{C}(D_n)$. If $D_n'$ has no
+remaining data errors ($D_n'=D_n^*$), we say that $\mathcal{C}$ is a
+\emph{complete complaint set}.
 \alex{there is some notion of minimality here...}
-In our work, we do not assume that the complaint set is complete.
+In our work, we do not assume that the complaint set is complete, but, as is
+more common in practice, we only know a subset of the errors.
 
 \smallskip
 \noindent
 \emph{Log repair ($\mathcal{Q}^*$):}
-Our framework derives a diagnosis as a log repair
+The goal of our framework is to derive a diagnosis as a log repair
 $\mathcal{Q}^*=\{q_1^*,\dots, q_n^*\}$, such that
-$\mathcal{Q}^*(D_0)=\mathcal{C}(D_n)$. In this work, we assume that each query
-$q_i^*$ in $\mathcal{Q}^*$ is either $q_i^*=q_i$ or $q_i^*=\mathcal{T}(q_i)$,
-where $\mathcal{T}(q_i)$ is a \emph{non-structural modification} of $q_i$. A
-non-structural modification $\mathcal{T}$ may change the value of the
+$\mathcal{Q}^*(D_0)\models\mathcal{C}$. In this work, we assume that each
+query $q_i^*\in\mathcal{Q}^*$ is either $q_i^*=q_i$ or
+$q_i^*=\mathcal{T}(q_i)$, where $\mathcal{T}(q_i)$ is a \emph{non-structural
+modification} of $q_i$.
+\alex{Need different notation to avoid confusion with complaint transformation.}
+A non-structural modification $\mathcal{T}$ may change the value of the
 constants that appear in a query, but it will not alter the attributes and
 functions used in the query, or any of its structure. For example, a
 non-structural modification of query $q_1$ in Figure~\ref{fig:example} could
 be $q_1^*$=\texttt{UPDATE Taxes SET rate = 30 WHERE income >= 87500}.
 
-\xxx{===}
 
+\subsubsection*{Problem definition}
 
+We now formalize the definition of the problem of diagnosing data errors using
+query histories. A diagnosis is a log repair $\mathcal{Q}^*$ that resolves all
+complaints in the set $\mathcal{C}$.
 
+\begin{definition}[Optimal diagnosis]\label{def:problem}
+    Given a set of data errors in the form of complaints $\mathcal{C}$, a query log $\mathcal{Q}$, and a distance function $d$, the optimal diagnosis is a log repair $\mathcal{Q}^*$, such that:
+    \begin{itemize}[itemsep=0pt, parsep=0pt]
+        \item $\mathcal{Q}^*(D_0)\models\mathcal{C}$
+        \item $d(\mathcal{Q}, \mathcal{Q}^*)$ is minimized
+    \end{itemize}
+\end{definition}
 
 
 \begin{figure}[t]
 \centering
-\includegraphics[width = 0.65\columnwidth]{figures/probtransform}
-\caption{Graphical depiction of the general \sys problem.}
+\includegraphics[width = 0.75\columnwidth]{figures/probtransform}
+\caption{Graphical depiction of the diagnosis problem in our \sys framework.  $D_0$, $D_n$, $\mathcal{Q}$, and $\mathcal{C}$ are given, and \sys uses them to derive the log repair $\mathcal{Q}^*$}
 \label{f:probtransform} 
 \end{figure}
 
 
-
+\deprecate{
 \subsection{Naive Formulation}
 
 The most general version of the problem
@@ -221,3 +266,4 @@ Not clear how to roll back complaints
 
 Ways to perturb query expressions is unbounded
 
+}

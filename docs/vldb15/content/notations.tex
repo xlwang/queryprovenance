@@ -7,12 +7,18 @@
     \toprule
     \textbf{Notation} & \textbf{Description}\\
     \midrule
-    $D_0$    & Initial database state at beginning of log\\
     $\mathcal{Q}$& The sequence of executed update queries (log)\\ 
              & $\mathcal{Q}=\{q_1, \dots, q_n\}$ \\
+    $D_0$    & Initial database state at beginning of log\\
     $D_n$    & End database state (current) $D_n=\mathcal{Q}(D_0)$\\
+    $D_i$    & Database state after query $q_i$: $D_i=q_i(\dots q_1(D_0))$\\
+    $c(t,t^*)$ & Incorrect value complaint: $\mathcal{T}_c(D) = (D_n\setminus\{t\})\cup\{t^*\}$\\
+    $c(\_,t^*)$ & Missing tuple complaint: $\mathcal{T}_c(D) = D_n\cup\{t^*\}$\\
+    $c(t,\_)$ & Present tuple complaint: $\mathcal{T}_c(D) = D_n\setminus\{t\}$\\
     $\mathcal{C}$ & Set of complaints $\mathcal{C}=\{c_1,\dots,c_k\}$\\
-    $\mathcal{Q}^*$& Corrected query sequence \\
+    $D\models\mathcal{C}$   & Database $D$ satisfies all complaints in $\mathcal{C}$\\
+    $\mathcal{Q}^*$& Log repair $\mathcal{Q}^*(D_0)=\mathcal{C}(D_n)$\\
+    $d(\mathcal{Q}, \mathcal{Q}^*)$ & Distance functions between two query logs\\
     \bottomrule
 \end{tabular}
 }
