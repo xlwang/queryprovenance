@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import queryprovenance.database.Table;
-import queryprovenance.query.CplexHandler;
+import queryprovenance.query.Query;
 /**
  * 
  * @author xlwang
@@ -64,6 +64,8 @@ public abstract class Expression {
 	public abstract IloNumExpr convertExpr(IloCplex cplex, HashMap<IloNumVar, Double> varmap, HashMap<Expression, IloNumVar> exprmap, IloNumVar[] preattribute, Table table, boolean option) throws Exception;
 	
 	public abstract void fixExpression(HashMap<IloNumVar, Double> fixedmap, HashMap<Expression, IloNumVar> expressionmap) throws Exception;
+	
+	public abstract IloNumExpr convertExpr(IloCplex cplex, HashMap<IloNumVar, Double> varmap, HashMap<Expression, IloNumVar> exprmap, HashMap<Query, ArrayList<IloNumVar>> varquerymap, Query query, IloNumVar[] preattribute, Table table, boolean option) throws Exception;
 	
 	public abstract boolean compare(Expression expr);
 	/* return Expression type */

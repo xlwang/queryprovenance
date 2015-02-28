@@ -111,12 +111,16 @@ public class Table {
 		String[] cols = new String[ncols];
 		Type[] types = new Type[ncols];
 		Object[] domains = new Object[ncols];
-
 		
+		String keyname = "id";
+		ResultSet tabkey =  handler.getMetaData().getPrimaryKeys(null, null, tname.toLowerCase());
+		while(tabkey.next()) {
+			keyname = tabkey.getString(4);
+		}
 		for (int i = 0; i < ncols; i++) {
 			String col = rmd.getColumnName(i+1);
 			cols[i] = col;
-			if ("id".equalsIgnoreCase(col)) {
+			if (keyname.equalsIgnoreCase(col)) {
 				pkIdx = i;
 			}
 			int type = rmd.getColumnType(i+1);

@@ -6,10 +6,9 @@ import ilog.cplex.IloCplex;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 import queryprovenance.database.Table;
-import queryprovenance.query.CplexHandler;
+import queryprovenance.query.Query;
 
 public class DivisionExpression extends OperationExpression{
 
@@ -62,11 +61,11 @@ public class DivisionExpression extends OperationExpression{
 		return current;
 	}
 
-	@Override
-	public void fixExpression(HashMap<IloNumVar, Double> fixedmap,
-			HashMap<Expression, IloNumVar> expressionmap) throws Exception {
-		right.fixExpression(fixedmap, expressionmap);
-		left.fixExpression(fixedmap, expressionmap);
-		
+	public IloNumExpr convertExpr(IloCplex cplex, HashMap<IloNumVar, Double> varmap, HashMap<Expression, IloNumVar> exprmap, HashMap<Query, ArrayList<IloNumVar>> varquerymap, Query query, IloNumVar[] preattribute, Table table,
+			boolean option) throws Exception {
+		IloNumExpr leftexpr = super.left.convertExpr(cplex, varmap, exprmap, varquerymap, query, preattribute, table, option);
+		Double rightval = Double.valueOf(this.right.toString());
+		IloNumExpr current = cplex.prod(leftexpr, 1.0/rightval);
+		return current;
 	}
 }

@@ -1,6 +1,6 @@
 package queryprovenance.query;
 
-import ilog.concert.IloAnd;
+ 
 import ilog.concert.IloConstraint;
 import ilog.concert.IloException;
 import ilog.concert.IloNumVar;

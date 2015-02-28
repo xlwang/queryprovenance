@@ -46,7 +46,9 @@ public class Complaint {
 				compmap.put(key, new SingleComplaint(key, null));
 		}
 	}
-	
+	public void addAll(Complaint comp) {
+		this.compmap.putAll(comp.compmap);
+	}
 	/* get partial complaints */ 
 	public Complaint getPart(double ratio){
 		
@@ -176,5 +178,16 @@ public class Complaint {
 				
 		return ret;
 	}	
+	
+	public static Complaint getPartial(Complaint c, int count) {
+		List<Integer> ckeys = new ArrayList<Integer>();
+		ckeys.addAll(c.keySet());
+		Collections.shuffle(Arrays.asList(c.keySet()));
+		Complaint ret = c.clone();
+		for (int i = 0; i < c.size() - count; i++) {
+			ret.remove(ckeys.get(i));
+		}
+		return ret;
+	}
 
 }
