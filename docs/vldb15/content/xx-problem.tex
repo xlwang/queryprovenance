@@ -114,11 +114,11 @@ $\mathcal{Q}^*=\{q_1^*,\dots, q_n^*\}$, such that
 $\mathcal{Q}^*(D_0)=\mathcal{C}(D_n)$. In this work, we assume that each query
 $q_i^*$ in $\mathcal{Q}^*$ is either $q_i^*=q_i$ or $q_i^*=\mathcal{T}(q_i)$,
 where $\mathcal{T}(q_i)$ is a \emph{non-structural modification} of $q_i$. A
-non-structural modification $\mathcal{T}$ may alter the constants that appear
-in a query, but it will not change the attributes and functions used in the
-query, or any of its structure. For example, a non-structural modification of
-query $q_1$ in Figure~\ref{fig:example} could be $q_1^*$=\texttt{UPDATE Taxes
-SET rate = 30 WHERE income >= 87500}.
+non-structural modification $\mathcal{T}$ may change the value of the
+constants that appear in a query, but it will not alter the attributes and
+functions used in the query, or any of its structure. For example, a
+non-structural modification of query $q_1$ in Figure~\ref{fig:example} could
+be $q_1^*$=\texttt{UPDATE Taxes SET rate = 30 WHERE income >= 87500}.
 
 \xxx{===}
 
@@ -128,7 +128,7 @@ SET rate = 30 WHERE income >= 87500}.
 
 \begin{figure}[t]
 \centering
-\includegraphics[width = 2in]{figures/probtransform}
+\includegraphics[width = 0.65\columnwidth]{figures/probtransform}
 \caption{Graphical depiction of the general \sys problem.}
 \label{f:probtransform} 
 \end{figure}

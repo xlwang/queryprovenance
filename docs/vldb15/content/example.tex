@@ -24,12 +24,13 @@
             \multicolumn{2}{l}{\emph{Query log}: $\mathcal{Q}$}\\
             % \toprule
             \hline
-            $q_1$: & {\small UPDATE Taxes SET rate = 30}\\
-                   & {\small WHERE income >= \color{red}{85700}} \\
+            $q_1$: & \texttt{\small UPDATE Taxes SET rate = 30}\\
+                   & \texttt{\small WHERE income >= \color{red}{85700}} \\
             
-            $q_2$: & {\small UPDATE Taxes SET owed = income*rate/100}\\
+            $q_2$: & \texttt{\small UPDATE Taxes SET owed = income*rate/100}\\
             
-            $q_3$: & {\small INSERT INTO Taxes}\\ &{\small VALUES (4, 25, 86500, 21625)}\\
+            $q_3$: & \texttt{\small INSERT INTO Taxes}\\ 
+                   & \texttt{\small VALUES (4, 25, 86500, 21625)}\\
             \hline
             % \bottomrule
         \end{tabular}
