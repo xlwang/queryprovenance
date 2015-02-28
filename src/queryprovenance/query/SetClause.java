@@ -15,7 +15,6 @@ import queryprovenance.expression.Expression;
 import queryprovenance.expression.VariableExpression;
 import queryprovenance.harness.QueryParams;
 import queryprovenance.harness.Util;
-import queryprovenance.query.WhereClause.Op;
 
 public class SetClause {
 	private List<SetExpr> set_exprs; // a set of conditions
@@ -70,6 +69,7 @@ public class SetClause {
 			set.fix(fixedmap, expressionmap);
 		}
 	}
+	
 	
 	public static SetClause generate(SetClause set, QueryParams params){
 		Table t = params.from;
