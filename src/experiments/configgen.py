@@ -155,32 +155,56 @@ ALL_OPTIONS = {
 
   "iter": [
     {
-      "N_D": [10, 100, 1000],
-      "N_q": [5, 10, 20],
-      "N_pred": [1,2],
+      "N_D": [10, 100, 1000, 10000, 50000, 100000],
+      "N_q": [5, 10, 20, 50, 100],
+      "N_pred": [1,2,3],
       "N_where": [2],
       "idx": [.8],
+      "passtype": 5,
       "exptype": 1,
       "niterations": 2
     },
     {
-      "N_D": 1000,
-      "N_q": 20,
-      "N_pred": 2,
-      "N_where": [1, 2],
-      "idx": 0.8,
-      "exptype": 1,
-      "niterations": 2
-    },
-    {
-      "N_D": 1000,
-      "N_q": 20,
+      "N_D": [50000],
+      "N_q": [200, 300, 500],
       "N_pred": 2,
       "N_where": 2,
+      "idx": .8,
+      "passtype": 5,
+      "exptype": 1,
+      "niterations": 2
+    },
+     {
+      "N_D": 50000,
+      "N_q": 100,
+      "N_pred": 3,
+      "N_where": [1, 2, 3],
+      "idx": 0.8,
+      "passtype": 5,
+      "exptype": 1,
+      "niterations": 2
+    },
+    {
+      "N_D": 50000,
+      "N_q": 100,
+      "N_pred": 2,
+      "N_where": 2,
+      "passtype": 5,
       "idx": [0.2, 05, 0.8, 0.9],
       "exptype": 1,
       "niterations": 2
+    },
+    {
+      "N_D": 50000,
+      "N_q": 100,
+      "N_pred": 2,
+      "N_where": 2,
+      "passtype": 5,
+      "idx": [.8],
+      "exptype": 1,
+      "niterations": [1,2,3]
     }
+
   ],
 
   "rollback": [

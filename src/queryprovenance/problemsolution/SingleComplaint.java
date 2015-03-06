@@ -21,7 +21,9 @@ public class SingleComplaint {
 	}
 	
 	public SingleComplaint clone() {
-		String[] vals = values.clone();
+		String[] vals = null;
+    if (values != null) 
+      vals = values.clone();
 		return new SingleComplaint(key, vals);
 	}
 }

@@ -86,6 +86,9 @@ public class DatabaseHandler {
 				result = preparedquery.executeQuery();
 				
 			}catch(Exception ex){
+        String exstr = ex.toString();
+        if (!exstr.contains("No results were returned") && !exstr.contains("does not exist"))
+          System.out.println(ex);
 			}
 			return result;
 		}

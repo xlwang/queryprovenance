@@ -80,10 +80,10 @@ public class SyntheticHarness {
 		approx = rset.getBoolean(7);
 		prune = rset.getBoolean(8);
 		rollbackbatch = rset.getInt(9);
-		oneerror = rset.getBoolean(10);
-		feasible = rset.getBoolean(11);
-		falsepositive = rset.getBoolean(12);
-		print = rset.getBoolean(13);
+		//oneerror = rset.getBoolean(10);
+		//feasible = rset.getBoolean(11);
+		//falsepositive = rset.getBoolean(12);
+		//print = rset.getBoolean(13);
 	}
 	
 	
@@ -130,6 +130,8 @@ public class SyntheticHarness {
 				Complaint newcmp = new Complaint(cleanDss.get(cleanDss.size()-1), fixedds.get(fixedds.size()-1));
 				newcmp = Complaint.getPartial(newcmp, 10);
 				_complaints.addAll(newcmp);
+
+        System.out.println("Finished iteration " + iterationIdx);
 			}
 			return;
 		}
@@ -160,19 +162,25 @@ public class SyntheticHarness {
 			if(computetime[j] == 0)
 				System.out.print(" ");
 		}
+
 		
 		// insert data into result table
-		Object[] params = new Object[]{
-			String.valueOf(cid),
-			metric_value,
+    String params = String.format(
+      "DEFAULT, %d, %d, %d, %d, %f, %f, '%s', %f, %f, %f, %f",
+			cid,
+      iterationIdx,
+      metrics.get(Metrics.Type.BADCOMPLAINT).intValue(),
+      metrics.get(Metrics.Type.FIXEDCOMPLAINT).intValue(),
+      metrics.get(Metrics.Type.REMOVEDRATE),
+      metrics.get(Metrics.Type.NOISERATE),
 			diff,
 			computetime[0],
 			computetime[1],
 			computetime[2],
 			computetime[3]
-		};
-		String strParams = Util.join(params, ", ");
-		String q = String.format("INSERT INTO RESULT VALUES(%s)", strParams);
+		);
+		String q = String.format("INSERT INTO exps VALUES(%s)", params);
+    System.out.println(q);
 		handler.queryExecution(q);
 	
 		

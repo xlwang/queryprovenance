@@ -78,12 +78,16 @@ def init_db(db):
         id serial primary key,
         cid int references configs(id),
         iter int,
+        nbadcomplaints int,
+        nfixedcomplaints int,
+        removerate numeric,
+        noiserate numeric,
         metrics text,
-        diff_log float,
-        prep_time float,
-        solver_prep_time float,
-        solve_time float,
-        post_proc_time float
+        diff_log text,
+        prep_time numeric,
+        solver_prep_time numeric,
+        solve_time numeric,
+        post_proc_time numeric 
       )
       """
   ]
