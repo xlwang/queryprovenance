@@ -7,6 +7,7 @@ import java.io.FileReader;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 import org.json.simple.JSONArray;
@@ -42,7 +43,10 @@ public class SyntheticHarness {
 	DatabaseStates dirtyDss = null;
 	Complaint complaints = null;
 	
-	int passtype, optchoice, qfixtype;
+	int passtype, 
+		optchoice, 
+		qfixtype,
+		niterations;
 	int rollbackbatch;
 	float epsilon, M; 
 	boolean approx, prune;
@@ -60,25 +64,26 @@ public class SyntheticHarness {
 		this.cleanDss = loadDatabaseStates(handler, cid, true);  // clean
 		this.dirtyDss = loadDatabaseStates(handler, cid, false); // dirty
 		this.complaints = new Complaint(cleanDss.get(cleanDss.size()-1), dirtyDss.get(cleanDss.size()-1));
-    loadConfigParams();
+		loadConfigParams();
 	}
 	
 	public void loadConfigParams() throws Exception {
-		String q = "SELECT passtype, optchoice, qfixtype, epsilon, M, approx, prune, rollbackbatch FROM configs WHERE id = " + cid;
+		String q = "SELECT passtype, optchoice, qfixtype, niterations, epsilon, M, approx, prune, rollbackbatch FROM configs WHERE id = " + cid;
 		ResultSet rset = handler.queryExecution(q);
-    rset.next();
+		rset.next();
 		passtype = rset.getInt(1);
 		optchoice = rset.getInt(2);
 		qfixtype = rset.getInt(3);
-		epsilon = rset.getFloat(4);
-		M = rset.getFloat(5);
-		approx = rset.getBoolean(6);
-		prune = rset.getBoolean(7);
-		rollbackbatch = rset.getInt(8);
-		oneerror = rset.getBoolean(9);
-		feasible = rset.getBoolean(10);
-		falsepositive = rset.getBoolean(11);
-		print = rset.getBoolean(12);
+		niterations = rset.getInt(4);
+		epsilon = rset.getFloat(5);
+		M = rset.getFloat(6);
+		approx = rset.getBoolean(7);
+		prune = rset.getBoolean(8);
+		rollbackbatch = rset.getInt(9);
+		oneerror = rset.getBoolean(10);
+		feasible = rset.getBoolean(11);
+		falsepositive = rset.getBoolean(12);
+		print = rset.getBoolean(13);
 	}
 	
 	
@@ -93,10 +98,11 @@ public class SyntheticHarness {
 		int solverind = -1;
 		String[] options = new String[]{"-M", String.valueOf(solverind) , "-E", "0.1", "-O", "abs"};
 
-		Solution solver = new Solution(handler, dirtyDss, dirtyQueries, complaints);
+		Complaint _complaints = complaints.clone();
+		Solution solver = new Solution(handler, dirtyDss, dirtyQueries, _complaints);
 		boolean preproc = optchoice == 2;
 		boolean usecplex = qfixtype == 1;
-		//int rollbackStepSize = 1;
+		
 		
 		
 		QueryLog fixedlog = null;
@@ -113,51 +119,73 @@ public class SyntheticHarness {
 			break;
 		case 4: // two pass algorithm
 			fixedlog = solver.twoPassSolution(cplex, epsilon, M, preproc, feasible, falsepositive, rollbackbatch, options);
-      break;
+			break;
+		case 5:
+			for (int iterationIdx = 0; iterationIdx < niterations; iterationIdx++) {
+				fixedlog = solver.onePassSolution(cplex, epsilon, M, preproc, feasible, falsepositive, oneerror, options);
+				DatabaseStates fixedds = fixedlog.execute(tableBase, handler);
+				computeMetrics(fixedlog, fixedds, solver, iterationIdx);
+				
+				// update complaint set
+				Complaint newcmp = new Complaint(cleanDss.get(cleanDss.size()-1), fixedds.get(fixedds.size()-1));
+				newcmp = Complaint.getPartial(newcmp, 10);
+				_complaints.addAll(newcmp);
+			}
+			return;
 		}
+		
+		DatabaseStates fixedds = fixedlog.execute(tableBase, handler);
+		computeMetrics(fixedlog, fixedds, solver, 0);
 
-    System.out.println("finished fixeng");
-    System.out.println(fixedlog);
-
-		
-		if (true) return;
-		
-		//
-		// Metrics
-		//
-		long totalTime = 0;
-		long rollbackTime = 0;
-		long cplexEncodingTime = 0;
-		long solverTime = 0;
-
-		DatabaseStates fixedDss = fixedQueries.execute(tableBase, handler);
-		HashMap<Metrics.Type, Double> metrics = Metrics.evaluateAll2(cleanQueries, cleanDss, dirtyQueries, dirtyDss, fixedQueries, fixedDss);
-		String metric_value = Metrics.toString(metrics);
-		Metrics.Index diff = Metrics.compare(dirtyQueries, fixedQueries, 0.1);
-		
-		
-		// Store run results in database
-		Object[] results = new Object[]{
-				cid,
-				/*percentage,
-				solver,
-				clause_count,
-				qlog_count,
-				tuple_count,
-				preprocess,
-				metric_value,
-				qidx,
-				diff,*/
-				totalTime,
-				rollbackTime,
-				cplexEncodingTime,
-				solverTime
-		};
-		String sql = String.format("INSERT INTO exps VALUES (default, %s)", Util.join(results, ","));
-		handler.queryExecution(sql);
-		
+		System.out.println("finished fixeng");
+		System.out.println(fixedlog);
 	}
 
+	/*
+	 * @arg iterationIdx in the iterative approach to the onepass algorithm, it runs in multiple passes.  
+	 */
+	public void computeMetrics(QueryLog fixedqlog, DatabaseStates fixedds, Solution solver, int iterationIdx) throws Exception {
+		Metrics.Index diff = Metrics.compare(dirtyQueries, fixedqlog, 0.1);
+		HashSet<Integer> updated = new HashSet<Integer>();
+
+		updated.clear();
+		updated.addAll(diff);
+		HashMap<Metrics.Type, Double> metrics = Metrics.evaluateAll2(cleanQueries, cleanDss, dirtyQueries, dirtyDss, fixedqlog, fixedds);
+		
+		String metric_value = Metrics.toString(metrics);
+		long[] time = solver.getTime();
+		double[] computetime = new double[time.length];
+		for(int j = 0; j < computetime.length; ++j) {
+			computetime[j] = time[j] / 1000000000.0;
+			if(computetime[j] == 0)
+				System.out.print(" ");
+		}
+		
+		// insert data into result table
+		Object[] params = new Object[]{
+			String.valueOf(cid),
+			metric_value,
+			diff,
+			computetime[0],
+			computetime[1],
+			computetime[2],
+			computetime[3]
+		};
+		String strParams = Util.join(params, ", ");
+		String q = String.format("INSERT INTO RESULT VALUES(%s)", strParams);
+		handler.queryExecution(q);
+	
+		
+		// write out fixed query log
+		/*
+		dataout.write("query log, bad query log, fixed query log"); dataout.newLine();
+		for(int i = 0; i < qlog.size(); ++i){
+			dataout.write(qlog.get(i) + "," + badqlog.get(i) + "," + fixedqlog.get(i));
+			dataout.newLine();
+		}
+		dataout.close();
+		*/		
+	}
 
 	
 	static SyntheticHarness loadHarness(DatabaseHandler handler, Table table, int cid) throws Exception {

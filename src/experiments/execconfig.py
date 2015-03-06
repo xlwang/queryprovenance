@@ -28,6 +28,7 @@ def init_db(db):
       """
       CREATE TABLE if not exists configs (
         id serial primary key,
+        notes text,
         N_D int,
         N_dim int,
         N_q int,
@@ -48,6 +49,7 @@ def init_db(db):
         passtype int,
         optchoice int,
         qfixtype int,
+        niterations int,
         epsilon float,
         M float,
         approx float,
@@ -74,7 +76,14 @@ def init_db(db):
       """
       CREATE TABLE if not exists exps (
         id serial primary key,
-        cid int references configs(id)
+        cid int references configs(id),
+        iter int,
+        metrics text,
+        diff_log float,
+        prep_time float,
+        solver_prep_time float,
+        solve_time float,
+        post_proc_time float
       )
       """
   ]
@@ -175,7 +184,13 @@ def run_querylog(db, cid, tname, queries, mode):
     old_tname = new_tname
 
 
-def save_config(db, dburl, config):
+def save_config(db, dburl, name, config):
+  """
+  1. saves the config in configs table
+  2. generates and saves base dataset
+  3. generates and saves clean and dirty query logs
+  4. executes query logs to generate intermediate tables
+  """
 
   # if config already exists, skip
   q = "SELECT id FROM configs WHERE %s"
@@ -188,7 +203,7 @@ def save_config(db, dburl, config):
     cid = rows[0][0]
     return cid
 
-  q = "INSERT INTO configs VALUES(default, %s) RETURNING id" % ",".join(["%s"]*len(config))
+  q = "INSERT INTO configs VALUES(default, '%s', %s) RETURNING id" % (name, ",".join(["%s"]*len(config)))
   res = db.execute(q, tuple(config))
   cid = res.fetchone()[0]
   
@@ -228,7 +243,7 @@ def save_config(db, dburl, config):
 
 
 @click.command()
-@click.option("--dburl", default=None)
+@click.option("--dburl", default="postgresql://localhost/queryprov")
 @click.argument("configfname")
 def main(dburl, configfname):
   """
@@ -243,9 +258,12 @@ def main(dburl, configfname):
 
   with file(configfname) as f:
     for l in f:
-      config = map(float, l.strip().split(","))
+      config = l.strip().split(",")
       print config
-      cid = save_config(db, dburl, config)
+      name = config[0]
+      config = config[1:]
+      config = map(float, config)
+      cid = save_config(db, dburl, name, config)
 
 
 if __name__ == "__main__":

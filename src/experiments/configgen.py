@@ -90,6 +90,7 @@ DEFAULT = {
     "passtype": 1, 
     "optchoice": 1 , 
     "qfixtype": 1,
+    "niterations": 1,     # for multi-iteration algorithm to deal with false-negatives
     "epsilon": 0.0001, 
     "M": 1000000, 
     "approx": False, 
@@ -102,10 +103,11 @@ keys = [
   "N_corrupt", "N_corrupt_vals", "N_corrupt_set", "N_corrupt_where",
   "idx", 
   "p_I", "p_pk", "p_fp", "p_fn",
-  "exptype", "passtype", "optchoice", "qfixtype",
+  "exptype", "passtype", "optchoice", "qfixtype", "niterations",
   "epsilon", "M", "approx", "prune", "rollbackbatch"
 ]
 
+# params used to generate synthetic query log
 qlogkeys = [
   "N_dim",  "N_set", "N_where", "N_where", "N_q",
   "p_I", "p_pk",
@@ -150,6 +152,37 @@ ALL_OPTIONS = {
       "exptype": 1
     }
   ],
+
+  "iter": [
+    {
+      "N_D": [10, 100, 1000],
+      "N_q": [5, 10, 20],
+      "N_pred": [1,2],
+      "N_where": [2],
+      "idx": [.8],
+      "exptype": 1,
+      "niterations": 2
+    },
+    {
+      "N_D": 1000,
+      "N_q": 20,
+      "N_pred": 2,
+      "N_where": [1, 2],
+      "idx": 0.8,
+      "exptype": 1,
+      "niterations": 2
+    },
+    {
+      "N_D": 1000,
+      "N_q": 20,
+      "N_pred": 2,
+      "N_where": 2,
+      "idx": [0.2, 05, 0.8, 0.9],
+      "exptype": 1,
+      "niterations": 2
+    }
+  ],
+
   "rollback": [
     {
       "N_D": [1000],
@@ -224,6 +257,7 @@ def main(out, exptypes):
   It can be one of the following:
   
     exact
+    iter
     rollback
     qfix
     endtoend
@@ -241,7 +275,7 @@ def main(out, exptypes):
     if "all" in exptypes or optname in exptypes:
       configs = all_options_to_generator(options)
       for config in configs:
-        print>>out, ",".join(map(str, config))
+        print>>out, "%s,%s" % (optname, ",".join(map(str, config)))
 
   try:
     if out is not sys.stdout:
