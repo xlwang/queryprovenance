@@ -93,8 +93,8 @@ DEFAULT = {
     "niterations": 1,     # for multi-iteration algorithm to deal with false-negatives
     "epsilon": 0.0001, 
     "M": 1000000, 
-    "approx": False, 
-    "prune": False,
+    "approx": 0, 
+    "prune": 0,
     "rollbackbatch": 1
 }
 
@@ -122,7 +122,6 @@ def all_options_to_generator(all_options):
       d.update(param)
       param_vals = map(lambda k: float(d[k]), keys)
       yield param_vals
-
 
 
 ALL_OPTIONS = {

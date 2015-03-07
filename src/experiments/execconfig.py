@@ -14,7 +14,7 @@ from itertools import *
 from collections import *
 from sqlalchemy import *
 
-from synth.gen import truemain as genmain
+from synth.gen import truemain as genqlog
 from synth.datagen import truemain as datamain
 from configgen import keys, qlogkeys
 
@@ -26,8 +26,18 @@ def init_db(db):
 
   stmts = [
       """
+      CREATE TABLE if not exists plots (
+        id serial primary key,
+        name text,
+        x text,
+        y text,
+        opts text
+      );
+      """,
+      """
       CREATE TABLE if not exists configs (
         id serial primary key,
+        pid int references plots(id),
         notes text,
         N_D int,
         N_dim int,
@@ -92,12 +102,12 @@ def init_db(db):
       """
   ]
 
-  try:
-    for stmt in stmts:
+  for stmt in stmts:
+    try:
       db.execute(stmt)
-  except Exception as e:
-    print e
-    pass
+    except Exception as e:
+      print e
+      pass
 
 
 
@@ -126,10 +136,6 @@ def to_sql(q, tname):
   return qtext
 
 
-def save_qlog(db, cid, oldtname, newtname, queries, isclean):
-  for qidx, q in enumerate(queries):
-    save_query(db, cid, qidx, oldtname, newtname, q, isclean)
-
 
 def save_query(db, cid, qidx, oldtname, newtname, q, isclean):
   qtype = q.get("type")
@@ -150,8 +156,8 @@ def save_query(db, cid, qidx, oldtname, newtname, q, isclean):
 
 def init_database_state(db, dburl, cid, config):
   tname = "synth_%d" % cid
-  ntup = int(config[0])
-  ndim = int(config[1])
+  ntup = int(config["n_d"])
+  ndim = int(config["n_dim"])
   datamain(False, False, True, "/dev/null", dburl, tname, 0, ndim, ntup)
   return tname
 
@@ -176,6 +182,8 @@ def run_querylog(db, cid, tname, queries, mode):
     mode: "clean", "dirty", "rollback"
   """
   for qidx, q in enumerate(queries):
+    print "%s %d" % (mode, qidx)
+    # initialize first table in the sequence
     if qidx == 0:
       old_tname = "%s_%s_%d" % (tname, mode, 0)
       sql = "CREATE TABLE %s AS (SELECT * FROM %s)"
@@ -187,6 +195,54 @@ def run_querylog(db, cid, tname, queries, mode):
     save_query(db, cid, qidx, old_tname, new_tname, q, mode=="clean")
     old_tname = new_tname
 
+
+def sync_db(db, dburl):
+  q = """SELECT id FROM configs WHERE 
+     id not in (SELECT cid FROM qlogs)"""
+  res = db.execute(q).fetchall()
+  cids_to_sync = [row[0] for row in res]
+
+  for cid in cids_to_sync:
+    sync_cid(db, dburl, cid)
+
+def sync_cid(db, dburl, cid):
+  print "Sync %d" % cid
+
+  q = "SELECT * FROM configs WHERE id = %s" % cid
+  cur = db.execute(q)
+  res = cur.fetchall()
+  keys = cur.keys()
+  if not res: return
+  config = dict(zip(keys, res[0]))
+
+  #
+  # Generate the initial database state
+  #
+  tname = init_database_state(db, dburl, cid, config)
+  print "init db %s" % tname
+
+  #
+  # Generate and save the queries
+  #
+  args = [config[key.lower()] for key in qlogkeys]
+  for i in xrange(len(args) - 4, len(args)):
+    args[i] = int(args[i])
+  queries, corruptqueries = genqlog(False, None, 0, *args)
+  print "qlog generated"
+
+  #save_qlog(db, cid, tname, queries, True)
+  #save_qlog(db, cid, tname, corruptqueries, False)
+
+
+  #
+  # Initialize and store every database state
+  #
+  run_querylog(db, cid, tname, queries, "clean")
+  run_querylog(db, cid, tname, corruptqueries, "dirty")
+
+  return cid
+
+ 
 
 def save_config(db, dburl, name, config):
   """
@@ -210,6 +266,7 @@ def save_config(db, dburl, name, config):
   q = "INSERT INTO configs VALUES(default, '%s', %s) RETURNING id" % (name, ",".join(["%s"]*len(config)))
   res = db.execute(q, tuple(config))
   cid = res.fetchone()[0]
+
   
   #
   # Generate the queries
@@ -217,12 +274,8 @@ def save_config(db, dburl, name, config):
   args = [config[keys.index(key)] for key in qlogkeys]
   for i in xrange(len(args) - 4, len(args)):
     args[i] = int(args[i])
-  queries, corruptqueries = genmain(False, None, 0, *args)
+  queries, corruptqueries = genqlog(False, None, 0, *args)
 
-  #
-  # Generate the initial database state
-  #
-  tname = init_database_state(db, dburl, cid, config)
 
   #
   # save queries
