@@ -141,8 +141,8 @@ def save_config(db, pid, name, config):
     cid = res.fetchone()[0]
     return cid
   
-def plot_cid(db, cid):
-  q = "SELECT id, name, opts FROM plots WHERE id = %d" % cid
+def plot_pid(db, pid):
+  q = "SELECT id, name, opts FROM plots WHERE id = %d" % pid
   res = db.execute(q).fetchall()
   if not res: return
 
@@ -248,9 +248,10 @@ def plot(name, query, x, y,
 @click.command()
 @click.option("--dburl", default="postgresql://localhost/queryprov")
 @click.option("--fname", default=None)
+@click.option("--dryrun", is_flag=True)
 @click.argument("cmd")
-@click.argument("cids", nargs=-1, type=int)
-def main(dburl, fname, cmd, cids):
+@click.argument("ids", nargs=-1, type=int)
+def main(dburl, fname, dryrun, cmd, ids):
   """
   CMD: sync | load
   """
@@ -271,16 +272,30 @@ def main(dburl, fname, cmd, cids):
           print "\t",conf
 
   elif cmd.lower() == "sync":
-    if cids:
-      for cid in cids:
+    if ids:
+      for cid in ids:
         sync_cid(db, dburl, cid)
     else:
       sync_db(db, dburl)
 
   elif cmd.lower() == "plot":
-    for cid in cids:
-      plot_cid(db, cid)
+    for pid in ids:
+      plot_pid(db, pid)
 
+  elif cmd.lower() == "run":
+    if not ids:
+      q = """SELECT id FROM configs 
+         WHERE id not in (SELECT cid FROM exps) AND
+               id in (SELECT cid FROM qlogs);"""
+      ids = [row[0] for row in db.execute(q).fetchall()]
+      print ids
+    for id in ids:
+      cmd = "cd ../../; sh run.sh SyntheticHarness dbconn.config %d; cd -"
+      cmd = cmd % id
+      if dryrun:
+        print cmd
+      else:
+        os.system(cmd)
 
 
 if __name__ == "__main__":
