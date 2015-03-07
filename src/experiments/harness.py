@@ -255,7 +255,7 @@ def plot(name, query, x, y,
 @click.argument("ids", nargs=-1, type=int)
 def main(dburl, fname, dryrun, cmd, ids):
   """
-  CMD: sync | load | plot | run
+  CMD: sync | load | plot | run | list
   """
   db = create_engine(dburl)
   init_db(db)
@@ -291,6 +291,14 @@ def main(dburl, fname, dryrun, cmd, ids):
 
     for pid in ids:
       plot_pid(db, pid)
+
+  elif cmd.lower() == "list":
+    q = """SELECT id, id in (SELECT pid FROM configs) , name
+          FROM plots"""
+    res = db.execute(q).fetchall()
+    for row in res:
+      print "%d\t%s\t%s" % tuple(row)
+
 
   elif cmd.lower() == "run":
     if not ids:
