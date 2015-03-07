@@ -284,10 +284,11 @@ def main(dburl, fname, dryrun, cmd, ids):
 
   elif cmd.lower() == "run":
     if not ids:
-      q = """SELECT id FROM configs 
+      q = """SELECT pid, id FROM configs 
          WHERE id not in (SELECT cid FROM exps) AND
-               id in (SELECT cid FROM qlogs);"""
-      ids = [row[0] for row in db.execute(q).fetchall()]
+               id in (SELECT cid FROM qlogs)
+         ORDER BY pid, id;"""
+      ids = [row[1] for row in db.execute(q).fetchall()]
       print ids
     for id in ids:
       cmd = "cd ../../; sh run.sh SyntheticHarness dbconn.config %d; cd -"
