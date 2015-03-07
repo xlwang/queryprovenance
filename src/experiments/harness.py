@@ -150,18 +150,20 @@ def plot_pid(db, pid):
   pid = row[0]
   name = row[1]
   opts = json.loads(row[2])
+  for k in opts: opts[k] = [v.lower() for v in opts[k]]
   x = opts["x"][0]
   ys = opts["y"]
-  fx = opts.get("fx", [None])[0]
+  fx = opts.get("fx", [None])[0] or "iter"
   fy = opts.get("fy", [None])[0]
   geom = opts.get("geom", ["line"])[0]
   group = opts.get("group", [])
   color = opts.get("color", [])
 
-  print name
-  pdb.set_trace()
+  print "plotting %s" % name
 
   for idx, y in enumerate(ys):
+    if 'prep' in y:
+      y = 'prep_time+solver_prep_time+solve_time'
 
     #
     # filter and aggregate the data
@@ -247,13 +249,13 @@ def plot(name, query, x, y,
 
 @click.command()
 @click.option("--dburl", default="postgresql://localhost/queryprov")
-@click.option("--fname", default=None)
-@click.option("--dryrun", is_flag=True)
+@click.option("--fname", default=None, help="file containing experiment configurations")
+@click.option("--dryrun", is_flag=True, help="flag for actually running experiments")
 @click.argument("cmd")
 @click.argument("ids", nargs=-1, type=int)
 def main(dburl, fname, dryrun, cmd, ids):
   """
-  CMD: sync | load
+  CMD: sync | load | plot | run
   """
   db = create_engine(dburl)
   init_db(db)
@@ -279,6 +281,14 @@ def main(dburl, fname, dryrun, cmd, ids):
       sync_db(db, dburl)
 
   elif cmd.lower() == "plot":
+    if not ids:
+      q = """SELECT pid, id FROM configs 
+         WHERE id in (SELECT cid FROM exps) AND
+               id in (SELECT cid FROM qlogs)
+         ORDER BY pid, id;"""
+      ids = [row[0] for row in db.execute(q).fetchall()]
+      print ids
+
     for pid in ids:
       plot_pid(db, pid)
 
