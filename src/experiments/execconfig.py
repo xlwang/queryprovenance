@@ -38,6 +38,7 @@ def init_db(db):
       CREATE TABLE if not exists configs (
         id serial primary key,
         pid int references plots(id),
+        runidx int,
         notes text,
         N_D int,
         N_dim int,
@@ -158,7 +159,7 @@ def init_database_state(db, dburl, cid, config):
   tname = "synth_%d" % cid
   ntup = int(config["n_d"])
   ndim = int(config["n_dim"])
-  datamain(False, False, True, "/dev/null", dburl, tname, 0, ndim, ntup)
+  datamain(False, False, True, "/dev/null", dburl, tname, cid, ndim, ntup)
   return tname
 
 
@@ -227,7 +228,7 @@ def sync_cid(db, dburl, cid):
   args = [config[key.lower()] for key in qlogkeys]
   for i in xrange(len(args) - 4, len(args)):
     args[i] = int(args[i])
-  queries, corruptqueries = genqlog(False, None, 0, *args)
+  queries, corruptqueries = genqlog(False, None, cid, *args)
   print "qlog generated"
 
   #save_qlog(db, cid, tname, queries, True)
@@ -274,7 +275,7 @@ def save_config(db, dburl, name, config):
   args = [config[keys.index(key)] for key in qlogkeys]
   for i in xrange(len(args) - 4, len(args)):
     args[i] = int(args[i])
-  queries, corruptqueries = genqlog(False, None, 0, *args)
+  queries, corruptqueries = genqlog(False, None, cid, *args)
 
 
   #

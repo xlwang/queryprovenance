@@ -111,32 +111,39 @@ def save_plot(db, name, plot):
   opts = json.dumps(plot)
   
   with db.begin() as conn:
-    q = "SELECT id FROM plots WHERE x=:x AND y=:y AND opts=:opts"
-    cur = conn.execute(text(q), x=x, y=y, opts=opts)
+    q = "SELECT id FROM plots WHERE name=:name"
+    cur = conn.execute(text(q), name=name)
     res = cur.fetchall()
     if res:
-      return res[0][0]
+      pid = res[0][0]
+      q = "UPDATE plots SET x=:x, y=:y, opts=:opts WHERE name=:name"
+      conn.execute(text(q), name=name, x=x, y=y, opts=opts)
+      print "updated plot %s" % name
+      return pid
 
     q = "INSERT INTO plots VALUES(default, :name, :x, :y, :opts) RETURNING id;"
     cur = conn.execute(text(q), name=name, x=x, y=y, opts=opts)
+    print "added plot %s" % name
     return cur.fetchone()[0]
 
 
-def save_config(db, pid, name, config):
+def save_config(db, pid, runidx, name, config):
   # if config already exists, skip
-  q = "SELECT id FROM configs WHERE pid = %s AND %%s" % pid
-  clauses = ["%s = %s" % pair for pair in config.items()]
-  where = " AND ".join(clauses)
-  q = q % where
+  q = "SELECT id FROM configs WHERE pid = :pid AND runidx = :runidx"
 
   with db.begin() as conn:
-    res = conn.execute(text(q))
+    res = conn.execute(text(q), pid=pid, runidx=runidx)
     rows = res.fetchall()
     if len(rows):
       cid = rows[0][0]
+      q = "UPDATE configs SET %s WHERE id = :cid"
+      args = ", ".join(["%s = :%s" % (k.lower(), k) for k in allkeys])
+      q = q % args
+      conn.execute(text(q), cid=cid, **config)
       return cid
 
-    q = "INSERT INTO configs VALUES(default, %d, '%s', %s) RETURNING id" % (pid, name, ",".join(["%s"]*len(config)))
+    q = "INSERT INTO configs VALUES(default, %d, %d, '%s', %s) RETURNING id"
+    q = q % (pid, runidx, name, ",".join(["%s"]*len(config)))
     res = conn.execute(q, tuple([config[k] for k in allkeys]))
     cid = res.fetchone()[0]
     return cid
@@ -229,11 +236,14 @@ def plot(name, query, x, y,
     if not fy:
       fy = "."
     facet = "facet_grid(%s~%s)" % (fx, fy)
+  xscale = "scale_x_continuous(name='%s')" % x
   yscale = None
   if log:
-    yscale = "scale_y_log10()"
+    yscale = "scale_y_log10(name='%s')" % y
+  else:
+    yscale = "scale_y_continuous(name='%s')" % y
 
-  arr = filter(bool, [ ggplot, geom, facet, yscale])
+  arr = filter(bool, [ ggplot, geom, facet, xscale, yscale])
   plot = "p = %s" % " + ".join(arr)
 
   prog = prog % (query, plot, name)
@@ -244,8 +254,63 @@ def plot(name, query, x, y,
   os.system("R -f plot.r")
 
 
+def cmd_load(db, fname):
+  for name, configs in  parse_config(fname).iteritems():
+    print name
+    plot = configs["plot"]
+    pid = save_plot(db, name, plot)
+
+    config = dict(DEFAULT)
+    config.update(configs["config"])
+    for runidx in xrange(int(plot["nruns"][0])):
+      for conf in create_params(config):
+        save_config(db, pid, runidx, name, conf)
+        print "\t",conf
+
+def cmd_sync(db, dburl, ids):
+  if ids:
+    for cid in ids:
+      sync_cid(db, dburl, cid)
+  else:
+    sync_db(db, dburl)
+
+def cmd_plot(db, dburl, ids):
+  if not ids:
+    q = """SELECT pid, id FROM configs 
+        WHERE id in (SELECT cid FROM exps) AND
+              id in (SELECT cid FROM qlogs)
+        ORDER BY pid, id;"""
+    ids = [row[0] for row in db.execute(q).fetchall()]
+    print ids
+
+  for pid in ids:
+    plot_pid(db, pid)
 
  
+def cmd_list(db):
+  q = """SELECT id, id in (SELECT pid FROM configs) , name
+        FROM plots"""
+  res = db.execute(q).fetchall()
+  for row in res:
+    print "%d\t%s\t%s" % tuple(row)
+
+def cmd_run(db, dryrun, ids):
+  if not ids:
+    q = """SELECT pid, id FROM configs 
+        WHERE id not in (SELECT cid FROM exps) AND
+              id in (SELECT cid FROM qlogs)
+        ORDER BY pid, id;"""
+    ids = [row[1] for row in db.execute(q).fetchall()]
+    print ids
+  for id in ids:
+    cmd = "cd ../../; sh run.sh SyntheticHarness dbconn.config %d; cd -"
+    cmd = cmd % id
+    if dryrun:
+      print cmd
+    else:
+      os.system(cmd)
+
+
 
 @click.command()
 @click.option("--dburl", default="postgresql://localhost/queryprov")
@@ -261,61 +326,15 @@ def main(dburl, fname, dryrun, cmd, ids):
   init_db(db)
 
   if cmd.lower() == "load":
-    for name, configs in  parse_config(fname).iteritems():
-      print name
-      plot = configs["plot"]
-      pid = save_plot(db, name, plot)
-
-      config = dict(DEFAULT)
-      config.update(configs["config"])
-      for runidx in xrange(int(plot["nruns"][0])):
-        for conf in create_params(config):
-          save_config(db, pid, name, conf)
-          print "\t",conf
-
+    cmd_load(db, fname)
   elif cmd.lower() == "sync":
-    if ids:
-      for cid in ids:
-        sync_cid(db, dburl, cid)
-    else:
-      sync_db(db, dburl)
-
+    cmd_sync(db, dburl, ids)
   elif cmd.lower() == "plot":
-    if not ids:
-      q = """SELECT pid, id FROM configs 
-         WHERE id in (SELECT cid FROM exps) AND
-               id in (SELECT cid FROM qlogs)
-         ORDER BY pid, id;"""
-      ids = [row[0] for row in db.execute(q).fetchall()]
-      print ids
-
-    for pid in ids:
-      plot_pid(db, pid)
-
+    cmd_plot(db, dburl, ids)
   elif cmd.lower() == "list":
-    q = """SELECT id, id in (SELECT pid FROM configs) , name
-          FROM plots"""
-    res = db.execute(q).fetchall()
-    for row in res:
-      print "%d\t%s\t%s" % tuple(row)
-
-
+    cmd_list(db)
   elif cmd.lower() == "run":
-    if not ids:
-      q = """SELECT pid, id FROM configs 
-         WHERE id not in (SELECT cid FROM exps) AND
-               id in (SELECT cid FROM qlogs)
-         ORDER BY pid, id;"""
-      ids = [row[1] for row in db.execute(q).fetchall()]
-      print ids
-    for id in ids:
-      cmd = "cd ../../; sh run.sh SyntheticHarness dbconn.config %d; cd -"
-      cmd = cmd % id
-      if dryrun:
-        print cmd
-      else:
-        os.system(cmd)
-
+    cmd_run(db, dryrun, ids)
 
 if __name__ == "__main__":
   main()
