@@ -18,7 +18,7 @@ from sqlalchemy.sql import text
 
 
 from configgen import keys as allkeys, DEFAULT
-from execconfig import sync_db, init_db, sync_cid
+from execconfig import sync_db, init_db, sync_cid, clean_database_state
 
 
 def parse_config(fname):
@@ -267,23 +267,26 @@ def cmd_load(db, fname):
         save_config(db, pid, runidx, name, conf)
         print "\t",conf
 
-def cmd_sync(db, dburl, ids):
-  if ids:
-    for cid in ids:
+def cmd_sync(db, dburl, pids):
+  if pids:
+    q = """SELECT id FROM configs 
+    WHERE pid in (%s)""" % ",".join(map(str, pids))
+    cids = [row[0] for row in db.execute(q).fetchall()]
+    for cid in cids:
       sync_cid(db, dburl, cid)
   else:
     sync_db(db, dburl)
 
-def cmd_plot(db, dburl, ids):
-  if not ids:
+def cmd_plot(db, dburl, pids):
+  if not pids:
     q = """SELECT pid, id FROM configs 
         WHERE id in (SELECT cid FROM exps) AND
               id in (SELECT cid FROM qlogs)
         ORDER BY pid, id;"""
-    ids = [row[0] for row in db.execute(q).fetchall()]
-    print ids
+    pids = [row[0] for row in db.execute(q).fetchall()]
+    print pids
 
-  for pid in ids:
+  for pid in pids:
     plot_pid(db, pid)
 
  
@@ -294,21 +297,34 @@ def cmd_list(db):
   for row in res:
     print "%d\t%s\t%s" % tuple(row)
 
-def cmd_run(db, dryrun, ids):
-  if not ids:
+def cmd_run(db, dburl, dryrun, pids):
+  if not pids:
     q = """SELECT pid, id FROM configs 
         WHERE id not in (SELECT cid FROM exps) AND
               id in (SELECT cid FROM qlogs)
         ORDER BY pid, id;"""
-    ids = [row[1] for row in db.execute(q).fetchall()]
-    print ids
-  for id in ids:
+    cids = [row[0] for row in db.execute(q).fetchall()]
+  else:
+    q = """SELECT id FROM configs WHERE pid in (%s)"""
+    q = q % ",".join(map(str, pids))
+    cids = [row[0] for row in db.execute(q).fetchall()]
+
+  print "exec cids: %s" % str(cids)
+  for cid in cids:
     cmd = "cd ../../; sh run.sh SyntheticHarness dbconn.config %d; cd -"
-    cmd = cmd % id
+    cmd = cmd % cid
+
     if dryrun:
       print cmd
     else:
+      # ensure database has the tables
+      sync_cid(db, dburl, cid)
+
       os.system(cmd)
+
+      # clean up database
+      print "clean dbstate %d" % cid
+      clean_database_state(db, cid)
 
 
 
@@ -321,6 +337,8 @@ def cmd_run(db, dryrun, ids):
 def main(dburl, fname, dryrun, cmd, ids):
   """
   CMD: sync | load | plot | run | list
+
+  ids: the plot ids to execute
   """
   db = create_engine(dburl)
   init_db(db)
@@ -334,7 +352,7 @@ def main(dburl, fname, dryrun, cmd, ids):
   elif cmd.lower() == "list":
     cmd_list(db)
   elif cmd.lower() == "run":
-    cmd_run(db, dryrun, ids)
+    cmd_run(db, dburl, dryrun, ids)
 
 if __name__ == "__main__":
   main()

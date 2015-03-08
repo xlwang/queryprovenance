@@ -162,6 +162,19 @@ def init_database_state(db, dburl, cid, config):
   datamain(False, False, True, "/dev/null", dburl, tname, cid, ndim, ntup)
   return tname
 
+def clean_database_state(db, cid):
+  tname = "synth_%d" % cid
+  q = "SELECT tablename FROM pg_tables WHERE tablename like '%s_%%%%';" 
+  q = q % tname
+  rows = db.execute(q).fetchall()
+  tnames = [row[0] for row in rows]
+  for torm in tnames:
+    q = "DROP TABLE IF EXISTS %s CASCADE;" % torm
+    db.execute(q)
+  return tnames
+
+
+
 
 def run_query(db, tname, newtname, q):
   sql = "CREATE TABLE %s AS (SELECT * FROM %s)" % (newtname, tname)
@@ -183,18 +196,22 @@ def run_querylog(db, cid, tname, queries, mode):
     mode: "clean", "dirty", "rollback"
   """
   for qidx, q in enumerate(queries):
-    print "%s %d" % (mode, qidx)
-    # initialize first table in the sequence
-    if qidx == 0:
-      old_tname = "%s_%s_%d" % (tname, mode, 0)
-      sql = "CREATE TABLE %s AS (SELECT * FROM %s)"
-      sql = sql % (old_tname, tname)
-      db.execute(sql)
+    try:
+      # initialize first table in the sequence
+      if qidx == 0:
+        old_tname = "%s_%s_%d" % (tname, mode, 0)
+        sql = "CREATE TABLE %s AS (SELECT * FROM %s)"
+        sql = sql % (old_tname, tname)
+        db.execute(sql)
 
-    new_tname = "%s_%s_%d" % (tname, mode, qidx+1)
-    run_query(db, old_tname, new_tname, q)
-    save_query(db, cid, qidx, old_tname, new_tname, q, mode=="clean")
-    old_tname = new_tname
+      new_tname = "%s_%s_%d" % (tname, mode, qidx+1)
+      run_query(db, old_tname, new_tname, q)
+      save_query(db, cid, qidx, old_tname, new_tname, q, mode=="clean")
+      old_tname = new_tname
+    except Exception as e:
+      #print e
+      pass
+  print "created %d tables for %s" % (qidx, tname)
 
 
 def sync_db(db, dburl):
@@ -244,55 +261,6 @@ def sync_cid(db, dburl, cid):
   return cid
 
  
-
-def save_config(db, dburl, name, config):
-  """
-  1. saves the config in configs table
-  2. generates and saves base dataset
-  3. generates and saves clean and dirty query logs
-  4. executes query logs to generate intermediate tables
-  """
-
-  # if config already exists, skip
-  q = "SELECT id FROM configs WHERE %s"
-  clauses = ["%s = %s" % pair for pair in zip(keys, config)]
-  where = " AND ".join(clauses)
-  q = q % where
-  res = db.execute(q)
-  rows = res.fetchall()
-  if len(rows):
-    cid = rows[0][0]
-    return cid
-
-  q = "INSERT INTO configs VALUES(default, '%s', %s) RETURNING id" % (name, ",".join(["%s"]*len(config)))
-  res = db.execute(q, tuple(config))
-  cid = res.fetchone()[0]
-
-  
-  #
-  # Generate the queries
-  #
-  args = [config[keys.index(key)] for key in qlogkeys]
-  for i in xrange(len(args) - 4, len(args)):
-    args[i] = int(args[i])
-  queries, corruptqueries = genqlog(False, None, cid, *args)
-
-
-  #
-  # save queries
-  #
-  #save_qlog(db, cid, tname, queries, True)
-  #save_qlog(db, cid, tname, corruptqueries, False)
-
-
-  #
-  # Initialize and store every database state
-  #
-  tname = init_database_state(db, dburl, cid, config)
-  run_querylog(db, cid, tname, queries, "clean")
-  run_querylog(db, cid, tname, corruptqueries, "dirty")
-
-  return cid
 
     
 
