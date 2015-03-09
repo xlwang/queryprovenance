@@ -130,6 +130,10 @@ def save_plot(db, name, plot):
 def save_config(db, pid, runidx, name, config):
   # if config already exists, skip
   q = "SELECT id FROM configs WHERE pid = :pid AND runidx = :runidx"
+  q = "SELECT id FROM configs WHERE pid = :pid AND runidx = :runidx AND %s"
+  clauses = ["%s = %s" % pair for pair in config.items()]
+  where = " AND ".join(clauses)
+  q = q % where
 
   with db.begin() as conn:
     res = conn.execute(text(q), pid=pid, runidx=runidx)
@@ -140,8 +144,10 @@ def save_config(db, pid, runidx, name, config):
       args = ", ".join(["%s = :%s" % (k.lower(), k) for k in allkeys])
       q = q % args
       conn.execute(text(q), cid=cid, **config)
+      print "update config", cid, config["N_q"]
       return cid
 
+    print "insert config"
     q = "INSERT INTO configs VALUES(default, %d, %d, '%s', %s) RETURNING id"
     q = q % (pid, runidx, name, ",".join(["%s"]*len(config)))
     res = conn.execute(q, tuple([config[k] for k in allkeys]))
@@ -265,7 +271,7 @@ def cmd_load(db, fname):
     for runidx in xrange(int(plot["nruns"][0])):
       for conf in create_params(config):
         save_config(db, pid, runidx, name, conf)
-        print "\t",conf
+        #print "\t",conf
 
 def cmd_sync(db, dburl, pids):
   if pids:
