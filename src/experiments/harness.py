@@ -184,7 +184,7 @@ def plot_pid(db, pid):
     q = """
     SELECT avg(%s) as y, stddev(%s) as std, %s
     FROM exps as e, configs as c
-    WHERE c.pid = %s
+    WHERE c.pid = %s AND c.id = e.cid
     GROUP BY %s
     """
     gb = [x]
@@ -222,19 +222,26 @@ def plot(name, query, x, y,
 
     q = "%s"
     data = dbGetQuery(con, q)
+    data$ymin = data$y - data$std
+    data$ymax = data$y + data$std
     %s
-    ggsave("%s", p, scale=1)
+    %s
+    ggsave("%s", p, scale=.8)
   """
+
+  xform = ""
 
   aes = "aes(x=%s, y=y" % x
   if group:
-    aes += ", group=%s" % (group)
+    aes += ", group=group"
+    xform += "\ndata = transform(data, group=paste0(%s))" % (group)
   if color:
-    aes += ", color=factor(%s)" % color
+    aes += ", color=color"
+    xform += "\ndata = transform(data, color=paste0(%s))" % (color)
   aes += ", alpha=0.6)" 
 
   ggplot = "ggplot(data, %s)" % aes
-  geom = "geom_%s()" % geom
+  geom = "geom_%s() + geom_pointrange(aes(ymin=ymin, ymax=ymax, width=0.05))" % geom
   facet = None
   if fx or fy:
     if not fx:
@@ -250,9 +257,10 @@ def plot(name, query, x, y,
     yscale = "scale_y_continuous(name='%s')" % y
 
   arr = filter(bool, [ ggplot, geom, facet, xscale, yscale])
+
   plot = "p = %s" % " + ".join(arr)
 
-  prog = prog % (query, plot, name)
+  prog = prog % (query, xform, plot, name)
 
   with file("plot.r", "w") as f:
     f.write(prog)
@@ -289,7 +297,7 @@ def cmd_plot(db, dburl, pids):
         WHERE id in (SELECT cid FROM exps) AND
               id in (SELECT cid FROM qlogs)
         ORDER BY pid, id;"""
-    pids = [row[0] for row in db.execute(q).fetchall()]
+    pids = sorted(set([row[0] for row in db.execute(q).fetchall()]))
     print pids
 
   for pid in pids:
