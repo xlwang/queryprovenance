@@ -12,8 +12,8 @@ Edit a configs file (configs.txt is an example) that defines what configurations
 
 Experiment name
 
-* experiment_1 is the both the name of the experiment, and the prefix of the plots that will be generated
-  * e.g., experiment_1_nbadcomplaints.pdf, experiment_1_removerate.pdf
+* `experiment_1` is the both the name of the experiment, and the prefix of the plots that will be generated
+  * e.g., `experiment_1_nbadcomplaints.pdf`, `experiment_1_removerate.pdf`
 * Each experiment is a record in the `plots` table in the database
 
 Configurations
