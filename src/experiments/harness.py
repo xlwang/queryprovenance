@@ -308,20 +308,26 @@ def cmd_list(db):
   q = """SELECT id, id in (SELECT pid FROM configs) , name
         FROM plots"""
   res = db.execute(q).fetchall()
+  print "plotid\tsynced\tname"
+  print "--------------------------------"
   for row in res:
     print "%d\t%s\t%s" % tuple(row)
 
 def cmd_run(db, dburl, dryrun, pids):
+  print "cmd_run", pids
   if not pids:
-    q = """SELECT pid, id FROM configs 
-        WHERE id not in (SELECT cid FROM exps) AND
-              id in (SELECT cid FROM qlogs)
-        ORDER BY pid, id;"""
+    q = """SELECT distinct id FROM
+            (SELECT pid, id FROM configs 
+            WHERE id not in (SELECT cid FROM exps) AND
+                  id in (SELECT cid FROM qlogs)
+            ORDER BY pid, id
+            ) as foo ORDER BY id;"""
     cids = [row[0] for row in db.execute(q).fetchall()]
   else:
-    q = """SELECT id FROM configs WHERE pid in (%s)"""
+    q = """SELECT distinct id FROM configs WHERE pid in (%s) ORDER BY id"""
     q = q % ",".join(map(str, pids))
     cids = [row[0] for row in db.execute(q).fetchall()]
+
 
   print "exec cids: %s" % str(cids)
   for cid in cids:
