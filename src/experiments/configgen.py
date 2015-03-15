@@ -92,7 +92,7 @@ DEFAULT = {
     "qfixtype": 1,
     "niterations": 1,     # for multi-iteration algorithm to deal with false-negatives
     "epsilon": 0.0001, 
-    "M": 1000000, 
+    "M": 10000000, 
     "approx": 0, 
     "prune": 0,
     "rollbackbatch": 1

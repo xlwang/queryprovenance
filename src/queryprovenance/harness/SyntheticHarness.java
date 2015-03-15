@@ -50,7 +50,7 @@ public class SyntheticHarness {
 	int rollbackbatch;
 	float epsilon, M; 
 	boolean approx, prune;
-	boolean oneerror = false; // true for single error fix. 
+	boolean oneerror = true; // true for single error fix. 
 	boolean print = false; // print cplex solver status
 	boolean feasible = false;
 	boolean falsepositive = false;
