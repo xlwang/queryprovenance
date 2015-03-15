@@ -70,10 +70,6 @@ Plots
   * (If I don't delete state, the file system runs out of disk space!)
   * This will cache results and not execute an experimental run if there is already a record for it...
 
-* Don't pass any parameters to run experiments for _all_ plots
-
-        python harness.py run
-
 * Use the `--dryrun` flag to print the java commands that will be executed but not run them
 
         python harness.py --dryrun run <plotid> 
