@@ -246,6 +246,7 @@ def sync_cid(db, dburl, cid):
   args = [config[key.lower()] for key in qlogkeys]
   for i in xrange(len(args) - 4, len(args)):
     args[i] = int(args[i])
+  args.append(config['n_d'])
   queries, corruptqueries = genqlog(False, None, cid, *args)
   print "qlog generated"
 

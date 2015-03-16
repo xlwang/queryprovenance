@@ -110,7 +110,14 @@ def corrupt(query, nvcorrupt, nwcorrupt=0, nscorrupt=0):
 
 
 
-def gen_templates(nattrs, nset, nwhereeq, nwhererng, nqueries, iperc=0.33, uperc=0.5):
+def gen_templates(nattrs, 
+                  nset, 
+                  nwhereeq, 
+                  nwhererng, 
+                  nqueries,
+                  iperc=0.33, 
+                  uperc=0.5, 
+                  init_tuple_id=0):
   """
   iperc: percentage of inserts
   uperc: of the updates, percentage of equality updates
@@ -127,7 +134,7 @@ def gen_templates(nattrs, nset, nwhereeq, nwhererng, nqueries, iperc=0.33, uperc
   whererngattrs = whererngattrs[:int(nwhererng)]
 
 
-  tup_id = 0
+  tup_id = init_tuple_id
   for i in xrange(int(nqueries)):
     if random.random() <= iperc:
       yield clone(gen_insert(tup_id, nattrs))
@@ -148,6 +155,7 @@ def gen_templates(nattrs, nset, nwhereeq, nwhererng, nqueries, iperc=0.33, uperc
 @click.option('--bprint', is_flag=True)
 @click.option("--out", default=None, help="output file name/path")
 @click.option('--seed', default=0, help="Seed to set the random number generator.")
+@click.option('--inittupid', default=0, help="Initial tuple ID for insert queries.")
 @click.argument('nattrs', default=4)      
 @click.argument('nset', default=1)        
 @click.argument('nwhereeq', default=1)    
@@ -160,7 +168,7 @@ def gen_templates(nattrs, nset, nwhereeq, nwhererng, nqueries, iperc=0.33, uperc
 @click.argument('setcorrupt', default=1)
 @click.argument('wherecorrupt', default=1)
 def main(
-    bprint, out, seed,
+    bprint, out, seed, inittupid,
     nattrs, nset, nwhereeq, nwhererng, nqueries, insertperc, equalityperc,
     ncorrupt, insertcorrupt, setcorrupt, wherecorrupt
     ):
@@ -188,13 +196,15 @@ def main(
   truemain(
     bprint, out, seed,
     nattrs, nset, nwhereeq, nwhererng, nqueries, insertperc, equalityperc,
-    ncorrupt, insertcorrupt, setcorrupt, wherecorrupt
+    ncorrupt, insertcorrupt, setcorrupt, wherecorrupt,
+    inittupid
   )
 
 def truemain(
     bprint, out, seed,
     nattrs, nset, nwhereeq, nwhererng, nqueries, insertperc, equalityperc,
-    ncorrupt, insertcorrupt, setcorrupt, wherecorrupt
+    ncorrupt, insertcorrupt, setcorrupt, wherecorrupt,
+    init_tuple_id=0
     ):
 
   random.seed(seed)
@@ -205,7 +215,7 @@ def truemain(
 
 
   queries = [q for q in gen_templates(
-    nattrs, nset, nwhereeq, nwhererng, nqueries, insertperc, equalityperc)]
+    nattrs, nset, nwhereeq, nwhererng, nqueries, insertperc, equalityperc, init_tuple_id)]
   corruptedqueries = list(queries)
 
   for idx in randrng(nqueries)[:ncorrupt]:
