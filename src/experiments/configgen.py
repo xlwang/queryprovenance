@@ -91,7 +91,7 @@ DEFAULT = {
     "optchoice": 1 , 
     "qfixtype": 1,
     "niterations": 1,     # for multi-iteration algorithm to deal with false-negatives
-    "epsilon": 0.0001, 
+    "epsilon": 0.001, 
     "M": 10000000, 
     "approx": 0, 
     "prune": 0,
