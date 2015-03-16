@@ -403,6 +403,9 @@ public class Linearization {
 			// add condition
 			constraints.add(cplex.addEq(curattr, cplex.sum(pre, next)));
 			if(fix) {
+				if(i == table.getKeyIdx()) {
+					constraints.add(cplex.addEq(insertvalue, Double.valueOf(values.get(i))));
+				}
 				varmap.put(insertvalue, Double.valueOf(values.get(i)));
 				vars[i] = insertvalue;
 				list.add(insertvalue);
@@ -413,8 +416,8 @@ public class Linearization {
 		}
 		if(fix) {
 			varquerymap.put(query, list);
-		}
-		insrtmap.put(values, vars);
+			insrtmap.put(values, vars);
+		}	
 		return nextattr;
 	}
 	
