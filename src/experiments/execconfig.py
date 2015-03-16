@@ -170,6 +170,7 @@ def clean_database_state(db, cid):
   tnames = [row[0] for row in rows]
   for torm in tnames:
     q = "DROP TABLE IF EXISTS %s CASCADE;" % torm
+    print q
     db.execute(q)
   return tnames
 

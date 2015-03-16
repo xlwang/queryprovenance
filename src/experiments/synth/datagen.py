@@ -55,7 +55,7 @@ def truemain(ddl, schema, data, out, dburl, table, seed, nattrs, ntuples):
   if data:
     tuples = []
     for i in xrange(ntuples):
-      vals = [-i - 1] + map(nextval, xrange(nattrs))
+      vals = [i - 1] + map(nextval, xrange(nattrs))
       tuples.append(vals)
 
 
