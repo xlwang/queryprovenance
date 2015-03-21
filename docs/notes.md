@@ -28,17 +28,55 @@ Feb 11
 
 TODOs
 
-* better complaints gen
-* experiments
-* ask anant for query logs
 * multi-query case
-* why do we do well for false negatives?
-  * when would it fail?
-  * assume complaints are uniformly sampled
-    * suggests pushing verizon use case example
-  * if not, then no guarantees?
 * argument for cleaning FP instead of embedding in algorithm?
 * Which complaints are most important?
+* Logging
+  * log the query that was changed/fixed
+
+# Mar 18
+
+Xiaolan explains cplex encoding
+
+UPDATE set A = A + 30 WHERE A <= 35
+
+Tuples
+
+        id  A   B
+        0   31, 20000
+        1   31  989
+
+Cplex variables
+
+        t1_state0  // array where each element is an attribute for that tuple e.g., A, B
+        t1_state1  // tuple in state 1, values are unknown
+        t1_state2 
+        t1_x       // one element for every query, defines if the WHERE clause is satisfied or not.  
+                   // encodes all possible WHERE clauses states for this tuple over the whole query log
+        t1_v       // 
+        var        // every parameretized constant turns into an element 
+                   // in the var array e.g., 30 and 35
+
+        cplex.addEq t1_state1[0] = sum(t1_state0[0], var[0])  // one of those is zero 
+
+CPLEX
+
+* frequency to try to repair infeasible MIP start
+* MIP probing level
+* limit on the number of presolve passes made
+  * what does presolve do?
+* presolve switch
+* limit on number of solutions generated for solution pool
+* MIP integer solutions to find before starting to polish a feasible solution
+* absolute MIP gap before starting to polish a feasible solution
+* absolute objective difference cutoff
+* MIP node selection strategy
+
+Ideas 
+
+* Whats primal vs Dual?
+* Normalize constants?
+
 
 # Feb 27
 

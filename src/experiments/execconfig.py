@@ -209,6 +209,9 @@ def run_querylog(db, cid, tname, queries, mode):
       run_query(db, old_tname, new_tname, q)
       save_query(db, cid, qidx, old_tname, new_tname, q, mode=="clean")
       old_tname = new_tname
+
+      res = db.execute("SELECT id, count(*) FROM %s GROUP BY id HAVING count(*) > 1" % new_tname)
+      assert len(res.fetchall()) == 0
     except Exception as e:
       #print e
       pass

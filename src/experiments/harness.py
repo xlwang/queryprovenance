@@ -179,7 +179,7 @@ def plot_pid(db, pid):
       y = 'prep_time+solver_prep_time+solve_time'
 
     #
-    # filter and aggregate the data
+    # Create query that filters and aggregate the data
     #
     q = """
     SELECT avg(%s) as y, stddev(%s) as std, %s
@@ -202,6 +202,24 @@ def plot_pid(db, pid):
          group=", ".join(group),
          color=", ".join(color),
          ylabel=y)
+
+
+    q = """
+    SELECT %s as y, 0 as std, %s
+    FROM exps as e, configs as c
+    WHERE c.pid = %s AND c.id = e.cid
+    """
+    q = q % (y, ", ".join(gb), pid)
+
+    outname = "%s_%s_all.pdf" % (name, idx)
+    plot(outname, q, x, y, 
+         geom="point",
+         fx=fx,
+         fy=fy,
+         group=", ".join(group),
+         color=", ".join(color),
+         ylabel=y)
+
 
 def plot(name, query, x, y, 
          geom="line", 
@@ -241,7 +259,7 @@ def plot(name, query, x, y,
   aes += ", alpha=0.6)" 
 
   ggplot = "ggplot(data, %s)" % aes
-  geom = "geom_%s() + geom_pointrange(aes(ymin=ymin, ymax=ymax, width=0.05))" % geom
+  geom = "geom_%s(alpha=0.35) + geom_pointrange(aes(ymin=ymin, ymax=ymax, width=0.05))" % geom
   facet = None
   if fx or fy:
     if not fx:

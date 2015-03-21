@@ -166,13 +166,14 @@ public class SyntheticHarness {
 		
 		// insert data into result table
     String params = String.format(
-      "DEFAULT, %d, %d, %d, %d, %f, %f, '%s', %f, %f, %f, %f",
+      "DEFAULT, %d, %d, %d, %d, %f, %f, '%s', '%s', %f, %f, %f, %f",
 			cid,
       iterationIdx,
       metrics.get(Metrics.Type.BADCOMPLAINT).intValue(),
       metrics.get(Metrics.Type.FIXEDCOMPLAINT).intValue(),
       metrics.get(Metrics.Type.REMOVEDRATE),
       metrics.get(Metrics.Type.NOISERATE),
+      "",
 			diff,
 			computetime[0],
 			computetime[1],
