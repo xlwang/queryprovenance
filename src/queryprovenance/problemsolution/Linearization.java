@@ -14,6 +14,9 @@ import queryprovenance.database.DatabaseStates;
 import queryprovenance.database.Table;
 import queryprovenance.database.Tuple;
 import queryprovenance.expression.Expression;
+import queryprovenance.problemsolution.ComplaintRange;
+import queryprovenance.problemsolution.SingleComplaintRange;
+import queryprovenance.problemsolution.SingleComplaintRange.Range;
 import queryprovenance.query.Query;
 import queryprovenance.query.SetClause;
 import queryprovenance.query.SetExpr;
@@ -38,6 +41,7 @@ public class Linearization {
 	
 	private boolean print = false;
 	
+	private double objvalue = -1;
 	
 	long[] times = new long[3]; // execution time
 	/* initialize */
@@ -64,6 +68,7 @@ public class Linearization {
 		exprmap.clear();
 		insrtmap.clear();
 		rollbackmap.clear();removemap.clear();
+		objvalue = -1;
 	}
 	
 	/* change print preference */
@@ -77,6 +82,7 @@ public class Linearization {
 		// clear model
 		//IloEvn env;
 		cplex.clearModel();
+		cplex.setParam(IloCplex.IntParam.PrePass, 4);
 		if(!print)
 			cplex.setOut(null);
 		this.clear();
@@ -117,6 +123,7 @@ public class Linearization {
 		starttime = System.nanoTime();
 		if(solved) {
 			//System.out.println("End solving: " + cplex.getObjValue());
+			objvalue = 0;
 			// remove queries 
 			HashSet<Query> removeset = new HashSet<Query>();
 			for(IloNumVar var : removemap.keySet()) {
@@ -129,6 +136,8 @@ public class Linearization {
 			 for(IloNumVar var : varmap.keySet()) {
 				 int digits = (int) Math.pow(10, (double) (String.valueOf(epsilon).length() - String.valueOf(epsilon).lastIndexOf(".") - 1));
 				 double value = (double) Math.round(cplex.getValue(var)*digits)/digits;
+				 double orgvalue = varmap.get(var);
+				 objvalue += Math.abs(orgvalue-value);
 				 fixedmap.put(var, value);
 			 }
 			
@@ -166,6 +175,10 @@ public class Linearization {
 		else
 			return null;
 	}
+	
+	public double getObjValue() {
+		return objvalue;
+	}
 	public Complaint rollBack(IloCplex cplex, Table table, QueryLog qlog, DatabaseStates badds, Complaint compset, int steps, int startidx, int endidx) throws Exception {
 		// 
 		if(startidx >= endidx)
@@ -186,6 +199,8 @@ public class Linearization {
 		// clear model
 		cplex.clearModel();
 		this.clear();
+		cplex.setParam(IloCplex.IntParam.PrePass, 4);
+		
 		ArrayList<IloConstraint> constraints = new ArrayList<IloConstraint>();
 		
 		Complaint rollback = new Complaint(); 
@@ -231,6 +246,61 @@ public class Linearization {
 		return rollback;
 		
 	}
+	
+	/* roll back db states*/
+	public ComplaintRange rollBackToRange(IloCplex cplex, Table table, QueryLog qlog, DatabaseStates badds, Complaint compset, int startidx, int endidx) throws Exception {
+		// clear model
+		cplex.clearModel();
+		this.clear();
+		ArrayList<IloConstraint> constraints = new ArrayList<IloConstraint>();
+		
+		ComplaintRange rollback = new ComplaintRange(); 
+		QueryLog qlogback = new QueryLog();
+		for(int i = 0; i < qlog.size(); ++i) {
+			Query query = qlog.get(i);
+			qlogback.add(query.clone());
+		}
+		
+		// prepare conditions
+		long starttime = System.nanoTime();
+		this.addAll(cplex, constraints, table, qlogback, badds, compset, false, new HashSet<Integer>(), startidx, endidx);
+		long endtime = System.nanoTime();
+		times[0] = endtime - starttime;
+		
+		// solve problem
+		starttime = System.nanoTime();
+		boolean solved = cplex.solve();
+		endtime = System.nanoTime();
+		times[1] = endtime - starttime;
+		
+		// process result
+		starttime = System.nanoTime();
+		if(solved) {
+			// get value for each tuple
+			for(Tuple tuple : rollbackmap.keySet()) {
+				IloNumVar[] vars = rollbackmap.get(tuple); // attribute values
+				Range[] values = new Range[vars.length];
+				for(int i = 0; i < vars.length; ++i) {
+					IloNumVar var = vars[i]; // get variable 
+					values[i].min = var.getLB();
+					values[i].max = var.getUB();
+				}
+				int keyvalue = (int) (Math.round(varmap.get(rollbackmap.get(tuple)[table.getKeyIdx()])));
+				//int keyvalue = (int) (Math.round(kv));
+				// round key value
+				//int keyvalue = (int) Math.round(Double.valueOf(values[table.getKeyIdx()]));
+				rollback.add(new SingleComplaintRange(keyvalue, values)); // update rollback list
+			}	
+		}
+		endtime = System.nanoTime();
+		times[2] = endtime - starttime;
+		
+		// return result
+		return rollback;
+		
+	}
+	
+	
 	
 	/* construct the problem: add conditions & set objective function */
 	public void addAll(IloCplex cplex, ArrayList<IloConstraint> constraints, Table table, QueryLog badqlog, DatabaseStates badds, Complaint compset, boolean fix, HashSet<Integer> candidate, int startidx, int endidx) throws Exception {

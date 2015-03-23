@@ -91,6 +91,8 @@ public class Solution {
 			Integer[] candarray = new Integer[candidate.size()];
 			candarray = candidate.toArray(candarray);
 			Arrays.sort(candarray); // sort the candidates, start from last one
+			QueryLog bestfix = null;
+			double bestobjvalue = Double.MAX_VALUE;
 			for(int i = candarray.length - 1; i >= 0; --i) {
 				int cand = candarray[i];
 				HashSet<Integer> curcand = new HashSet<Integer>();
@@ -100,9 +102,13 @@ public class Solution {
 					times[j] += linearsolver.getTime()[j-1];
 				}
 				if(qlogfix != null) {
-					break;
+					if(linearsolver.getObjValue() > 0 && (linearsolver.getObjValue() < bestobjvalue)) {
+						bestfix = qlogfix;
+						bestobjvalue = linearsolver.getObjValue();
+					}
 				}
 			}
+			qlogfix = bestfix;
 		} else {
 			qlogfix = linearsolver.fixParameters(cplex, badInitialDs.getTable(), badQueries, badDss, complaints, candidate, 0, badQueries.size());
 			// copy time

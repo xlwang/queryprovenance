@@ -42,11 +42,4 @@ public class PreProcess {
 		}
 		return candidate;
 	}
-	
-	/* prune false positives */
-	public Complaint pruneFlasePositive(DatabaseStates badds, QueryLog badqlog, Complaint compset, int startidx, int endidx) {
-		// Prune false positives by badqlog(startidx ~ endidx)
-		
-		return null;
-	}
 }
