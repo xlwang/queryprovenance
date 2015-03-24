@@ -117,38 +117,80 @@ def gen_templates(nattrs,
                   nqueries,
                   iperc=0.33, 
                   uperc=0.5, 
-                  init_tuple_id=0):
+                  init_tuple_id=0,
+                  gen_mode="fixed"):
   """
   iperc: percentage of inserts
   uperc: of the updates, percentage of equality updates
+  gen_mode: fixed:  pick attributes for SET and WHERE clauses, use them for every Q
+            pseudo: partition attrs for SET & WHERE.  Randomly pick within
+                    partition for each query
+            random: randomly pick attrs for each query
   """
+
+  nqueries = int(nqueries)
+  nset = int(nset)
+  nwhererng = int(nwhererng)
+  nwhereeq = int(nwhereeq)
   create = gen_create(nattrs)
+
   setattrs = list(create['attrs'])
-  random.shuffle(setattrs)
-  setattrs = setattrs[:int(nset)]
   whereeqattrs = list(create['attrs'])
-  random.shuffle(whereeqattrs)
-  whereeqattrs = whereeqattrs[:int(nwhereeq)]
   whererngattrs = list(create['attrs'])
-  random.shuffle(whererngattrs)
-  whererngattrs = whererngattrs[:int(nwhererng)]
 
-
+  # tuple id of max(id) in generated table
   tup_id = init_tuple_id
-  for i in xrange(int(nqueries)):
+
+  # attrs in SET and WHERE may overlap, but they are fixed
+  # Randomize once
+  if gen_mode == "fixed":
+    random.shuffle(setattrs)
+    setattrs = setattrs[:nset]
+    random.shuffle(whereeqattrs)
+    whereeqattrs = whereeqattrs[:nwhereeq]
+    random.shuffle(whererngattrs)
+    whererngattrs = whererngattrs[:nwhererng]
+
+    for i in xrange(nqueries):
+      if random.random() <= iperc:
+        yield clone(gen_insert(tup_id, nattrs))
+        tup_id += 1
+      elif random.random() <= uperc:
+        yield clone(gen_update_eq(setattrs, whereeqattrs))
+      else:
+        yield clone(gen_update_rng(setattrs, whererngattrs))
+
+    return
+
+  # attrs are randomized, and may not ovelap
+  # Do this by partitioning attributes into SET only attributes and
+  # WHERE only attributes
+  elif gen_mode == "pseudo":
+    if nattrs < nset + max(nwhererng, nwhereeq):
+      raise Exception("nattrs < nsetattrs + nwhereattrs! %d < %d + %d" % (
+        nset, max(nwhererng, nwhereeq)
+      ))
+
+    randidx = random.randint(0, nattrs - (nset + max(nwhererng, nwhereeq)))
+    setattrs = setattrs[:nset+randidx]
+    whereeqattrs = whereeqattrs[nset+randidx:]
+    whererngattrs = whererngattrs[nset+randidx:]
+
+  elif gen_mode != "random":
+    raise Exception("Unrecognized gen_mode %s" % gen_mode)
+
+  for i in xrange(nqueries):
     if random.random() <= iperc:
       yield clone(gen_insert(tup_id, nattrs))
       tup_id += 1
     elif random.random() <= uperc:
-      yield clone(gen_update_eq(setattrs, whereeqattrs))
+      random.shuffle(setattrs)
+      random.shuffle(whereeqattrs)
+      yield clone(gen_update_eq(setattrs[:nset], whereeqattrs[:nwhereeq]))
     else:
-      yield clone(gen_update_rng(setattrs, whererngattrs))
-  return
-
-  CREATE = "CREATE TABLE T (id int serial, %s);"
-  INSERT = "INSERT INTO T VALUES(default, %s);"
-  UPDATE = "UPDATE T SET %s WHERE %s;"
-  DELETE = "DELETE FROM T WHERE %s;"
+      random.shuffle(setattrs)
+      random.shuffle(whererngattrs)
+      yield clone(gen_update_rng(setattrs[:nset], whererngattrs[:nwhererng]))
 
 
 @click.command()
@@ -156,6 +198,7 @@ def gen_templates(nattrs,
 @click.option("--out", default=None, help="output file name/path")
 @click.option('--seed', default=0, help="Seed to set the random number generator.")
 @click.option('--inittupid', default=0, help="Initial tuple ID for insert queries.")
+@click.option('--mode', default="fixed", help="How to randomize attrs in SET and WHERE clauses.")
 @click.argument('nattrs', default=4)      
 @click.argument('nset', default=1)        
 @click.argument('nwhereeq', default=1)    
@@ -168,7 +211,7 @@ def gen_templates(nattrs,
 @click.argument('setcorrupt', default=1)
 @click.argument('wherecorrupt', default=1)
 def main(
-    bprint, out, seed, inittupid,
+    bprint, out, seed, inittupid, mode,
     nattrs, nset, nwhereeq, nwhererng, nqueries, insertperc, equalityperc,
     ncorrupt, insertcorrupt, setcorrupt, wherecorrupt
     ):
@@ -197,14 +240,14 @@ def main(
     bprint, out, seed,
     nattrs, nset, nwhereeq, nwhererng, nqueries, insertperc, equalityperc,
     ncorrupt, insertcorrupt, setcorrupt, wherecorrupt,
-    inittupid
+    inittupid, mode
   )
 
 def truemain(
     bprint, out, seed,
     nattrs, nset, nwhereeq, nwhererng, nqueries, insertperc, equalityperc,
     ncorrupt, insertcorrupt, setcorrupt, wherecorrupt,
-    init_tuple_id=0
+    init_tuple_id=0, mode="fixed"
     ):
 
   random.seed(seed)
@@ -214,8 +257,24 @@ def truemain(
     out = file(out, "w")
 
 
-  queries = [q for q in gen_templates(
-    nattrs, nset, nwhereeq, nwhererng, nqueries, insertperc, equalityperc, init_tuple_id)]
+  # fix mode in case its passed numerically
+  if mode == 1:
+    mode = "fixed"
+  elif mode == 2:
+    mode = "pseudo"
+  elif mode == 3:
+    mode = "random"
+
+
+  queries = [q for q in gen_templates(nattrs, 
+                                      nset, 
+                                      nwhereeq, 
+                                      nwhererng, 
+                                      nqueries, 
+                                      insertperc, 
+                                      equalityperc, 
+                                      init_tuple_id,
+                                      mode)]
   corruptedqueries = list(queries)
 
   for idx in randrng(nqueries)[:ncorrupt]:

@@ -48,6 +48,10 @@ def create_params(options, base_params={}, keys=None):
 
 ###########################
 #
+#  gen_mode:  (see synth/gen.py)
+#    1: fixed
+#    2: pseudo
+#    3: random
 #  exptype:
 #    1: synthetic
 #    2: tpcc
@@ -71,7 +75,7 @@ def create_params(options, base_params={}, keys=None):
 
 DEFAULT = {
     "N_D": 100, 
-    "N_dim": 4, 
+    "N_dim": 10, 
     "N_q": 10, 
     "N_pred": 4, 
     "N_ins": 2,
@@ -81,6 +85,7 @@ DEFAULT = {
     "N_corrupt_vals": 1,
     "N_corrupt_set": 1,
     "N_corrupt_where": 1,
+    "gen_mode": 1,
     "idx": .9, 
     "p_I": .33, 
     "p_pk": .5, 
@@ -101,6 +106,7 @@ DEFAULT = {
 keys = [
   "N_D", "N_dim", "N_q", "N_pred", "N_ins", "N_set", "N_where", 
   "N_corrupt", "N_corrupt_vals", "N_corrupt_set", "N_corrupt_where",
+  "gen_mode",
   "idx", 
   "p_I", "p_pk", "p_fp", "p_fn",
   "exptype", "passtype", "optchoice", "qfixtype", "niterations",

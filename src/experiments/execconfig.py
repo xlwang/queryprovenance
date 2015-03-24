@@ -51,6 +51,7 @@ def init_db(db):
         N_corrupt_vals int,
         N_corrupt_set int,
         N_corrupt_where int,
+        gen_mode int,
         idx float,
         p_I float,
         p_pk float,
@@ -254,6 +255,7 @@ def sync_cid(db, dburl, cid):
   for i in xrange(len(args) - 4, len(args)):
     args[i] = int(args[i])
   args.append(config['n_d'])
+  args.append(config['gen_mode'])
   queries, corruptqueries = genqlog(False, None, cid, *args)
   print "qlog generated"
 
