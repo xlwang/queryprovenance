@@ -66,7 +66,6 @@ synth_update_mixture
     nruns: 10
 
 
-
 synth_idx
   config
     N_D: 50000
@@ -110,3 +109,41 @@ synth_query_struct
     nruns: 10
 
 
+synth_false_negs
+  config
+    N_D: 50000
+    N_q: 100
+    passtype: 5
+    idx: 0.5
+    niterations: 2
+    p_I: 0
+    p_pk: 0
+    p_pk: 0, 0.5, 1
+    p_fn: 0, 0.1, 0.2, 0.5
+  plot
+    x: p_fn
+    y: nbadcomplaints, removerate, noiserate, prep_time+solver_prep_time+solve_time+post_proc_time
+    group: p_pk
+    color: p_pk
+    nruns: 10
+
+ 
+synth_false_pos
+  config
+    N_D: 50000
+    N_q: 100
+    passtype: 5
+    idx: 0.5
+    niterations: 2
+    p_I: 0
+    p_pk: 0
+    p_pk: 0, 0.5, 1
+    p_fp: 0, 0.1, 0.2, 0.5
+  plot
+    x: p_fp
+    y: nbadcomplaints, removerate, noiserate, prep_time+solver_prep_time+solve_time+post_proc_time
+    group: p_pk
+    color: p_pk
+    nruns: 10
+
+  
