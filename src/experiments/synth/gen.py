@@ -81,7 +81,7 @@ def corrupt(query, nvcorrupt, nwcorrupt=0, nscorrupt=0):
   query = clone(query)
   if query["type"] == "INSERT":
     query['trueval'] = clone(query['vals'])
-    idxs = range(len(query["vals"]))
+    idxs = range(1，len(query["vals"]))
     random.shuffle(idxs)
     for idx in idxs[:nvcorrupt]:
       query["vals"][idx] = nextval()
