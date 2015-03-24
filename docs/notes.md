@@ -34,6 +34,26 @@ TODOs
 * Logging
   * log the query that was changed/fixed
 
+
+# Mar 23
+
+Updates
+
+* Found CPLEX bug -- set preprocess > 0 (preprocess flag = 4 is slowest but best in 
+  terms of noise rate)
+* Xiaolan looked at results, systematic error (possibly)
+  * INSERT queries -- was allowing CPLEX to edit primary key -- not good
+  * Noise rate
+    * Often times the noise is because the resulting range correctly matches the
+      positive complaints, but is a superset of the true range.  Either post-processing
+      to contract the result to the complaint set, or by adding non-complaint tuples between
+      clusters of complaints can help deal with this issue.
+* Query log generation needs more diversity
+  1. Fixed set of attrs in SET and WHERE clauses for UPDATE
+  2. Randomly pick attrs for SET and WHERER clauses but don't let them overlap between
+     the clause types (if a1 is used for SET, don't allow in WHERE)
+  3. Pick attrs _completely_ randomly
+
 # Mar 18
 
 Xiaolan explains cplex encoding
