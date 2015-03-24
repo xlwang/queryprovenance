@@ -185,6 +185,8 @@ def clean_database_state(db, cid):
 def run_query(db, tname, newtname, q):
   sql = "CREATE TABLE %s AS (SELECT * FROM %s)" % (newtname, tname)
   db.execute(sql)
+  altersql = "ALTER TABLE %s ADD PRIMARY KEY (id)" % (newtname)
+  # db.execute(altersql)
   sql = "SELECT count(*) FROM %s" % newtname
   minv = db.execute(sql).fetchone()[0]
   sql = "CREATE SEQUENCE %s_seq MINVALUE %d;" % (newtname, minv)
