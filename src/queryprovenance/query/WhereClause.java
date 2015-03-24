@@ -105,8 +105,8 @@ public class WhereClause {
 	
 	public String toString() {
 		switch(this.operator){
-		case DISJ: return Util.join(where_exprs, " or ");
-		case CONJ: return Util.join(where_exprs, " and ");
+		case DISJ: return Util.join(where_exprs, " OR ");
+		case CONJ: return Util.join(where_exprs, " AND ");
 		}
 		return null;
 		// return Util.join(where_exprs, " and ");

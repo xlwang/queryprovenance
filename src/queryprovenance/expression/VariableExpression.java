@@ -64,16 +64,20 @@ public class VariableExpression extends Expression{
 	public double Evaluate(){
 		if(value == Double.MAX_VALUE)
 			throw new IllegalArgumentException("must set Variable: " + name);
-		else
-			return value;
+		else if (value == value.intValue())
+			return value.intValue();
+		return value;
 	}
 	
 	/* to string*/
 	public String toString(){
 		if(isTrue)
 			return name;
-		else
+		else {
+			if (value == value.intValue())
+				return String.valueOf(value.intValue());
 			return String.valueOf(value);
+		}
 	}
 
 	/* get variable*/
@@ -117,8 +121,12 @@ public class VariableExpression extends Expression{
 	
 	/* evaluate assigned part */
 	public double getAssignedEval() {
-		if(isTrue)
+		if(isTrue) {
+			if (value != null && value == value.intValue()) {
+				return value.intValue();
+			}
 			return value;
+		}
 		else
 			return 0;
 	}

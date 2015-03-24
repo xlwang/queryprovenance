@@ -1,0 +1,12 @@
+synth_niterations
+  config
+    N_D: 50000
+    N_q: 100
+    N_dim: 6
+    passtype: 5
+    idx: 0.5
+    niterations: 1, 2, 3, 4
+  plot
+    x: niterations
+    y: nbadcomplaints, removerate, noiserate, prep_time+solver_prep_time+solve_time+post_proc_time
+    nruns: 10

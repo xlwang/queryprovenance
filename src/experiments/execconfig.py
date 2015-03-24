@@ -68,6 +68,7 @@ def init_db(db):
         rollbackbatch int
       );
       """,
+      # mode: [clean, dirty, fixed]
       """
       CREATE TABLE if not exists qlogs (
         id serial primary key,
@@ -75,7 +76,7 @@ def init_db(db):
         qidx int,
         oldtname text,
         newtname text,
-        isclean bool,
+        mode text,
         type varchar,
         vals text,
         set text,
@@ -138,7 +139,10 @@ def to_sql(q, tname):
 
 
 
-def save_query(db, cid, qidx, oldtname, newtname, q, isclean):
+def save_query(db, cid, qidx, oldtname, newtname, q, mode):
+  """
+  mode: clean | dirty | fixed | rolledback
+  """
   qtype = q.get("type")
   setc = q.get("set", [])
   wherec = q.get("where", [])
@@ -147,7 +151,7 @@ def save_query(db, cid, qidx, oldtname, newtname, q, isclean):
   
   q = "INSERT INTO qlogs values(default, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
   db.execute(q, 
-      cid, qidx, oldtname, newtname, isclean, qtype, 
+      cid, qidx, oldtname, newtname, mode, qtype, 
       json.dumps(valsc),
       json.dumps(setc),
       json.dumps(wherec),
@@ -194,7 +198,7 @@ def run_query(db, tname, newtname, q):
 def run_querylog(db, cid, tname, queries, mode):
   """
   args:
-    mode: "clean", "dirty", "rollback"
+    mode: "clean", "dirty", "rollback", "fixed"
   """
   for qidx, q in enumerate(queries):
     try:
@@ -207,13 +211,13 @@ def run_querylog(db, cid, tname, queries, mode):
 
       new_tname = "%s_%s_%d" % (tname, mode, qidx+1)
       run_query(db, old_tname, new_tname, q)
-      save_query(db, cid, qidx, old_tname, new_tname, q, mode=="clean")
+      save_query(db, cid, qidx, old_tname, new_tname, q, mode)
       old_tname = new_tname
 
       res = db.execute("SELECT id, count(*) FROM %s GROUP BY id HAVING count(*) > 1" % new_tname)
       assert len(res.fetchall()) == 0
     except Exception as e:
-      #print e
+      print e
       pass
   print "created %d tables for %s" % (qidx, tname)
 

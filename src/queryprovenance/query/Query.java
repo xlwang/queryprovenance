@@ -156,9 +156,7 @@ public class Query {
 		if (type == Type.INSERT) {
 			l.add("INSERT INTO");
 			l.add(from.toString());
-			l.add("VALUES(");
-			l.add(Util.join(values, ", "));  //XXX: not exactly right...
-			l.add(")");
+			l.add("VALUES(" + Util.join(values, ",") + ")"); // XXX: assumes numeric vals 
 		} else if (type == Type.DELETE) {
 			l.add("DELETE FROM");
 			l.add(from.toString());

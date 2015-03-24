@@ -4,9 +4,9 @@ import ilog.concert.IloNumVar;
 
 import java.util.HashMap;
 
-import queryprovenance.expression.*;
+import queryprovenance.expression.Expression;
 public class WhereExpr {
-	public static enum Op {
+	public  static  enum Op {
 		l,  // <
 		le, // <=
 		g,  // >
@@ -48,6 +48,16 @@ public class WhereExpr {
 		return this.operator;
 	}
 	
+	public String getOperatorString() {
+		if (this.operator == Op.l)  return "<"; 
+		if (this.operator == Op.le) return "<=";
+		if (this.operator == Op.g) return ">";
+		if (this.operator == Op.ge) return ">=";
+		if (this.operator == Op.eq) return "=";
+		if (this.operator == Op.ne) return "!=";
+		return "";
+	}
+	
 	public static Op getOperator(String op){
 		switch(op){
 		case ">=": return Op.ge;
@@ -62,16 +72,17 @@ public class WhereExpr {
 	
 	public String toString(){
 		String str = attr_expr.toString();
+		String op = "";
 		switch(operator){
-		case l: str = str + "<";break;
-		case le: str = str + "<=";break;
-		case g: str = str + ">";break;
-		case ge: str = str + ">=";break;
-		case eq: str = str + "=";break;
-		case ne: str = str + "!=";break;
+		case l: op = "<";break;
+		case le: op = "<=";break;
+		case g: op = ">";break;
+		case ge: op = ">=";break;
+		case eq: op = "=";break;
+		case ne: op = "!=";break;
 		default: return null;
 		}
-		return str + var.toString();
+		return String.format("%s %s %s",  attr_expr.toString(), op, var.toString());
 	}
 	
 	/* clone expression */
