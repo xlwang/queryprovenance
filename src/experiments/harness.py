@@ -244,7 +244,7 @@ def plot(name, query, x, y,
     data$ymax = data$y + data$std
     %s
     %s
-    ggsave("%s", p, scale=.7)
+    ggsave("%s", p, scale=1)
   """
 
   xform = ""
