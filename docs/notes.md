@@ -34,6 +34,30 @@ TODOs
 * Logging
   * log the query that was changed/fixed
 
+# Mar 25
+
+Performance
+
+* reduce the number of constraints
+  * merge adjacenty composable queries
+* batch
+  * reuse cplex's state to compute feasible value ranges 
+    (instead of manually) and use them to implement batching
+
+Base lines
+
+* use lineage
+  * perturb every predicate in lineage greedily pick good perturbations
+  * classification weight problems
+    * complaints and non complaints as training examples
+    * predicates that are lineag of complaints as features
+    * weights on features after training w/L1 are the culprits
+    * xiaolan mentioned it doesn't capture dependency or omething?
+
+Incremental solutions
+
+* set previous solution as starting solution
+* re-weight queries or predicates based on previous solutions
 
 # Mar 23
 
