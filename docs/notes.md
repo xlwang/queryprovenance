@@ -31,8 +31,8 @@ TODOs
 * multi-query case
 * argument for cleaning FP instead of embedding in algorithm?
 * Which complaints are most important?
-* Logging
-  * log the query that was changed/fixed
+X Logging
+  X log the query that was changed/fixed
 
 # Mar 25
 

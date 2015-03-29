@@ -269,12 +269,16 @@ def plot(name, query, x, y,
     facet = "facet_grid(%s~%s)" % (fx, fy)
   xscale = "scale_x_continuous(name='%s')" % x
   yscale = None
+  colorscale = None
   if log:
     yscale = "scale_y_log10(name='%s')" % y
   else:
     yscale = "scale_y_continuous(name='%s')" % y
+  if color:
+    colorscale = "scale_color_hue(guide = guide_legend(title = '%s'))" % color
 
-  arr = filter(bool, [ ggplot, geom, facet, xscale, yscale])
+
+  arr = filter(bool, [ ggplot, geom, facet, xscale, yscale, colorscale])
 
   plot = "p = %s" % " + ".join(arr)
 
