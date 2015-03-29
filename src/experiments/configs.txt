@@ -94,7 +94,7 @@ synth_niterations
 synth_query_struct
   config
     N_D: 50000
-    N_q: 50
+    N_q: 25
     passtype: 5
     idx: 0.5
     niterations: 2
@@ -120,6 +120,24 @@ synth_false_negs
     p_pk: 0
     p_pk: 0, 0.5, 1
     p_fn: 0, 0.1, 0.2, 0.5
+  plot
+    x: nbadcomplaints
+    y: nbadcomplaints, removerate, noiserate, prep_time+solver_prep_time+solve_time+post_proc_time
+    group: p_pk
+    color: p_pk
+    nruns: 10
+
+synth_fn_small
+  config
+    N_D: 50000
+    N_q: 25
+    passtype: 5
+    idx: 0.5
+    niterations: 2
+    p_I: 0
+    p_pk: 0
+    p_pk: 0, 0.5
+    p_fn: 0, 0.25, 0.5, 0.75, 1.0
   plot
     x: nbadcomplaints
     y: nbadcomplaints, removerate, noiserate, prep_time+solver_prep_time+solve_time+post_proc_time
