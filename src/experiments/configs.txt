@@ -121,7 +121,7 @@ synth_false_negs
     p_pk: 0, 0.5, 1
     p_fn: 0, 0.1, 0.2, 0.5
   plot
-    x: nbadcomplaints
+    x: p_fn
     y: nbadcomplaints, removerate, noiserate, prep_time+solver_prep_time+solve_time+post_proc_time
     group: p_pk
     color: p_pk
@@ -139,7 +139,7 @@ synth_fn_small
     p_pk: 0, 0.5
     p_fn: 0, 0.25, 0.5, 0.75, 1.0
   plot
-    x: nbadcomplaints
+    x: p_fn
     y: nbadcomplaints, removerate, noiserate, prep_time+solver_prep_time+solve_time+post_proc_time
     group: p_pk
     color: p_pk
