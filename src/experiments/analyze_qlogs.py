@@ -97,8 +97,23 @@ def compare_qlogs(db, cid):
     if setd:
       print "S", cid, row[0], str(setd)
     if whered:
-      print "W", cid, row[0], str(whered)
-
+      tmpl = "%s\t%s\t%d\t%0.3f\t[%d, %d]\t[%0.2f, %0.2f]"
+      for var, data in whered.items():
+        s = tmpl % (
+            data[0], 
+            data[1],
+            data[2],
+            data[3],
+            data[4][0],
+            data[4][1],
+            data[5][0],
+            data[5][1]
+        )
+        print "W\t%d\t%d\t%s" % (
+            cid,
+            row[0],
+            s
+        )
 
 
 def compare_queries(db, 
