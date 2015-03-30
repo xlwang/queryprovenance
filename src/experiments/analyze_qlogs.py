@@ -109,9 +109,10 @@ def compare_qlogs(db, cid):
             data[5][0],
             data[5][1]
         )
-        print "W\t%d\t%d\t%s" % (
+        print "W\t%d\t%d\t%s\t%s" % (
             cid,
             row[0],
+            var,
             s
         )
 
