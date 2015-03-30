@@ -1,0 +1,167 @@
+# comments
+
+
+synth_scale_qlog
+  config
+    N_D: 50000
+    N_q: 5, 25, 50, 100, 200, 300, 400
+    passtype: 5
+    idx: 0.5
+    niterations: 2
+    p_I: 0, 1
+    p_pk: 0, 1
+  plot
+    x: N_q
+    y: nbadcomplaints, removerate, noiserate, prep_time+solver_prep_time+solve_time+post_proc_time
+    group: p_I, p_pk
+    color: p_I, p_pk
+    nruns: 10
+
+
+synth_scale_dim
+  config
+    N_D: 50000
+    N_q: 50
+    N_pred: 1, 2, 3, 5
+    N_where: 1,2, 3
+    passtype: 5
+    idx: 0.5
+    niterations: 2
+  plot
+    x: N_pred
+    y: nbadcomplaints, removerate, noiserate, prep_time+solver_prep_time+solve_time+post_proc_time
+    group: N_where
+    color: N_where
+    nruns: 10
+
+synth_insert_mixture
+  config
+    N_D: 50000
+    N_q: 50
+    idx: 0.5
+    passtype: 5
+    niterations: 2
+    p_I: 0, 0.25, 0.5, 0.75, 1.0
+    p_pk: 0, 1
+  plot
+    x: p_I
+    y: nbadcomplaints, removerate, noiserate, prep_time+solver_prep_time+solve_time+post_proc_time
+    group: p_pk
+    color: p_pk
+    nruns: 10
+
+synth_update_mixture
+  config
+    N_D: 50000
+    N_q: 50
+    idx: 0.5
+    passtype: 5
+    niterations: 2
+    p_I: 0
+    p_pk: 0, 0.25, 0.5, 0.75, 1.0
+  plot
+    x: nbadcomplaints
+    y: nbadcomplaints, removerate, noiserate, prep_time+solver_prep_time+solve_time+post_proc_time
+    geom: point
+    nruns: 10
+
+
+synth_idx
+  config
+    N_D: 50000
+    N_q: 50
+    passtype: 5
+    idx: 0, 0.1, 0.25, 0.5, 0.75, 0.9, 1
+    niterations: 2
+  plot
+    x: idx
+    y: nbadcomplaints, removerate, noiserate, prep_time+solver_prep_time+solve_time+post_proc_time
+    nruns: 10
+
+synth_niterations
+  config
+    N_D: 50000
+    N_q: 50
+    passtype: 5
+    idx: 0.5
+    niterations: 1, 2, 3, 4
+  plot
+    x: niterations
+    y: nbadcomplaints, removerate, noiserate, prep_time+solver_prep_time+solve_time+post_proc_time
+    nruns: 10
+
+
+synth_query_struct
+  config
+    N_D: 50000
+    N_q: 25
+    passtype: 5
+    idx: 0.5
+    niterations: 2
+    gen_mode: 2, 3
+    p_I: 0
+    p_pk: 0, 0.5, 1
+  plot
+    x: p_pk
+    y: nbadcomplaints, removerate, noiserate, prep_time+solver_prep_time+solve_time+post_proc_time
+    group: gen_mode
+    color: gen_mode
+    nruns: 10
+
+
+synth_false_negs
+  config
+    N_D: 50000
+    N_q: 50
+    passtype: 5
+    idx: 0.5
+    niterations: 2
+    p_I: 0
+    p_pk: 0
+    p_pk: 0, 0.5, 1
+    p_fn: 0, 0.1, 0.2, 0.5
+  plot
+    x: p_fn
+    y: nbadcomplaints, removerate, noiserate, prep_time+solver_prep_time+solve_time+post_proc_time
+    group: p_pk
+    color: p_pk
+    nruns: 10
+
+synth_fn_small
+  config
+    N_D: 50000
+    N_q: 25
+    passtype: 5
+    idx: 0.5
+    niterations: 2
+    p_I: 0
+    p_pk: 0
+    p_pk: 0, 0.5
+    p_fn: 0, 0.25, 0.5, 0.75, 1.0
+  plot
+    x: p_fn
+    y: nbadcomplaints, removerate, noiserate, prep_time+solver_prep_time+solve_time+post_proc_time
+    group: p_pk
+    color: p_pk
+    nruns: 10
+
+ 
+synth_false_pos
+  config
+    N_D: 50000
+    N_q: 50
+    passtype: 5
+    idx: 0.5
+    niterations: 2
+    p_I: 0
+    p_pk: 0
+    p_pk: 0, 0.5, 1
+    p_fp: 0, 0.1, 0.2, 0.5
+  plot
+    x: p_fp
+    y: nbadcomplaints, removerate, noiserate, prep_time+solver_prep_time+solve_time+post_proc_time
+    group: p_pk
+    color: p_pk
+    nruns: 10
+
+  
