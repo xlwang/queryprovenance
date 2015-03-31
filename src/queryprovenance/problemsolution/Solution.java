@@ -94,6 +94,13 @@ public class Solution {
 			QueryLog bestfix = null;
 			double bestobjvalue = Double.MAX_VALUE;
 			for(int i = candarray.length - 1; i >= 0; --i) {
+				// prune false positive
+				starttime = System.nanoTime();
+				if(falsepositive) {
+					complaints = FalsePositiveAll.densityFilter(cplex, handler, badDss, badQueries, i, complaints, epsilon, M);
+				}
+				times[0] += System.nanoTime() - starttime; // add false positive pruning time into pre-process time
+				// add candidate set, only include the current query
 				int cand = candarray[i];
 				HashSet<Integer> curcand = new HashSet<Integer>();
 				curcand.add(cand);
