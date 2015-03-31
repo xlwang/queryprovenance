@@ -18,7 +18,7 @@ import weka.core.Utils;
 
 /** FalsePositiveAll: support remove false positives for both set clasue error and where clause error. Use cplex (instead of bounding box) to derive single complaint fix
  *                    * only support query by query pruning *
- *  densityFilter: prune false positives for query qlog(qidx)
+ *  densityFilter: prune false positives for query badQueries(qidx)
  *  create table T (complaintID, tupleID, {set_attributes})
  *  create view V (complaintID, # of tuples only modified by current complaint) from T
  *  create view Contribution (complaintID, #edges in T, #nodes in V + 1)
@@ -40,22 +40,33 @@ import weka.core.Utils;
  *      */
 public class FalsePositiveAll {
 	/* filter complaints based on density */
-	public static Complaint densityFilter(IloCplex cplex, DatabaseHandler dbhandler, DatabaseStates dss, QueryLog qlog, int qidx, Complaint complaints, double epsilon, double M) throws Exception {
+	public static Complaint densityFilter(IloCplex cplex, 
+			DatabaseHandler dbhandler,  
+			DatabaseStates badDss, 
+			QueryLog badQueries, 
+			HashSet<Integer> qidxs, 
+			int startidx, int endidx, 
+			Complaint complaints, 
+			double epsilon, double M) throws Exception {
+		Table table = badDss.iterator().next().getTable();
+		// get modified attributes
+		List<String> attrs = new ArrayList<String>();
 		// get query
-		Query query = qlog.get(qidx);
-		DatabaseState preds = dss.get(qidx);
-		DatabaseState nextds = dss.get(qidx + 1);
-		Table table = preds.getTable();
-		// prepare sql query
-		String[] attrs = query.getModifiedAttr();
+		for(Integer qidx : qidxs) {
+			Query query = badQueries.get(qidx);
+			// prepare sql query
+			 attrs.addAll(query.getModifiedAttr());
+		}
+		DatabaseState preds = badDss.get(startidx);
+		DatabaseState nextds = badDss.get(endidx);
 		String setattrs = table.getPrimaryKey() + " int, ";
 		String setattrlist = table.getPrimaryKey() + ",";
 		String setattrjoin = "T." + table.getPrimaryKey() + "= A." + table.getPrimaryKey() + " and ";
-		for(int i = 0; i < attrs.length; ++i) {
-			setattrs += attrs[i] + " real";
-			setattrlist += attrs[i];
-			setattrjoin += "T." + attrs[i] + " = " + "A." + attrs[i];
-			if(i < attrs.length - 1) {
+		for(int i = 0; i < attrs.size(); ++i) {
+			setattrs += attrs.get(i) + " real";
+			setattrlist += attrs.get(i);
+			setattrjoin += "T." + attrs.get(i) + " = " + "A." + attrs.get(i);
+			if(i < attrs.size() - 1) {
 				setattrs += ",";
 				setattrlist += ",";
 				setattrjoin += " and ";
@@ -86,9 +97,9 @@ public class FalsePositiveAll {
 			// compare preds and correct ds
 			boolean isSame = preds.getTuple(scp.key).compare(scp.values);
 			linearization.setSingleFix(isSame);
-			Query fixedquery = computeSolution(cplex, linearization, table, dss, qlog, qidx, scp);
+			QueryLog fixedQueries = computeSolution(cplex, linearization, table, badDss, badQueries, qidxs, startidx, endidx, scp);
 			// update related table & views
-			update(dbhandler, preds, nextds, qidx, fixedquery, attrs, scp);
+			update(dbhandler, preds, nextds, fixedQueries, attrs, endidx, scp);
 			// clear solver
 			linearization.clear();
 		}
@@ -97,30 +108,36 @@ public class FalsePositiveAll {
 	}
 	
 	/* find solution for current complaint*/
-	public static Query computeSolution(IloCplex cplex, Linearization linearization, Table table, DatabaseStates dss, QueryLog qlog, int qidx, SingleComplaint scp) throws Exception {
+	public static QueryLog computeSolution(IloCplex cplex, 
+			Linearization linearization, 
+			Table table, 
+			DatabaseStates badDss, 
+			QueryLog badQueries, HashSet<Integer> qidxs, 
+			int startidx, int endidx, 
+			SingleComplaint scp) throws Exception {
+		// define single complaint
 		Complaint complaint = new Complaint();
 		complaint.add(scp);
-		HashSet<Integer> curcand = new HashSet<Integer>();
-		curcand.add(qidx);
-		QueryLog qlogfix = linearization.fixParameters(cplex, table, qlog, dss, complaint, curcand, qidx, qlog.size()); 
-		return qlogfix.get(qidx);
+		QueryLog fixedQueries = linearization.fixParameters(cplex, table, badQueries, badDss, complaint, qidxs, startidx, endidx); 
+		return fixedQueries;
 	}
 	
 	/* update table T; view V, Contribution based on fix */
-	public static void update(DatabaseHandler dbhandler, DatabaseState pre, DatabaseState next, int qidx, Query fixedquery, String[] attrs, SingleComplaint scp) throws Exception {
+	public static void update(DatabaseHandler dbhandler, DatabaseState pre, DatabaseState next, QueryLog fixedQueries, List<String> attrs, int endidx, SingleComplaint scp) throws Exception {
 		// based on current fixedquery, update table T
-		DatabaseState fixedds = QueryLog.executeSingleQuery(pre.getTable() + "_" + qidx, qidx, fixedquery, dbhandler);
+		DatabaseStates fixedDss = fixedQueries.execute(pre.getTable().toString(), dbhandler); //QueryLog.execute(pre.getTable().toString(), dbhandler);
+		DatabaseState fixedDs = fixedDss.get(endidx);
 		// define query
 		String inrtsql = "";
 		// find all tuples different with values in next state
-		for(int key : fixedds.getKeySet()) {
-			Tuple fixed = fixedds.getTuple(key);
+		for(int key : fixedDs.getKeySet()) {
+			Tuple fixed = fixedDs.getTuple(key);
 			Tuple dirty = next.getTuple(key);
 			if(!fixed.compare(dirty.values)) {
-				inrtsql += "insert into T values (" + scp.key + "," + fixedds.getValue(key, pre.getPrimaryKey()) + ",";
-				for(int i = 0; i < attrs.length; ++i) {
-					inrtsql += String.valueOf(fixedds.getValue(key, attrs[i]));
-					if(i < attrs.length - 1)
+				inrtsql += "insert into T values (" + scp.key + "," + fixedDs.getValue(key, pre.getPrimaryKey()) + ",";
+				for(int i = 0; i < attrs.size(); ++i) {
+					inrtsql += String.valueOf(fixedDs.getValue(key, attrs.get(i)));
+					if(i < attrs.size() - 1)
 						inrtsql += ", ";
 				}
 				inrtsql += ");";

@@ -62,7 +62,7 @@ public class QueryLog extends ArrayList<Query>{
 			prevTable = curTable;
 			tablenames.add(curTable);
 		}
-		
+
 		// turn tablenames into a list of DatabaseStates
 		
 		for (String tablename : tablenames) {
@@ -72,7 +72,7 @@ public class QueryLog extends ArrayList<Query>{
 		}
 		return dss;
 	}
-	
+
 	public List<String> difference(QueryLog o) {
 		Hashtable<Integer, Query> ht = new Hashtable<Integer, Query>();
 		List<String> diffs = new ArrayList<String>();

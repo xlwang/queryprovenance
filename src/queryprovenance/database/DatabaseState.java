@@ -229,7 +229,7 @@ public class DatabaseState {
 		}
 		
 		/* get tuple values*/
-		public String getValue(String key, String column_name){
+		public String getValue(int key, String column_name){
 			Tuple tuple = state.get(key);
 			int idx = table.getColumnIdx(column_name);
 			if(idx != -1)

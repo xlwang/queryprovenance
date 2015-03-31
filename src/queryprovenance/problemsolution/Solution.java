@@ -94,16 +94,17 @@ public class Solution {
 			QueryLog bestfix = null;
 			double bestobjvalue = Double.MAX_VALUE;
 			for(int i = candarray.length - 1; i >= 0; --i) {
-				// prune false positive
-				starttime = System.nanoTime();
-				if(falsepositive) {
-					complaints = FalsePositiveAll.densityFilter(cplex, handler, badDss, badQueries, i, complaints, epsilon, M);
-				}
-				times[0] += System.nanoTime() - starttime; // add false positive pruning time into pre-process time
 				// add candidate set, only include the current query
 				int cand = candarray[i];
 				HashSet<Integer> curcand = new HashSet<Integer>();
 				curcand.add(cand);
+				// prune false positive
+				starttime = System.nanoTime();
+				if(falsepositive) {
+					complaints = FalsePositiveAll.densityFilter(cplex, handler, badDss, badQueries, curcand, cand, badQueries.size(), complaints, epsilon, M);
+				}
+				times[0] += System.nanoTime() - starttime; // add false positive pruning time into pre-process time
+
 				qlogfix = linearsolver.fixParameters(cplex, badInitialDs.getTable(), badQueries, badDss, complaints, curcand, cand, badQueries.size()); // start from current candidate state
 				for(int j = 1; j < linearsolver.getTime().length + 1; ++j) {
 					times[j] += linearsolver.getTime()[j-1];
@@ -117,6 +118,12 @@ public class Solution {
 			}
 			qlogfix = bestfix;
 		} else {
+			// prune false positive
+			starttime = System.nanoTime();
+			if(falsepositive) {
+				complaints = FalsePositiveAll.densityFilter(cplex, handler, badDss, badQueries, candidate, 0, badQueries.size(), complaints, epsilon, M);
+			}
+			times[0] += System.nanoTime() - starttime; // add false positive pruning time into pre-process time
 			qlogfix = linearsolver.fixParameters(cplex, badInitialDs.getTable(), badQueries, badDss, complaints, candidate, 0, badQueries.size());
 			// copy time
 			for(int i = 1; i < linearsolver.getTime().length + 1; ++i) {

@@ -43,6 +43,8 @@ public class Linearization {
 	
 	private double objvalue = -1;
 	
+	private boolean singlefix = false;
+	
 	long[] times = new long[3]; // execution time
 	/* initialize */
 	public Linearization(double e_, double m_) {
@@ -69,11 +71,17 @@ public class Linearization {
 		insrtmap.clear();
 		rollbackmap.clear();removemap.clear();
 		objvalue = -1;
+		singlefix = false;
 	}
 	
 	/* change print preference */
 	public void setPrint(boolean p_) {
 		print = p_;
+	}
+	
+	/* set single fix flag*/
+	public void setSingleFix(boolean sig) {
+		singlefix = sig;
 	}
 	/* solve parameter fix problem: baseline */	
 	public QueryLog fixParameters(IloCplex cplex, Table table, QueryLog badqlog, DatabaseStates badds, Complaint compset, HashSet<Integer> candidate, int startidx, int endidx) throws Exception {
@@ -430,7 +438,7 @@ public class Linearization {
 		switch(query.getType()) {
 		case UPDATE:
 			this.addWhere(cplex, query, constraints, where, table, preattr, x, fix); // add conditions for where clause
-			nextattr = this.addSet(cplex, query, constraints, set, table, preattr, x, fix); // add conditions for set clause
+			nextattr = this.addSet(cplex, query, constraints, set, table, preattr, x, fix && !singlefix); // add conditions for set clause
 			break;
 		case INSERT: 
 			constraints.add(cplex.addEq(x, cplex.eq(key, nextattr[table.getKeyIdx()])));
