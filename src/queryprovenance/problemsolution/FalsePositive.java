@@ -110,6 +110,7 @@ public class FalsePositive {
 		summarizeIntoRegions(dbhandler, tablename, ds, solutionmap, tupleamt);
 		
 		Complaint pruned = filterByDensity(dbhandler, complaints, comprangemap);
+		System.out.println(pruned.size());
 		return pruned;
 	}
 	

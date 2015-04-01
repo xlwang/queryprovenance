@@ -47,7 +47,8 @@ public class FalsePositiveAll {
 			HashSet<Integer> qidxs, 
 			int startidx, int endidx, 
 			Complaint complaints, 
-			double epsilon, double M) throws Exception {
+			double epsilon, double M,
+			float percentage) throws Exception {
 		Table table = badDss.iterator().next().getTable();
 		// get modified attributes
 		List<String> attrs = new ArrayList<String>();
@@ -103,7 +104,12 @@ public class FalsePositiveAll {
 			// clear solver
 			linearization.clear();
 		}
-		Complaint pruned = filterByDensity(dbhandler, setattrlist, complaints);
+		
+		Complaint pruned;
+		if(percentage > 0) {
+			pruned = filterByDensity2(dbhandler, setattrlist, complaints, percentage);
+		} else {
+			pruned = filterByDensity(dbhandler, setattrlist, complaints);}
 		return pruned;
 	}
 	
@@ -123,8 +129,14 @@ public class FalsePositiveAll {
 	}
 	
 	/* update table T; view V, Contribution based on fix */
-	public static void update(DatabaseHandler dbhandler, DatabaseState pre, DatabaseState next, QueryLog fixedQueries, List<String> attrs, int endidx, SingleComplaint scp) throws Exception {
+	public static void update(DatabaseHandler dbhandler, 
+			DatabaseState pre, DatabaseState next, 
+			QueryLog fixedQueries, 
+			List<String> attrs, int endidx, 
+			SingleComplaint scp) throws Exception {
 		// based on current fixedquery, update table T
+		if(fixedQueries == null)
+			return;
 		DatabaseStates fixedDss = fixedQueries.execute(pre.getTable().toString(), dbhandler); //QueryLog.execute(pre.getTable().toString(), dbhandler);
 		DatabaseState fixedDs = fixedDss.get(endidx);
 		// define query
@@ -147,7 +159,9 @@ public class FalsePositiveAll {
 	}
 	
 	/* find densest complaint set*/
-	public static Complaint filterByDensity(DatabaseHandler dbhandler, String setattrlist, Complaint complaints) throws Exception {
+	public static Complaint filterByDensity(DatabaseHandler dbhandler, 
+			String setattrlist, 
+			Complaint complaints) throws Exception {
 
 		// iteratively find complaint make least contribution, update solutions for the complaint. 
 		Complaint pruned = new Complaint();
@@ -163,7 +177,9 @@ public class FalsePositiveAll {
 			if(rset.next()){
 				edgecount = Integer.valueOf(rset.getString(1));
 				nodecount = Integer.valueOf(rset.getString(2));
-			}	
+			} 
+			if(nodecount < 1)
+				return complaints;
 			double density = edgecount / (nodecount + 0.0) ;
 			int maxind = 0;
 			double maxdensity = density;
@@ -187,6 +203,35 @@ public class FalsePositiveAll {
 			}
 			for(int i = maxind; i < removeorder.size(); ++i) {
 				pruned.add(removeorder.get(i));
+			}
+		} catch(Exception e) {
+			
+		}
+		return pruned;
+	}
+	
+
+	/* find densest complaint set*/
+	public static Complaint filterByDensity2(DatabaseHandler dbhandler, 
+			String setattrlist, 
+			Complaint complaints, 
+			float percentage) throws Exception {
+		
+		int removecount = (int) (complaints.size() * percentage);
+		// iteratively find complaint make least contribution, update solutions for the complaint. 
+		Complaint pruned = complaints.clone();
+		// find complaint with minimum contribution
+		String minquery = "SELECT complaintid, edge, node from contribution order by cont asc limit 1";
+		// update table T
+		String deletequery = "DELETE FROM T where complaintid = ";
+		try {
+			ResultSet current;
+			int removed = 0;
+			while((current = dbhandler.queryExecution(minquery)).next() && removed < removecount) {
+				int key = Integer.valueOf(current.getString(1));
+				pruned.compmap.remove(key);
+				dbhandler.queryExecution(deletequery + key);
+				removed ++;
 			}
 		} catch(Exception e) {
 			

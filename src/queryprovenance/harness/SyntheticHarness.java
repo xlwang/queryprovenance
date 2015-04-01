@@ -70,7 +70,7 @@ public class SyntheticHarness {
 	}
 
 	public void loadConfigParams() throws Exception {
-		String q = "SELECT passtype, optchoice, qfixtype, niterations, epsilon, M, approx, prune, rollbackbatch FROM configs WHERE id = " + cid;
+		String q = "SELECT passtype, optchoice, qfixtype, niterations, epsilon, M, approx, prune, rollbackbatch, p_fp FROM configs WHERE id = " + cid;
 		ResultSet rset = handler.queryExecution(q);
 		rset.next();
 		passtype = rset.getInt(1);
@@ -82,6 +82,7 @@ public class SyntheticHarness {
 		approx = rset.getBoolean(7);
 		prune = rset.getBoolean(8);
 		rollbackbatch = rset.getInt(9);
+		falsepositive = rset.getFloat(10) > 0; 
 		//oneerror = rset.getBoolean(10);
 		//feasible = rset.getBoolean(11);
 		//falsepositive = rset.getBoolean(12);
@@ -126,7 +127,7 @@ public class SyntheticHarness {
 			for (int iterationIdx = 0; iterationIdx < niterations; iterationIdx++) {
 				fixedlog = solver.onePassSolution(cplex, epsilon, M, preproc, feasible, falsepositive, oneerror, options);
 				DatabaseStates fixedds = fixedlog.execute(tableBase, handler);
-				computeMetrics(fixedlog, fixedds, solver, iterationIdx);
+				computeMetrics(fixedlog, fixedds, solver, complaints, iterationIdx);
 
 				// update complaint set
 				Complaint newcmp = new Complaint(cleanDss.get(cleanDss.size()-1), fixedds.get(fixedds.size()-1));
@@ -139,7 +140,7 @@ public class SyntheticHarness {
 		}
 
 		DatabaseStates fixedds = fixedlog.execute(tableBase, handler);
-		computeMetrics(fixedlog, fixedds, solver, 0);
+		computeMetrics(fixedlog, fixedds, solver, complaints, 0);
 
 		System.out.println("finished fixeng");
 		System.out.println(fixedlog);
@@ -148,7 +149,7 @@ public class SyntheticHarness {
 	/*
 	 * @arg iterationIdx in the iterative approach to the onepass algorithm, it runs in multiple passes.  
 	 */
-	public void computeMetrics(QueryLog fixedqlog, DatabaseStates fixedds, Solution solver, int iterationIdx) throws Exception {
+	public void computeMetrics(QueryLog fixedqlog, DatabaseStates fixedds, Solution solver, Complaint complaints, int iterationIdx) throws Exception {
 		Metrics.Index diff = Metrics.compare(dirtyQueries, fixedqlog, 0.1);
 		HashSet<Integer> updated = new HashSet<Integer>();
 
@@ -171,7 +172,8 @@ public class SyntheticHarness {
 				"DEFAULT, %d, %d, %d, %d, %f, %f, '%s', '%s', %f, %f, %f, %f",
 				cid,
 				iterationIdx,
-				metrics.get(Metrics.Type.BADCOMPLAINT).intValue(),
+				//metrics.get(Metrics.Type.BADCOMPLAINT).intValue(),
+				complaints.size(),
 				metrics.get(Metrics.Type.FIXEDCOMPLAINT).intValue(),
 				metrics.get(Metrics.Type.REMOVEDRATE),
 				metrics.get(Metrics.Type.NOISERATE),

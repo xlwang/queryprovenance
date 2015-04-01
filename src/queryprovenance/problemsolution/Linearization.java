@@ -91,6 +91,7 @@ public class Linearization {
 		//IloEvn env;
 		cplex.clearModel();
 		cplex.setParam(IloCplex.IntParam.PrePass, 4);
+		//cplex.setParam(IloCplex.DoubleParam.EpGap, 1e-5);
 		if(!print)
 			cplex.setOut(null);
 		this.clear();
@@ -119,7 +120,6 @@ public class Linearization {
 		// cplex.setParam(IloCplex.IntParam.MIPOrdType, 3);
 		
 		//cplex.addMIPStart(arg0, arg1);
-		
 		boolean solved = cplex.solve();
 	
 		endtime = System.nanoTime();

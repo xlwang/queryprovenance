@@ -105,9 +105,11 @@ public class TableStats {
 	
 	
 	public String randomVal(String attr) {
-		if (num_stats.contains(attr)) {
+		if (num_stats.containsKey(attr)) {
 			int[] colstats = num_stats.get(attr);
-			int val = rand.nextInt(colstats[1] - colstats[0]) + colstats[0];
+			int val = 0;
+			if(colstats[1] - colstats[0] > 0)
+				val = rand.nextInt(colstats[1] - colstats[0]) + colstats[0];
 			return String.valueOf(val);
 		} 
 		List<String> vals = str_stats.get(attr);
