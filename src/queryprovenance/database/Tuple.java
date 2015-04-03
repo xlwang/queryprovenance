@@ -59,4 +59,14 @@ public class Tuple {
 	public String getKey(Table table) {
 		return values[table.getKeyIdx()];
 	}
+	
+	public boolean compare(String[] v) {
+		boolean isSame = true;
+		for(int i = 0; i < values.length; ++i) {
+			isSame &= values[i].equals(v[i]);
+			if(!isSame)
+				return false;
+		}
+		return true;
+	}
 } 

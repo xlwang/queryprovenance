@@ -32,6 +32,14 @@ public class SetClause {
 		return Util.join(set_exprs, ", ");
 	}
 	
+	public List<String> getModifiedAttr() {
+		List<String> attrs = new ArrayList<String>();
+		for(SetExpr expr : set_exprs) {
+			attrs.add(expr.attr.toString());
+		}
+		return attrs;
+	}
+	
 	public static SetClause generate(QueryParams params) {
 		// generate <random col> = <random col> + <random value>
 		Table t = params.from;
@@ -40,7 +48,7 @@ public class SetClause {
 		Random rand = new Random();
 		List<SetExpr> conds = new ArrayList<SetExpr>();
 		HashSet<Integer> selected = new HashSet<Integer>();
-		for (int i = 0; i < 1; i++) {
+		for (int i = 0; i < 2; i++) {
 			int idx = rand.nextInt(ncols);
 			while(idx == t.getKeyIdx() || selected.contains(idx))
 				idx = rand.nextInt(ncols);
@@ -52,7 +60,7 @@ public class SetClause {
 				v = v == 0? v+1 : v;
 				// conds.add(new SetExpr(cols[idx], cols[idx] + "+" + v)); 
 				Expression attr = new VariableExpression(cols[idx], true); 
-				Expression expr = new AdditionExpression(new VariableExpression(cols[idx], true), new VariableExpression(v, false));
+				Expression expr = new VariableExpression(v, false);
 				conds.add(new SetExpr(attr, expr));
 			} else {
 				// TODO: function not supported for STR type

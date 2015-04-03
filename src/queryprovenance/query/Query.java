@@ -34,6 +34,15 @@ public class Query {
 	
 	protected Set<Integer> impact; // get impact of the query; should depend on query log
 	
+	public List<String> getModifiedAttr() {
+		List<String> attrs = new ArrayList<String>();
+		if (type == Type.INSERT || type == Type.DELETE) {
+			attrs.addAll(attr_names);
+		} else if (type == Type.UPDATE) {		
+			attrs = set.getModifiedAttr();
+		}
+		return attrs;
+	}
 	
 	public boolean compare(Query query, double epsilon) {
 		boolean isSame = true;
@@ -156,7 +165,9 @@ public class Query {
 		if (type == Type.INSERT) {
 			l.add("INSERT INTO");
 			l.add(from.toString());
-			l.add("VALUES(" + Util.join(values, ",") + ")"); // XXX: assumes numeric vals 
+			l.add("VALUES(");
+			l.add(Util.join(values, ", "));  //XXX: not exactly right...
+			l.add(")");
 		} else if (type == Type.DELETE) {
 			l.add("DELETE FROM");
 			l.add(from.toString());

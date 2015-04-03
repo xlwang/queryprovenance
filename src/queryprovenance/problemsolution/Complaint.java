@@ -141,6 +141,7 @@ public class Complaint {
 		
 		Complaint ret = c.clone();
 		TableStats stats = TableStats.fromDatabaseState(db);
+		int primarykeyidx = db.getTable().getKeyIdx();
 
 		// remove complaints for false negatives
 		if (fn > 0) {
@@ -163,7 +164,8 @@ public class Complaint {
 			allkeys.addAll(allkeysSet);
 
 			Random rand = new Random();
-			int numPos = (int)(ret.size() * (1 - fp) / fp);
+			//int numPos = (int)(ret.size() * (1 - fp) / fp);
+			int numPos = (int) (ret.size() * fp);
 			String[] schema = db.getColumnNames();
 			for (int i = 0; i < numPos; i++) {
 				Integer key = allkeys.get(i);
@@ -171,8 +173,10 @@ public class Complaint {
 
 				// pick random values for each attribute dictated by the Table statistics
 				for (int colidx = 0; colidx < schema.length; colidx++) {
-					vals[colidx] = stats.randomVal(schema[colidx]);
+					if (colidx != primarykeyidx)
+						vals[colidx] = stats.randomVal(schema[colidx]);
 				}
+				ret.add(key, vals);
 			}
 		}
 				
