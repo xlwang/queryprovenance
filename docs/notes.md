@@ -36,6 +36,28 @@ X Logging
 
 # Mar 25
 
+
+What we have
+
+* Entire log approach
+  * single problem approach and formulation
+    * one pass algorithm 
+      * can't shove every query into the cplex
+  * N problem approach 
+    * fix one query at a time, encode qlog and db
+* Partitioning the log
+  * 2 pass algorithm
+    * rollback the database state
+    * THEN solve query at a time
+  * batch-wise rollback
+* Noise
+  * false negative
+    * studies
+    * multiple iterations
+  * false positive
+    * algorithms
+* sampling
+
 Performance
 
 * reduce the number of constraints
@@ -43,6 +65,7 @@ Performance
 * batch
   * reuse cplex's state to compute feasible value ranges 
     (instead of manually) and use them to implement batching
+* False positivie performance
 
 Base lines
 
@@ -58,6 +81,7 @@ Incremental solutions
 
 * set previous solution as starting solution
 * re-weight queries or predicates based on previous solutions
+
 
 # Mar 23
 
