@@ -12,7 +12,7 @@ import queryprovenance.database.DatabaseState;
 
 public class Complaint {
 	
-	Hashtable<Integer, SingleComplaint> compmap;
+	public Hashtable<Integer, SingleComplaint> compmap;
 	
 	public Complaint() {
 		//complaint_set = new ArrayList<SingleComplaint>();

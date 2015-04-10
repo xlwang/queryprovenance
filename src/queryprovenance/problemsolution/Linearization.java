@@ -1,6 +1,7 @@
 package queryprovenance.problemsolution;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -8,7 +9,9 @@ import java.util.List;
 import ilog.concert.IloConstraint;
 import ilog.concert.IloNumExpr;
 import ilog.concert.IloNumVar;
+import ilog.concert.IloObjective;
 import ilog.cplex.IloCplex;
+import ilog.cplex.IloCplex.ConflictStatus;
 import queryprovenance.database.DatabaseState;
 import queryprovenance.database.DatabaseStates;
 import queryprovenance.database.Table;
@@ -16,7 +19,6 @@ import queryprovenance.database.Tuple;
 import queryprovenance.expression.Expression;
 import queryprovenance.problemsolution.ComplaintRange;
 import queryprovenance.problemsolution.SingleComplaintRange;
-import queryprovenance.problemsolution.SingleComplaintRange.Range;
 import queryprovenance.query.Query;
 import queryprovenance.query.SetClause;
 import queryprovenance.query.SetExpr;
@@ -83,8 +85,9 @@ public class Linearization {
 	public void setSingleFix(boolean sig) {
 		singlefix = sig;
 	}
+	
 	/* solve parameter fix problem: baseline */	
-	public QueryLog fixParameters(IloCplex cplex, Table table, QueryLog badqlog, DatabaseStates badds, Complaint compset, HashSet<Integer> candidate, int startidx, int endidx) throws Exception {
+	public QueryLog fixParameters(IloCplex cplex, Table table, QueryLog badqlog, DatabaseStates badds, Object compset, HashSet<Integer> candidate, int startidx, int endidx) throws Exception {
 		if(print)
 			System.out.println("Start solving : clear model");
 		// clear model
@@ -107,7 +110,18 @@ public class Linearization {
 		long starttime = System.nanoTime();
 		if(print)
 			System.out.println("Start solving : prepare constraints");
-		this.addAll(cplex, constraints, table, qlogfix, badds, compset, true, candidate, startidx, endidx);
+		// process complaint set
+		if (compset instanceof Complaint) {
+			Complaint compsetn = (Complaint)(compset);
+			this.addAll(cplex, constraints, table, qlogfix, badds, compsetn, true, candidate, startidx, endidx);
+		} else if (compset instanceof ComplaintRange) {
+			ComplaintRange compsetr = (ComplaintRange)(compset);
+			this.addAll(cplex, constraints, table, qlogfix, badds, compsetr, true, candidate, startidx, endidx);
+		} else {
+			System.out.println("Invalid complaint set type");
+			return null;
+		}
+		//this.addAll(cplex, constraints, table, qlogfix, badds, compset, true, candidate, startidx, endidx);
 		long endtime = System.nanoTime();
 		times[0] = endtime - starttime;
 		
@@ -187,80 +201,30 @@ public class Linearization {
 	public double getObjValue() {
 		return objvalue;
 	}
-	public Complaint rollBack(IloCplex cplex, Table table, QueryLog qlog, DatabaseStates badds, Complaint compset, int steps, int startidx, int endidx) throws Exception {
+	public ComplaintRange rollBack(IloCplex cplex, Table table, QueryLog qlog, DatabaseStates badds, ComplaintRange compsetr, int steps, int startidx, int endidx) throws Exception {
 		// 
 		if(startidx >= endidx)
-			return compset;
+			return compsetr;
 		if (steps >= (endidx - startidx)) {
-			return rollBack(cplex, table, qlog, badds, compset, startidx, endidx);
+			return rollBack(cplex, table, qlog, badds, compsetr, startidx, endidx);
 		} else {
-			Complaint rolledback = compset;
+			ComplaintRange rolledback = null;
 			for(int i = endidx; i > startidx; i = i - steps) {
 				int preidx = i - steps >= 0 ? i - steps : 0;
-				rolledback = rollBack(cplex, table, qlog, badds, rolledback, preidx, preidx + steps);
+				rolledback = rollBack(cplex, table, qlog, badds, compsetr, preidx, preidx + steps);
 			}
 			return rolledback;
 		}
 	}
 	/* roll back db states*/
-	public Complaint rollBack(IloCplex cplex, Table table, QueryLog qlog, DatabaseStates badds, Complaint compset, int startidx, int endidx) throws Exception {
+	public ComplaintRange rollBack(IloCplex cplex, Table table, QueryLog qlog, DatabaseStates badds, ComplaintRange compsetr, int startidx, int endidx) throws Exception {
 		// clear model
 		cplex.clearModel();
 		this.clear();
-		cplex.setParam(IloCplex.IntParam.PrePass, 4);
+		// cplex.setParam(IloCplex.IntParam.PrePass, 4);
+		cplex.setOut(null);
+		times = new long[3];
 		
-		ArrayList<IloConstraint> constraints = new ArrayList<IloConstraint>();
-		
-		Complaint rollback = new Complaint(); 
-		QueryLog qlogback = new QueryLog();
-		for(int i = 0; i < qlog.size(); ++i) {
-			Query query = qlog.get(i);
-			qlogback.add(query.clone());
-		}
-		
-		// prepare conditions
-		long starttime = System.nanoTime();
-		this.addAll(cplex, constraints, table, qlogback, badds, compset, false, new HashSet<Integer>(), startidx, endidx);
-		long endtime = System.nanoTime();
-		times[0] = endtime - starttime;
-		
-		// solve problem
-		starttime = System.nanoTime();
-		boolean solved = cplex.solve();
-		endtime = System.nanoTime();
-		times[1] = endtime - starttime;
-		
-		// process result
-		starttime = System.nanoTime();
-		if(solved) {
-			// get value for each tuple
-			for(Tuple tuple : rollbackmap.keySet()) {
-				IloNumVar[] vars = rollbackmap.get(tuple); // attribute values
-				String[] values = new String[tuple.size()]; // rollbacked values
-				for(int i = 0; i < vars.length; ++i) {
-					IloNumVar var = vars[i]; // get variable 
-					int digits = (int) Math.pow(10, (double) (String.valueOf(epsilon).length() - String.valueOf(epsilon).lastIndexOf(".") - 1));
-					values[i] = String.valueOf((double) Math.round(cplex.getValue(var)*digits)/digits); // get value
-				}
-				// round key value
-				int keyvalue = (int) Math.round(Double.valueOf(values[table.getKeyIdx()]));
-				rollback.add(keyvalue, values); // update rollback list
-			}	
-		}
-		endtime = System.nanoTime();
-		times[2] = endtime - starttime;
-		
-		// return result
-		return rollback;
-		
-	}
-	
-	/* roll back db states*/
-	public ComplaintRange rollBackToRange(IloCplex cplex, Table table, QueryLog qlog, DatabaseStates badds, Complaint compset, int startidx, int endidx) throws Exception {
-		// clear model
-		cplex.clearModel();
-		this.clear();
-		ArrayList<IloConstraint> constraints = new ArrayList<IloConstraint>();
 		
 		ComplaintRange rollback = new ComplaintRange(); 
 		QueryLog qlogback = new QueryLog();
@@ -268,47 +232,70 @@ public class Linearization {
 			Query query = qlog.get(i);
 			qlogback.add(query.clone());
 		}
-		
-		// prepare conditions
 		long starttime = System.nanoTime();
-		this.addAll(cplex, constraints, table, qlogback, badds, compset, false, new HashSet<Integer>(), startidx, endidx);
-		long endtime = System.nanoTime();
-		times[0] = endtime - starttime;
-		
-		// solve problem
-		starttime = System.nanoTime();
-		boolean solved = cplex.solve();
-		endtime = System.nanoTime();
-		times[1] = endtime - starttime;
-		
-		// process result
-		starttime = System.nanoTime();
-		if(solved) {
-			// get value for each tuple
+		for(SingleComplaintRange scpr : compsetr.compmap.values()) {
+			cplex.clearModel();
+			this.clear();
+			// get current tuple and complaint
+			//int key = Integer.valueOf(tuple.values[table.getKeyIdx()]);
+			//SingleComplaintRange scpr = compsetr.get(key);
+			ComplaintRange current = new ComplaintRange();
+			current.add(scpr);
+			// prepare conditions
+			ArrayList<IloConstraint> constraints = new ArrayList<IloConstraint>();
+			this.addAll(cplex, constraints, table, qlogback, badds, current, false, new HashSet<Integer>(), startidx, endidx);
+			/*
+			double[] weights = new double[constraints.size()];
+			Arrays.fill(weights, 1);
+			IloConstraint[] constraintarry = constraints.toArray(new IloConstraint[constraints.size()]);
+			cplex.refineConflict(constraintarry, weights);
+			ConflictStatus[] conflicts = cplex.getConflict(constraintarry);
+			for(int i = 0; i < conflicts.length; ++i) {
+				System.out.print(conflicts[i]);
+			}*/
+			// process result
+			// starttime = System.nanoTime();
+				// get value for each tuple
+			// define min, max
+			// IloNumVar sum = cplex.numVar(0, M);
+			
 			for(Tuple tuple : rollbackmap.keySet()) {
 				IloNumVar[] vars = rollbackmap.get(tuple); // attribute values
-				Range[] values = new Range[vars.length];
-				for(int i = 0; i < vars.length; ++i) {
-					IloNumVar var = vars[i]; // get variable 
-					values[i].min = var.getLB();
-					values[i].max = var.getUB();
-				}
-				int keyvalue = (int) (Math.round(varmap.get(rollbackmap.get(tuple)[table.getKeyIdx()])));
-				//int keyvalue = (int) (Math.round(kv));
-				// round key value
-				//int keyvalue = (int) Math.round(Double.valueOf(values[table.getKeyIdx()]));
-				rollback.add(new SingleComplaintRange(keyvalue, values)); // update rollback list
-			}	
-		}
-		endtime = System.nanoTime();
-		times[2] = endtime - starttime;
+				// cplex.eq(sum, cplex.sum(sum, cplex.sum(vars)));
 		
+				// solve minimum bound
+				int digits = (int) Math.pow(10, (double) (String.valueOf(epsilon).length() - String.valueOf(epsilon).lastIndexOf(".") - 1));
+				
+				Range[] ranges = new Range[vars.length];
+				for(int i = 0; i < vars.length; ++i) {
+					IloNumVar var = vars[i];
+					IloObjective minobj = cplex.addMinimize(var);
+					boolean minsolved = cplex.solve();
+					ranges[i] = new Range();
+					if(minsolved)
+						ranges[i].min = (double) Math.round(cplex.getValue(var)*digits)/digits;
+					cplex.remove(minobj);
+					
+					IloObjective maxobj = cplex.addMaximize(var);
+					boolean maxsolved = cplex.solve();
+					// starttime = System.nanoTime();
+					if(maxsolved)
+						ranges[i].max = (double) Math.round(cplex.getValue(var)*digits)/digits;
+					cplex.remove(maxobj);
+					
+				}
+				// System.out.print(ranges);
+
+				SingleComplaintRange prescpr = new SingleComplaintRange(Integer.valueOf(tuple.values[table.getKeyIdx()]), ranges);
+				rollback.add(prescpr);
+			}
+		}
+		long endtime = System.nanoTime();
+		times[0] += endtime - starttime;
 		// return result
 		return rollback;
 		
 	}
-	
-	
 	
 	/* construct the problem: add conditions & set objective function */
 	public void addAll(IloCplex cplex, ArrayList<IloConstraint> constraints, Table table, QueryLog badqlog, DatabaseStates badds, Complaint compset, boolean fix, HashSet<Integer> candidate, int startidx, int endidx) throws Exception {
@@ -336,9 +323,33 @@ public class Linearization {
 		
 		//System.out.println("done");
 	}
+	
+	/* construct the problem: add conditions & set objective function */
+	public void addAll(IloCplex cplex, ArrayList<IloConstraint> constraints, Table table, QueryLog badqlog, DatabaseStates badds, ComplaintRange compsetrange, boolean fix, HashSet<Integer> candidate, int startidx, int endidx) throws Exception {
+		// process each complaint in the complaint set
+		//System.out.println(compset.size());
+		for(Integer key : compsetrange.keySet()) {
+			if(key == null) {
+				continue;
+			}
+			// get initial values from state0
+			SingleComplaintRange scpr = compsetrange.get(key);
+			DatabaseState state0 = badds.get(startidx);
+			Tuple tupleinit= state0.getTuple(key);
+			// System.out.println(tuplefinl);
+			// add conditions
+			this.addTuple(cplex, constraints, table, badqlog, tupleinit, scpr, fix, candidate, startidx, endidx);
+		}
+		//System.out.println(compset.size());
+		// add objective function
+		//this.addObjective(cplex, constraints,  table, badds, fix);
+		//this.addModificationSize(cplex, constraints, 1);
+		//System.out.println("done");
+	}
+	
 	public void addModificationSize(IloCplex cplex, ArrayList<IloConstraint> constraints, int k) throws Exception {
-		IloNumVar sumy = cplex.numVar(Double.MIN_VALUE, Double.MAX_VALUE);
-		IloNumVar[] y = cplex.numVarArray(varquerymap.size(), Double.MIN_VALUE, Double.MAX_VALUE);
+		IloNumVar sumy = cplex.numVar(0, M);
+		IloNumVar[] y = cplex.numVarArray(varquerymap.size(), 0, M);
 		int count = 0;
 		for(Query query : varquerymap.keySet()) {
 			ArrayList<IloNumVar> list = varquerymap.get(query); // get list of variables
@@ -358,8 +369,8 @@ public class Linearization {
 		
 		if(fix) {
 			// add objective for fix parameters: minimize the difference from original parameters
-			IloNumVar[] obj = cplex.numVarArray(varmap.size(), Double.MIN_VALUE, Double.MAX_VALUE);
-			
+			IloNumVar[] obj = cplex.numVarArray(varmap.size(), 0, M);
+			cplex.add(obj);
 			int i = 0;
 			//IloNumVar[] variables = new IloNumVar[varmap.size()];
 			//double[] orgvalues = new double[varmap.size()];
@@ -371,11 +382,12 @@ public class Linearization {
 				//System.out.println(exprmap.get(var) + ": " + orgval);
 			}
 			//cplex.addMIPStart(variables, orgvalues);
-			cplex.minimize(cplex.sum(obj));
+			cplex.addMinimize(cplex.sum(obj));
 		} else {
 			// add objective for rollback: maximize the difference from original values
 			int tuplesize = table.getColumns().length;
-			IloNumVar[] obj = cplex.numVarArray(rollbackmap.size() * tuplesize, Double.MIN_VALUE, Double.MAX_VALUE);
+			IloNumVar[] obj = cplex.numVarArray(rollbackmap.size() * tuplesize, 0, M);
+			cplex.add(obj);
 			int count = 0;
 			for(Tuple tuple : rollbackmap.keySet()) {
 				IloNumVar[] vars = rollbackmap.get(tuple); // get variables
@@ -388,7 +400,7 @@ public class Linearization {
 					constraints.add(cplex.addEq(obj[count++], cplex.abs(cplex.sum(var, -orgval)))); // difference
 				}
 			}
-			cplex.minimize(cplex.sum(obj)); // maximize total differences
+			cplex.addMinimize(cplex.sum(obj)); // maximize total differences
 		}
 	}
 	
@@ -398,7 +410,8 @@ public class Linearization {
 		// define initial variables
 		IloNumVar[] preattr = new IloNumVar[table.getColumns().length];
 		for(int i = 0; i < preattr.length; ++i) {
-			preattr[i] = cplex.numVar(Double.MIN_VALUE, Double.MAX_VALUE);
+			preattr[i] = cplex.numVar(0, M);
+			cplex.add(preattr);
 			//constraints.add(preattr[i]);
 		}
 		if(!fix) {
@@ -427,6 +440,42 @@ public class Linearization {
 		//System.out.println(tupleinit.getValue(table.getKeyIdx()) + " : " + cplex.solve());
 	}
 	
+	/* add conditions for each tuple, assign tuple values */
+	public void addTuple(IloCplex cplex, ArrayList<IloConstraint> constraints, Table table, QueryLog qlog, Tuple tupleinit, SingleComplaintRange scpr, boolean fix, HashSet<Integer> candidate, int startidx, int endidx) throws Exception {
+		// tupleinitial is the initial values of the tuple and tuplefinal is the final state values
+		// define initial variables
+		IloNumVar[] preattr = new IloNumVar[table.getColumns().length];
+		for(int i = 0; i < preattr.length; ++i) {
+			preattr[i] = cplex.numVar(0, M);
+			cplex.add(preattr);
+			//constraints.add(preattr[i]);
+		}
+		if(!fix) {
+			rollbackmap.put(tupleinit, preattr);
+		}
+		
+		// add conditions for each query in the query log
+		IloNumVar[] curr = preattr;
+		double keyvalue = Double.valueOf(tupleinit.getValue(table.getKeyIdx())) != Double.MIN_VALUE ? Double.valueOf(tupleinit.getValue(table.getKeyIdx())) : Double.valueOf(scpr.key);
+		for(int i = startidx; i < endidx; ++i) {
+			Query query = qlog.get(i);
+			if(fix && candidate.contains(i)) {
+				curr = this.addConstraint(cplex, constraints, table, query, keyvalue, curr, true);
+			} else {
+				curr = this.addConstraint(cplex, constraints, table, query, keyvalue, curr, false);
+			}
+		}
+		// add constraint for final tuple values based complaints
+		for(int i = 0; i < curr.length; ++i) {
+			if (fix)
+				constraints.add(cplex.addEq(preattr[i], Double.valueOf(tupleinit.getValue(i))));
+			constraints.add(cplex.addGe(curr[i], scpr.values[i].min));
+			constraints.add(cplex.addLe(curr[i], scpr.values[i].max));
+		}
+		//cplex.minimize(cplex.sum(preattr[1], 0));
+		//System.out.println(tupleinit.getValue(table.getKeyIdx()) + " : " + cplex.solve());
+	}
+	
 	/* add conditions by tuple & query */
 	public IloNumVar[] addConstraint(IloCplex cplex, ArrayList<IloConstraint> constraints, Table table, Query query, double key, IloNumVar[] preattr, boolean fix) throws Exception {
 		// option: false: linearize tuple; true: linearize tuple & query
@@ -434,7 +483,9 @@ public class Linearization {
 		SetClause set = query.getSet();
 		List<String> values = query.getValue();
 		IloNumVar x = cplex.numVar(0.0, 1.0);
-		IloNumVar[] nextattr = cplex.numVarArray(preattr.length, Double.MIN_VALUE, Double.MAX_VALUE);
+		IloNumVar[] nextattr = cplex.numVarArray(preattr.length, 0, M);
+		cplex.add(x);
+		cplex.add(nextattr);
 		switch(query.getType()) {
 		case UPDATE:
 			this.addWhere(cplex, query, constraints, where, table, preattr, x, fix); // add conditions for where clause
@@ -462,18 +513,21 @@ public class Linearization {
 		IloNumVar[] vars = new IloNumVar[preattr.length];
 		ArrayList<IloNumVar> list = new ArrayList<IloNumVar>();
 		for(int i = 0; i < table.getColumns().length; ++i) {
-			IloNumVar curattr = cplex.numVar(Double.MIN_VALUE, Double.MAX_VALUE); // initialize current attribute variable
-			IloNumVar insertvalue = cplex.numVar(Double.MIN_VALUE, Double.MAX_VALUE);
-			
+			IloNumVar curattr = cplex.numVar(0, M); // initialize current attribute variable
+			IloNumVar insertvalue = cplex.numVar(0, M);
+			cplex.add(curattr);
+			cplex.add(insertvalue);
 			// linearize
 			// create for previous value
-			IloNumVar pre = cplex.numVar(Double.MIN_VALUE, Double.MAX_VALUE);
+			IloNumVar pre = cplex.numVar(0, M);
+			cplex.add(pre);
 			constraints.add(cplex.addLe(pre, preattr[i]));
 			constraints.add(cplex.addLe(pre, cplex.prod(cplex.diff(1, x), M)));
 			constraints.add(cplex.addGe(pre, cplex.diff(preattr[i], cplex.prod(x, M))));
 			
 			// create for set value
-			IloNumVar next = cplex.numVar(Double.MIN_VALUE, Double.MAX_VALUE);
+			IloNumVar next = cplex.numVar(0, M);
+			cplex.add(next);
 			constraints.add(cplex.addLe(next, insertvalue));
 			constraints.add(cplex.addLe(next, cplex.prod(x, M)));
 			constraints.add(cplex.addGe(next, cplex.diff(insertvalue, cplex.prod(cplex.diff(1, x), M))));
@@ -504,24 +558,26 @@ public class Linearization {
 		// create one variable for the insert query
 		IloNumVar[] nextattr = new IloNumVar[preattr.length];
 		for(int i = 0; i < table.getColumns().length; ++i) {
-			IloNumVar curattr = cplex.numVar(Double.MIN_VALUE, Double.MAX_VALUE); // initialize current attribute variable
+			IloNumVar curattr = cplex.numVar(0, M); // initialize current attribute variable
 			double deletevalue = Double.MIN_VALUE;
-			
+			cplex.add(curattr);
 			// linearize
 			// create for previous value
-			IloNumVar pre = cplex.numVar(Double.MIN_VALUE, Double.MAX_VALUE);
+			IloNumVar pre = cplex.numVar(0, M);
+			cplex.add(pre);
 			constraints.add(cplex.addLe(pre, preattr[i]));
 			constraints.add(cplex.addLe(pre, cplex.prod(cplex.diff(1, x), M)));
 			constraints.add(cplex.addGe(pre, cplex.diff(preattr[i], cplex.prod(x, M))));
 			
 			// create for set value
-			IloNumVar next = cplex.numVar(Double.MIN_VALUE, Double.MAX_VALUE);
+			IloNumVar next = cplex.numVar(0, M);
 			constraints.add(cplex.addLe(next, deletevalue));
 			constraints.add(cplex.addLe(next, cplex.prod(x, M)));
 			constraints.add(cplex.addGe(next, cplex.diff(deletevalue, cplex.prod(cplex.diff(1, x), M))));
 			
 			// add condition
 			constraints.add(cplex.addEq(curattr, cplex.sum(pre, next)));
+			cplex.add(next);
 			nextattr[i] = curattr;
 		}
 		return nextattr;
@@ -533,7 +589,7 @@ public class Linearization {
 		int size = set_exprs.size(); //get set clause cardinality
 		// for each set function
 		IloNumVar[] nextattr = new IloNumVar[preattr.length];
-		
+		cplex.add(nextattr);
 		HashSet<Integer> modifiedset = new HashSet<Integer>();
 		
 		for(int i = 0; i < size; ++i) {
@@ -541,18 +597,18 @@ public class Linearization {
 			Expression setfunc = set_exprs.get(i).getExpr(); // get set function expression
 			int idx = table.getColumnIdx(attr.toString()); // get the index of modified attribute
 			
-			IloNumVar curattr = cplex.numVar(Double.MIN_VALUE, Double.MAX_VALUE); // initialize current attribute variable
+			IloNumVar curattr = cplex.numVar(0, M); // initialize current attribute variable
 			//IloNumExpr setexpr = setfunc.convertExpr(cplex, varmap, exprmap, preattr, table, fix); // get cplex expression
 			IloNumExpr setexpr = setfunc.convertExpr(cplex, varmap, exprmap, varquerymap, query, preattr, table, fix);
 			// linearize
 			// create for previous value
-			IloNumVar pre = cplex.numVar(Double.MIN_VALUE, Double.MAX_VALUE);
+			IloNumVar pre = cplex.numVar(0, M);
 			constraints.add(cplex.addLe(pre, preattr[idx]));
 			constraints.add(cplex.addLe(pre, cplex.prod(cplex.diff(1, x), M)));
 			constraints.add(cplex.addGe(pre, cplex.diff(preattr[idx], cplex.prod(x, M))));
 			
 			// create for set value
-			IloNumVar next = cplex.numVar(Double.MIN_VALUE, Double.MAX_VALUE);
+			IloNumVar next = cplex.numVar(0, M);
 			constraints.add(cplex.addLe(next, setexpr));
 			constraints.add(cplex.addLe(next, cplex.prod(x, M)));
 			constraints.add(cplex.addGe(next, cplex.diff(setexpr, cplex.prod(cplex.diff(1, x), M))));
@@ -564,7 +620,7 @@ public class Linearization {
 		}
 		for(int i = 0; i < preattr.length; ++i) {
 			if(!modifiedset.contains(i)) {
-				nextattr[i] = cplex.numVar(Double.MIN_VALUE, Double.MAX_VALUE);
+				nextattr[i] = cplex.numVar(0, M);
 				constraints.add(cplex.addEq(nextattr[i], preattr[i]));
 			}
 		}
@@ -578,7 +634,7 @@ public class Linearization {
 		int size = where_exprs.size();
 		WhereClause.Op operation = where.getOperator();
 
-		//IloNumVar[] obj = cplex.numVarArray(size, Double.MIN_VALUE, Double.MAX_VALUE);
+		//IloNumVar[] obj = cplex.numVarArray(size, 0, M);
 		
 		// prepare constraints
 		IloConstraint[] cons = new IloConstraint[size];
