@@ -233,6 +233,7 @@ public class Linearization {
 			qlogback.add(query.clone());
 		}
 		long starttime, endtime;
+		// for each complaint
 		for(SingleComplaintRange scpr : compsetr.compmap.values()) {
 			cplex.clearModel();
 			this.clear();
@@ -242,6 +243,7 @@ public class Linearization {
 			// prepare conditions
 			ArrayList<IloConstraint> constraints = new ArrayList<IloConstraint>();
 			starttime = System.nanoTime();
+			// add constraints
 			this.addAll(cplex, constraints, table, qlogback, badds, current, false, new HashSet<Integer>(), startidx, endidx);
 			endtime = System.nanoTime();
 			times[0] += endtime - starttime;
@@ -264,6 +266,7 @@ public class Linearization {
 				// solve minimum bound
 				int digits = (int) Math.pow(10, (double) (String.valueOf(epsilon).length() - String.valueOf(epsilon).lastIndexOf(".") - 1));
 				
+				// solve per attribute
 				Range[] ranges = new Range[vars.length];
 				for(int i = 0; i < vars.length; ++i) {
 					IloNumVar var = vars[i];
@@ -344,15 +347,9 @@ public class Linearization {
 			SingleComplaintRange scpr = compsetrange.get(key);
 			DatabaseState state0 = badds.get(startidx);
 			Tuple tupleinit= state0.getTuple(key);
-			// System.out.println(tuplefinl);
 			// add conditions
 			this.addTuple(cplex, constraints, table, badqlog, tupleinit, scpr, fix, candidate, startidx, endidx);
 		}
-		//System.out.println(compset.size());
-		// add objective function
-		//this.addObjective(cplex, constraints,  table, badds, fix);
-		//this.addModificationSize(cplex, constraints, 1);
-		//System.out.println("done");
 	}
 	
 	public void addModificationSize(IloCplex cplex, ArrayList<IloConstraint> constraints, int k) throws Exception {
@@ -448,9 +445,8 @@ public class Linearization {
 		//System.out.println(tupleinit.getValue(table.getKeyIdx()) + " : " + cplex.solve());
 	}
 	
-	/* add conditions for each tuple, assign tuple values */
+	/* add conditions for each tuple, assign tuple values rollback only */
 	public void addTuple(IloCplex cplex, ArrayList<IloConstraint> constraints, Table table, QueryLog qlog, Tuple tupleinit, SingleComplaintRange scpr, boolean fix, HashSet<Integer> candidate, int startidx, int endidx) throws Exception {
-		// tupleinitial is the initial values of the tuple and tuplefinal is the final state values
 		// define initial variables
 		IloNumVar[] preattr = new IloNumVar[table.getColumns().length];
 		for(int i = 0; i < preattr.length; ++i) {
@@ -458,30 +454,20 @@ public class Linearization {
 			cplex.add(preattr);
 			//constraints.add(preattr[i]);
 		}
-		if(!fix) {
-			rollbackmap.put(tupleinit, preattr);
-		}
+		rollbackmap.put(tupleinit, preattr);
 		
 		// add conditions for each query in the query log
 		IloNumVar[] curr = preattr;
 		double keyvalue = Double.valueOf(tupleinit.getValue(table.getKeyIdx())) != Double.MIN_VALUE ? Double.valueOf(tupleinit.getValue(table.getKeyIdx())) : Double.valueOf(scpr.key);
 		for(int i = startidx; i < endidx; ++i) {
 			Query query = qlog.get(i);
-			if(fix && candidate.contains(i)) {
-				curr = this.addConstraint(cplex, constraints, table, query, keyvalue, curr, true);
-			} else {
-				curr = this.addConstraint(cplex, constraints, table, query, keyvalue, curr, false);
-			}
+			curr = this.addConstraint(cplex, constraints, table, query, keyvalue, curr, false);
 		}
 		// add constraint for final tuple values based complaints
 		for(int i = 0; i < curr.length; ++i) {
-			if (fix)
-				constraints.add(cplex.addEq(preattr[i], Double.valueOf(tupleinit.getValue(i))));
 			constraints.add(cplex.addGe(curr[i], scpr.values[i].min));
 			constraints.add(cplex.addLe(curr[i], scpr.values[i].max));
 		}
-		//cplex.minimize(cplex.sum(preattr[1], 0));
-		//System.out.println(tupleinit.getValue(table.getKeyIdx()) + " : " + cplex.solve());
 	}
 	
 	/* add conditions by tuple & query */
