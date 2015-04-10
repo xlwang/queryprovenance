@@ -58,6 +58,7 @@ public class FalsePositiveAll {
 			double epsilon, double M,
 			float percentage, 
 			long[] time) throws Exception {
+		
 		long solvertime = 0, updatetime = 0, starttime, endtime;
 		// initialize variables
 		HashMap<Integer, ComplaintFix> allcomplaints = new HashMap<Integer, ComplaintFix>();
@@ -137,8 +138,8 @@ public class FalsePositiveAll {
 			pruned = filterByDensity(edgecount, allcomplaints, alltuples, nodelist, sortedcomplaints, complaints);}
 		endtime = System.nanoTime();
 		time[0] += solvertime;
-		time[1] += updatetime;
-		time[2] += endtime - starttime;
+		time[0] += updatetime;
+		time[0] += endtime - starttime;
 		//System.out.println(solvertime + " : " + updatetime + " : " + (endtime - starttime));
 		//System.out.println(complaints.size() + " : " + fixedDssmap.size());
 		return pruned;

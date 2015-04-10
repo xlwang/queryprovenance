@@ -16,6 +16,6 @@ public class Range {
 		return new Range(min, max);
 	}
 	public String toString() {
-		return String.valueOf(min) + "_" + String.valueOf(max);
+		return "(" + String.valueOf(min) + ":" + String.valueOf(max) + ")";
 	}
 }

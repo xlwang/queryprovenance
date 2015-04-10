@@ -77,7 +77,7 @@ public class Solution {
 			boolean prepos, boolean feasible, 
 			boolean falsepositive, int batch, String[] args) throws Exception {
 		// define linear solver
-		times = new long[]{0,0,0,0,0,0,0};
+		times = new long[]{0,0,0,0};
 		Linearization linearsolver = new Linearization(epsilon, M);
 		linearsolver.setPrint(print);
 		
@@ -115,14 +115,13 @@ public class Solution {
 			
 			if(falsepositive) {
 				//starttime = System.nanoTime();
-				long[] fptime = new long[3];
 				pruned = FalsePositiveAll.densityFilter(cplex, handler, badDss, badQueries, curcand, cand, candarray[i], complaints, epsilon, M, -1, times);
 				// times[0] += fptime[1]; // add false positive pruning time into pre-process time
 				qlogfix = linearsolver.fixParameters(cplex, badInitialDs.getTable(), badQueries, badDss, pruned, curcand, cand, badQueries.size()); // start from current candidate state
 			} else {
 				qlogfix = linearsolver.fixParameters(cplex, badInitialDs.getTable(), badQueries, badDss, complaints, curcand, cand, badQueries.size()); // start from current candidate state
 			}
-			for(int j = 4; j < linearsolver.getTime().length + 4; ++j) {
+			for(int j = 1; j < linearsolver.getTime().length + 1; ++j) {
 				times[j] += linearsolver.getTime()[j-4];
 			}
 			if(qlogfix != null) {
@@ -189,7 +188,7 @@ public class Solution {
 			double epsilon, double M, 
 			boolean prepos,
 			int steps, 
-			int startidx, int endidx,
+			int startidx, int endidx, 
 			String[] args) throws Exception {
 		
 		

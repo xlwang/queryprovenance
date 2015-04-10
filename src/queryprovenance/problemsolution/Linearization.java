@@ -232,19 +232,21 @@ public class Linearization {
 			Query query = qlog.get(i);
 			qlogback.add(query.clone());
 		}
-		long starttime = System.nanoTime();
+		long starttime, endtime;
 		for(SingleComplaintRange scpr : compsetr.compmap.values()) {
 			cplex.clearModel();
 			this.clear();
 			// get current tuple and complaint
-			//int key = Integer.valueOf(tuple.values[table.getKeyIdx()]);
-			//SingleComplaintRange scpr = compsetr.get(key);
 			ComplaintRange current = new ComplaintRange();
 			current.add(scpr);
 			// prepare conditions
 			ArrayList<IloConstraint> constraints = new ArrayList<IloConstraint>();
+			starttime = System.nanoTime();
 			this.addAll(cplex, constraints, table, qlogback, badds, current, false, new HashSet<Integer>(), startidx, endidx);
-			/*
+			endtime = System.nanoTime();
+			times[0] += endtime - starttime;
+			
+			/* check infeasibility
 			double[] weights = new double[constraints.size()];
 			Arrays.fill(weights, 1);
 			IloConstraint[] constraintarry = constraints.toArray(new IloConstraint[constraints.size()]);
@@ -253,12 +255,8 @@ public class Linearization {
 			for(int i = 0; i < conflicts.length; ++i) {
 				System.out.print(conflicts[i]);
 			}*/
-			// process result
-			// starttime = System.nanoTime();
-				// get value for each tuple
-			// define min, max
-			// IloNumVar sum = cplex.numVar(0, M);
 			
+			// solve
 			for(Tuple tuple : rollbackmap.keySet()) {
 				IloNumVar[] vars = rollbackmap.get(tuple); // attribute values
 				// cplex.eq(sum, cplex.sum(sum, cplex.sum(vars)));
@@ -269,19 +267,31 @@ public class Linearization {
 				Range[] ranges = new Range[vars.length];
 				for(int i = 0; i < vars.length; ++i) {
 					IloNumVar var = vars[i];
+					// min
+					starttime = System.nanoTime();
 					IloObjective minobj = cplex.addMinimize(var);
 					boolean minsolved = cplex.solve();
+					endtime = System.nanoTime();
+					times[1] += endtime - starttime;
 					ranges[i] = new Range();
+					starttime = System.nanoTime();
 					if(minsolved)
 						ranges[i].min = (double) Math.round(cplex.getValue(var)*digits)/digits;
 					cplex.remove(minobj);
-					
+					endtime = System.nanoTime();
+					times[2] += endtime - starttime;
+					// max
+					starttime = System.nanoTime();
 					IloObjective maxobj = cplex.addMaximize(var);
 					boolean maxsolved = cplex.solve();
-					// starttime = System.nanoTime();
+					endtime = System.nanoTime();
+					times[1] += endtime - starttime;
+				    starttime = System.nanoTime();
 					if(maxsolved)
 						ranges[i].max = (double) Math.round(cplex.getValue(var)*digits)/digits;
 					cplex.remove(maxobj);
+					endtime = System.nanoTime();
+					times[2] += endtime - starttime;
 					
 				}
 				// System.out.print(ranges);
@@ -290,8 +300,6 @@ public class Linearization {
 				rollback.add(prescpr);
 			}
 		}
-		long endtime = System.nanoTime();
-		times[0] += endtime - starttime;
 		// return result
 		return rollback;
 		

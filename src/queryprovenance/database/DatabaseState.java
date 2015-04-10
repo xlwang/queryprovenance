@@ -117,7 +117,8 @@ public class DatabaseState {
 			StringBuffer fmtsb = new StringBuffer();
 			StringBuffer sb = new StringBuffer();
 			sb.append(String.format("CREATE SEQUENCE %s_seq MINVALUE %d;", tablename, this.size()+1));
-			sb.append(String.format("DROP TABLE IF EXISTS %s;", tablename));
+			// sb.append(String.format("DROP TABLE IF EXISTS %s;", tablename));
+			sb.append(String.format("DROP TABLE %s cascade;", tablename));
 			sb.append(String.format("CREATE TABLE IF NOT EXISTS %s (", tablename));
 			for (int colidx = 0; colidx < table.size(); colidx++) {
 				String col = table.getColumnName(colidx);
@@ -136,7 +137,6 @@ public class DatabaseState {
 			
 			List<String> valslist = new ArrayList<String>();
 			String valstmpl = String.format("(%s)", fmtsb.toString());
-			int xx = 0;
 			for (Tuple t : state.values()) {
 				int tuplekey = Integer.valueOf(t.getValue(table.getKeyIdx()));
 				if(compsetr.containsKey(tuplekey)) {
@@ -144,8 +144,6 @@ public class DatabaseState {
 					valslist.add(String.format(valstmpl, (Object[]) values));
 				} else {
 				valslist.add(String.format(valstmpl, (Object[])t.values));
-				xx ++;
-				if (xx > 3) break;
 				}
 			}
 			String sql = String.format("INSERT INTO %s VALUES %s;", tablename, Util.join(valslist, ","));
