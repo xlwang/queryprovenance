@@ -167,7 +167,7 @@ public class Complaint {
 			//int numPos = (int)(ret.size() * (1 - fp) / fp);
 			int numPos = (int) (ret.size() * fp);
 			String[] schema = db.getColumnNames();
-			for (int i = 0; i < numPos; i++) {
+			for (int i = 0; i < numPos && ret.size() < db.getKeySet().size(); i++) {
 				Integer key = allkeys.get(i);
 				String[] vals = db.getTuple(allkeys.get(i)).values.clone();
 
@@ -179,7 +179,6 @@ public class Complaint {
 				ret.add(key, vals);
 			}
 		}
-				
 		return ret;
 	}	
 	

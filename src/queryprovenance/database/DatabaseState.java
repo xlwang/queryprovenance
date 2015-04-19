@@ -117,8 +117,12 @@ public class DatabaseState {
 			StringBuffer fmtsb = new StringBuffer();
 			StringBuffer sb = new StringBuffer();
 			sb.append(String.format("CREATE SEQUENCE %s_seq MINVALUE %d;", tablename, this.size()+1));
+			handler.queryExecution(sb.toString());
+			sb.setLength(0);
 			// sb.append(String.format("DROP TABLE IF EXISTS %s;", tablename));
 			sb.append(String.format("DROP TABLE %s cascade;", tablename));
+			handler.queryExecution(sb.toString());
+			sb.setLength(0);
 			sb.append(String.format("CREATE TABLE IF NOT EXISTS %s (", tablename));
 			for (int colidx = 0; colidx < table.size(); colidx++) {
 				String col = table.getColumnName(colidx);

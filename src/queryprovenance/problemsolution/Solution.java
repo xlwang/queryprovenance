@@ -122,7 +122,7 @@ public class Solution {
 				qlogfix = linearsolver.fixParameters(cplex, badInitialDs.getTable(), badQueries, badDss, complaints, curcand, cand, badQueries.size()); // start from current candidate state
 			}
 			for(int j = 1; j < linearsolver.getTime().length + 1; ++j) {
-				times[j] += linearsolver.getTime()[j-4];
+				times[j] += linearsolver.getTime()[j-1];
 			}
 			if(qlogfix != null) {
 				if(falsepositive) { // pick the fix maintain maximum number of complaints; if the same, consider objective value
