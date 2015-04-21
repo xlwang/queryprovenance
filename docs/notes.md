@@ -34,6 +34,40 @@ TODOs
 X Logging
   X log the query that was changed/fixed
 
+# Apr 20
+
+* Give up on pure rollback  approach -- too difficult, unbounded ranges
+* Try techniques for partitioning the single pass CPLEX problem
+  * view each query as bag of R/W attrs
+  * drag edge between two query's attrs if earlier query writes, later query reads
+  * look for clusters ala correlation clustering
+  * originally was looking for disjoint strongly connected components
+  * similar to what alexandra had wanted to do with tiresias anyways
+
+
+# Apr 15
+
+TODO:
+
+* Enumerate the branches
+* Think about avoid explicitly representing all the branch paths
+
+
+# Apr 10
+
+Done
+
+* Xiaolan implemented rollback only by explicitly computing min and max bounds for 
+  each attribute.  It works well however it computes the min and max of ALL valid bounds
+  that the attr can take e.g., [-inf, 98] even if it' can't take values in [10, 30] 
+
+TODO:
+
+* xiaolan formalize the optimization problem for partitioning the rollback problem
+  * 3 dims: qlog, attrs, and tuples
+* given a partitioning, filter the query log and database to only the problmes that matter
+  this should reduce the time to encode the CPLEX problem
+
 # Mar 25
 
 
