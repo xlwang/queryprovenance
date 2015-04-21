@@ -66,11 +66,16 @@ def count_tuples(db, tname, cwhere, fvar, cb, fb):
   return n
 
 
-def compare_qlogs(db, cid):
+def compare_all_qlogs(db, cid):
   
   cq = "SELECT * FROM qlogs WHERE mode = 'clean'"
   fq = "SELECT * FROM qlogs WHERE mode = 'fixed'"
   dq = "SELECT * FROM qlogs WHERE mode = 'dirty'"
+  compare_qlogs(db, cid, "clean_fixed", cq, fq)
+  compare_qlogs(db, cid, "clean_dirty", cq, dq)
+  compare_qlogs(db, cid, "fixed_dirty", fq, dq)
+
+def compare_qlogs(db, cid, name, qlog1, qlog2):
   q  = """
         SELECT cq.qidx, 
                cq.type,
@@ -90,16 +95,18 @@ def compare_qlogs(db, cid):
               cq.query <> fq.query
         ORDER BY cq.qidx
         """
-  q = q % (cq, fq, cid, cid)
+  q = q % (qlog1, qlog2, cid, cid)
+
   rows = db.execute(q).fetchall()
   for row in rows:
     setd, whered = compare_queries(db, *row)
     if setd:
       print "S", cid, row[0], str(setd)
     if whered:
-      tmpl = "%s\t%s\t%d\t%0.3f\t[%d, %d]\t[%0.2f, %0.2f]"
+      tmpl = "%s\t%s\t%s\t%d\t%0.3f\t[%d, %d]\t[%0.2f, %0.2f]"
       for var, data in whered.items():
         s = tmpl % (
+            name,
             data[0], 
             data[1],
             data[2],
@@ -188,7 +195,7 @@ db = create_engine("postgresql:///queryprov")
 cids = [row[0] for row in db.execute("SELECT distinct cid FROM qlogs").fetchall()]
 for cid in cids:
   sync_cid(db, "postgresql:///queryprov", cid)
-  compare_qlogs(db, cid)
+  compare_all_qlogs(db, cid)
   clean_database_state(db, cid)
 
 
