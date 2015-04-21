@@ -1,22 +1,6 @@
 package queryprovenance.problemsolution;
 
 public class SingleComplaintRange {
-	public class Range {
-		double min, max;
-		
-		public Range() {
-			min = Double.MIN_VALUE;
-			max = Double.MAX_VALUE;
-		}
-		public Range(double min_, double max_) {
-			min = min_;
-			max = max_;
-		}
-		public Range clone() {
-			return new Range(min, max);
-		}
-	}
-	
 	public Integer key;
 	public Range[] values;
 	
@@ -28,6 +12,7 @@ public class SingleComplaintRange {
 	
 	public SingleComplaintRange(SingleComplaint comp) {
 		key = comp.key;
+		values = new Range[comp.values.length];
 		for(int i = 0; i < comp.values.length; ++i) {
 			double value = Double.valueOf(comp.values[i]);
 			values[i] = new Range(value, value);

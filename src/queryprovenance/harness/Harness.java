@@ -164,7 +164,8 @@ public class Harness {
 			case 0: fixedqlog = solver2.onePassSolution(cplex, 0.000001, 10000000, true, false, false, true, options); break;
 			case 1: fixedqlog = solver2.onePassSolution(cplex, 0.000001, 10000000, false, false, false, true, options); break;
 			case 2: fixedqlog = solver2.twoPassSolution(cplex, 0.000001, 10000000, true, false, false, 5, options); break;
-			case 3: fixedqlog = solver2.twoPassSolution(cplex, 0.000001, 10000000, false, false, false, 5, options);
+			case 3: fixedqlog = solver2.twoPassSolution(cplex, 0.000001, 10000000, false, false, false, 5, options); break;
+			case 4: solver2.rollback(cplex, 0.001, 10000000, true, badqlog.size(), 0, badqlog.size(), options); // example
 			}
 			//fixedqlog = solver2.onePassSolution(cplex, handler, fixedds, fixedqlog, complaint, 0.000001, 10000000, updated, true, false, false, options);
 			fixedds = fixedqlog.execute(table.getName(), handler);

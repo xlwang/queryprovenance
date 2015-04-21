@@ -1,4 +1,4 @@
-package queryprovenance.problemsolution;
+package queryprovenance.falsepositive;
 
 import java.sql.ResultSet;
 import java.util.ArrayList;
@@ -10,12 +10,15 @@ import java.util.TreeSet;
 import queryprovenance.database.DatabaseHandler;
 import queryprovenance.database.DatabaseState;
 import queryprovenance.harness.Util;
+import queryprovenance.problemsolution.Complaint;
+import queryprovenance.problemsolution.SingleComplaint;
 import queryprovenance.query.Query;
 import queryprovenance.query.WhereExpr;
 
 /*
  * Density approach for false positives
  */
+@Deprecated
 public class FalsePositive {
 	
 	static final double epsilon = 0.001;

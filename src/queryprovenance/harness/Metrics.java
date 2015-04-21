@@ -123,7 +123,7 @@ public class Metrics {
 	}
 	
 	public static String toString(HashMap<Type, Double> metrics){
-		String out = metrics.get(Type.BADCOMPLAINT) + "," + metrics.get(Type.FIXEDCOMPLAINT) + "," + metrics.get(Type.REMOVEDRATE) + "," + metrics.get(Type.NOISERATE) + ",";
+		String out = metrics.get(Type.FIXEDCOMPLAINT) + "," + metrics.get(Type.REMOVEDRATE) + "," + metrics.get(Type.NOISERATE) + ",";
 		return out;
 	}
 }

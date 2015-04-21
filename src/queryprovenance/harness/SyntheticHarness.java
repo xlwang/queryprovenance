@@ -52,7 +52,7 @@ public class SyntheticHarness {
 	int rollbackbatch;
 	float epsilon, M; 
 	boolean approx, prune;
-	boolean oneerror = true; // true for single error fix. 
+	int batch = 1; // true for single error fix. 
 	boolean print = false; // print cplex solver status
 	boolean feasible = false;
 	boolean falsepositive = false;
@@ -102,6 +102,7 @@ public class SyntheticHarness {
 		String[] options = new String[]{"-M", String.valueOf(solverind) , "-E", "0.1", "-O", "abs"};
 
 		Complaint _complaints = complaints.clone();
+		// _complaints = Complaint.addNoise(_complaints, handler, fp, fn);
 		Solution solver = new Solution(handler, dirtyDss, dirtyQueries, _complaints);
 		boolean preproc = optchoice == 2;
 		boolean usecplex = qfixtype == 1;
@@ -112,10 +113,10 @@ public class SyntheticHarness {
 		DatabaseStates fixeddss = null;
 		switch(passtype) {
 		case 1: // one pass alg
-			fixedlog = solver.onePassSolution(cplex, epsilon, M, preproc, feasible, falsepositive, oneerror, options);
+			fixedlog = solver.onePassSolution(cplex, epsilon, M, preproc, feasible, falsepositive, batch, options);
 			break;
 		case 2: // rollback only
-			fixeddss = solver.rollback(cplex, epsilon, M, preproc, rollbackbatch, options);
+			fixeddss = solver.rollback(cplex, epsilon, M, preproc, rollbackbatch, 0, dirtyQueries.size(), options);
 			break;
 		case 3: // query fix only (no rollback)
 			fixedlog = solver.qfixOnlySolution(cplex, this.cleanDss, epsilon, M, preproc, feasible, falsepositive, rollbackbatch, options);
@@ -125,9 +126,9 @@ public class SyntheticHarness {
 			break;
 		case 5:
 			for (int iterationIdx = 0; iterationIdx < niterations; iterationIdx++) {
-				fixedlog = solver.onePassSolution(cplex, epsilon, M, preproc, feasible, falsepositive, oneerror, options);
+				fixedlog = solver.onePassSolution(cplex, epsilon, M, preproc, feasible, falsepositive, batch, options);
 				DatabaseStates fixedds = fixedlog.execute(tableBase, handler);
-				computeMetrics(fixedlog, fixedds, solver, complaints, iterationIdx);
+				computeMetrics(fixedlog, fixedds, solver, _complaints, iterationIdx);
 
 				// update complaint set
 				Complaint newcmp = new Complaint(cleanDss.get(cleanDss.size()-1), fixedds.get(fixedds.size()-1));
@@ -300,7 +301,7 @@ public class SyntheticHarness {
 		rset = handler.queryExecution(dq);
 		while (rset.next()) {
 			String tname = rset.getString("tname");
-			System.out.println(" " + tname);
+			//System.out.println(" " + tname);
 			DatabaseState ds = new DatabaseState(handler, tname);
 			dss.add(ds);
 		}

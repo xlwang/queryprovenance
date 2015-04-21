@@ -11,6 +11,7 @@ import queryprovenance.database.DatabaseHandler;
 import queryprovenance.database.DatabaseState;
 import queryprovenance.database.DatabaseStates;
 import queryprovenance.database.Table;
+import queryprovenance.falsepositive.FalsePositiveAll;
 import queryprovenance.harness.Metrics;
 
 public class Solution {
@@ -74,7 +75,7 @@ public class Solution {
 	public QueryLog onePassSolution(IloCplex cplex, 
 			double epsilon, double M, 
 			boolean prepos, boolean feasible, 
-			boolean falsepositive, boolean oneerror, String[] args) throws Exception {
+			boolean falsepositive, int batch, String[] args) throws Exception {
 		// define linear solver
 		times = new long[]{0,0,0,0};
 		Linearization linearsolver = new Linearization(epsilon, M);
@@ -82,70 +83,67 @@ public class Solution {
 		
 		long starttime = System.nanoTime();
 		HashSet<Integer> candidate = preprocess(prepos); 
-		times[0] = System.nanoTime() - starttime;
+		times[3] = System.nanoTime() - starttime;
 		// record original number of complaints
 		int complaintsize = complaints.size();
 		Complaint pruned = new Complaint();
 		// solve the problem
 		QueryLog qlogfix = new QueryLog();
 		DatabaseState badInitialDs = badDss.get(0);
-		if(oneerror) {
-			Integer[] candarray = new Integer[candidate.size()];
-			candarray = candidate.toArray(candarray);
-			Arrays.sort(candarray); // sort the candidates, start from last one
-			QueryLog bestfix = null;
-			double bestobjvalue = Double.MAX_VALUE;
-			int bestcoverage = 0;
-			for(int i = candarray.length - 1; i >= 0; --i) {
-				// add candidate set, only include the current query
-				int cand = candarray[i];
-				HashSet<Integer> curcand = new HashSet<Integer>();
-				curcand.add(cand);
-				// prune false positive
-				starttime = System.nanoTime();
-				if(falsepositive) {
-					pruned = FalsePositiveAll.densityFilter(cplex, handler, badDss, badQueries, curcand, cand, badQueries.size(), complaints, epsilon, M, -1);
-					times[0] += System.nanoTime() - starttime; // add false positive pruning time into pre-process time
-					qlogfix = linearsolver.fixParameters(cplex, badInitialDs.getTable(), badQueries, badDss, pruned, curcand, cand, badQueries.size()); // start from current candidate state
-				} else {
-					qlogfix = linearsolver.fixParameters(cplex, badInitialDs.getTable(), badQueries, badDss, complaints, curcand, cand, badQueries.size()); // start from current candidate state
-				}
-				for(int j = 1; j < linearsolver.getTime().length + 1; ++j) {
-					times[j] += linearsolver.getTime()[j-1];
-				}
-				if(qlogfix != null) {
-					if(falsepositive) { // pick the fix maintain maximum number of complaints; if the same, consider objective value
-						System.out.println("query index: " + i + " complaintcount: " + pruned.size() + " objective value: " + linearsolver.getObjValue());
-						if(linearsolver.getObjValue() > 0 && pruned.size() > bestcoverage) {
-							bestfix = qlogfix;
-							bestcoverage = pruned.size();
-							bestobjvalue = linearsolver.getObjValue();
-						} else if (linearsolver.getObjValue() > 0 && pruned.size() == bestcoverage && (linearsolver.getObjValue() < bestobjvalue)) {
-							bestfix = qlogfix;
-							bestobjvalue = linearsolver.getObjValue();
-						}
-					} else { // pick the fix with minimum objective value
-						if(linearsolver.getObjValue() > 0 && (linearsolver.getObjValue() < bestobjvalue)) {
-							bestfix = qlogfix;
-							bestobjvalue = linearsolver.getObjValue();
-						}
+		
+		
+		Integer[] candarray = new Integer[candidate.size()];
+		candarray = candidate.toArray(candarray);
+		Arrays.sort(candarray); // sort the candidates, start from last one
+		QueryLog bestfix = null;
+		double bestobjvalue = Double.MAX_VALUE;
+		int bestcoverage = 0;
+		
+		// prune false positive at a time
+		//if(falsepositive) {
+		//	pruned = FalsePositiveAll.densityFilter(cplex, handler, badDss, badQueries, new HashSet<Integer>(Arrays.asList(candarray)), 0, badQueries.size(), complaints, epsilon, M, -1);
+		//}
+		for(int i = candarray.length - 1; i >= 0; i = i - batch) { // batch of 2
+			// add candidate set, only include the current query
+			int cand = candarray[i];
+			HashSet<Integer> curcand = new HashSet<Integer>();
+			for(int b = 0; b < batch && i - b >= 0; ++b) {
+				curcand.add(candarray[i-b]);
+				cand = i - b;
+			}
+			// prune false positive
+			
+			if(falsepositive) {
+				//starttime = System.nanoTime();
+				pruned = FalsePositiveAll.densityFilter(cplex, handler, badDss, badQueries, curcand, cand, candarray[i], complaints, epsilon, M, -1, times);
+				// times[0] += fptime[1]; // add false positive pruning time into pre-process time
+				qlogfix = linearsolver.fixParameters(cplex, badInitialDs.getTable(), badQueries, badDss, pruned, curcand, cand, badQueries.size()); // start from current candidate state
+			} else {
+				qlogfix = linearsolver.fixParameters(cplex, badInitialDs.getTable(), badQueries, badDss, complaints, curcand, cand, badQueries.size()); // start from current candidate state
+			}
+			for(int j = 1; j < linearsolver.getTime().length + 1; ++j) {
+				times[j] += linearsolver.getTime()[j-1];
+			}
+			if(qlogfix != null) {
+				if(falsepositive) { // pick the fix maintain maximum number of complaints; if the same, consider objective value
+					System.out.println("query index: " + i + " complaintcount: " + pruned.size() + " objective value: " + linearsolver.getObjValue());
+					if(linearsolver.getObjValue() > 0 && pruned.size() > bestcoverage) {
+						bestfix = qlogfix;
+						bestcoverage = pruned.size();
+						bestobjvalue = linearsolver.getObjValue();
+					} else if (linearsolver.getObjValue() > 0 && pruned.size() == bestcoverage && (linearsolver.getObjValue() < bestobjvalue)) {
+						bestfix = qlogfix;
+						bestobjvalue = linearsolver.getObjValue();
+					}
+				} else { // pick the fix with minimum objective value
+					if(linearsolver.getObjValue() > 0 && (linearsolver.getObjValue() < bestobjvalue)) {
+						bestfix = qlogfix;
+						bestobjvalue = linearsolver.getObjValue();
 					}
 				}
 			}
-			qlogfix = bestfix;
-		} else {
-			// prune false positive
-			starttime = System.nanoTime();
-			if(falsepositive) {
-				complaints = FalsePositiveAll.densityFilter(cplex, handler, badDss, badQueries, candidate, 0, badQueries.size(), complaints, epsilon, M, -1);
-			}
-			times[0] += System.nanoTime() - starttime; // add false positive pruning time into pre-process time
-			qlogfix = linearsolver.fixParameters(cplex, badInitialDs.getTable(), badQueries, badDss, complaints, candidate, 0, badQueries.size());
-			// copy time
-			for(int i = 1; i < linearsolver.getTime().length + 1; ++i) {
-				times[i] = linearsolver.getTime()[i-1];
-			}
 		}
+		qlogfix = bestfix;
 
 		if(qlogfix != null)
 			return qlogfix;
@@ -189,7 +187,9 @@ public class Solution {
 	public DatabaseStates rollback(IloCplex cplex, 
 			double epsilon, double M, 
 			boolean prepos,
-			int steps, String[] args) throws Exception {
+			int steps, 
+			int startidx, int endidx, 
+			String[] args) throws Exception {
 		
 		
 		times = new long[]{0,0,0,0};
@@ -210,51 +210,32 @@ public class Solution {
 		DatabaseState badInitialDs = badDss.get(0);
 		Table badInitialTable = badInitialDs.getTable();
 		
-		if(print) {
-		    for(DatabaseState x:badDss) { 
-		        System.out.println(x.getTable().getName());
-		      }
-		  		
-		      for (int cand: candlist) {
-		        System.out.println(" candlist: " + cand);
-		      }
-		}
-		
 		// start the fix
 		DatabaseState[] dss = new DatabaseState[badDss.size()];
 		if(print) System.out.println("dss states: " + badDss.size());
 	    if(print) System.out.println("badq list:  " + badQueries.size());
-		Complaint precompset = complaints;
+		ComplaintRange precompset = new ComplaintRange(complaints);
 		int last = badQueries.size();
-		for(int i = candlist.length - 1; i >= 0; --i) {
+
 			// for each candidate query
-			int idx = candlist[i];
-			if(print) System.out.println("idx: " + idx + " to " + last);
+		if(print) System.out.println("idx: " + startidx + " to " + last);
 
-			Complaint rolledback = linearsolver.rollBack(cplex, badInitialTable, badQueries, badDss, precompset, steps, idx + 0, last);
-			DatabaseState fixedDs = badDss.get(idx).getTrueState(rolledback);
-			if(print) System.out.println(fixedDs.getTable());
-			dss[idx] = fixedDs;
-			
-			// roll forward the database state to recover the rest of the database states
-			QueryLog badQueriesSublist = badQueries.subList(idx, last);
-			String tmptablename = String.format("%s_rollback_%d", badInitialTable.getName(), idx);
-			fixedDs.saveToDatabase(handler, tmptablename);
-			int h = idx+1;
-			if(print)  System.out.println("tmptablename " + tmptablename);
-			for (DatabaseState ds : badQueriesSublist.execute(tmptablename, handler)) {
-				if(print)  System.out.println(" " + h);
-				dss[h-1] = ds;
-				h++;
-			}
+		ComplaintRange rolledback = linearsolver.rollBack(cplex, badInitialTable, badQueries, badDss, precompset, steps, startidx, endidx);
+		
+		
+		DatabaseState fixedDs = badDss.get(startidx).getTrueState(complaints);
+		if(print) System.out.println(fixedDs.getTable());
+		dss[startidx] = fixedDs;
+		
+		// roll forward the database state to recover the rest of the database states
+		QueryLog badQueriesSublist = badQueries.subList(startidx, endidx);
+		String tmptablename = String.format("%s_rollback_%d", badInitialTable.getName(), startidx);
+		fixedDs.saveToDatabase(handler, tmptablename, rolledback);
 
-			// copy time
-			for(int j = 1; j < linearsolver.getTime().length + 1; ++j) 
-				times[j] += linearsolver.getTime()[j-1];
-			
-			last = idx;
-			precompset = rolledback;
-		}
+		// copy time
+		for(int j = 1; j < linearsolver.getTime().length + 1; ++j) 
+			times[j] += linearsolver.getTime()[j-1];
+
 		
 		DatabaseStates fixedDss = new DatabaseStates();
 		for (DatabaseState ds : dss) fixedDss.add(ds);
@@ -295,13 +276,13 @@ public class Solution {
 		ArrayList<QueryLog> fixes = new ArrayList<QueryLog>();
 		
 		// start the fix
-		Complaint precompset = complaints;
+		ComplaintRange precompset = new ComplaintRange(complaints);
 		int last = badQueries.size();
 		for(int i = candlist.length - 1; i >= 0 && !fixed; --i) {
 			// for each candidate query
 			int idx = candlist[i];
 			// rollback
-			Complaint rolledback = linearsolver.rollBack(cplex, badInitialTable, badQueries, badDss, precompset, steps, idx + 1, last);
+			ComplaintRange rolledback = linearsolver.rollBack(cplex, badInitialTable, badQueries, badDss, precompset, steps, idx + 1, last);
 			last = idx;
 			// solve the problem
 			QueryLog curfix = linearsolver.fixParameters(cplex, badInitialTable, badQueries, badDss, rolledback, candidate, idx, idx + 1);
@@ -349,7 +330,7 @@ public class Solution {
 		boolean preprocess = true; // true: do preprocess; false no preprocess
 		boolean feasible = false; // do not relax constraints
 		boolean falsepositive = false; // do not prune false positives
-		boolean oneerror = false;
+		int batch = 1;
 		boolean print = false;
 		int i = 0;
 		while(i < args.length){
@@ -380,7 +361,7 @@ public class Solution {
 				tablename = args[++i];
 				break;
 			case "-ONE": 
-				oneerror = true; i++;
+				//oneerror = true; i++;
 				break;
 			case "-PRINT": 
 				print = true; i++;
@@ -441,7 +422,7 @@ public class Solution {
 		
 		// solve 
 		if(solution == 1) {
-			fixedqlog = solver.onePassSolution(cplex, epsilon, M, preprocess, feasible, falsepositive, oneerror, args);
+			fixedqlog = solver.onePassSolution(cplex, epsilon, M, preprocess, feasible, falsepositive, batch, args);
 		} else {
 			fixedqlog = solver.twoPassSolution(cplex, epsilon, M, preprocess, feasible, falsepositive, steps, args);
 		}
