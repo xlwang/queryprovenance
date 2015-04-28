@@ -48,7 +48,7 @@ public class SetClause {
 		Random rand = new Random();
 		List<SetExpr> conds = new ArrayList<SetExpr>();
 		HashSet<Integer> selected = new HashSet<Integer>();
-		for (int i = 0; i < 2; i++) {
+		for (int i = 0; i < 1; i++) {
 			int idx = rand.nextInt(ncols);
 			while(idx == t.getKeyIdx() || selected.contains(idx))
 				idx = rand.nextInt(ncols);

@@ -10,7 +10,6 @@ import java.util.Set;
 
 import queryprovenance.harness.Util;
 import queryprovenance.problemsolution.Complaint;
-import queryprovenance.problemsolution.ComplaintRange;
 import queryprovenance.problemsolution.SingleComplaint;
 
 public class DatabaseState {
@@ -110,48 +109,6 @@ public class DatabaseState {
 			}
 			String sql = String.format("INSERT INTO %s VALUES %s;", tablename, Util.join(valslist, ","));
 			System.out.println(sql);
-			handler.queryExecution(sql);
-		}
-		
-		public void saveToDatabase(DatabaseHandler handler, String tablename, ComplaintRange compsetr) throws Exception {
-			StringBuffer fmtsb = new StringBuffer();
-			StringBuffer sb = new StringBuffer();
-			sb.append(String.format("CREATE SEQUENCE %s_seq MINVALUE %d;", tablename, this.size()+1));
-			handler.queryExecution(sb.toString());
-			sb.setLength(0);
-			// sb.append(String.format("DROP TABLE IF EXISTS %s;", tablename));
-			sb.append(String.format("DROP TABLE %s cascade;", tablename));
-			handler.queryExecution(sb.toString());
-			sb.setLength(0);
-			sb.append(String.format("CREATE TABLE IF NOT EXISTS %s (", tablename));
-			for (int colidx = 0; colidx < table.size(); colidx++) {
-				String col = table.getColumnName(colidx);
-				
-				fmtsb.append("'%s'");
-				sb.append(String.format("%s text", col));
-				
-				if (colidx < table.size()-1) {
-					fmtsb.append(", ");
-					sb.append(", ");
-				}
-			}
-			sb.append(");");
-			handler.queryExecution(sb.toString());
-			//System.out.println(sb.toString());
-			
-			List<String> valslist = new ArrayList<String>();
-			String valstmpl = String.format("(%s)", fmtsb.toString());
-			for (Tuple t : state.values()) {
-				int tuplekey = Integer.valueOf(t.getValue(table.getKeyIdx()));
-				if(compsetr.containsKey(tuplekey)) {
-					String[] values = compsetr.get(tuplekey).toString().split(",");
-					valslist.add(String.format(valstmpl, (Object[]) values));
-				} else {
-				valslist.add(String.format(valstmpl, (Object[])t.values));
-				}
-			}
-			String sql = String.format("INSERT INTO %s VALUES %s;", tablename, Util.join(valslist, ","));
-			//System.out.println(sql);
 			handler.queryExecution(sql);
 		}
 		

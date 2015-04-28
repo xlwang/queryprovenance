@@ -10,6 +10,7 @@ import java.util.List;
 
 import queryprovenance.database.Table;
 import queryprovenance.query.Query;
+import queryprovenance.solve.varQuery;
 
 public class VariableExpression extends Expression{
 	String name;
@@ -64,20 +65,16 @@ public class VariableExpression extends Expression{
 	public double Evaluate(){
 		if(value == Double.MAX_VALUE)
 			throw new IllegalArgumentException("must set Variable: " + name);
-		else if (value == value.intValue())
-			return value.intValue();
-		return value;
+		else
+			return value;
 	}
 	
 	/* to string*/
 	public String toString(){
 		if(isTrue)
 			return name;
-		else {
-			if (value == value.intValue())
-				return String.valueOf(value.intValue());
+		else
 			return String.valueOf(value);
-		}
 	}
 
 	/* get variable*/
@@ -88,10 +85,18 @@ public class VariableExpression extends Expression{
 	}
 	
 	/* get unassigned variable */
-	public List<Expression> getUnassignedVariable(){
-		List<Expression> list = new ArrayList<Expression>();
+	public List<VariableExpression> getUnassignedVariable(){
+		List<VariableExpression> list = new ArrayList<VariableExpression>();
 		if(!isTrue)
 			list.add(this);
+		return list;
+	}
+	
+	/* get unassigned variable */
+	public List<String> getAssignedVariable(){
+		List<String> list = new ArrayList<String>();
+		if(isTrue)
+			list.add(this.name);
 		return list;
 	}
 	
@@ -121,12 +126,8 @@ public class VariableExpression extends Expression{
 	
 	/* evaluate assigned part */
 	public double getAssignedEval() {
-		if(isTrue) {
-			if (value != null && value == value.intValue()) {
-				return value.intValue();
-			}
+		if(isTrue)
 			return value;
-		}
 		else
 			return 0;
 	}
@@ -135,6 +136,10 @@ public class VariableExpression extends Expression{
 	public void setName(Expression ex, String name_){
 		if(ex.equals(this))
 			this.name = name_;
+	}
+	
+	public double getValue() {
+		return this.value;
 	}
 	
 	/* clone variable */
@@ -232,6 +237,34 @@ public class VariableExpression extends Expression{
 		expr = cplex.sum(para, 0);
 		return expr;
 	}
+
+	@Override
+	public IloNumExpr convertExpr(IloCplex cplex, HashMap<String, Integer> attrs,
+			IloNumVar[] prestate, HashMap<VariableExpression, varQuery> varQMap, boolean fix)
+			throws Exception {
+		IloNumVar para;
+		// check if the current variable is in the varQMap
+		if (varQMap.containsKey(this)) {
+			// current query in the variable map: 
+			 varQuery var = varQMap.get(this);
+			 if (fix && var.fixedval == Double.MAX_VALUE) {
+				 var.incurrentcycle = true;
+			 } else if (var.fixedval != Double.MAX_VALUE){
+				 cplex.addEq(var.var, var.fixedval);
+			 } else {
+				 cplex.addEq(var.var, this.value);
+			 }
+			 return cplex.sum(var.var, 0);
+		} else {
+			// current variable expression is an attribute
+			if(attrs.containsKey(this.name)) {
+				return cplex.sum(prestate[attrs.get(this.name)], 0);
+			} else {
+				return null;
+			}
+		}
+	}
+
 
 
 }

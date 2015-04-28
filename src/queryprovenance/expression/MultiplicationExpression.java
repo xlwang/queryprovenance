@@ -9,6 +9,7 @@ import java.util.HashMap;
 
 import queryprovenance.database.Table;
 import queryprovenance.query.Query;
+import queryprovenance.solve.varQuery;
 
 public class MultiplicationExpression extends OperationExpression{
 
@@ -75,4 +76,19 @@ public class MultiplicationExpression extends OperationExpression{
 		IloNumExpr current = cplex.prod(leftexpr, rightexpr);
 		return current;
 	}
+	
+	@Override
+	public IloNumExpr convertExpr(IloCplex cplex,
+			HashMap<String, Integer> attrs, IloNumVar[] prestate,
+			HashMap<VariableExpression, varQuery> varQMap, boolean fix) throws Exception {
+		IloNumExpr rightexpr = super.right.convertExpr(cplex, attrs, prestate, varQMap, fix);
+		IloNumExpr leftexpr = super.left.convertExpr(cplex, attrs, prestate, varQMap, fix);
+		if(rightexpr == null || leftexpr == null) {
+			return null;
+		} else {
+			IloNumExpr current = cplex.prod(leftexpr, rightexpr);
+			return current;
+		}
+	}
+	
 }

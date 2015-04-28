@@ -10,6 +10,7 @@ import java.util.List;
 
 import queryprovenance.database.Table;
 import queryprovenance.query.Query;
+import queryprovenance.solve.varQuery;
 /**
  * 
  * @author xlwang
@@ -47,7 +48,9 @@ public abstract class Expression {
 	
 	public abstract List<Expression> getVariable(); // get all VariableExressions
 	
-	public abstract List<Expression> getUnassignedVariable(); // get all VariableExpression that do not have assigned value. List of variables to solve in SetExpr or WhereExpr
+	public abstract List<VariableExpression> getUnassignedVariable(); // get all VariableExpression that do not have assigned value. List of variables to solve in SetExpr or WhereExpr
+	
+	public abstract List<String> getAssignedVariable();
 	
 	public abstract boolean containsVar(Expression ex); // check whether given VariableExpression is included
 	
@@ -66,6 +69,8 @@ public abstract class Expression {
 	public abstract void fixExpression(HashMap<IloNumVar, Double> fixedmap, HashMap<Expression, IloNumVar> expressionmap) throws Exception;
 	
 	public abstract IloNumExpr convertExpr(IloCplex cplex, HashMap<IloNumVar, Double> varmap, HashMap<Expression, IloNumVar> exprmap, HashMap<Query, ArrayList<IloNumVar>> varquerymap, Query query, IloNumVar[] preattribute, Table table, boolean option) throws Exception;
+	
+	public abstract IloNumExpr convertExpr(IloCplex cplex, HashMap<String, Integer> attrs, IloNumVar[] prestate, HashMap<VariableExpression, varQuery> varQMap, boolean fix) throws Exception;
 	
 	public abstract boolean compare(Expression expr);
 	/* return Expression type */

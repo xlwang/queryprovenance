@@ -1,6 +1,7 @@
 package queryprovenance.query;
 
 import ilog.concert.IloNumVar;
+import ilog.cplex.IloCplex;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,10 +12,13 @@ import java.util.Set;
 import queryprovenance.database.DatabaseState;
 import queryprovenance.database.Table;
 import queryprovenance.expression.Expression;
+import queryprovenance.expression.VariableExpression;
 import queryprovenance.harness.QueryParams;
 import queryprovenance.harness.Util;
 import queryprovenance.problemsolution.Complaint;
 import queryprovenance.problemsolution.QueryLog;
+import queryprovenance.solve.varQuery;
+import queryprovenance.solve.varX;
 
 
 public class Query {
@@ -29,8 +33,10 @@ public class Query {
 	protected SetClause set;
 	protected Table from;
 	protected WhereClause where;
-	protected List<String> values; // values for INSERT query
+	protected List<VariableExpression> values; // values for INSERT query
 	protected List<String> attr_names; // attribute names for INSERT query
+	
+	public List<VariableExpression> variables = new ArrayList<VariableExpression>();
 	
 	protected Set<Integer> impact; // get impact of the query; should depend on query log
 	
@@ -44,14 +50,91 @@ public class Query {
 		return attrs;
 	}
 	
+	/** Function querySAT: return query satisfactory information for a given tuple
+	 *  Update & Delete query: whether each expression in the where clause is satisfied or not
+	 *  Insert query: whether insert query is conducted, always true 
+	 * @throws Exception */
+	public HashMap<String, varX> querySAT(IloCplex cplex, String[] values) throws Exception {
+		HashMap<String, varX> varXList = new HashMap<String, varX>();
+		if(where != null) {
+			for(WhereExpr whereexpr : where.getWhereExprs()) {
+				// for each where expression
+				// set value for each attribute
+				Expression leftexpr = whereexpr.getAttrExpr();
+				Expression rightexpr = whereexpr.getVarExpr();
+				for(int i = 0; i < from.getColumns().length; ++i) {
+					String attr = from.getColumnName(i);
+					leftexpr.setVariable(attr, Double.valueOf(values[i]));
+					rightexpr.setVariable(attr, Double.valueOf(values[i]));
+				}
+				double left = leftexpr.Evaluate();
+				double right = rightexpr.Evaluate();
+				boolean sat = true;
+				switch (whereexpr.getOperator()) {
+				case g:
+					sat = left > right;
+					break;
+				case l:
+					sat = left < right;
+				case ge:
+					sat = left >= right;
+					break;
+				case le:
+					sat = left <= right;
+					break;
+				case eq:
+					sat = left == right;
+					break;
+				case ne:
+					sat = left != right;
+					break;
+				}
+				varX x = new varX(cplex, whereexpr.toString(), sat == true ? 1 : 0);
+				varXList.put(whereexpr.toString(), x);
+			}
+		}
+		return varXList;
+	}
+	
+	/** Function getSetAttr: return attributes that are changed by the current query */
+	public HashSet<String> getSetAttr() {
+		HashSet<String> setattrs = new HashSet<String>();
+		if(set != null) {
+			for(SetExpr setexpr : set.getSetExprs()) {
+				setattrs.addAll(setexpr.attrs);
+			}
+		}
+		if(values != null && values.size() > 0) {
+			for(String attr : from.getColumns()) {
+				setattrs.add(attr);
+			}
+		}
+		return setattrs;
+	}
+	/** Function getWhereAttr: return attributes that are included in the current query where clause */
+	public HashSet<String> getWhereAttr() {
+		HashSet<String> whereattrs = new HashSet<String>();
+		if(where != null) {
+			for(WhereExpr whereexpr : where.getWhereExprs()) {
+				whereattrs.addAll(whereexpr.attrs);
+			}
+		}
+		return whereattrs;
+	}
+	
+	public List<VariableExpression> getVariable() {
+		return variables;
+	}
+	
+	
 	public boolean compare(Query query, double epsilon) {
 		boolean isSame = true;
 		if(type == Query.Type.INSERT) {
 			// compare list of values
 			isSame &= values.size() == query.values.size();
 			for(int i = 0; isSame && i < values.size(); ++i) {
-				Double cur = Double.valueOf(values.get(i));
-				Double qval = Double.valueOf(query.values.get(i));
+				Double cur = Double.valueOf(values.get(i).getValue());
+				Double qval = Double.valueOf(query.values.get(i).getValue());
 				isSame &= Math.abs(cur - qval) < epsilon;
 			}
 		} else {
@@ -103,14 +186,14 @@ public class Query {
 			where.fix(fixedmap, expressionmap);
 	}
 	
-	public void fixInsert(HashMap<IloNumVar, Double> fixedmap, HashMap<List<String>, IloNumVar[]> insrtmap) throws Exception {
+	public void fixInsert(HashMap<IloNumVar, Double> fixedmap, HashMap<List<VariableExpression>, IloNumVar[]> insrtmap) throws Exception {
 		if(insrtmap.containsKey(this.values)) {
 			IloNumVar[] vars = insrtmap.get(this.values);
-			List<String> temp = new ArrayList<String>();
+			List<VariableExpression> temp = new ArrayList<VariableExpression>();
 			for(int i = 0; i < vars.length; ++i) {
 				IloNumVar var = vars[i];
 				Double corval = fixedmap.get(var);
-				temp.add(String.valueOf(corval));
+				temp.add(new VariableExpression(String.valueOf(corval), false));
 			}
 			this.values = temp;
 		}
@@ -124,6 +207,13 @@ public class Query {
 		this.from = from;
 		this.where = where;
 		this.type = type_;
+		// update variable expressions
+		for(SetExpr setexpr : set.getSetExprs()) {
+			variables.addAll(setexpr.getExpr().getUnassignedVariable());
+		}
+		for(WhereExpr wherexpr : where.getWhereExprs()) {
+			variables.addAll(wherexpr.getVarExpr().getUnassignedVariable());
+		}
 	}
 	// For DELETE query
 	public Query(int id, Table from, WhereClause where, Query.Type type_){
@@ -132,6 +222,10 @@ public class Query {
 		this.from = from;
 		this.where = where;
 		this.type = type_;
+		
+		for(WhereExpr wherexpr : where.getWhereExprs()) {
+			variables.addAll(wherexpr.getVarExpr().getUnassignedVariable());
+		}
 	}
 	
 	// insert query constructor
@@ -139,7 +233,11 @@ public class Query {
 		this.id = id;
 		this.type = Type.INSERT;
 		this.from = from;
-		this.values = values;
+		// this.values = values;
+		for(String value : values) {
+			VariableExpression variable = new VariableExpression(Double.valueOf(value), false);
+			variables.add(variable);
+		}
 	}
 	
 	/* initialization */
@@ -150,6 +248,13 @@ public class Query {
 		this.from = from;
 		this.where = where;
 		this.type = type;
+		
+		for(SetExpr setexpr : set.getSetExprs()) {
+			variables.addAll(setexpr.getExpr().getUnassignedVariable());
+		}
+		for(WhereExpr wherexpr : where.getWhereExprs()) {
+			variables.addAll(wherexpr.getVarExpr().getUnassignedVariable());
+		}
 	}
 	
 	
@@ -166,7 +271,7 @@ public class Query {
 			l.add("INSERT INTO");
 			l.add(from.toString());
 			l.add("VALUES(");
-			l.add(Util.join(values, ", "));  //XXX: not exactly right...
+			l.add(Util.join(variables, ", "));  //XXX: not exactly right...
 			l.add(")");
 		} else if (type == Type.DELETE) {
 			l.add("DELETE FROM");
@@ -290,11 +395,14 @@ public class Query {
 	
 	/* set values for insert query */
 	public void setValue(List<String> values) {
-		this.values = values;
+		variables.clear();
+		for(String value : values) {
+			variables.add(new VariableExpression(Double.valueOf(value), false));
+		}
 	}
 	
 	/* get values for insert query */
-	public List<String> getValue(){
+	public List<VariableExpression> getValue(){
 		return this.values;
 	}
 	

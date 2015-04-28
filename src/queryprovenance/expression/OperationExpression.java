@@ -29,10 +29,18 @@ public abstract class OperationExpression extends Expression{
 	}
 	
 	/* get all unassigned variable expressions (variable expressions that are suppose to be fixed) */
-	public List<Expression> getUnassignedVariable(){
-		List<Expression> list = new ArrayList<Expression>();
+	public List<VariableExpression> getUnassignedVariable(){
+		List<VariableExpression> list = new ArrayList<VariableExpression>();
 		list.addAll(this.left.getUnassignedVariable());
 		list.addAll(this.right.getUnassignedVariable());
+		return list;
+	}
+	
+	/* get all assigned variable expressions (variable expressions that are suppose to be fixed) */
+	public List<String> getAssignedVariable(){
+		List<String> list = new ArrayList<String>();
+		list.addAll(this.left.getAssignedVariable());
+		list.addAll(this.right.getAssignedVariable());
 		return list;
 	}
 	

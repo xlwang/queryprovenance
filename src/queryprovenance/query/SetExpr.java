@@ -3,6 +3,7 @@ package queryprovenance.query;
 import ilog.concert.IloNumVar;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -18,11 +19,13 @@ public class SetExpr {
 
 	protected Expression attr;
 	protected Expression expr;
-	
+	public HashSet<String> attrs = new HashSet<String>();
 	
 	public SetExpr(Expression attr_, Expression expr_){
 		this.attr = attr_;
 		this.expr = expr_; 
+		attrs.addAll(attr.getAssignedVariable());
+		attrs.addAll(expr.getAssignedVariable());
 	}
 	
 	public String toString(){
