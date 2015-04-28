@@ -37,12 +37,19 @@ public class Linearization {
 	private Complaint complaints; // complaints
 	private Table table; // table
 
+	private double objective = 0;
 	public HashMap<VariableExpression, varQuery> varQMap; // query variable map
 	private HashMap<SingleComplaint, ArrayList<HashMap<String, varX>>> varXMap; // complaint-where
 																				// clause
 																				// satisfactory
 																				// conditions
 																				// map
+	private HashSet<Integer> queryToFix;
+	public HashSet<varQuery> currentVar;
+	public HashSet<varX> currentX;
+
+	private int solvedvar = 0, remain = 0;
+	public boolean stop = false;
 
 	private Boolean[] queryStatus; // query status: true, already processed;
 									// false otherwise
@@ -73,10 +80,15 @@ public class Linearization {
 	 *            complaint-where clause satisfactory conditions map
 	 * 
 	 * */
-	public Linearization(double epsilon_, double M_, DatabaseStates badDss_,
-			QueryLog fixedQueries_, Complaint complaints_,
+	public Linearization(
+			double epsilon_,
+			double M_,
+			DatabaseStates badDss_,
+			QueryLog fixedQueries_,
+			Complaint complaints_,
 			HashMap<VariableExpression, varQuery> varQMap_,
-			HashMap<SingleComplaint, ArrayList<HashMap<String, varX>>> varXMap_) {
+			HashMap<SingleComplaint, ArrayList<HashMap<String, varX>>> varXMap_,
+			HashSet<Integer> queryToFix_) {
 		epsilon = epsilon_;
 		M = M_;
 		digits = (int) Math.pow(10, (double) (String.valueOf(epsilon).length()
@@ -85,13 +97,19 @@ public class Linearization {
 		fixedQueries = fixedQueries_;
 		complaints = complaints_;
 		table = badDss.get(0).getTable();
-		varQMap = varQMap_;
-		varXMap = varXMap_;
+		varQMap = clonevarQMap(varQMap_);
+		varXMap = clonevarXMap(varXMap_);
 		queryStatus = new Boolean[fixedQueries.size()];
 		for (int i = 0; i < queryStatus.length; ++i) {
 			queryStatus[i] = false;
 		}
 		constraints.clear();
+		queryToFix = queryToFix_;
+		// update remaining variables to solve
+		remain = 0;
+		for (int i : queryToFix) {
+			remain += fixedQueries.get(i).getVariable().size();
+		}
 	}
 
 	/**
@@ -105,9 +123,12 @@ public class Linearization {
 		cplex.clearModel();
 		cplex.setParam(IloCplex.IntParam.PrePass, 4);
 		cplex.setParam(IloCplex.DoubleParam.TiLim, TIMELIMTI);
+		cplex.setWarning(null);
 		if (!print)
 			cplex.setOut(null);
 		constraints.clear();
+		currentVar = new HashSet<varQuery>();
+		currentX = new HashSet<varX>();
 	}
 
 	/**
@@ -133,12 +154,10 @@ public class Linearization {
 	 * @param times
 	 *            execution time
 	 * */
-	public void fixParameters(IloCplex cplex, List<String> currAttrs,
-			int batchsize, long[] times) throws Exception {
-		// prepare variables
-		double bestobjval = Double.MAX_VALUE;
-		HashMap<VariableExpression, varQuery> bestvars = null;
-		HashMap<SingleComplaint, ArrayList<HashMap<String, varX>>> bestvarxs = null;
+	public HashMap<VariableExpression, varQuery> fixParameters(IloCplex cplex,
+			List<String> currAttrs, long[] times, int startidx)
+			throws Exception {
+
 		// time variable
 		long starttime = 0, endtime = 0;
 		// add constraints
@@ -146,87 +165,76 @@ public class Linearization {
 		for (int i = 0; i < currAttrs.size(); ++i) {
 			attrs.put(currAttrs.get(i), i);
 		}
-		for (int i = 0; i < fixedQueries.size(); i = i + batchsize) {
-			// prepare: clean model
-			if (print)
-				System.out.println("Start solving : clear model");
-			// clear model
-			this.clear(cplex);
+		// prepare: clean model
+		if (print)
+			System.out.println("Start solving : clear model");
+		// clear model
+		this.clear(cplex);
 
-			// decide the end current processing index
-			starttime = System.nanoTime();
-			int endidx = fixedQueries.size() > i + batchsize ? i + batchsize
-					: fixedQueries.size();
-			// create current variable map and current variable X map
-			HashMap<VariableExpression, varQuery> curvars = clonevarQMap(varQMap);
-			HashMap<SingleComplaint, ArrayList<HashMap<String, varX>>> curxs = clonevarXMap(varXMap);
-			IloNumExpr objpart1 = addConstraints(cplex, attrs, curvars, curxs,
-					i, endidx);
+		// decide the end current processing index
+		starttime = System.nanoTime();
+		// create current variable map and current variable X map
+		IloNumExpr objpart1 = addConstraints(cplex, attrs, startidx);
 
-			// add objective function
-			IloNumExpr objpart2 = addObjective(cplex, curvars);
-			IloObjective maxobj = cplex.addMinimize(cplex.sum(objpart1,
-					objpart2));
-			endtime = System.nanoTime();
-			times[1] += endtime - starttime;
+		// add objective function
+		IloNumExpr objpart2 = addObjective(cplex);
+		// IloObjective maxobj = cplex.addMinimize(cplex.sum(objpart1,
+		// objpart2));
+		IloObjective maxobj = cplex.addMinimize(objpart2);
+		endtime = System.nanoTime();
+		times[1] += endtime - starttime;
 
-			// solve
-			starttime = System.nanoTime();
-			boolean solved = cplex.solve();
-			endtime = System.nanoTime();
-			times[2] += endtime - starttime;
+		// solve
+		starttime = System.nanoTime();
+		boolean solved = cplex.solve();
+		endtime = System.nanoTime();
+		times[2] += endtime - starttime;
+		// System.out.println(endtime -starttime);
 
-			// process result
-			starttime = System.nanoTime();
-			if (solved) {
-				// compare objective value
-				double objval = cplex.getObjValue();
-				if (objval < bestobjval) {
-					bestobjval = objval;
-					bestvars = curvars;
-					bestvarxs = curxs;
-					// get fixed value
-					for (varQuery var : bestvars.values()) {
-						if (var.incurrentcycle) {
-							var.incurrentcycle = false;
-							var.fixedval = (double) Math.round(cplex
-									.getValue(var.var) * digits)
-									/ digits;
-						}
-					}
-					// solve value for each complaint
-					for (SingleComplaint scp : curxs.keySet()) {
-						ArrayList<HashMap<String, varX>> scpcurxs = curxs
-								.get(scp);
-						int count = 0;
-						for (HashMap<String, varX> querycurxs : scpcurxs) {
-							if (queryStatus[count++]) {
-								for (varX var : querycurxs.values()) {
-									if (var.solvedval == -1) {
-										var.solvedval = (double) Math
-												.round(cplex.getValue(var.var)
-														* digits)
-												/ digits;
-										// System.out.println(scp + ":" +
-										// var.expr + " :" + var.solvedval);
-									}
-								}
-							}
-						}
+		// process result
+		starttime = System.nanoTime();
+
+		if (solved) {
+
+			// get fixed value
+
+			for (varQuery var : currentVar) {
+				var.fixedval = (double) Math.round(cplex.getValue(var.var)
+						* digits)
+						/ digits;
+				objective += Math.abs(var.fixedval - var.expr.getValue());
+				// System.out.println(var.expr + ":" + var.fixedval);
+			}
+			solvedvar += currentVar.size();
+			if (solvedvar < remain && attrs.size() < table.getColumns().length) {
+
+				// solve value for each complaint
+				for (varX x : currentX) {
+					if (x.solvedval == -1) {
+						double sat = (double) Math.round(cplex.getValue(x.var)
+								* digits)
+								/ digits;
+						x.solvedval = sat == 1 ? 1.0 : 0.0;
+						// System.out.println(
+						// x.expr + " : " + x.solvedval);
 					}
 				}
+			} else {
+				stop = true;
 			}
-			cplex.remove(maxobj);
-			endtime = System.nanoTime();
-			times[3] += endtime - starttime;
 		}
-		// save the best solution with minimum objective value
-		if (bestvars != null && bestvarxs != null) {
-			// update query variable map
-			varQMap = bestvars;
-			// update varX variable map
-			varXMap = bestvarxs;
+		endtime = System.nanoTime();
+		times[3] += endtime - starttime;
+		cplex.remove(maxobj);
+		if (solved) {
+			return varQMap;
+		} else {
+			return null;
 		}
+	}
+
+	public double getObjective() {
+		return objective;
 	}
 
 	/**
@@ -235,14 +243,11 @@ public class Linearization {
 	 * 
 	 * @param cplex
 	 *            IloCplex
-	 * @param curVars
-	 *            current variable map
 	 */
-	public IloNumExpr addObjective(IloCplex cplex,
-			HashMap<VariableExpression, varQuery> curvars) throws Exception {
+	public IloNumExpr addObjective(IloCplex cplex) throws Exception {
 		IloNumExpr vardiff = cplex.numVar(Double.MIN_VALUE, Double.MAX_VALUE);
 		ArrayList<IloNumExpr> difflist = new ArrayList<IloNumExpr>();
-		for (varQuery var : curvars.values()) {
+		for (varQuery var : varQMap.values()) {
 			if (var.incurrentcycle && var.fixedval == Double.MAX_VALUE) {
 				difflist.add(cplex.abs(cplex.diff(var.var, var.expr.getValue())));
 			}
@@ -259,70 +264,62 @@ public class Linearization {
 	 *            IloCplex
 	 * @param attr
 	 *            attribute-index map
-	 * @param varQMap
-	 *            variable map
-	 * @param varXMap
-	 *            complaint-where clause satisfactory conditions map
-	 * @param startidx
-	 *            start query index to fix
-	 * @param endidx
-	 *            end query index to fix
+	 * @param queryToFix
+	 *            list of queries to fix
 	 * @throws Exception
 	 */
 	public IloNumExpr addConstraints(IloCplex cplex,
-			HashMap<String, Integer> attrs,
-			HashMap<VariableExpression, varQuery> varQMap,
-			HashMap<SingleComplaint, ArrayList<HashMap<String, varX>>> varXMap,
-			int startidx, int endidx) throws Exception {
+			HashMap<String, Integer> attrs, int startidx) throws Exception {
 
 		// add constraints
 		IloNumExpr compldiff;
 		ArrayList<IloNumExpr> difflist = new ArrayList<IloNumExpr>();
+		// get proceed information
+		boolean[] proceed = new boolean[fixedQueries.size()];
+		for (int i = startidx; i < fixedQueries.size(); ++i) {
+			proceed[i] = false;
+			Query query = fixedQueries.get(i);
+			// if current query already considered or set attribute in the
+			// current currAttrs set
+			for (String attr : query.getWhereAttr()) {
+				if (attrs.containsKey(attr)) {
+					proceed[i] |= true;
+					break;
+				}
+			}
+			proceed[i] &= this.queryStatus[i];
+			for (String attr : query.getSetAttr()) {
+				if (attrs.containsKey(attr)) {
+					proceed[i] |= true;
+					this.queryStatus[i] = true;
+					break;
+				}
+			}
+		}
+		// start processing
 		for (SingleComplaint scp : complaints.compmap.values()) {
 			// create initial variable list
 			IloNumVar[] prestate = cplex.numVarArray(attrs.size(),
 					Double.MIN_VALUE, Double.MAX_VALUE);
 			IloNumVar[] nextstate = prestate;
-			for (int i = 0; i < fixedQueries.size(); ++i) {
+			for (int i = startidx; i < fixedQueries.size(); ++i) {
 				// get current query
 				Query query = fixedQueries.get(i);
-				// if current query already considered or set attribute in the
-				// current currAttrs set
-				boolean proceed = this.queryStatus[i];
-				for (String attr : query.getSetAttr()) {
-					if (attrs.containsKey(attr))
-						proceed |= true;
-					if (proceed)
-						break;
-				}
-				this.queryStatus[i] |= proceed;
-				if (!proceed) {
+				if (!proceed[i]) {
 					// skip current query
 					continue;
 				}
 				// check if query is in the current fix range
-				boolean fix = i >= startidx && i < endidx;
+				boolean fix = queryToFix.contains(i);
 				nextstate = addTuplePerQuery(cplex, query, nextstate, scp,
-						attrs, varQMap, varXMap.get(scp).get(i), fix);
-				// add objective value
-				int index = 0;
-				for (varX var : varXMap.get(scp).get(i).values()) {
-					if (var.solvedval == -1) {
-						// when current variable is not solved yet
-						difflist.add(cplex.abs(cplex.diff(var.var, var.origval)));
-					} else {
-						// add constraints on processed varX
-						double solvedval = var.solvedval > 0.5 ? 1 : 0;
-						constraints.add(cplex.addEq(var.var, solvedval));
-					}
-				}
+						attrs, varXMap.get(scp).get(i), fix, difflist);
 			}
 			// get initial value and final value for the current complaint
-			String[] initialval = badDss.get(0).getTuple(scp.key).values;
+			String[] initialval = badDss.get(startidx).getTuple(scp.key).values;
 			String[] finalval = scp.values;
 			// add corresponding constraints
-			addEqCondition(cplex, varQMap, attrs, prestate, initialval);
-			addEqCondition(cplex, varQMap, attrs, nextstate, finalval);
+			addEqCondition(cplex, attrs, prestate, initialval);
+			addEqCondition(cplex, attrs, nextstate, finalval);
 		}
 		IloNumExpr[] list = difflist.toArray(new IloNumExpr[difflist.size()]);
 		compldiff = cplex.sum(list);
@@ -333,10 +330,8 @@ public class Linearization {
 	 * Function addEqCondition : add equivalent constraints on initial database
 	 * state and final correct database state
 	 */
-	public void addEqCondition(IloCplex cplex,
-			HashMap<VariableExpression, varQuery> varQMap,
-			HashMap<String, Integer> attrs, IloNumVar[] varary, String[] values)
-			throws Exception {
+	public void addEqCondition(IloCplex cplex, HashMap<String, Integer> attrs,
+			IloNumVar[] varary, String[] values) throws Exception {
 		// for each variable
 		for (String attr : attrs.keySet()) {
 			int varidx = attrs.get(attr);
@@ -366,29 +361,29 @@ public class Linearization {
 	 */
 	public IloNumVar[] addTuplePerQuery(IloCplex cplex, Query query,
 			IloNumVar[] prestate, SingleComplaint scp,
-			HashMap<String, Integer> attrs,
-			HashMap<VariableExpression, varQuery> varQMap,
-			HashMap<String, varX> scpvarXMap, boolean fix) throws Exception {
+			HashMap<String, Integer> attrs, HashMap<String, varX> scpvarXMap,
+			boolean fix, ArrayList<IloNumExpr> difflist) throws Exception {
 		// define next database states
 		IloNumVar[] nextstate = null;
 		IloNumVar X = cplex.numVar(0, 1);
 		// decide actions for current query
 		switch (query.getType()) {
 		case UPDATE:
-			this.addWhere(cplex, query.getWhere(), X, prestate, attrs, varQMap,
-					scpvarXMap, fix); // add conditions for where clause
+			this.addWhere(cplex, query.getWhere(), X, prestate, attrs,
+					scpvarXMap, fix, difflist); // add conditions for where
+												// clause
 			nextstate = this.addSet(cplex, query.getSet(), X, prestate, attrs,
-					varQMap, scpvarXMap, fix);
+					scpvarXMap, fix);
 			break;
 		case INSERT:
 			nextstate = this.addOther(cplex, query, X, prestate, attrs,
-					varQMap, scpvarXMap, fix);
+					scpvarXMap, fix);
 			break;
 		case DELETE:
-			this.addWhere(cplex, query.getWhere(), X, prestate, attrs, varQMap,
-					scpvarXMap, fix);
+			this.addWhere(cplex, query.getWhere(), X, prestate, attrs,
+					scpvarXMap, fix, difflist);
 			nextstate = this.addOther(cplex, query, X, prestate, attrs,
-					varQMap, scpvarXMap, fix);
+					scpvarXMap, fix);
 			break;
 		default:
 			break;
@@ -399,7 +394,6 @@ public class Linearization {
 	/** Function addOther : add constraints for Insert query and Delete query */
 	public IloNumVar[] addOther(IloCplex cplex, Query query, IloNumVar X,
 			IloNumVar[] prestate, HashMap<String, Integer> attrs,
-			HashMap<VariableExpression, varQuery> varQMap,
 			HashMap<String, varX> scpvarXMap, boolean fix) throws Exception {
 		// create one variable for the insert query
 		IloNumVar[] nextstate = cplex.numVarArray(prestate.length,
@@ -410,8 +404,11 @@ public class Linearization {
 			if (query.getType() == Query.Type.DELETE) {
 				constraints.add(cplex.addEq(nextvalue, NOTEXIST));
 			} else {
-				nextvalue = query.getValue().get(idx)
-						.convertExpr(cplex, attrs, prestate, varQMap, fix);
+				nextvalue = query
+						.getValue()
+						.get(idx)
+						.convertExpr(cplex, attrs, prestate, varQMap,
+								currentVar, fix);
 			}
 			// linearize
 			// create for previous value
@@ -437,7 +434,6 @@ public class Linearization {
 	/** Function addSet : add constraints for set clause */
 	public IloNumVar[] addSet(IloCplex cplex, SetClause set, IloNumVar X,
 			IloNumVar[] prestate, HashMap<String, Integer> attrs,
-			HashMap<VariableExpression, varQuery> varQMap,
 			HashMap<String, varX> scpvarXMap, boolean fix) throws Exception {
 		List<SetExpr> setexprs = set.getSetExprs();
 		IloNumVar[] nextstate = cplex.numVarArray(prestate.length,
@@ -446,15 +442,15 @@ public class Linearization {
 		for (int i = 0; i < setexprs.size(); ++i) {
 			// get attribute modified by current set function
 			SetExpr setexpr = setexprs.get(i);
-			Expression attr = setexpr.getAttr(); 
+			Expression attr = setexpr.getAttr();
 			// get set function expression
-			Expression setfunc = setexpr.getExpr(); 
+			Expression setfunc = setexpr.getExpr();
 			if (attrs.containsKey(attr.toString())) {
 				// get the index of modified attribute
-				int idx = attrs.get(attr.toString()); 
+				int idx = attrs.get(attr.toString());
 
 				IloNumExpr nextvalue = setfunc.convertExpr(cplex, attrs,
-						prestate, varQMap, fix);
+						prestate, varQMap, currentVar, fix);
 				// create for previous value
 				IloNumVar pre = cplex
 						.numVar(Double.MIN_VALUE, Double.MAX_VALUE);
@@ -495,8 +491,8 @@ public class Linearization {
 	/** Function addWhere : add constraints for where clause */
 	public void addWhere(IloCplex cplex, WhereClause where, IloNumVar X,
 			IloNumVar[] prestate, HashMap<String, Integer> attrs,
-			HashMap<VariableExpression, varQuery> varQMap,
-			HashMap<String, varX> scpvarXMap, boolean fix) throws Exception {
+			HashMap<String, varX> scpvarXMap, boolean fix,
+			ArrayList<IloNumExpr> difflist) throws Exception {
 		List<WhereExpr> whereexprs = where.getWhereExprs();
 		IloConstraint[] cons = new IloConstraint[scpvarXMap.size()];
 		for (int i = 0; i < whereexprs.size(); ++i) {
@@ -507,9 +503,9 @@ public class Linearization {
 				if (attrs.containsKey(attr)) {
 					// consider current where expression
 					IloNumExpr left = whereexpr.getAttrExpr().convertExpr(
-							cplex, attrs, prestate, varQMap, fix);
+							cplex, attrs, prestate, varQMap, currentVar, fix);
 					IloNumExpr right = whereexpr.getVarExpr().convertExpr(
-							cplex, attrs, prestate, varQMap, fix);
+							cplex, attrs, prestate, varQMap, currentVar, fix);
 					WhereExpr.Op op = whereexpr.getOperator();
 					IloNumExpr condition = null;
 					switch (op) {
@@ -537,6 +533,17 @@ public class Linearization {
 				}
 			}
 			cons[i] = cplex.eq(x.var, 1);
+			// currentX.add(x);
+			// add objective value
+			if (x.solvedval == -1) {
+				// when current variable is not solved yet
+				difflist.add(cplex.abs(cplex.diff(x.var, x.origval)));
+				currentX.add(x);
+			} else {
+				// add constraints on processed varX
+				double solvedval = x.solvedval == 1 ? 1 : 0;
+				constraints.add(cplex.addEq(x.var, solvedval));
+			}
 		}
 		if (where.getOperator().equals(WhereClause.Op.CONJ)) {
 			// every condition must satisfy 'isTrue' value

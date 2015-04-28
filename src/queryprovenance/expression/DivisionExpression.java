@@ -6,6 +6,7 @@ import ilog.cplex.IloCplex;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import queryprovenance.database.Table;
 import queryprovenance.query.Query;
@@ -73,9 +74,10 @@ public class DivisionExpression extends OperationExpression{
 	@Override
 	public IloNumExpr convertExpr(IloCplex cplex,
 			HashMap<String, Integer> attrs, IloNumVar[] prestate,
-			HashMap<VariableExpression, varQuery> varQMap, boolean fix) throws Exception {
-		IloNumExpr rightexpr = super.right.convertExpr(cplex, attrs, prestate, varQMap, fix);
-		IloNumExpr leftexpr = super.left.convertExpr(cplex, attrs, prestate, varQMap, fix);
+			HashMap<VariableExpression, varQuery> varQMap, 
+			HashSet<varQuery> currentVar, boolean fix) throws Exception {
+		IloNumExpr rightexpr = super.right.convertExpr(cplex, attrs, prestate, varQMap, currentVar, fix);
+		IloNumExpr leftexpr = super.left.convertExpr(cplex, attrs, prestate, varQMap, currentVar, fix);
 		if(rightexpr == null || leftexpr == null) {
 			return null;
 		} else {

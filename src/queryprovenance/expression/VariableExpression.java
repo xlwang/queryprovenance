@@ -6,6 +6,7 @@ import ilog.cplex.IloCplex;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 import queryprovenance.database.Table;
@@ -240,15 +241,16 @@ public class VariableExpression extends Expression{
 
 	@Override
 	public IloNumExpr convertExpr(IloCplex cplex, HashMap<String, Integer> attrs,
-			IloNumVar[] prestate, HashMap<VariableExpression, varQuery> varQMap, boolean fix)
+			IloNumVar[] prestate, HashMap<VariableExpression, varQuery> varQMap, 
+			HashSet<varQuery> currentVar, boolean fix)
 			throws Exception {
-		IloNumVar para;
 		// check if the current variable is in the varQMap
 		if (varQMap.containsKey(this)) {
 			// current query in the variable map: 
 			 varQuery var = varQMap.get(this);
 			 if (fix && var.fixedval == Double.MAX_VALUE) {
 				 var.incurrentcycle = true;
+				 currentVar.add(var);
 			 } else if (var.fixedval != Double.MAX_VALUE){
 				 cplex.addEq(var.var, var.fixedval);
 			 } else {

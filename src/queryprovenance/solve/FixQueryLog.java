@@ -3,7 +3,9 @@ package queryprovenance.solve;
 import ilog.cplex.IloCplex;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 import queryprovenance.database.DatabaseHandler;
@@ -12,6 +14,7 @@ import queryprovenance.database.DatabaseStates;
 import queryprovenance.expression.VariableExpression;
 import queryprovenance.harness.Metrics;
 import queryprovenance.problemsolution.Complaint;
+import queryprovenance.problemsolution.PreProcess;
 import queryprovenance.problemsolution.QueryLog;
 import queryprovenance.problemsolution.SingleComplaint;
 import queryprovenance.query.Query;
@@ -100,45 +103,90 @@ public class FixQueryLog {
 		times = new long[4];
 		// define initial database state
 		DatabaseState badInitialDs = badDss.get(0);
-		// define linearization solver
-		Linearization linearization = new Linearization(epsilon, M, badDss,
-				fixedQueries, complaints, varQMap, varXMap);
-		linearization.setPrint(print);
 		// define attribute provenance
 		long starttime = System.nanoTime();
 		AttributeProvenance attrprov = new AttributeProvenance(fixedQueries);
 		long endtime = System.nanoTime();
 		// record time
 		times[0] += endtime - starttime;
-		int processed = 0;
-		while (processed < attrprov.sortedAttributes.size()) {
-			// solve for current attributes
-			linearization.fixParameters(cplex, attrprov.sortedAttributes
-					.subList(processed,
-							processed + attrcount < attrprov.sortedAttributes
-									.size() ? processed + attrcount
-									: attrprov.sortedAttributes.size()),
-					batchsize, times);
-			// add processed
-			processed += attrcount;
+		// divide the problem by batches
+		HashSet<varQuery> bestfix = null;
+		double bestobj = Double.MAX_VALUE;
+		// preprocess the querylog
+		HashSet<Integer> candidate = preprocess(true); 
+		Integer[] sortedcandidate = new Integer[candidate.size()];
+		sortedcandidate = candidate.toArray(sortedcandidate);
+		Arrays.sort(sortedcandidate); 
+		for(int i = sortedcandidate.length - 1; i >= 0; i = i - batchsize) { // batch of 2
+			// add candidate set, only include the current query
+			int startidx = sortedcandidate[i];
+			HashSet<Integer> queryToFix = new HashSet<Integer>();
+			for(int j = 0; j < batchsize && i - j >= 0; ++j) {
+				queryToFix.add(sortedcandidate[i-j]);
+				startidx = sortedcandidate[i - j];
+			}
+			// define linearization solver
+			Linearization linearization = new Linearization(epsilon, M, badDss,
+					fixedQueries, complaints, varQMap, varXMap, queryToFix);
+			linearization.setPrint(print);
+		
+			// divide problem by attribute
+			int processed = 0;
+			HashMap<VariableExpression, varQuery> current = null;
+			while (processed < attrprov.sortedAttributes.size()) {
+				// solve for current attributes
+				int attrsnum = processed + attrcount < attrprov.sortedAttributes
+						.size() ? processed + attrcount
+						: attrprov.sortedAttributes.size();
+				current = linearization.fixParameters(cplex, attrprov.sortedAttributes
+						.subList(processed, attrsnum),
+						times, startidx);
+				// add processed
+				processed += attrcount;
+				if(current == null || linearization.stop) {
+					break;
+				}
+			}
+			// check if current fix is valid
+			if(current != null && linearization.getObjective() < bestobj) {
+				bestfix = linearization.currentVar;
+				bestobj = linearization.getObjective();
+				//break;
+			}
+			//System.out.print(i + " ");
 		}
-		// finish all the attributes, solve remaining unsolved variables
-		// linearization.fixParameters(cplex, attrprov.sortedAttributes,
-		// batchsize, times);
-		// final process
-		varQMap = linearization.varQMap;
+		//System.out.println();
 		starttime = System.nanoTime();
-		updateFix();
+		if(bestfix != null)
+			updateFix(bestfix);
 		endtime = System.nanoTime();
 		times[3] += endtime - starttime;
+		// finish all the attributes, solve remaining unsolved variables
 		return fixedQueries;
 	}
-
-	/** Function updateFix : update fixed query log */
-	public void updateFix() {
-		for (VariableExpression variable : varQMap.keySet()) {
-			variable.setVariable(variable, varQMap.get(variable).fixedval);
+	
+	public HashSet<Integer> preprocess(boolean preproc) {
+		HashSet<Integer> candidate = new HashSet<Integer>();
+		//preprocess queries
+		if(preproc) {
+			PreProcess pre = new PreProcess();
+			candidate.addAll(pre.findCandidate(badDss, fixedQueries, complaints));
+		} 
+		if(!preproc || candidate.size() == 0) {
+			for(int i = 0; i < fixedQueries.size(); ++i)
+				candidate.add(i);
 		}
+		return candidate;
+	}
+	
+	public void updateFix(HashSet<varQuery> bestfix) {
+		for(varQuery var : bestfix) {
+			if(var.fixedval != Double.MAX_VALUE)
+				var.expr.setVariable(var.expr, var.fixedval);
+		} 
+	}
+	public long[] getTime() {
+		return this.times;
 	}
 
 }

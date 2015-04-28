@@ -43,6 +43,9 @@ public class AttributeProvenance {
 					attrs.add(attr);
 				}
 			}
+			if(sortedAttributes.size() == query.getTable().getColumns().length) {
+				break;
+			}
 		}
 		// sortedAttributes.add("age");sortedAttributes.add("tax");sortedAttributes.add("employeeid");//sortedAttributes.add("tax");
 	}

@@ -6,6 +6,7 @@ import ilog.cplex.IloCplex;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 import queryprovenance.database.Table;
@@ -70,7 +71,7 @@ public abstract class Expression {
 	
 	public abstract IloNumExpr convertExpr(IloCplex cplex, HashMap<IloNumVar, Double> varmap, HashMap<Expression, IloNumVar> exprmap, HashMap<Query, ArrayList<IloNumVar>> varquerymap, Query query, IloNumVar[] preattribute, Table table, boolean option) throws Exception;
 	
-	public abstract IloNumExpr convertExpr(IloCplex cplex, HashMap<String, Integer> attrs, IloNumVar[] prestate, HashMap<VariableExpression, varQuery> varQMap, boolean fix) throws Exception;
+	public abstract IloNumExpr convertExpr(IloCplex cplex, HashMap<String, Integer> attrs, IloNumVar[] prestate, HashMap<VariableExpression, varQuery> varQMap, HashSet<varQuery> currentVar, boolean fix) throws Exception;
 	
 	public abstract boolean compare(Expression expr);
 	/* return Expression type */
