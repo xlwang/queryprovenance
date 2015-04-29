@@ -34,6 +34,17 @@ TODOs
 X Logging
   X log the query that was changed/fixed
 
+# Apr 29
+
+New algorithm
+
+* On large query logs, reduces the number of queries used in the cplex problem, faster for > 500 queries
+  * asked to add
+* new alogrithm places an implicit ordering on the SET/WHERE clauses we try to fix first, so places a bias on what we will fix
+  * Asked xiaolan to come up with a degenerate example that highlights this bias
+* There is also a bias to prefer WHERE clauses since we encode it as binary (1 satisfied/0 unsatisfied), whereas the SET clause is an integer.  Need to normalize their value ranges since objective function is SUM of distance
+
+
 # Apr 20
 
 * Give up on pure rollback  approach -- too difficult, unbounded ranges
