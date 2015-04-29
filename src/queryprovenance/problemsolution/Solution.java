@@ -14,6 +14,7 @@ import queryprovenance.database.Table;
 import queryprovenance.falsepositive.FalsePositiveAll;
 import queryprovenance.harness.Metrics;
 
+/** @deprecated*/
 public class Solution {
 	static final String gqlogname = "gqlog"; // filename for good query log
 	static final String bqlogname = "bqlog"; // filename for bad query log
@@ -109,13 +110,13 @@ public class Solution {
 			HashSet<Integer> curcand = new HashSet<Integer>();
 			for(int b = 0; b < batch && i - b >= 0; ++b) {
 				curcand.add(candarray[i-b]);
-				cand = i - b;
+				cand = candarray[i - b];
 			}
 			// prune false positive
 			
 			if(falsepositive) {
 				//starttime = System.nanoTime();
-				pruned = FalsePositiveAll.densityFilter(cplex, handler, badDss, badQueries, curcand, cand, candarray[i], complaints, epsilon, M, -1, times);
+				pruned = FalsePositiveAll.densityFilter(cplex, handler, badDss, badQueries, curcand, cand, candarray[i] + 1, complaints, epsilon, M, -1, times);
 				// times[0] += fptime[1]; // add false positive pruning time into pre-process time
 				qlogfix = linearsolver.fixParameters(cplex, badInitialDs.getTable(), badQueries, badDss, pruned, curcand, cand, badQueries.size()); // start from current candidate state
 			} else {
@@ -126,7 +127,7 @@ public class Solution {
 			}
 			if(qlogfix != null) {
 				if(falsepositive) { // pick the fix maintain maximum number of complaints; if the same, consider objective value
-					System.out.println("query index: " + i + " complaintcount: " + pruned.size() + " objective value: " + linearsolver.getObjValue());
+					//System.out.println("query index: " + i + " complaintcount: " + pruned.size() + " objective value: " + linearsolver.getObjValue());
 					if(linearsolver.getObjValue() > 0 && pruned.size() > bestcoverage) {
 						bestfix = qlogfix;
 						bestcoverage = pruned.size();
@@ -137,18 +138,22 @@ public class Solution {
 					}
 				} else { // pick the fix with minimum objective value
 					if(linearsolver.getObjValue() > 0 && (linearsolver.getObjValue() < bestobjvalue)) {
+						//System.out.println("query index: " + i + "  complaintcount: " + complaints.size() + " objective value: " + linearsolver.getObjValue());
 						bestfix = qlogfix;
 						bestobjvalue = linearsolver.getObjValue();
+						
 					}
 				}
 			}
 		}
 		qlogfix = bestfix;
 
-		if(qlogfix != null)
+		if(qlogfix != null) {
 			return qlogfix;
-		else
+		} else {
+			System.out.print("infeasible");
 			return badQueries;
+		}
 	}
 	
 	/*
@@ -178,261 +183,6 @@ public class Solution {
 			return curfix;
 					
 		return badQueries;
-	}
-	
-	
-
-	
-	/* solve by two passes: cplex or decision tree */
-	public DatabaseStates rollback(IloCplex cplex, 
-			double epsilon, double M, 
-			boolean prepos,
-			int steps, 
-			int startidx, int endidx, 
-			String[] args) throws Exception {
-		
-		
-		times = new long[]{0,0,0,0};
-		// define linear solver
-		Linearization linearsolver = new Linearization(epsilon, M);
-		
-		// preprocess
-		long starttime = System.nanoTime();
-		HashSet<Integer> candidate = preprocess(prepos);
-		times[0] = System.nanoTime() - starttime;
-				
-		// sort the candidate queries. start from last one
-		Integer[] candlist = new Integer[candidate.size()];
-		candlist = candidate.toArray(candlist);
-		Arrays.sort(candlist);
-		
-		
-		DatabaseState badInitialDs = badDss.get(0);
-		Table badInitialTable = badInitialDs.getTable();
-		
-		// start the fix
-		DatabaseState[] dss = new DatabaseState[badDss.size()];
-		if(print) System.out.println("dss states: " + badDss.size());
-	    if(print) System.out.println("badq list:  " + badQueries.size());
-		ComplaintRange precompset = new ComplaintRange(complaints);
-		int last = badQueries.size();
-
-			// for each candidate query
-		if(print) System.out.println("idx: " + startidx + " to " + last);
-
-		ComplaintRange rolledback = linearsolver.rollBack(cplex, badInitialTable, badQueries, badDss, precompset, steps, startidx, endidx);
-		
-		
-		DatabaseState fixedDs = badDss.get(startidx).getTrueState(complaints);
-		if(print) System.out.println(fixedDs.getTable());
-		dss[startidx] = fixedDs;
-		
-		// roll forward the database state to recover the rest of the database states
-		QueryLog badQueriesSublist = badQueries.subList(startidx, endidx);
-		String tmptablename = String.format("%s_rollback_%d", badInitialTable.getName(), startidx);
-		fixedDs.saveToDatabase(handler, tmptablename, rolledback);
-
-		// copy time
-		for(int j = 1; j < linearsolver.getTime().length + 1; ++j) 
-			times[j] += linearsolver.getTime()[j-1];
-
-		
-		DatabaseStates fixedDss = new DatabaseStates();
-		for (DatabaseState ds : dss) fixedDss.add(ds);
-
-		return fixedDss;
-	}
-	
-	
-	/* solve by two passes: cplex or decision tree */
-	public QueryLog twoPassSolution(IloCplex cplex, 
-			double epsilon, double M, 
-			boolean prepos, boolean feasible, boolean falsepositive, 
-			int steps, String[] args) throws Exception {
-		
-		// check inputs
-		if(badQueries.size() != badDss.size()-1) {
-			return null;
-    }
-
-		
-		times = new long[]{0,0,0,0};
-		// define linear solver
-		Linearization linearsolver = new Linearization(epsilon, M);
-		
-		// preprocess
-		long starttime = System.nanoTime();
-		HashSet<Integer> candidate = preprocess(prepos);
-		times[0] = System.nanoTime() - starttime;
-				
-		// sort the candidate queries. start from last one
-		Integer[] candlist = new Integer[candidate.size()];
-		candlist = candidate.toArray(candlist);
-		Arrays.sort(candlist);
-		DatabaseState badInitialDs = badDss.get(0);
-		Table badInitialTable = badInitialDs.getTable();
-		
-		boolean fixed = false;
-		ArrayList<QueryLog> fixes = new ArrayList<QueryLog>();
-		
-		// start the fix
-		ComplaintRange precompset = new ComplaintRange(complaints);
-		int last = badQueries.size();
-		for(int i = candlist.length - 1; i >= 0 && !fixed; --i) {
-			// for each candidate query
-			int idx = candlist[i];
-			// rollback
-			ComplaintRange rolledback = linearsolver.rollBack(cplex, badInitialTable, badQueries, badDss, precompset, steps, idx + 1, last);
-			last = idx;
-			// solve the problem
-			QueryLog curfix = linearsolver.fixParameters(cplex, badInitialTable, badQueries, badDss, rolledback, candidate, idx, idx + 1);
-			
-			if(curfix != null) {
-				fixes.add(curfix);
-				break;
-			}
-			// copy time
-			for(int j = 1; j < linearsolver.getTime().length + 1; ++j) {
-				times[j] += linearsolver.getTime()[j-1];
-			}
-			precompset = rolledback;
-		}
-		
-		// find the best fix
-		QueryLog qlogfix = new QueryLog();
-		if(fixes.size() > 0)
-			qlogfix = fixes.get(0);
-		else
-			qlogfix = badQueries;
-		return qlogfix;
-	}
-	
-	public void solve(IloCplex cplex, String[] args) throws Exception {
-		// process parameters
-		// -F: (mandatory) database configuration file
-		// -T: (mandatory) specify table name
-		// -PATH: (mandatory) specify the path for querylogs, under the path, there should have two files: "gqlog", bqlog"
-		// -S: 1: one pass solution; 2: two passes solution. Default: one pass solution
-		// -OP: optimization choice: 0: no preprocess; 1: with preprocess
-		// -STEP: for two passes solution only, batch rollback
-		// -M: for two passes solution only, 0: cplex; 1: decision tree
-		// -E: epsilon, default: 0.0001 
-		// -MV: linearize parameter, default 1000000.0
-		// -AP: use approximation if cplex is infeasible
-		// -PRUNE: prone false positives
-		// -ONE: single query error
-		// -PRINT: print status
-		
-		String configfile = null, tablename = null, dir = null;
-		int solution = 1; // default, one pass solution,
-		int steps = 1; // default, steps for two passes solution
-		double epsilon = 0.0001, M = 1000000.0;
-		boolean preprocess = true; // true: do preprocess; false no preprocess
-		boolean feasible = false; // do not relax constraints
-		boolean falsepositive = false; // do not prune false positives
-		int batch = 1;
-		boolean print = false;
-		int i = 0;
-		while(i < args.length){
-			String op = args[i];
-			switch(op){
-			case "-F":
-				configfile = args[++i];
-				break;
-			case "-PATH":
-				dir = args[++i];
-				break;
-			case "-AP":
-				feasible = true; i++;
-				break;
-			case "-PRUNE":
-				falsepositive = true; i++;
-				break;
-			case "-S": 
-				solution = Integer.valueOf(args[++i]);
-				break;
-			case "-STEP": 
-				steps = Integer.valueOf(args[++i]);
-				break;
-			case "-OP": 
-				preprocess = Integer.valueOf(args[++i]) == 1;
-				break;
-			case "-T": 
-				tablename = args[++i];
-				break;
-			case "-ONE": 
-				//oneerror = true; i++;
-				break;
-			case "-PRINT": 
-				print = true; i++;
-				break;
-			case "-E": 
-				try{
-					epsilon = Double.parseDouble(args[++i]);
-				} catch (Exception e){
-					throw new IllegalArgumentException("MILP parameter error: epsilon must be a number. ");
-				}
-				break;
-			case "-MV":
-				try{
-					M = Double.parseDouble(args[++i]);
-				} catch (Exception e){
-					throw new IllegalArgumentException("MILP parameter error: M must be a number. ");
-				}
-				break;
-			default: 
-				System.out.print("\n Help \n "
-						+ "-F: (mandatory) database configuration file \n "
-						+ "-PATH: (mandatory) specify the path for querylogs, under the path, there should have two files: goodquerylog, badquerylog \n "
-						+ "-T: (mandatory) specify table name"
-						+ "-S: 1: one pass solution; 2: two pass solution Default: 1 \n "
-						+ "-OP: optimization choice: 0: no preprocess; 1: with preprocess & prunning \n"
-						+ "-M: for two pass solution only, 0: cplex; 1: decision tree \n "
-						+ "-EP: epsilon, default: 0.0001 \n "
-						+ "-MV: linearize parameter, default 1000000.0 \n"
-						+ "-AP: use approximation if cplex is infeasible \n"
-						+ "-PRUNE: prone false positives \n"
-						+ " -ONE: single query error");
-			}
-			i++;
-		}
-		if(configfile == null || tablename == null || dir == null)
-			throw new IllegalArgumentException("Not enough input parameters. ");
-		// start the work
-		// prepare the problem: 
-
-		
-		// connect to database
-		DatabaseHandler dbhandler = new DatabaseHandler();
-		dbhandler.getConnected(configfile);
-		
-		// get query log
-		QueryLog badqlog = this.readQueryLog(dir + "/" + bqlogname);
-		QueryLog qlog = this.readQueryLog(dir + "/" + gqlogname);
-		QueryLog fixedqlog = null; // get a bad querylog and good querylog
-		DatabaseStates ds, badds;
-		badds = badqlog.execute(tablename, dbhandler); // get bad querylog
-		ds = qlog.execute(tablename, dbhandler); // get correct querylog
-		
-		// get complaint set
-		Complaint compset = new Complaint(ds.get(ds.size()-1), badds.get(badds.size()-1)); // get complaint set
-		
-		Solution solver = new Solution(dbhandler, badds, badqlog, compset);
-		solver.setPrint(print);
-		
-		// solve 
-		if(solution == 1) {
-			fixedqlog = solver.onePassSolution(cplex, epsilon, M, preprocess, feasible, falsepositive, batch, args);
-		} else {
-			fixedqlog = solver.twoPassSolution(cplex, epsilon, M, preprocess, feasible, falsepositive, steps, args);
-		}
-		
-		// evaluate 
-		DatabaseStates fixedds = fixedqlog.execute(tablename, dbhandler);
-		metrics = Metrics.evaluateAll2(qlog, ds, badqlog, badds, fixedqlog, fixedds); // get evaluation 
-		
-		// save result
-		this.writeResult(dbhandler, badqlog, qlog, fixedqlog, dir);
 	}
 	
 	public long[] getTime() {

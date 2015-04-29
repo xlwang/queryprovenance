@@ -9,6 +9,7 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
 import queryprovenance.expression.Expression;
+import queryprovenance.expression.VariableExpression;
 import Jama.Matrix;
 public class JAMAHandler {
 	Matrix A;
@@ -77,7 +78,7 @@ public class JAMAHandler {
 		int varcount = 0;
 		for(int i = 0; i < sizem; ++i){
 			Expression expr = set.getSetExprs().get(i).getExpr();
-			List<Expression> list_of_var = expr.getUnassignedVariable();
+			List<VariableExpression> list_of_var = expr.getUnassignedVariable();
 			for(Expression var: list_of_var){
 				expr.setName(var, "var"+String.valueOf(varcount++));
 				variables.add(var);

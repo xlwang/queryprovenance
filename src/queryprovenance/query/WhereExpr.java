@@ -2,7 +2,10 @@ package queryprovenance.query;
 
 import ilog.concert.IloNumVar;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 
 import queryprovenance.expression.Expression;
 public class WhereExpr {
@@ -18,12 +21,14 @@ public class WhereExpr {
 	protected Expression attr_expr; // expression that is fixed: no revision needed
 	protected Op operator; // relationship between two expressions
 	protected Expression var; // expression need revision
+	public HashSet<String> attrs = new HashSet<String>();;
 	
 	/* initialize where expression */
 	public WhereExpr(Expression attr_expr_, Op operator_, Expression var_){
 		this.attr_expr = attr_expr_;
 		this.operator = operator_;
 		this.var = var_;
+		attrs.addAll(attr_expr.getAssignedVariable());
 	}
 	
 	/* initialize where expression */
@@ -31,6 +36,7 @@ public class WhereExpr {
 		this.attr_expr = attr_expr_;
 		this.operator = this.getOperator(op_);
 		this.var = var_;
+		attrs.addAll(attr_expr.getAssignedVariable());
 	}
 	
 	/* return attr_expr */

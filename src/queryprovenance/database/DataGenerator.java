@@ -32,11 +32,11 @@ public class DataGenerator {
 			int val1 = val2 + val0; //age
 			
 			
-			int val4 = rand.nextInt(6); // level
+			int val4 = rand.nextInt(100); // level
 			int val5 = rand.nextInt(150000)+50000; // salary
 			
 			int val3 = (int) (((double)rand.nextInt(30)/100.0)*val5); //tax
-			writer.write("INSERT INTO Employee VALUES ("+String.valueOf(i)+"," + String.valueOf(val4)+","+ String.valueOf(val1) + "," + String.valueOf(val2) + "," + String.valueOf(val3) + "," + String.valueOf(val5)+");");
+			writer.write("INSERT INTO Employee VALUES ("+String.valueOf(i)+"," + String.valueOf(val4) +","+ String.valueOf(val1) + "," + String.valueOf(val2) + "," + String.valueOf(val3) + "," + String.valueOf(val5)+");");
 			writer.newLine();
 		}
 		writer.close();

@@ -116,13 +116,13 @@ public class SyntheticHarness {
 			fixedlog = solver.onePassSolution(cplex, epsilon, M, preproc, feasible, falsepositive, batch, options);
 			break;
 		case 2: // rollback only
-			fixeddss = solver.rollback(cplex, epsilon, M, preproc, rollbackbatch, 0, dirtyQueries.size(), options);
+			//fixeddss = solver.rollback(cplex, epsilon, M, preproc, rollbackbatch, 0, dirtyQueries.size(), options);
 			break;
 		case 3: // query fix only (no rollback)
 			fixedlog = solver.qfixOnlySolution(cplex, this.cleanDss, epsilon, M, preproc, feasible, falsepositive, rollbackbatch, options);
 			break;
 		case 4: // two pass algorithm
-			fixedlog = solver.twoPassSolution(cplex, epsilon, M, preproc, feasible, falsepositive, rollbackbatch, options);
+			//fixedlog = solver.twoPassSolution(cplex, epsilon, M, preproc, feasible, falsepositive, rollbackbatch, options);
 			break;
 		case 5:
 			for (int iterationIdx = 0; iterationIdx < niterations; iterationIdx++) {

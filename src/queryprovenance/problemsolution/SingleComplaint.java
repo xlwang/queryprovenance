@@ -6,7 +6,7 @@ public class SingleComplaint {
 	public String[] values;
 	
 	/* initialization */
-	SingleComplaint(Integer key_, String[] values_){
+	public SingleComplaint(Integer key_, String[] values_){
 		key = key_;
 		values = values_;
 	}

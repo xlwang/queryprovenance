@@ -7,6 +7,7 @@ import java.util.List;
 import queryprovenance.database.DatabaseState;
 import queryprovenance.database.Table;
 import queryprovenance.database.Tuple;
+import queryprovenance.expression.VariableExpression;
 
 public class InsertQuery extends Query {
 	
@@ -32,8 +33,9 @@ public class InsertQuery extends Query {
 			super.attr_names.toArray(column_names);
 		}
 		
-		for(String value:values){
+		for(VariableExpression val:values){
 			String key_value = "";
+			String value = String.valueOf(val.getValue());
 			String[] splited_value = value.split(",");
 			for(int i=0; i < splited_value.length; ++i)
 				splited_value[i] = splited_value[i].trim();
@@ -96,7 +98,7 @@ public class InsertQuery extends Query {
 			
 			List<String> fixed_values = fixValues(pre, next);
 			if(fixed_values!= null){
-				q.values = fixed_values;
+				q.setValue(fixed_values);
 				return q;
 			}
 			else
