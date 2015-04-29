@@ -117,6 +117,7 @@ public class FixQueryLog {
 		Integer[] sortedcandidate = new Integer[candidate.size()];
 		sortedcandidate = candidate.toArray(sortedcandidate);
 		Arrays.sort(sortedcandidate); 
+		boolean stop = false;
 		for(int i = sortedcandidate.length - 1; i >= 0; i = i - batchsize) { // batch of 2
 			// add candidate set, only include the current query
 			int startidx = sortedcandidate[i];
@@ -133,7 +134,7 @@ public class FixQueryLog {
 			// divide problem by attribute
 			int processed = 0;
 			HashMap<VariableExpression, varQuery> current = null;
-			while (processed < attrprov.sortedAttributes.size()) {
+			while (processed < attrprov.sortedAttributes.size() && !stop) {
 				// solve for current attributes
 				int attrsnum = processed + attrcount < attrprov.sortedAttributes
 						.size() ? processed + attrcount
@@ -144,18 +145,19 @@ public class FixQueryLog {
 				// add processed
 				processed += attrcount;
 				if(current == null || linearization.stop) {
-					break;
+					stop = true;
 				}
 			}
 			// check if current fix is valid
-			if(current != null && linearization.getObjective() < bestobj) {
+			if(current != null && linearization.getObjective() < bestobj && linearization.getObjective() > 0) {
 				bestfix = linearization.currentVar;
 				bestobj = linearization.getObjective();
 				//break;
 			}
-			//System.out.print(i + " ");
+			System.out.print(i + " ");
+			stop = false;
 		}
-		//System.out.println();
+		System.out.println();
 		starttime = System.nanoTime();
 		if(bestfix != null)
 			updateFix(bestfix);
