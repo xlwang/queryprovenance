@@ -17,16 +17,19 @@ public class AttributeProvenance {
 	 * @param queries_
 	 *            query to sort
 	 */
-	public AttributeProvenance(QueryLog queries_) {
+	public AttributeProvenance(QueryLog queries_, HashSet<Integer> candidate) {
 		queries = queries_;
-		sortAttribute();
+		sortAttribute(candidate);
 	}
 
 	/** Sort attributes for given query log */
-	public void sortAttribute() {
+	public void sortAttribute(HashSet<Integer> candidate) {
 		HashSet<String> attrs = new HashSet<String>();
 
 		for (int i = queries.size() - 1; i >= 0; --i) {
+			if(!candidate.contains(i)) {
+				continue;
+			}
 			Query query = queries.get(i);
 			// get modified attributes
 			HashSet<String> setattr = query.getSetAttr();

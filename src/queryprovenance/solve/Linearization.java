@@ -47,6 +47,7 @@ public class Linearization {
 	private HashSet<Integer> queryToFix;
 	public HashSet<varQuery> currentVar;
 	public HashSet<varX> currentX;
+	public HashMap<Query, varX> removeList;
 
 	private int solvedvar = 0, remain = 0;
 	public boolean stop = false;
@@ -54,12 +55,13 @@ public class Linearization {
 	private Boolean[] queryStatus; // query status: true, already processed;
 									// false otherwise
 
-	private static double TIMELIMTI = 120; // maximum time to escape from cplex
+	private static double TIMELIMTI = 1; // maximum time to escape from cplex
 											// solver
 
 	private static double NOTEXIST = Double.MAX_VALUE; // value for null
 
 	ArrayList<IloConstraint> constraints = new ArrayList<IloConstraint>();
+	int variables = 0;
 
 	/**
 	 * Initialize Linearization
@@ -99,6 +101,7 @@ public class Linearization {
 		table = badDss.get(0).getTable();
 		varQMap = clonevarQMap(varQMap_);
 		varXMap = clonevarXMap(varXMap_);
+		removeList = new HashMap<Query, varX>();
 		queryStatus = new Boolean[fixedQueries.size()];
 		for (int i = 0; i < queryStatus.length; ++i) {
 			queryStatus[i] = false;
@@ -129,6 +132,7 @@ public class Linearization {
 		constraints.clear();
 		currentVar = new HashSet<varQuery>();
 		currentX = new HashSet<varX>();
+		variables = 0;
 	}
 
 	/**
@@ -223,6 +227,7 @@ public class Linearization {
 				stop = true;
 			}
 		}
+		variables += currentVar.size() + currentX.size();
 		endtime = System.nanoTime();
 		times[3] += endtime - starttime;
 		cplex.remove(maxobj);
@@ -301,6 +306,7 @@ public class Linearization {
 			// create initial variable list
 			IloNumVar[] prestate = cplex.numVarArray(attrs.size(),
 					Double.MIN_VALUE, Double.MAX_VALUE);
+			variables += attrs.size();
 			IloNumVar[] nextstate = prestate;
 			for (int i = startidx; i < fixedQueries.size(); ++i) {
 				// get current query
@@ -376,8 +382,13 @@ public class Linearization {
 					scpvarXMap, fix);
 			break;
 		case INSERT:
-			nextstate = this.addOther(cplex, query, X, prestate, attrs,
+			varX x = scpvarXMap.get(query.toString());
+			currentX.add(x);
+			nextstate = this.addOther(cplex, query, x.var, prestate, attrs,
 					scpvarXMap, fix);
+			if(!removeList.containsKey(query)) {
+				removeList.put(query, x);
+			}
 			break;
 		case DELETE:
 			this.addWhere(cplex, query.getWhere(), X, prestate, attrs,
@@ -388,6 +399,9 @@ public class Linearization {
 		default:
 			break;
 		}
+		
+		// add number of variables
+		variables += nextstate.length + 1;
 		return nextstate;
 	}
 
@@ -428,6 +442,7 @@ public class Linearization {
 			// add condition
 			constraints.add(cplex.addEq(nextstate[idx], cplex.sum(pre, next)));
 		}
+		
 		return nextstate;
 	}
 
