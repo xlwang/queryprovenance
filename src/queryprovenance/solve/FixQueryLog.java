@@ -55,7 +55,11 @@ public class FixQueryLog {
 	 *            Complaints
 	 * @throws Exception
 	 */
-	public FixQueryLog(IloCplex cplex, DatabaseHandler handler_,
+	public FixQueryLog()
+			throws Exception {
+	}
+
+	public void initialize(IloCplex cplex, DatabaseHandler handler_,
 			DatabaseStates badDss_, QueryLog badQueries_, Complaint complaints_)
 			throws Exception {
 		this.handler = handler_;
@@ -85,7 +89,6 @@ public class FixQueryLog {
 			}
 		}
 	}
-
 	/**
 	 * Function: fixQueries : fix the query log
 	 * 
@@ -170,11 +173,13 @@ public class FixQueryLog {
 				bestfix = linearization.currentVar;
 				bestrm = linearization.removeList;
 				bestobj = linearization.getObjective();
+				//System.out.print("objective:" + bestobj);
 				//break;
 			}
-			System.out.print(i + " ");
+			//System.out.print(i + " ");
 		}
-		System.out.println();
+		//System.out.println();
+		System.out.println("objective:" + bestobj);
 		starttime = System.nanoTime();
 		if(bestfix != null)
 			fixedQueries = updateFix(bestfix, bestrm);
@@ -207,6 +212,7 @@ public class FixQueryLog {
 			if(var.fixedval != Double.MAX_VALUE) {		
 				if(var.expr.getValue() != var.fixedval) {
 					modifiedList.add(varMap.get(var.expr));
+					//System.out.println(varMap.get(var.expr).toString() + " modificedvalue:" + var.expr.getValue() + "->" + var.fixedval);
 					var.expr.setVariable(var.expr, var.fixedval);
 				}
 			}

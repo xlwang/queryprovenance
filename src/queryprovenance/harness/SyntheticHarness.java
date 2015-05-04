@@ -33,6 +33,7 @@ import queryprovenance.query.UpdateQuery;
 import queryprovenance.query.WhereClause;
 import queryprovenance.query.WhereExpr;
 import queryprovenance.query.WhereExpr.Op;
+import queryprovenance.solve.FixQueryLog;
 
 public class SyntheticHarness {
 
@@ -50,9 +51,12 @@ public class SyntheticHarness {
 	qfixtype,
 	niterations;
 	int rollbackbatch;
-	float epsilon, M; 
+	float epsilon, M;
+	double p_fp;
 	boolean approx, prune;
 	int batch = 1; // true for single error fix. 
+	int n_compl = 10;
+	int n_compl_iter = 10;
 	boolean print = false; // print cplex solver status
 	boolean feasible = false;
 	boolean falsepositive = false;
@@ -102,46 +106,41 @@ public class SyntheticHarness {
 		String[] options = new String[]{"-M", String.valueOf(solverind) , "-E", "0.1", "-O", "abs"};
 
 		Complaint _complaints = complaints.clone();
+		// sample 10 complaint
+		Complaint _complaints_sub = Complaint.getPartial(_complaints, n_compl);
 		// _complaints = Complaint.addNoise(_complaints, handler, fp, fn);
-		Solution solver = new Solution(handler, dirtyDss, dirtyQueries, _complaints);
+		
+		// define onepass algorithm
+		Solution solver = new Solution(handler, dirtyDss, dirtyQueries, _complaints_sub);
 		boolean preproc = optchoice == 2;
 		boolean usecplex = qfixtype == 1;
+		// define new algorithm
+		FixQueryLog solver2 = new FixQueryLog();
 
-
-
+		p_fp = (double) (_complaints_sub.size() == 0 ? 1 : _complaints_sub.size() / _complaints.size());
 		QueryLog fixedlog = null;
-		DatabaseStates fixeddss = null;
-		switch(passtype) {
-		case 1: // one pass alg
-			fixedlog = solver.onePassSolution(cplex, epsilon, M, preproc, feasible, falsepositive, batch, options);
-			break;
-		case 2: // rollback only
-			//fixeddss = solver.rollback(cplex, epsilon, M, preproc, rollbackbatch, 0, dirtyQueries.size(), options);
-			break;
-		case 3: // query fix only (no rollback)
-			fixedlog = solver.qfixOnlySolution(cplex, this.cleanDss, epsilon, M, preproc, feasible, falsepositive, rollbackbatch, options);
-			break;
-		case 4: // two pass algorithm
-			//fixedlog = solver.twoPassSolution(cplex, epsilon, M, preproc, feasible, falsepositive, rollbackbatch, options);
-			break;
-		case 5:
-			for (int iterationIdx = 0; iterationIdx < niterations; iterationIdx++) {
+		/*
+		passtype = 0: onepass algorithm
+		passtype > 0: new algorithm_passtype, passtype = number of attributes to consider
+		*/
+		for (int iterationIdx = 0; iterationIdx < niterations; iterationIdx++) {
+			if(passtype == 0) {
 				fixedlog = solver.onePassSolution(cplex, epsilon, M, preproc, feasible, falsepositive, batch, options);
-				DatabaseStates fixedds = fixedlog.execute(tableBase, handler);
-				computeMetrics(fixedlog, fixedds, solver, _complaints, iterationIdx);
-
-				// update complaint set
-				Complaint newcmp = new Complaint(cleanDss.get(cleanDss.size()-1), fixedds.get(fixedds.size()-1));
-				newcmp = Complaint.getPartial(newcmp, 10);
-				_complaints.addAll(newcmp);
-
-				System.out.println("Finished iteration " + iterationIdx);
+			} else {
+				solver2.initialize(cplex, handler, dirtyDss, dirtyQueries, _complaints_sub);
+				fixedlog = solver2.fixQueries(cplex, epsilon, M, passtype, batch, falsepositive);
 			}
-			return;
+			// update exprs result
+			DatabaseStates fixedds = fixedlog.execute(tableBase, handler);
+			computeMetrics(fixedlog, fixedds, solver, solver2, complaints, 0);
+			// update complaint set
+			Complaint newcmp = new Complaint(cleanDss.get(cleanDss.size()-1), fixedds.get(fixedds.size()-1));
+			newcmp = Complaint.getPartial(newcmp, n_compl_iter);
+			_complaints.addAll(newcmp);
+
+			System.out.println("Finished iteration " + iterationIdx);
 		}
 
-		DatabaseStates fixedds = fixedlog.execute(tableBase, handler);
-		computeMetrics(fixedlog, fixedds, solver, complaints, 0);
 
 		System.out.println("finished fixeng");
 		System.out.println(fixedlog);
@@ -150,27 +149,35 @@ public class SyntheticHarness {
 	/*
 	 * @arg iterationIdx in the iterative approach to the onepass algorithm, it runs in multiple passes.  
 	 */
-	public void computeMetrics(QueryLog fixedqlog, DatabaseStates fixedds, Solution solver, Complaint complaints, int iterationIdx) throws Exception {
-		Metrics.Index diff = Metrics.compare(dirtyQueries, fixedqlog, 0.1);
-		HashSet<Integer> updated = new HashSet<Integer>();
+	public void computeMetrics(QueryLog fixedqlog, DatabaseStates fixedds, Solution solver, FixQueryLog solver2, Complaint complaints, int iterationIdx) throws Exception {
 
-		updated.clear();
-		updated.addAll(diff);
 		HashMap<Metrics.Type, Double> metrics = Metrics.evaluateAll2(cleanQueries, cleanDss, dirtyQueries, dirtyDss, fixedqlog, fixedds);
 
 		String metric_value = Metrics.toString(metrics);
-		long[] time = solver.getTime();
+		long[] time;
+		if(passtype == 0) {
+			time = solver.getTime();
+		} else {
+			time = solver2.getTime();
+		}
 		double[] computetime = new double[time.length];
 		for(int j = 0; j < computetime.length; ++j) {
 			computetime[j] = time[j] / 1000000000.0;
 			if(computetime[j] == 0)
 				System.out.print(" ");
 		}
-
-
+		// define number of constraints and variables
+		int nconstraints = 0, nvariables = 0;
+		if (passtype == 0) {
+			nconstraints = solver.avgconstraint;
+			nvariables = solver.avgvariable;
+		} else {
+			nconstraints = solver2.avgconstraint;
+			nvariables = solver2.avgvariable;
+		}
 		// insert data into result table
 		String params = String.format(
-				"DEFAULT, %d, %d, %d, %d, %f, %f, '%s', '%s', %f, %f, %f, %f",
+				"DEFAULT, %d, %d, %d, %d, %f, %f, %f, %f, %f, %f, %f, %d, %d",
 				cid,
 				iterationIdx,
 				//metrics.get(Metrics.Type.BADCOMPLAINT).intValue(),
@@ -178,18 +185,20 @@ public class SyntheticHarness {
 				metrics.get(Metrics.Type.FIXEDCOMPLAINT).intValue(),
 				metrics.get(Metrics.Type.REMOVEDRATE),
 				metrics.get(Metrics.Type.NOISERATE),
-				"",
-				diff,
 				computetime[0],
 				computetime[1],
 				computetime[2],
-				computetime[3]
+				computetime[3],
+				p_fp,
+				nconstraints,
+				nvariables
 				);
 		String q = String.format("INSERT INTO exps VALUES(%s)", params);
 		handler.queryExecution(q);
-
 		
 		SyntheticHarness.saveQueries(this.handler, this.tableBase, cid, fixedqlog);
+		
+		
 
 		// write out fixed query log
 		/*
