@@ -95,12 +95,13 @@ def init_db(db):
         nfixedcomplaints int,
         removerate numeric,
         noiserate numeric,
-        metrics text,
-        diff_log text,
         prep_time numeric,
         solver_prep_time numeric,
         solve_time numeric,
-        post_proc_time numeric 
+        post_proc_time numeric,
+        p_fp numeric,
+        avgnconstraints int,
+        avgnvariables int
       )
       """
   ]

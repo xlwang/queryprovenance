@@ -46,7 +46,11 @@ public class Linearization {
 	
 	private boolean singlefix = false;
 	
-	private static double TIMELIMTI = 120;
+	private static double TIMELIMTI = 1;
+	
+	public int avgvariable = 0;
+	public int avgconstraint = 0;
+	public List<Integer> modifiedList = new ArrayList<Integer>();
 	
 	long[] times = new long[3]; // execution time
 	/* initialize */
@@ -75,6 +79,8 @@ public class Linearization {
 		rollbackmap.clear();removemap.clear();
 		objvalue = -1;
 		singlefix = false;
+		avgvariable = 0;
+		avgconstraint = 0;
 	}
 	
 	/* change print preference */
@@ -97,8 +103,6 @@ public class Linearization {
 			HashMap<Integer, ArrayList<HashMap<String, Integer>>> initialComplaints,
 			int batchsize,
 			long[] times) throws Exception {
-	
-		
 		
 	}
 	
@@ -134,7 +138,9 @@ public class Linearization {
 		long endtime = System.nanoTime();
 		times[0] = endtime - starttime;
 		
-		
+		//update avgconstraint
+		avgconstraint += constraints.size();
+		avgvariable += varmap.size();
 		// solve problem
 		if(print)
 			System.out.println("Start solving : solve");
@@ -168,7 +174,8 @@ public class Linearization {
 				 double value = (double) Math.round(cplex.getValue(var)*digits)/digits;
 				 double orgvalue = varmap.get(var);
 				 objvalue += Math.abs(orgvalue-value);
-				 fixedmap.put(var, value);
+				 if(orgvalue != value)
+					 fixedmap.put(var, value);
 			 }
 			
             // convert querylog
@@ -176,9 +183,14 @@ public class Linearization {
             for(int i = 0; i < qlogfix.size(); ++i) {
             	Query query = qlogfix.get(i);
             	if(!removeset.contains(query)) {
+            		String prequery = query.toString();
             		query.fix(fixedmap, exprmap);
             		query.fixInsert(fixedmap, insrtmap);
             		temp.add(query);
+            		if(!prequery.equals(query.toString()))
+            			modifiedList.add(i);
+            	} else {
+            		modifiedList.add(i);
             	}
             }
             qlogfix = temp;
@@ -294,6 +306,7 @@ public class Linearization {
 		// tupleinitial is the initial values of the tuple and tuplefinal is the final state values
 		// define initial variables
 		IloNumVar[] preattr = new IloNumVar[table.getColumns().length];
+		avgvariable += table.getColumns().length;
 		for(int i = 0; i < preattr.length; ++i) {
 			preattr[i] = cplex.numVar(Double.MIN_VALUE, Double.MAX_VALUE);
 			//constraints.add(preattr[i]);
@@ -313,6 +326,7 @@ public class Linearization {
 			} else {
 				curr = this.addConstraint(cplex, constraints, table, query, keyvalue, curr, false);
 			}
+			avgvariable += table.getColumns().length + 1;
 			//curr = this.addConstraint(cplex, table, query, curr, fix); // add conditions
 		}
 		// add constraint for final tuple values based complaints

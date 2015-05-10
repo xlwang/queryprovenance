@@ -181,8 +181,10 @@ public class VariableExpression extends Expression{
 			HashMap<Expression, IloNumVar> expressionmap) throws Exception {
 		if(expressionmap.containsKey(this)) {
 			IloNumVar var = expressionmap.get(this);
-			double fixedvalue = fixedmap.get(var);
-			this.value = fixedvalue;
+			if(fixedmap != null && fixedmap.containsKey(var)) {
+				double fixedvalue = fixedmap.get(var);
+				this.value = fixedvalue;
+			}
 		}
 		
 	}
@@ -266,7 +268,4 @@ public class VariableExpression extends Expression{
 			}
 		}
 	}
-
-
-
 }

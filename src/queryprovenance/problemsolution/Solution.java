@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 
 import queryprovenance.database.DatabaseHandler;
 import queryprovenance.database.DatabaseState;
@@ -31,6 +32,11 @@ public class Solution {
 	DatabaseStates badDss;
 	QueryLog badQueries;
 	Complaint complaints;
+	
+	
+	public List<Integer> modifiedList = new ArrayList<Integer>();
+	public int avgconstraint = 0;
+	public int avgvariable = 0;
 	
 	private boolean print = false;
 	
@@ -84,7 +90,7 @@ public class Solution {
 		
 		long starttime = System.nanoTime();
 		HashSet<Integer> candidate = preprocess(prepos); 
-		times[3] = System.nanoTime() - starttime;
+		times[0] = System.nanoTime() - starttime;
 		// record original number of complaints
 		int complaintsize = complaints.size();
 		Complaint pruned = new Complaint();
@@ -99,11 +105,13 @@ public class Solution {
 		QueryLog bestfix = null;
 		double bestobjvalue = Double.MAX_VALUE;
 		int bestcoverage = 0;
+		List<Integer> bestmodified = new ArrayList<Integer>();
 		
 		// prune false positive at a time
 		//if(falsepositive) {
 		//	pruned = FalsePositiveAll.densityFilter(cplex, handler, badDss, badQueries, new HashSet<Integer>(Arrays.asList(candarray)), 0, badQueries.size(), complaints, epsilon, M, -1);
 		//}
+		int counttime = 0;
 		for(int i = candarray.length - 1; i >= 0; i = i - batch) { // batch of 2
 			// add candidate set, only include the current query
 			int cand = candarray[i];
@@ -122,6 +130,11 @@ public class Solution {
 			} else {
 				qlogfix = linearsolver.fixParameters(cplex, badInitialDs.getTable(), badQueries, badDss, complaints, curcand, cand, badQueries.size()); // start from current candidate state
 			}
+			
+			avgconstraint += linearsolver.avgconstraint;
+			avgvariable += linearsolver.avgvariable;
+			counttime ++;
+			
 			for(int j = 1; j < linearsolver.getTime().length + 1; ++j) {
 				times[j] += linearsolver.getTime()[j-1];
 			}
@@ -132,22 +145,29 @@ public class Solution {
 						bestfix = qlogfix;
 						bestcoverage = pruned.size();
 						bestobjvalue = linearsolver.getObjValue();
+						bestmodified = linearsolver.modifiedList;
 					} else if (linearsolver.getObjValue() > 0 && pruned.size() == bestcoverage && (linearsolver.getObjValue() < bestobjvalue)) {
 						bestfix = qlogfix;
 						bestobjvalue = linearsolver.getObjValue();
+						bestmodified = linearsolver.modifiedList;
 					}
 				} else { // pick the fix with minimum objective value
 					if(linearsolver.getObjValue() > 0 && (linearsolver.getObjValue() < bestobjvalue)) {
 						//System.out.println("query index: " + i + "  complaintcount: " + complaints.size() + " objective value: " + linearsolver.getObjValue());
 						bestfix = qlogfix;
 						bestobjvalue = linearsolver.getObjValue();
-						
+						bestmodified = linearsolver.modifiedList;
 					}
 				}
 			}
+			System.out.print(i + " ");
 		}
+		System.out.println();
 		qlogfix = bestfix;
-
+		this.modifiedList = bestmodified;
+		avgconstraint = avgconstraint / counttime;
+		avgvariable = avgvariable / counttime;
+		
 		if(qlogfix != null) {
 			return qlogfix;
 		} else {

@@ -32,7 +32,13 @@ public class FixQueryLog {
 	private HashMap<VariableExpression, varQuery> varQMap = new HashMap<VariableExpression, varQuery>();
 	private HashMap<SingleComplaint, ArrayList<HashMap<String, varX>>> varXMap = new HashMap<SingleComplaint, ArrayList<HashMap<String, varX>>>();
 
+	private HashMap<VariableExpression, Integer> varMap = new HashMap<VariableExpression, Integer>();
+
 	private boolean print = false; // print flag
+	
+	public List<Integer> modifiedList = new ArrayList<Integer>();
+	public int avgconstraint = 0;
+	public int avgvariable = 0;
 
 	/**
 	 * Initialize
@@ -49,7 +55,11 @@ public class FixQueryLog {
 	 *            Complaints
 	 * @throws Exception
 	 */
-	public FixQueryLog(IloCplex cplex, DatabaseHandler handler_,
+	public FixQueryLog()
+			throws Exception {
+	}
+
+	public void initialize(IloCplex cplex, DatabaseHandler handler_,
 			DatabaseStates badDss_, QueryLog badQueries_, Complaint complaints_)
 			throws Exception {
 		this.handler = handler_;
@@ -70,14 +80,15 @@ public class FixQueryLog {
 		}
 
 		// initial varQMap
-		for (Query query : fixedQueries) {
+		for (int i = 0; i < fixedQueries.size(); ++i) {
+			Query query = fixedQueries.get(i);
 			List<VariableExpression> variables = query.getVariable();
 			for (VariableExpression variable : variables) {
 				varQMap.put(variable, new varQuery(cplex, variable));
+				varMap.put(variable, i);
 			}
 		}
 	}
-
 	/**
 	 * Function: fixQueries : fix the query log
 	 * 
@@ -105,19 +116,24 @@ public class FixQueryLog {
 		DatabaseState badInitialDs = badDss.get(0);
 		// define attribute provenance
 		long starttime = System.nanoTime();
-		AttributeProvenance attrprov = new AttributeProvenance(fixedQueries);
-		long endtime = System.nanoTime();
-		// record time
-		times[0] += endtime - starttime;
-		// divide the problem by batches
-		HashSet<varQuery> bestfix = null;
-		double bestobj = Double.MAX_VALUE;
 		// preprocess the querylog
 		HashSet<Integer> candidate = preprocess(true); 
 		Integer[] sortedcandidate = new Integer[candidate.size()];
 		sortedcandidate = candidate.toArray(sortedcandidate);
 		Arrays.sort(sortedcandidate); 
-		boolean stop = false;
+		
+		AttributeProvenance attrprov = new AttributeProvenance(fixedQueries, candidate);
+		long endtime = System.nanoTime();
+		// record time
+		times[0] += endtime - starttime;
+		
+		HashSet<varQuery> bestfix = null;
+		HashMap<Query, varX> bestrm = null;
+		double bestobj = Double.MAX_VALUE;
+
+		// divide the problem by batches
+		// count number of times call linearization solver
+		int counttime = 0;
 		for(int i = sortedcandidate.length - 1; i >= 0; i = i - batchsize) { // batch of 2
 			// add candidate set, only include the current query
 			int startidx = sortedcandidate[i];
@@ -134,7 +150,7 @@ public class FixQueryLog {
 			// divide problem by attribute
 			int processed = 0;
 			HashMap<VariableExpression, varQuery> current = null;
-			while (processed < attrprov.sortedAttributes.size() && !stop) {
+			while (processed < attrprov.sortedAttributes.size()) {
 				// solve for current attributes
 				int attrsnum = processed + attrcount < attrprov.sortedAttributes
 						.size() ? processed + attrcount
@@ -144,26 +160,35 @@ public class FixQueryLog {
 						times, startidx);
 				// add processed
 				processed += attrcount;
+				// record constraint and variable amount
+				avgconstraint += linearization.constraints.size();
+				avgvariable += linearization.variables;
+				counttime ++;
 				if(current == null || linearization.stop) {
-					stop = true;
+					break;
 				}
 			}
 			// check if current fix is valid
 			if(current != null && linearization.getObjective() < bestobj && linearization.getObjective() > 0) {
 				bestfix = linearization.currentVar;
+				bestrm = linearization.removeList;
 				bestobj = linearization.getObjective();
+				//System.out.print("objective:" + bestobj);
 				//break;
 			}
-			System.out.print(i + " ");
-			stop = false;
+			//System.out.print(i + " ");
 		}
-		System.out.println();
+		//System.out.println();
+		System.out.println("objective:" + bestobj);
 		starttime = System.nanoTime();
 		if(bestfix != null)
-			updateFix(bestfix);
+			fixedQueries = updateFix(bestfix, bestrm);
 		endtime = System.nanoTime();
 		times[3] += endtime - starttime;
 		// finish all the attributes, solve remaining unsolved variables
+		// update average number of constraints and variables
+		avgconstraint = avgconstraint / counttime;
+		avgvariable = avgvariable / counttime;
 		return fixedQueries;
 	}
 	
@@ -181,14 +206,30 @@ public class FixQueryLog {
 		return candidate;
 	}
 	
-	public void updateFix(HashSet<varQuery> bestfix) {
+	public QueryLog updateFix(HashSet<varQuery> bestfix, HashMap<Query, varX> bestrm) {
+		QueryLog fixed = new QueryLog();
 		for(varQuery var : bestfix) {
-			if(var.fixedval != Double.MAX_VALUE)
-				var.expr.setVariable(var.expr, var.fixedval);
+			if(var.fixedval != Double.MAX_VALUE) {		
+				if(var.expr.getValue() != var.fixedval) {
+					modifiedList.add(varMap.get(var.expr));
+					//System.out.println(varMap.get(var.expr).toString() + " modificedvalue:" + var.expr.getValue() + "->" + var.fixedval);
+					var.expr.setVariable(var.expr, var.fixedval);
+				}
+			}
 		} 
+		for(int i = 0; i < fixedQueries.size(); ++i) {
+			Query query = fixedQueries.get(i);
+			if(bestrm.containsKey(query) && bestrm.get(query).solvedval == 0) {
+				modifiedList.add(i);
+				continue;
+			}
+			fixed.add(query);
+		}
+		return fixed;
 	}
 	public long[] getTime() {
 		return this.times;
 	}
+	
 
 }
