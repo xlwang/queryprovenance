@@ -35,32 +35,26 @@ X Logging
   X log the query that was changed/fixed
 
 
-# July 1
-
-State of everything
-
-* stopping condition
-  * if attr 1 has errors, focus on fixing only attr 1, without checking for newly introduced errors
-  * check for introduced errors
-
 # May 6
 
 * Algorithms
+  * [What exactly are the algorithms to pick the queries/subsets of queries to put into the cplex problem?]
 * Performance drop after qlog size > 500
   * ran w/ 1, 2, 3 attributes
   * remove rate drops
   * don't know new noise
-* 4 main parametrs for new alogrithm  
+* 4 main parametrs for new alogrithm [fill which to try, hopefully a harness can automatically run] 
   * # attrs to fix in cplex query
   * stoppnig condition
   * queries included
   * number of layers (set -> where -> set cycles) to include
 * NOTE: for point queries, if error is set early on, it gets fixed by subsequent queries pretty often
 
-TODO
+TODO [fill in]
 
 * fix query log and error, and append (or prepend) to it until removerate drops.  Try to understand why
 * fix a dataset and querylog to see how each algorithm affects it
+* [are there new algorithms for picking queries that wu/meliou can think about]
 
 # Apr 29
 
