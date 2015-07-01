@@ -34,6 +34,30 @@ TODOs
 X Logging
   X log the query that was changed/fixed
 
+
+# July 1
+
+State of everything
+
+* 
+
+# May 6
+
+* Algorithms
+* Performance drop after qlog size > 500
+  * remove rate drops
+* 4 main parametrs for new alogrithm  
+  * # attrs to fix in cplex query
+  * stoppnig condition
+  * queries included
+  * number of layers (set -> where -> set cycles) to include
+* NOTE: for point queries, if error is set early on, it gets fixed by subsequent queries pretty often
+
+TODO
+
+* fix query log and error, and append (or prepend) to it until removerate drops.  Try to understand why
+* fix a dataset and querylog to see how each algorithm affects it
+
 # Apr 29
 
 New algorithm
