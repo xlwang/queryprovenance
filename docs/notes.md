@@ -39,13 +39,17 @@ X Logging
 
 State of everything
 
-* 
+* stopping condition
+  * if attr 1 has errors, focus on fixing only attr 1, without checking for newly introduced errors
+  * check for introduced errors
 
 # May 6
 
 * Algorithms
 * Performance drop after qlog size > 500
+  * ran w/ 1, 2, 3 attributes
   * remove rate drops
+  * don't know new noise
 * 4 main parametrs for new alogrithm  
   * # attrs to fix in cplex query
   * stoppnig condition
