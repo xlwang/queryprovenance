@@ -34,6 +34,12 @@ TODOs
 X Logging
   X log the query that was changed/fixed
 
+# July 1
+
+* Think of query log as a matrix of
+  * row = query
+  * col = query fragment (clauses)
+* algorithms to pick which subsets to include in the cplex problem
 
 # May 6
 
