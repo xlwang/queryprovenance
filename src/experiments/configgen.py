@@ -45,7 +45,6 @@ def create_params(options, base_params={}, keys=None):
 
 
 
-
 ###########################
 #
 #  gen_mode:  (see synth/gen.py)
@@ -75,7 +74,7 @@ def create_params(options, base_params={}, keys=None):
 
 DEFAULT = {
     "N_D": 100, 
-    "N_dim": 10, 
+    "N_dim": 4, 
     "N_q": 10, 
     "N_pred": 4, 
     "N_ins": 2,
@@ -92,25 +91,28 @@ DEFAULT = {
     "p_fp": 0, 
     "p_fn": 0,
     "exptype": 1,
-    "passtype": 1, 
-    "optchoice": 1 , 
-    "qfixtype": 1,
-    "niterations": 1,     # for multi-iteration algorithm to deal with false-negatives
     "epsilon": 0.001, 
-    "M": 10000000, 
+    "M": 1000000,
+    "solvertype": 0,
+    "batchsize": 1,
+    "niterations": 1,     # for multi-iteration algorithm to deal with false-negatives 
     "approx": 0, 
-    "prune": 0,
-    "rollbackbatch": 1
+    "alg2_attrsize": 1,
+    "alg2_obj": 0,
+    "alg2_objratio": 10,
+    "alg2_fixq": 0,
+    "alg2_fixattr": 0
 }
 
 keys = [
   "N_D", "N_dim", "N_q", "N_pred", "N_ins", "N_set", "N_where", 
   "N_corrupt", "N_corrupt_vals", "N_corrupt_set", "N_corrupt_where",
-  "gen_mode",
-  "idx", 
+  "gen_mode", "idx", 
   "p_I", "p_pk", "p_fp", "p_fn",
-  "exptype", "passtype", "optchoice", "qfixtype", "niterations",
-  "epsilon", "M", "approx", "prune", "rollbackbatch"
+  "exptype", "epsilon", "M", "solvertype", 
+  "batchsize", "niterations", "approx", 
+  "alg2_attrsize", "alg2_obj", "alg2_objratio", 
+  "alg2_fixq", "alg2_fixattr"
 ]
 
 # params used to generate synthetic query log
@@ -165,7 +167,6 @@ ALL_OPTIONS = {
       "N_pred": [1,2,3],
       "N_where": [2],
       "idx": [.8],
-      "passtype": 5,
       "exptype": 1,
       "niterations": 2
     },
@@ -175,7 +176,6 @@ ALL_OPTIONS = {
       "N_pred": 2,
       "N_where": 2,
       "idx": .8,
-      "passtype": 5,
       "exptype": 1,
       "niterations": 2
     },
@@ -185,7 +185,6 @@ ALL_OPTIONS = {
       "N_pred": 3,
       "N_where": [1, 2, 3],
       "idx": 0.8,
-      "passtype": 5,
       "exptype": 1,
       "niterations": 2
     },
@@ -194,7 +193,6 @@ ALL_OPTIONS = {
       "N_q": 100,
       "N_pred": 2,
       "N_where": 2,
-      "passtype": 5,
       "idx": [0.2, 05, 0.8, 0.9],
       "exptype": 1,
       "niterations": 2
@@ -204,7 +202,6 @@ ALL_OPTIONS = {
       "N_q": 100,
       "N_pred": 2,
       "N_where": 2,
-      "passtype": 5,
       "idx": [.8],
       "exptype": 1,
       "niterations": [1,2,3]
@@ -220,8 +217,6 @@ ALL_OPTIONS = {
       "N_where": [2],
       "idx": [.8],
       "exptype": 1,
-      "passtype": 2,
-      "rollbackbatch": [1, 2, 5]
     }
   ],
   "qfix": [
@@ -232,8 +227,6 @@ ALL_OPTIONS = {
       "N_where": [2],
       "idx": [.8],
       "exptype": 1,
-      "passtype": 3,
-      "qfixtype": [1, 2]
     }
   ],
   "endtoend": [
@@ -244,8 +237,6 @@ ALL_OPTIONS = {
       "N_where": [2],
       "idx": [.8],
       "exptype": 1,
-      "passtype": 4,
-      "qfixtype": 1
     }
   ],
   "noise": [
@@ -256,8 +247,6 @@ ALL_OPTIONS = {
       "N_where": [2],
       "idx": [.8],
       "exptype": 1,
-      "passtype": 4,
-      "qfixtype": 1,
       "p_fp": [0, 01, 02, 05], 
       "p_fn": 0
     },
@@ -268,8 +257,6 @@ ALL_OPTIONS = {
       "N_where": [2],
       "idx": [.8],
       "exptype": 1,
-      "passtype": 4,
-      "qfixtype": 1,
       "p_fp": 0,
       "p_fn": [0, 01, 02, 05], 
     }

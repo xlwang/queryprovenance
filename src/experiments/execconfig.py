@@ -58,15 +58,17 @@ def init_db(db):
         p_fp float,
         p_fn float,
         exptype int,
-        passtype int,
-        optchoice int,
-        qfixtype int,
-        niterations int,
         epsilon float,
         M float,
-        approx float,
-        prune float,
-        rollbackbatch int
+        solvertype int,
+        batchsize int,
+        niterations int,
+        approx int,
+        alg2_attrsize int,
+        alg2_obj int,
+        alg2_objratio int,
+        alg2_fixq int,
+        alg2_fixattr int
       );
       """,
       # mode: [clean, dirty, fixed]
@@ -259,6 +261,7 @@ def sync_cid(db, dburl, cid):
     args[i] = int(args[i])
   args.append(config['n_d'])
   args.append(config['gen_mode'])
+  print args
   queries, corruptqueries = genqlog(False, None, cid, *args)
   print "qlog generated"
 
