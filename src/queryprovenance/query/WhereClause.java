@@ -96,7 +96,8 @@ public class WhereClause {
 			// generate new random number
 			int v = rand.nextInt(dom[1]-dom[0]) + dom[0];
 			v = v==0?v+1:v;
-			WhereExpr.Op op = expr.getOperator();
+			// WhereExpr.Op op = expr.getOperator();
+			WhereExpr.Op op = WhereExpr.Op.le;
 			Expression varexpr = new VariableExpression(v, false);
 			conds.add(new WhereExpr(expr.getAttrExpr().clone(), op, varexpr));
 		}

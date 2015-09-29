@@ -6,11 +6,7 @@ import queryprovenance.query.SetClause;
 import queryprovenance.query.WhereClause;
 import weka.core.Debug.Random;
 
-
-
-
-
-class Transformation {
+public class Transform {
 	public enum Type {
 		DELETE, VALUES, SET, WHERE
 	}
@@ -19,7 +15,7 @@ class Transformation {
 	protected WhereClause where;
 	protected SetClause set;
 	protected QueryParams params;
-	public Transformation(int qidx, Type type, WhereClause where, SetClause set, QueryParams params) {
+	public Transform(int qidx, Type type, WhereClause where, SetClause set, QueryParams params) {
 		// delete query
 		// change insert value
 		//   change values at indexes idxs
@@ -71,9 +67,9 @@ class Transformation {
 				where = WhereClause.generate(ql.get(qidx).getWhere(), params);
 			q = ql.get(qidx);
 			q = q.clone();
-			System.out.println(q);
+			//System.out.println(q);
 			q.setWhere(where);
-			System.out.println(q);
+			//System.out.println(q);
 			ql.set(qidx, q);
 			break;
 		}
@@ -83,19 +79,21 @@ class Transformation {
 	/*
 	 * Create a transformation for our experiments
 	 */
-	public static Transformation generate(ExpParams params, double percentage) {
+	public static Transform generate(ExpParams params, double percentage) {
 		Random rand = new Random();
 		int lowerbd = (int) (params.ql_nqueries*( (double) (percentage-0.2) >0 ? percentage - 0.2: 0));
 		int upperbd = (int) (params.ql_nqueries*((double) (percentage+0.2) <1 ? percentage + 0.2: 1));
 		upperbd = upperbd == 0?1:upperbd;
-		int idx = rand.nextInt(upperbd-lowerbd) + lowerbd;
+		int idx = rand.nextInt(upperbd - lowerbd + 1) + lowerbd;
+		idx = idx >= params.ql_nqueries ? idx - 1 : idx;
+		idx = params.ql_nqueries - 1;
 		QueryParams qparams = new QueryParams();
 		qparams.from = params.table;
 		qparams.nclauses = 1;
 		qparams.queryType = Query.Type.UPDATE;
 		//WhereClause newWhere = WhereClause.generate(qparams);
 		//Transformation.Type transtype = (((Math.random()<0.5)?0:1) == 0)?Transformation.Type.WHERE:Transformation.Type.SET;
-		Transformation.Type transtype = Transformation.Type.WHERE;
-		return new Transformation(idx, transtype, null, null, qparams);
+		Transform.Type transtype = Transform.Type.WHERE;
+		return new Transform(idx, transtype, null, null, qparams);
 	}
 }

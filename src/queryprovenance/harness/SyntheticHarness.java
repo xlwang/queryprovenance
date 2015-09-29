@@ -1,5 +1,4 @@
-package queryprovenance.harness;
-
+         package queryprovenance.harness;
 import ilog.cplex.IloCplex;
 
 import java.io.BufferedReader;
@@ -35,41 +34,11 @@ import queryprovenance.query.WhereExpr.Op;
 import queryprovenance.solve.FixQueryLog;
 import queryprovenance.solve.FixQueryLogParams;
 
-public class SyntheticHarness {
-	// Define parameter class for the current problem.
-	public class ProbParams {
-		public ProbParams() {
-		}
-
-		public ProbParams(double p_fp_, double p_fn_, int solvertype_,
-				int niterations_) {
-			p_fp = p_fp_;
-			p_fn = p_fn_;
-			solvertype = solvertype_;
-			niterations = niterations_;
-		}
-
-		public double p_fp;
-		public double p_fn;
-		public int solvertype = 0;
-		public int niterations = 10;
-		public int n_compl = 10;
-		public int n_compl_iter = 10;
-	}
+public class SyntheticHarness extends HarnessBase {
 
 	// Define problem variables.
-	DatabaseHandler handler = null;
 	int cid = -1;
 	String tableBase = null;
-	QueryLog cleanQueries = null;
-	queryprovenance.problemsolution.QueryLog dirtyQueries = null;
-	DatabaseStates cleanDss = null;
-	DatabaseStates dirtyDss = null;
-	Complaint complaints = null;
-
-	// Define solver parameters.
-	public FixQueryLogParams fix_params;
-	public ProbParams prob_params;
 
 	public SyntheticHarness(DatabaseHandler handler, int cid, QueryLog cleanQs,
 			QueryLog dirtyQs) throws Exception {
@@ -253,15 +222,49 @@ public class SyntheticHarness {
 
 			switch (type) {
 			case "UPDATE":
-				queries.add(jsonToUpdateQuery(qidx, curTable, setjson,
+				queries.add(Util.jsonToUpdateQuery(qidx, curTable, setjson,
 						wherejson));
 				break;
 			case "INSERT":
-				queries.add(jsonToInsertQuery(qidx, curTable, valsjson));
+				queries.add(Util.jsonToInsertQuery(qidx, curTable, valsjson));
 				break;
 			}
 		}
 		return queries;
+	}
+	
+	public static List<Query> loadQueryLog(String fname, Table table)
+			throws Exception {
+		List<Query> qlog = new ArrayList<Query>();
+		BufferedReader fr = new BufferedReader(new FileReader(fname));
+		String line = null;
+		int qid = 0;
+
+		while ((line = fr.readLine()) != null) {
+			JSONObject qjson = (JSONObject) JSONValue.parse(line.trim());
+			String qtype = (String) qjson.get("type");
+			JSONArray vals = (JSONArray) qjson.get("vals");
+			JSONArray set = (JSONArray) qjson.get("set");
+			JSONArray where = (JSONArray) qjson.get("where");
+			String tname = (String) qjson.get("table");
+
+			switch (qtype) {
+			case "UPDATE":
+				WhereClause wclause = Util.jsonToWhereClause(where);
+				SetClause sclause = Util.jsonToSetClause(set);
+				qlog.add(new UpdateQuery(qid, sclause, table, wclause));
+				break;
+			case "INSERT":
+				List<String> realvals = new ArrayList<String>();
+				for (Object s : vals) {
+					realvals.add((String) s);
+				}
+				qlog.add(new InsertQuery(qid, table, realvals));
+
+			}
+			qid++;
+		}
+		return qlog;
 	}
 
 	static void saveQueries(DatabaseHandler handler, String table, int cid,
@@ -282,8 +285,8 @@ public class SyntheticHarness {
 				vals_str = vals.toJSONString();
 				type_str = "INSERT";
 			} else if (type == Query.Type.UPDATE) {
-				JSONArray where = whereToJSON(q.getWhere());
-				JSONArray set = setToJSON(q.getSet());
+				JSONArray where = Util.whereToJSON(q.getWhere());
+				JSONArray set = Util.setToJSON(q.getSet());
 				where_str = where.toJSONString();
 				set_str = set.toJSONString();
 				type_str = "UPDATE";
@@ -322,131 +325,6 @@ public class SyntheticHarness {
 		return dss;
 	}
 
-	public static List<Query> loadQueryLog(String fname, Table table)
-			throws Exception {
-		List<Query> qlog = new ArrayList<Query>();
-		BufferedReader fr = new BufferedReader(new FileReader(fname));
-		String line = null;
-		int qid = 0;
-
-		while ((line = fr.readLine()) != null) {
-			JSONObject qjson = (JSONObject) JSONValue.parse(line.trim());
-			String qtype = (String) qjson.get("type");
-			JSONArray vals = (JSONArray) qjson.get("vals");
-			JSONArray set = (JSONArray) qjson.get("set");
-			JSONArray where = (JSONArray) qjson.get("where");
-			String tname = (String) qjson.get("table");
-
-			switch (qtype) {
-			case "UPDATE":
-				WhereClause wclause = jsonToWhereClause(where);
-				SetClause sclause = jsonToSetClause(set);
-				qlog.add(new UpdateQuery(qid, sclause, table, wclause));
-				break;
-			case "INSERT":
-				List<String> realvals = new ArrayList<String>();
-				for (Object s : vals) {
-					realvals.add((String) s);
-				}
-				qlog.add(new InsertQuery(qid, table, realvals));
-
-			}
-			qid++;
-		}
-		return qlog;
-	}
-
-	public static JSONArray whereToJSON(WhereClause where) {
-		JSONArray ret = new JSONArray();
-		for (WhereExpr expr : where.getWhereExprs()) {
-			Op op = expr.getOperator();
-			JSONArray wa = new JSONArray();
-			wa.add(expr.getAttrExpr().toString());
-			wa.add(expr.getOperatorString());
-			wa.add(expr.getVar());
-			ret.add(wa);
-		}
-		return ret;
-	}
-
-	public static JSONArray setToJSON(SetClause set) {
-		JSONArray ret = new JSONArray();
-		for (SetExpr expr : set.getSetExprs()) {
-			JSONArray sa = new JSONArray();
-			String col = expr.getAttr().toString();
-			sa.add(col);
-			if (expr.getExpr() instanceof AdditionExpression) {
-				JSONArray exprjson = new JSONArray();
-				exprjson.add(col);
-				exprjson.add("=");
-				List<Expression> addExprs = expr.getExpr().getVariable();
-				double val = addExprs.get(addExprs.size() - 1)
-						.getAssignedEval();
-				exprjson.add(val);
-				sa.add(exprjson);
-			} else {
-				sa.add(expr.getExpr().getAssignedEval());
-			}
-			ret.add(sa);
-		}
-		return ret;
-	}
-
-	public static InsertQuery jsonToInsertQuery(int qid, Table table,
-			JSONArray vals) {
-		List<String> realvals = new ArrayList<String>();
-		for (Object s : vals) {
-			realvals.add(String.valueOf(s));
-		}
-		return new InsertQuery(qid, table, realvals);
-	}
-
-	public static UpdateQuery jsonToUpdateQuery(int qid, Table table,
-			JSONArray setjson, JSONArray wherejson) {
-		WhereClause where = jsonToWhereClause(wherejson);
-		SetClause set = jsonToSetClause(setjson);
-		return new UpdateQuery(qid, set, table, where);
-	}
-
-	public static WhereClause jsonToWhereClause(JSONArray where) {
-		List<WhereExpr> exprs = new ArrayList<WhereExpr>();
-		for (Object wc : where) {
-			JSONArray wa = (JSONArray) wc;
-			String col = (String) wa.get(0);
-			String op = (String) wa.get(1);
-			long v = (long) wa.get(2);
-			WhereExpr expr = new WhereExpr(new VariableExpression(col, true),
-					WhereExpr.getOperator(op), new VariableExpression(v, false));
-			exprs.add(expr);
-		}
-		return new WhereClause(exprs, WhereClause.Op.CONJ);
-	}
-
-	public static SetClause jsonToSetClause(JSONArray set) {
-		List<SetExpr> setexprs = new ArrayList<SetExpr>();
-		for (Object setc : set) {
-			VariableExpression lhs = null;
-			Expression rhs = null;
-			JSONArray seta = (JSONArray) setc;
-			String col = (String) seta.get(0);
-			lhs = new VariableExpression(col, true);
-
-			if (seta.get(1) instanceof JSONArray) {
-				JSONArray exprjson = (JSONArray) seta.get(1);
-				String exprcol = (String) exprjson.get(0);
-				String exprop = (String) exprjson.get(1);
-				float exprv = (float) exprjson.get(2);
-				rhs = new AdditionExpression(new VariableExpression(col, true),
-						new VariableExpression(exprv, false));
-			} else {
-				long exprv = (long) seta.get(1);
-				rhs = new VariableExpression(exprv, false);
-			}
-
-			setexprs.add(new SetExpr(lhs, rhs));
-		}
-		return new SetClause(setexprs);
-	}
 
 	/*
 	 * config array: [ N_D, N_dim, N_q, N_pred, N_ins, N_set, N_where, idx, p_I,
