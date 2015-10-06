@@ -111,7 +111,7 @@ public class SyntheticHarness extends HarnessBase {
 				fixedlog = solver2.fixQueries(cplex, fix_params);
 			}
 			// update exprs result
-			DatabaseStates fixedds = fixedlog.execute(tableBase, handler);
+			DatabaseStates fixedds = fixedlog.execute(tableBase, "fixed", handler, true);
 			computeMetrics(fixedlog, fixedds, solver, solver2, complaints, 0);
 			// update complaint set
 			Complaint newcmp = new Complaint(cleanDss.get(cleanDss.size() - 1),
@@ -226,7 +226,7 @@ public class SyntheticHarness extends HarnessBase {
 						wherejson));
 				break;
 			case "INSERT":
-				queries.add(Util.jsonToInsertQuery(qidx, curTable, valsjson));
+				queries.add(Util.jsonToInsertQuery(qidx, curTable, valsjson, null));
 				break;
 			}
 		}
@@ -312,14 +312,14 @@ public class SyntheticHarness extends HarnessBase {
 		ResultSet rset = handler.queryExecution(cq);
 		rset.next();
 		System.out.println(rset.getString("tname"));
-		dss.add(new DatabaseState(handler, rset.getString("tname")));
+		dss.add(new DatabaseState(handler, rset.getString("tname"), null));
 
 		System.out.println(dq);
 		rset = handler.queryExecution(dq);
 		while (rset.next()) {
 			String tname = rset.getString("tname");
 			// System.out.println(" " + tname);
-			DatabaseState ds = new DatabaseState(handler, tname);
+			DatabaseState ds = new DatabaseState(handler, tname, null);
 			dss.add(ds);
 		}
 		return dss;

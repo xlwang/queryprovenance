@@ -5,6 +5,7 @@ import ilog.cplex.IloCplex;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -18,6 +19,7 @@ import queryprovenance.problemsolution.Complaint;
 import queryprovenance.problemsolution.QueryLog;
 import queryprovenance.problemsolution.SingleComplaint;
 import queryprovenance.problemsolution.Solution;
+import queryprovenance.query.Query;
 import queryprovenance.solve.FixQueryLog;
 import queryprovenance.solve.FixQueryLogParams;
 
@@ -30,6 +32,7 @@ public class Harness {
 	Table table = null;
 
 	int run = 0;
+	int domian_max = 50;
 
 	public static void main(String[] args) throws Exception {
 		String dir = "/Users/xlwang/2015/projects/queryprov/code/queryprovenance/queryprovenance/";
@@ -46,7 +49,7 @@ public class Harness {
 		// 1000, 5000, 10000,100, 500, 1000, 5000, 10000, 100, 500, 1000, 5000,
 		// 10000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000};
 		int[] clause_count = { 1, 1, 1, 1, 1, 1 };
-		int[] qlog_count = { 10, 50, 100, 500, 1000 };
+		int[] qlog_count = { 1000, 50, 100, 500, 1000 };
 		int[] tuple_count = { 500, 500, 500, 500, 500, 500 };
 		IloCplex cplex = new IloCplex();
 		// cplex.setParam(IloCplex.IntParam.PrePass, 0);
@@ -64,7 +67,7 @@ public class Harness {
 
 		Harness harness = new Harness();
 
-		for (int i = 0; i < 4; ++i) {
+		for (int i = 0; i < 5; ++i) {
 			// prepare data files
 			String filename = dir + "/result/harnessresult(" + tuple_count[i]
 					+ "_" + qlog_count[i] + "_" + clause_count[i] + ").csv";
@@ -115,26 +118,33 @@ public class Harness {
 				"employmentyear", "tax", "salary" };
 		Table.Type[] types = new Table.Type[] { Table.Type.NUM, Table.Type.NUM,
 				Table.Type.NUM, Table.Type.NUM, Table.Type.NUM, Table.Type.NUM };
-		Object[] domains = new Object[] { new int[] { 0, 100 },
-				new int[] { 0, 100 }, new int[] { 0, 100 },
-				new int[] { 0, 100 }, new int[] { 0, 100 },
-				new int[] { 0, 100 } };
-		table = new Table("Employee", cols, types, domains, 0);
+		Object[] domains = new Object[] { new int[] { 0, domian_max },
+				new int[] { 0, domian_max }, new int[] { 0, domian_max },
+				new int[] { 0, domian_max }, new int[] { 0, domian_max },
+				new int[] { 0, domian_max } };
+		ArrayList<Integer> keylist = new ArrayList<Integer>();
+		keylist.add(0);
+		table = new Table("Employee", cols, types, domains, keylist);
 		params.table = table;
 		params.ql_nqueries = qlog_count;
 		params.ql_nclauses = clause_count;
-		params.ql_qtypes = null;
+
 
 		// correct query log
 		qlog = QueryLog.generate(params);
-		ds = qlog.execute(table.getName(), handler);
+		ds = qlog.execute(table.getName(), "clean", handler, true);
 		params.qlog = qlog;
+		params.ql_qtypes = new Query.Type[qlog.size()];
+		for(int qidx = 0; qidx < qlog.size(); ++qidx) {
+			params.ql_qtypes[qidx] = qlog.get(qidx).getType();
+		} 
 
 		// System.out.println("Transformation: ");
-		Transform trans = Transform.generate(params, 1);
+		Transform trans = new Transform(qlog.size());
+		trans.generate(params, 1);
 		badqlog = trans.apply(qlog);
 		// System.out.println("Wrong Query Log: ");
-		badds = badqlog.execute(table.getName(), handler);
+		badds = badqlog.execute(table.getName(), "dirty", handler, true);
 
 		// get complaint set: good ds vs. bad ds
 		complaint = new Complaint(ds.get(ds.size() - 1),
@@ -145,17 +155,17 @@ public class Harness {
 			handler.executePrepFile(dir + "/data/inserts.sql");
 
 			qlog = QueryLog.generate(params);
-			ds = qlog.execute(table.getName(), handler);
+			ds = qlog.execute(table.getName(), "clean", handler, true);
 
 			params.qlog = qlog;
-			trans = Transform.generate(params, percentage);
+			trans.generate(params, 1);
 
 			badqlog = trans.apply(qlog);
-			badds = badqlog.execute(table.getName(), handler);
+			badds = badqlog.execute(table.getName(), "dirty", handler, true);
 			complaint = new Complaint(ds.get(ds.size() - 1), badds.get(badds
 					.size() - 1));
 
-			// System.out.print(complaint.size() + " ");
+			System.out.print(complaint.size() + " ");
 		}
 
 		return trans.qidx;
@@ -280,7 +290,7 @@ public class Harness {
 			// fixedqlog = solver2.onePassSolution(cplex, handler, fixedds,
 			// fixedqlog, complaint, 0.000001, 10000000, updated, true, false,
 			// false, options);
-			fixedds = fixedqlog.execute(table.getName(), handler);
+			fixedds = fixedqlog.execute(table.getName(), "fixed", handler, true);
 			Metrics.Index diff = Metrics.compare(badqlog, fixedqlog, 0.1);
 			updated.clear();
 			updated.addAll(diff);

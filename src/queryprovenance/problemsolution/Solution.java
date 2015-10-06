@@ -64,7 +64,7 @@ public class Solution {
 		// write metrics, times, dataparas into result table
 	}
 	
-	public HashSet<Integer> preprocess(boolean preproc) {
+	public HashSet<Integer> preprocess(boolean preproc) throws Exception {
 		HashSet<Integer> candidate = new HashSet<Integer>();
 		//preprocess queries
 		if(preproc) {
@@ -80,8 +80,7 @@ public class Solution {
 	
 	/* solve by one pass */
 	public QueryLog onePassSolution(IloCplex cplex, 
-			double epsilon, double M, 
-			boolean prepos, boolean feasible, 
+			double epsilon, double M, boolean feasible, 
 			boolean falsepositive, int batch, String[] args) throws Exception {
 		// define linear solver
 		times = new long[]{0,0,0,0};
@@ -89,7 +88,7 @@ public class Solution {
 		linearsolver.setPrint(print);
 		
 		long starttime = System.nanoTime();
-		HashSet<Integer> candidate = preprocess(prepos); 
+		HashSet<Integer> candidate = preprocess(true); 
 		times[0] = System.nanoTime() - starttime;
 		// record original number of complaints
 		int complaintsize = complaints.size();

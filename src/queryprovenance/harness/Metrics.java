@@ -56,7 +56,7 @@ public class Metrics {
 	public static HashMap<Type, String> evaluateAll(
 			QueryLog qlog, DatabaseStates ds,
 			QueryLog badqlog, DatabaseStates badds, 
-			QueryLog fixedqlog, DatabaseStates fixedds) {
+			QueryLog fixedqlog, DatabaseStates fixedds) throws Exception {
 		
 		
 		// XXX: assume the NUMBER of queries in each qlog has not changed
@@ -95,7 +95,7 @@ public class Metrics {
 	public static HashMap<Type, Double> evaluateAll2(
 			QueryLog qlog, DatabaseStates ds,
 			QueryLog badqlog, DatabaseStates badds, 
-			QueryLog fixedqlog, DatabaseStates fixedds) {
+			QueryLog fixedqlog, DatabaseStates fixedds) throws Exception {
 	
 		HashMap<Type, Double> metrics = new HashMap<Type, Double>();
 		// compare database state differences

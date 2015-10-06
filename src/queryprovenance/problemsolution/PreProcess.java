@@ -14,7 +14,7 @@ import queryprovenance.query.Query;
 public class PreProcess {
 
 	/* find candidate queries : Single Error */
-	public Set<Integer> findCandidate(DatabaseStates badds, QueryLog badqlog, Complaint compset) {
+	public Set<Integer> findCandidate(DatabaseStates badds, QueryLog badqlog, Complaint compset) throws Exception {
 		Set<Integer> candidate = new HashSet<Integer>();
 		// get error attribute
 		HashSet<Integer> wrongattribute = new HashSet<Integer>();
@@ -22,7 +22,11 @@ public class PreProcess {
 		for(SingleComplaint sp : compset.compmap.values()) {
 			Tuple orgtuple = last.getTuple(sp.key);
 			for(int i = 0; i < sp.values.length; ++i) {
-				if(!orgtuple.getValue(i).equals(sp.values[i])) {
+				if(orgtuple.getValue(i) == null || sp.values[i] == null) {
+					if(! (orgtuple.getValue(i) == null && sp.values[i] == null)) {
+						wrongattribute.add(i);
+					}
+				} else if(!orgtuple.getValue(i).equals(sp.values[i])) {
 					wrongattribute.add(i);
 				}
 			}

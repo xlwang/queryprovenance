@@ -1,12 +1,17 @@
 package queryprovenance.problemsolution;
 
+import java.util.ArrayList;
+
+import queryprovenance.database.Table;
+import queryprovenance.harness.Util;
+
 // define single complaint
 public class SingleComplaint {
-	public Integer key;
+	public String key;
 	public String[] values;
 	
 	/* initialization */
-	public SingleComplaint(Integer key_, String[] values_){
+	public SingleComplaint(String key_, String[] values_){
 		key = key_;
 		values = values_;
 	}
@@ -25,5 +30,14 @@ public class SingleComplaint {
     if (values != null) 
       vals = values.clone();
 		return new SingleComplaint(key, vals);
+	}
+	
+	public String getConstraint(Table table) {
+		ArrayList<String> attrs = table.getPrimaryKey();
+		String[] conditions = new String[attrs.size()];
+		for(int i = 0; i < attrs.size(); ++i) {
+			conditions[i] = attrs.get(i) + " = " + values[table.getColumnIdx(attrs.get(i))];
+		}
+		return " (" + Util.join(conditions, " and ") + ") ";
 	}
 }

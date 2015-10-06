@@ -59,8 +59,10 @@ public class WhereClause {
 			//String attr = cols[idx];
 			Table.Type type = t.getType(idx);
 			if (type == Table.Type.NUM) {
-				int[] dom = t.getNumDomain(idx);
-				int v = rand.nextInt(dom[1]-dom[0]) + dom[0];
+				long[] dom = t.getNumDomain(idx);
+				long v = dom[0];
+				if(dom[1] != dom[0])
+					v = rand.nextInt((int)(dom[1]-dom[0])) + dom[0];
 				v = v == 0? v+1 : v;
 				// conds.add(new WhereExpr(v+"", op, attr));
 				Expression attr = new VariableExpression(cols[idx], true); 
@@ -87,17 +89,23 @@ public class WhereClause {
 			// duplicate attribute , attribute index
 			String attr = expr.getAttrExpr().getVariable().get(0).toString();
 			int idx = -1;
-			for(int i = 0; i < cols.length; ++i)
-				if(cols[i].equals(attr))
+			for(int i = 0; i < cols.length; ++i) {
+				if(cols[i].toLowerCase().equals(attr.toLowerCase()))
 					idx = i;
-			if(idx == -1)
+			}
+			if(idx == -1) {
+				System.out.println("not find");
 				return where;
-			int[] dom = t.getNumDomain(idx);
+			}
+			long[] dom = t.getNumDomain(idx);
+			long v = dom[0];
+			if(dom[1] != dom[0]) {
+				v =  rand.nextInt((int)(dom[1]-dom[0])) + dom[0];
+			}
 			// generate new random number
-			int v = rand.nextInt(dom[1]-dom[0]) + dom[0];
 			v = v==0?v+1:v;
-			// WhereExpr.Op op = expr.getOperator();
-			WhereExpr.Op op = WhereExpr.Op.le;
+			WhereExpr.Op op = expr.getOperator();
+			// WhereExpr.Op op = WhereExpr.Op.le;
 			Expression varexpr = new VariableExpression(v, false);
 			conds.add(new WhereExpr(expr.getAttrExpr().clone(), op, varexpr));
 		}
@@ -115,9 +123,9 @@ public class WhereClause {
 	
 	public WhereClause solve(CplexHandler cplex, DatabaseState pre, DatabaseState bad, Complaint complaint, String[] options) throws Exception{
 		WhereClause result = null;
-		HashMap<Integer, String> badclassinfo = pre.compare(bad);
-		HashMap<Integer, String> classinfo = new HashMap<Integer, String>();
-		for(Integer key: complaint.keySet()){
+		HashMap<String, String> badclassinfo = pre.compare(bad);
+		HashMap<String, String> classinfo = new HashMap<String, String>();
+		for(String key: complaint.keySet()){
 			SingleComplaint comp = complaint.get(key);
 			String originfo = badclassinfo.get(key);
 			originfo = originfo.equals("g")?"b":"g";
@@ -133,12 +141,12 @@ public class WhereClause {
 		WhereClause result = null;
 		
 		// gather class information
-		HashMap<Integer, String> classinfo = pre.compare(next);
+		HashMap<String, String> classinfo = pre.compare(next);
 		// gather class information for bad db state
-		HashMap<Integer, String> badclassinfo = pre.compare(bad);
+		HashMap<String, String> badclassinfo = pre.compare(bad);
 		
 		boolean isSame = true;
-		for(Integer key:classinfo.keySet()){
+		for(String key:classinfo.keySet()){
 			if(!classinfo.get(key).equals(badclassinfo.get(key))){
 				isSame = false;
 				break;
@@ -171,7 +179,7 @@ public class WhereClause {
 	}
 	
 	/* solve the where clause by MILP cplex*/
-	public WhereClause solveMILP(CplexHandler cplex, DatabaseState pre, DatabaseState next, DatabaseState bad, HashMap<Integer, String> classinfo, String[] option) throws Exception{
+	public WhereClause solveMILP(CplexHandler cplex, DatabaseState pre, DatabaseState next, DatabaseState bad, HashMap<String, String> classinfo, String[] option) throws Exception{
 		// define parameters
 		double ep = Double.MAX_VALUE;
 		String objFuc = null;
@@ -221,7 +229,7 @@ public class WhereClause {
 	}
 	
 	/* solve the where clause by decision tree */
-	public WhereClause solveDT(DatabaseState pre, DatabaseState next, DatabaseState bad, HashMap<Integer, String> classinfo) throws Exception{
+	public WhereClause solveDT(DatabaseState pre, DatabaseState next, DatabaseState bad, HashMap<String, String> classinfo) throws Exception{
 		// prepare input for Decision Tree solver
 		WhereClause fixed_where = null;
 		

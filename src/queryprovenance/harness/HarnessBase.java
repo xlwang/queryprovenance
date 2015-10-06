@@ -23,7 +23,7 @@ public abstract class HarnessBase {
 		public double p_fp;
 		public double p_fn;
 		public int solvertype = 0;
-		public int niterations = 10;
+		public int niterations = 1;
 		public int n_compl = 10;
 		public int n_compl_iter = 10;
 	}
@@ -36,7 +36,7 @@ public abstract class HarnessBase {
 	Complaint complaints = null;
 
 	// Define solver parameters.
-	public FixQueryLogParams fix_params;
-	public ProbParams prob_params;
+	public FixQueryLogParams fix_params = new FixQueryLogParams();
+	public ProbParams prob_params = new ProbParams();
 	
 }

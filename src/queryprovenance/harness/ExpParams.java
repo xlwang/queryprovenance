@@ -2,6 +2,7 @@ package queryprovenance.harness;
 
 import queryprovenance.database.Table;
 import queryprovenance.problemsolution.QueryLog;
+import queryprovenance.query.Query;
 
 public class ExpParams {
 	protected static ExpParams _instance = new ExpParams();
@@ -14,7 +15,7 @@ public class ExpParams {
 	 * prefix: ql_
 	 */
 	public int ql_nqueries = 0;
-	public float[] ql_qtypes = null;
+	public Query.Type[] ql_qtypes = null;
 	public int ql_nclauses = 0;
 	
 	/*

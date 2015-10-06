@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -22,21 +23,33 @@ import queryprovenance.query.WhereClause;
 import queryprovenance.query.WhereExpr;
 import queryprovenance.query.WhereExpr.Op;
 
-
-
 public class Util {
 	public static String join(Object[] os, String sep) {
 		List<Object> l = new ArrayList<Object>();
-		for (Object o : os) l.add(o);
+		for (Object o : os)
+			l.add(o);
 		return join(l, sep);
 	}
+
 	public static String join(List<? extends Object> l, String sep) {
 		String s = "";
 		for (int i = 0; i < l.size(); i++) {
 			s += l.get(i).toString();
 			if (i < l.size() - 1) {
 				s += sep;
-			}		
+			}
+		}
+		return s;
+	}
+	
+	public static String join(Set<? extends Object> l, String sep) {
+		String s = "";
+		int size = 0;
+		for(Object obj : l) {
+			s += obj.toString();
+			if(size++ < l.size() - 1) {
+				s += sep;
+			}
 		}
 		return s;
 	}
@@ -78,13 +91,20 @@ public class Util {
 	}
 
 	public static InsertQuery jsonToInsertQuery(int qid, Table table,
-			JSONArray vals) {
+			JSONArray vals, JSONArray attrs) {
 		List<String> realvals = new ArrayList<String>();
+		List<String> realattrs = new ArrayList<String>();
 		for (Object s : vals) {
-			if(s instanceof Long || s instanceof Double || s instanceof Integer)
+			if (s instanceof Long || s instanceof Double
+					|| s instanceof Integer)
 				realvals.add(String.valueOf(s));
 		}
-		return new InsertQuery(qid, table, realvals);
+		if (attrs != null) {
+			for (Object attr : attrs) {
+				realattrs.add(String.valueOf(attr));
+			}
+		}
+		return new InsertQuery(qid, table, realvals, realattrs);
 	}
 
 	public static UpdateQuery jsonToUpdateQuery(int qid, Table table,

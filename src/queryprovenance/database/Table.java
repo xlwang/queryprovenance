@@ -4,6 +4,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 
@@ -12,7 +13,8 @@ public class Table {
 		STR, NUM  // column types
 	}
 
-	private int keyidx = -1;
+	// private int keyidx = -1;
+	private HashSet<Integer> keyidx_list = new HashSet<Integer>();
 	private String name;
 	private String[] columns;
 	public Type[] types;
@@ -24,12 +26,26 @@ public class Table {
 
 	// should only be used when sure that name is only attribute that is needed
 	public Table(String name) {
-		this(name, null, null, null, -1);
+		this(name, null, null, null, new ArrayList<Integer>());
 	}
 	
-	public Table(String name, String[] columns, Type[] types, Object[] domains, int primaryKeyIdx) {
+	public Table(String name, String[] columns, Type[] types, Object[] domains, ArrayList<Integer> primaryKeyIdx) {
 		this.name = name;
-		this.keyidx = primaryKeyIdx;
+		// this.keyidx = primaryKeyIdx;
+		for(int keyidx : primaryKeyIdx) {
+			this.keyidx_list.add(keyidx);
+		}
+		this.columns = columns;
+		this.types = types;
+		this.domains = domains;
+	}
+	
+	public Table(String name, String[] columns, Type[] types, Object[] domains, HashSet<Integer> primaryKeyIdx) {
+		this.name = name;
+		// this.keyidx = primaryKeyIdx;
+		for(int keyidx : primaryKeyIdx) {
+			this.keyidx_list.add(keyidx);
+		}
 		this.columns = columns;
 		this.types = types;
 		this.domains = domains;
@@ -45,8 +61,8 @@ public class Table {
 		return (String[])domains[colidx];
 	}
 	
-	public int[] getNumDomain(int colidx) {
-		return (int[]) domains[colidx];
+	public long[] getNumDomain(int colidx) {
+		return (long[]) domains[colidx];
 	}
 	
 	public String toString() {
@@ -61,8 +77,12 @@ public class Table {
 		return columns;
 	}
 	
-	public String getPrimaryKey() {
-		return columns[keyidx];
+	public ArrayList<String> getPrimaryKey() {
+		ArrayList<String> columnlist = new ArrayList<String>();
+		for(int keyidx : this.keyidx_list) {
+			columnlist.add(this.columns[keyidx]);
+		}
+		return columnlist;
 	}
 	
 	public Table clone() {
@@ -72,7 +92,7 @@ public class Table {
     if (types != null) typs = types.clone();
     Object[] dmns = null;
     if (domains != null) dmns = domains.clone();
-		return new Table(name, cols, typs, dmns, keyidx);
+		return new Table(name, cols, typs, dmns, keyidx_list);
 	}
 	
 	public void setName(String n_) {
@@ -82,8 +102,8 @@ public class Table {
 	public void setColumns(String[] c_) {
 		this.columns = c_;
 	}
-	public int getKeyIdx() {
-		return this.keyidx;
+	public HashSet<Integer> getKeyIdx() {
+		return this.keyidx_list;
 	}
 	
 	public int getColumnIdx(String column_name) {
@@ -107,21 +127,21 @@ public class Table {
 		ResultSet rset = handler.queryExecution("SELECT * FROM " + tname + " LIMIT 0");
 		ResultSetMetaData rmd = rset.getMetaData();
 		int ncols = rmd.getColumnCount();
-		int pkIdx = -1;
+		ArrayList<Integer> pkIdx = new ArrayList<Integer>();
 		String[] cols = new String[ncols];
 		Type[] types = new Type[ncols];
 		Object[] domains = new Object[ncols];
 		
-		String keyname = "id";
+		HashSet<String> keynames = new HashSet<String>();
 		ResultSet tabkey =  handler.getMetaData().getPrimaryKeys(null, null, tname.toLowerCase());
 		while(tabkey.next()) {
-			keyname = tabkey.getString(4);
+			keynames.add(tabkey.getString(4).toLowerCase());
 		}
 		for (int i = 0; i < ncols; i++) {
 			String col = rmd.getColumnName(i+1);
 			cols[i] = col;
-			if (keyname.equalsIgnoreCase(col)) {
-				pkIdx = i;
+			if(keynames.size() == 0 || keynames.contains(col.toLowerCase())) {
+					pkIdx.add(i);
 			}
 			int type = rmd.getColumnType(i+1);
 			Table.Type realtype = null;
@@ -141,6 +161,8 @@ public class Table {
 			case Types.VARCHAR:
 				realtype = Table.Type.STR;
 				break;
+			case Types.TIMESTAMP:
+				break;
 			default:
 				throw new RuntimeException(col + " has unknown type: " + type);
 			}
@@ -152,7 +174,7 @@ public class Table {
 				q = String.format(q, col, col, tname);
 				ResultSet rset2 = handler.queryExecution(q);
 				rset2.next();
-				int[] domain = new int[]{(int)rset2.getFloat(1), (int)rset2.getFloat(2)};
+				long[] domain = new long[]{(long)rset2.getFloat(1), (long)rset2.getFloat(2)};
 				domains[i] = domain;
 			} else {
 				String q = "SELECT distinct %s FROM %s";

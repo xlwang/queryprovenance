@@ -1,9 +1,11 @@
 package queryprovenance.solve;
 
+import queryprovenance.problemsolution.SingleComplaint;
 import ilog.concert.IloNumVar;
 import ilog.cplex.IloCplex;
 
 public class varX {
+	public SingleComplaint scp;
 	public IloNumVar var; // IloVariable
 	public String expr; // expression in the query: where expression in where
 						// clause or insert query
@@ -21,8 +23,9 @@ public class varX {
 	 * @param origval
 	 *            original satisfactory
 	 */
-	public varX(IloCplex cplex_, String expr_, double origval_)
+	public varX(IloCplex cplex_, SingleComplaint scp_, String expr_, double origval_)
 			throws Exception {
+		scp = scp_;
 		cplex = cplex_;
 		var = cplex.numVar(0, 1);
 		expr = expr_;
@@ -33,7 +36,7 @@ public class varX {
 	/**
 	 * Initialization
 	 */
-	public varX(IloCplex cplex_, String expr_, double origval_,
+	public varX(IloCplex cplex_, SingleComplaint scp_, String expr_, double origval_,
 			double solvedval_) throws Exception {
 		cplex = cplex_;
 		var = cplex.numVar(0, 1);
@@ -46,7 +49,7 @@ public class varX {
 	/** Function clone : clone the variable */
 	public varX clone() {
 		try {
-			return new varX(cplex, expr, origval, solvedval);
+			return new varX(cplex, scp, expr, origval, solvedval);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

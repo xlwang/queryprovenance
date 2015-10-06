@@ -36,7 +36,7 @@ public class FixQueryLog {
 
 	private boolean print = false; // print flag
 
-	public List<Integer> modifiedList = new ArrayList<Integer>();
+	public HashSet<Integer> modifiedList = new HashSet<Integer>();
 	public int avgconstraint = 0;
 	public int avgvariable = 0;
 
@@ -71,7 +71,7 @@ public class FixQueryLog {
 			ArrayList<HashMap<String, varX>> complVarXList = new ArrayList<HashMap<String, varX>>();
 			for (int i = 0; i < fixedQueries.size(); ++i) {
 				Query query = fixedQueries.get(i);
-				HashMap<String, varX> varXList = query.querySAT(cplex, badDss
+				HashMap<String, varX> varXList = query.querySAT(cplex, scp, badDss
 						.get(i).getTuple(scp.key).values);
 				complVarXList.add(varXList);
 			}
@@ -138,6 +138,7 @@ public class FixQueryLog {
 				- params.batch_per_iteration) { // batch of 2
 			// add candidate set, only include the current query
 			int startidx = sortedcandidate[i];
+			System.out.println("Index: " + String.valueOf(startidx));
 			HashSet<Integer> queryToFix = new HashSet<Integer>();
 			for (int j = 0; j < params.batch_per_iteration && i - j >= 0; ++j) {
 				queryToFix.add(sortedcandidate[i - j]);
@@ -181,6 +182,11 @@ public class FixQueryLog {
 				bestfix = linearization.querySolvedVar;
 				bestrm = linearization.queryRemoveList;
 				bestobj = linearization.getObjective();
+				//
+				if(i < sortedcandidate.length - 1) {
+					// print the objective
+					System.out.println(String.valueOf(bestobj));  
+				}
 			}
 		}
 		starttime = System.nanoTime();
@@ -196,7 +202,7 @@ public class FixQueryLog {
 	}
 
 	// preprocess the problem
-	public HashSet<Integer> preprocess(boolean preproc) {
+	public HashSet<Integer> preprocess(boolean preproc) throws Exception {
 		HashSet<Integer> candidate = new HashSet<Integer>();
 		// preprocess queries
 		if (preproc) {

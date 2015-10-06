@@ -4,6 +4,7 @@ import ilog.concert.IloConstraint;
 import ilog.concert.IloNumExpr;
 import ilog.concert.IloNumVar;
 import ilog.concert.IloObjective;
+import ilog.concert.IloRange;
 import ilog.cplex.IloCplex;
 
 import java.util.ArrayList;
@@ -38,7 +39,7 @@ public class Linearization {
 	// maximum time to escape from cplex solver
 	private static final double TIMELIMTI = 1;
 	// value for null
-	private static final double NOTEXIST = Double.MAX_VALUE;
+	private static final double NOTEXIST = Double.MIN_VALUE;
 
 	// Solver parameters
 	public FixQueryLogParams params;
@@ -85,6 +86,7 @@ public class Linearization {
 	 *            variable map for queries
 	 * @param varXMap_
 	 *            complaint-where clause satisfactory conditions map
+	 * @throws Exception 
 	 * 
 	 * */
 	public Linearization(
@@ -93,7 +95,7 @@ public class Linearization {
 			Complaint complaints_,
 			HashMap<VariableExpression, varQuery> varQMap_,
 			HashMap<SingleComplaint, ArrayList<HashMap<String, varX>>> varXMap_,
-			HashSet<Integer> queryToFix_, FixQueryLogParams params_) {
+			HashSet<Integer> queryToFix_, FixQueryLogParams params_) throws Exception {
 		params = params_;
 		badDss = badDss_;
 		fixedQueries = fixedQueries_;
@@ -158,7 +160,7 @@ public class Linearization {
 		}
 		// prepare: clean model
 		if (params.print)
-			System.out.println("Start solving : clear model");
+			System.out.println("Start solving : clear model ");
 		// clear model
 		this.clear(cplex);
 
@@ -344,9 +346,16 @@ public class Linearization {
 		for (String attr : attrs_map.keySet()) {
 			int varidx = attrs_map.get(attr);
 			int idx = table.getColumnIdx(attr);
-			double value = org_valary == null ? NOTEXIST : Double
-					.valueOf(org_valary[idx]);
-			cplexConstraints.add(cplex.addEq(cplex_varary[varidx], value));
+			try {
+				double value = org_valary == null || org_valary[idx] == null ? NOTEXIST
+						: Double.valueOf(org_valary[idx]);
+				
+				cplexConstraints.add(cplex.addEq(cplex_varary[varidx], value));
+			} catch (Exception e) {
+				System.out.println(org_valary[idx]);
+				boolean temp = org_valary == null || org_valary[idx] == null;
+				throw e;
+			}
 			/*
 			 * check conflict constraints IloConstraint[] constraintsary =
 			 * constraints.toArray(new IloConstraint[constraints.size()]);
@@ -527,9 +536,11 @@ public class Linearization {
 		for (int i = 0; i < whereexprs.size(); ++i) {
 			WhereExpr whereexpr = whereexprs.get(i);
 			varX x = scpvarXMap.get(whereexpr.toString());
+			boolean current_expr = false;
 			// check if current where clause should be considered
 			for (String attr : whereexpr.attrs) {
 				if (attrs.containsKey(attr)) {
+					current_expr = true;
 					// consider current where expression
 					IloNumExpr left = whereexpr.getAttrExpr().convertExpr(
 							cplex, attrs, prestate, varQMap, current_var, fix);
@@ -570,6 +581,7 @@ public class Linearization {
 				// when current variable is not solved yet
 				x_difflist.add(cplex.abs(cplex.diff(x.var, x.origval)));
 				current_x.add(x);
+				
 			} else {
 				// add constraints on processed varX
 				double solvedval = x.solvedval == 1 ? 1 : 0;

@@ -4,59 +4,70 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 
+import com.sun.deploy.uitoolkit.impl.fx.Utils;
+
 import queryprovenance.database.DatabaseHandler;
 import queryprovenance.database.DatabaseState;
 import queryprovenance.database.DatabaseStates;
 import queryprovenance.database.Table;
 import queryprovenance.harness.ExpParams;
 import queryprovenance.harness.QueryParams;
+import queryprovenance.harness.Util;
 import queryprovenance.query.Query;
 
-public class QueryLog extends ArrayList<Query>{
-	
+public class QueryLog extends ArrayList<Query> {
+
 	public QueryLog() {
 		super();
-	} 
+	}
+
 	/**
 	 * 
 	 */
 	private final long serialVersionUID = 5327786044304140040L;
 
-	
 	/*
-	 * Run the queries in the query log on the database in sequence.
-	 * For each query, create a unique table for the state
+	 * Run the queries in the query log on the database in sequence. For each
+	 * query, create a unique table for the state
 	 * 
 	 * Assumptions: database state is a single table
 	 */
-	public DatabaseStates execute(String baseTableName, DatabaseHandler handler) throws Exception {
-		//String baseTableName = this.get(0).getTable().getName();
-		ArrayList<String> tablenames = new ArrayList<String>();
+	public DatabaseStates execute(String baseTableName, String mid, 
+			DatabaseHandler handler, boolean inMemory) throws Exception {
+		// String baseTableName = this.get(0).getTable().getName();
+		List<String> tablenames = new ArrayList<String>();
 		String prevTable = baseTableName;
 		String qstr = "";
 		DatabaseStates dss = new DatabaseStates();
-		DatabaseState ds = new DatabaseState(handler, baseTableName);
-		dss.add(ds);
-		String primarykey = ds.getPrimaryKey();
-		//this.add(0, null);
+		DatabaseState ds = new DatabaseState(handler, baseTableName, null);
+		tablenames.add(prevTable);
+		ArrayList<String> primarykey = ds.getPrimaryKey();
+		String[] keys = new String[primarykey.size()];
+		for (int i = 0; i < keys.length; ++i) {
+			keys[i] = primarykey.get(i);
+		}
+		// this.add(0, null);
 		for (int i = 0; i < this.size(); ++i) {
-			
+
 			// create a copy of the previous table so we can run update query
 			// on it
-			String curTable = baseTableName + "_" + i;
+			String curTable = baseTableName + "_" + mid + "_" + i;
 			qstr = "SELECT * from " + prevTable;
 			try {
 				handler.queryExecution("DROP TABLE " + curTable);
-			} catch(Exception e) {
+			} catch (Exception e) {
 				// XXX: should do something with this?
 			}
-			handler.queryExecution("CREATE TABLE " + curTable + " AS (" + qstr + ");");
-			handler.queryExecution("ALTER TABLE " +  curTable + " ADD PRIMARY KEY (" + primarykey +");");
-			
+			handler.queryExecution("CREATE TABLE " + curTable + " AS (" + qstr
+					+ ");");
+			handler.queryExecution("ALTER TABLE " + curTable
+					+ " ADD PRIMARY KEY (" + Util.join(keys, ",") + ");");
+
 			// execute
 			Query q = this.get(i);
 			q = q.clone();
-			q.setTable(new Table(curTable, null, null, null, -1));
+			q.setTable(new Table(curTable, null, null, null,
+					new ArrayList<Integer>()));
 			qstr = q.toString();
 			handler.queryExecution(qstr);
 			prevTable = curTable;
@@ -64,11 +75,14 @@ public class QueryLog extends ArrayList<Query>{
 		}
 
 		// turn tablenames into a list of DatabaseStates
-		
-		for (String tablename : tablenames) {
-			ds = new DatabaseState(handler, tablename);
-			//System.out.println(ds.size());
-			dss.add(ds);
+		if (inMemory) {
+			for (String tablename : tablenames) {
+				ds = new DatabaseState(handler, tablename, null);
+				// System.out.println(ds.size());
+				dss.add(ds);
+			}
+		} else {
+			dss.settablenames(handler, tablenames);
 		}
 		return dss;
 	}
@@ -92,12 +106,12 @@ public class QueryLog extends ArrayList<Query>{
 		}
 		return diffs;
 	}
-	
-	
+
 	/*
-	 * Generates a sequence of queries based on distribution information in the 
+	 * Generates a sequence of queries based on distribution information in the
 	 * params passed in
-	 * @param params 
+	 * 
+	 * @param params
 	 */
 	public static QueryLog generate(ExpParams params) {
 		QueryLog ql = new QueryLog();
@@ -109,24 +123,24 @@ public class QueryLog extends ArrayList<Query>{
 			qparams.queryType = Query.Type.UPDATE;
 			Query q = Query.generate(qparams);
 			ql.add(q);
-			
+
 		}
 		return ql;
 	}
-	
+
 	public QueryLog clone() {
 		QueryLog cloned = new QueryLog();
-		for(Query query : this) {
+		for (Query query : this) {
 			cloned.add(query.clone());
 		}
 		return cloned;
 	}
-	
+
 	public QueryLog subList(int start, int end) {
 		QueryLog copy = new QueryLog();
-		for(int i = start; i < end; ++i)
+		for (int i = start; i < end; ++i)
 			copy.add(this.get(i));
 		return copy;
 	}
-	
+
 }

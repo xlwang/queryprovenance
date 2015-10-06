@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 
 import queryprovenance.database.DatabaseState;
@@ -17,6 +18,8 @@ import queryprovenance.harness.QueryParams;
 import queryprovenance.harness.Util;
 import queryprovenance.problemsolution.Complaint;
 import queryprovenance.problemsolution.QueryLog;
+import queryprovenance.problemsolution.SingleComplaint;
+import queryprovenance.query.WhereClause.Op;
 import queryprovenance.solve.varQuery;
 import queryprovenance.solve.varX;
 
@@ -33,14 +36,35 @@ public class Query {
 	protected Table from;
 	protected WhereClause where;
 	protected List<VariableExpression> values; // values for INSERT query
-	protected List<String> insert_vals; // values for INSERT query
-	protected List<String> attr_names; // attribute names for INSERT query
+	public List<String> insert_vals; // values for INSERT query
+	public List<String> attr_names; // attribute names for INSERT query
 
 	public List<VariableExpression> variables = new ArrayList<VariableExpression>();
 
 	protected Set<Integer> impact; // get impact of the query; should depend on
 									// query log
 
+	// transform insert values
+	public List<String> generate(List<String> values, List<String> attrs, QueryParams params){
+		Table t = params.from;
+		Random rand = new Random();
+		List<String> transvalue = new ArrayList<String>();
+		
+		for(String attr : attrs) {
+			int col = t.getColumnIdx(attr);
+			long[] dom = t.getNumDomain(col);
+			long v;
+			if(dom[0] == dom[1]) {
+				v = dom[0];
+			} else {
+				v = rand.nextInt((int)(dom[1]-dom[0])) + dom[0];
+				v = v==0?v+1:v;
+			}
+			transvalue.add(String.valueOf(v));
+		}
+		return transvalue;
+	}
+	
 	public List<String> getModifiedAttr() {
 		List<String> attrs = new ArrayList<String>();
 		if (type == Type.INSERT || type == Type.DELETE) {
@@ -59,7 +83,7 @@ public class Query {
 	 * 
 	 * @throws Exception
 	 */
-	public HashMap<String, varX> querySAT(IloCplex cplex, String[] values_)
+	public HashMap<String, varX> querySAT(IloCplex cplex, SingleComplaint scp, String[] values_)
 			throws Exception {
 		HashMap<String, varX> varXList = new HashMap<String, varX>();
 		if (where != null) {
@@ -70,8 +94,14 @@ public class Query {
 				Expression rightexpr = whereexpr.getVarExpr();
 				for (int i = 0; i < from.getColumns().length; ++i) {
 					String attr = from.getColumnName(i);
-					leftexpr.setVariable(attr, Double.valueOf(values_[i]));
-					rightexpr.setVariable(attr, Double.valueOf(values_[i]));
+					double value;
+					if(values_[i] == null) {
+						value = Double.MIN_VALUE;
+					} else {
+						value = Double.valueOf(values_[i]);
+					}
+					leftexpr.setVariable(attr, value);
+					rightexpr.setVariable(attr, value);
 				}
 				double left = leftexpr.Evaluate();
 				double right = rightexpr.Evaluate();
@@ -95,13 +125,13 @@ public class Query {
 					sat = left != right;
 					break;
 				}
-				varX x = new varX(cplex, whereexpr.toString(), sat == true ? 1
+				varX x = new varX(cplex, scp, whereexpr.toString(), sat == true ? 1
 						: 0);
 				varXList.put(whereexpr.toString(), x);
 			}
 		} else if (values != null && values.size() > 0) {
 			// for insert query
-			varX x = new varX(cplex, this.toString(), 1);
+			varX x = new varX(cplex, scp, this.toString(), 1);
 			varXList.put(this.toString(), x);
 		}
 		return varXList;
@@ -276,6 +306,11 @@ public class Query {
 			variables.add(variable);
 		}
 	}
+	
+	public Query(int id, Table from, List<String> values, List<String> attrs) {
+		this(id, from, values);
+		this.attr_names = attrs;
+	}
 
 	/* initialization */
 	public Query(int id, Select select, SetClause set, Table from,
@@ -307,6 +342,8 @@ public class Query {
 		if (type == Type.INSERT) {
 			l.add("INSERT INTO");
 			l.add(from.toString());
+			if(this.attr_names != null && attr_names.size() > 0)
+				l.add(" (" + Util.join(this.attr_names, ", ") + " ) ");
 			l.add("VALUES(");
 			l.add(Util.join(variables, ", ")); // XXX: not exactly right...
 			l.add(")");
@@ -462,7 +499,7 @@ public class Query {
 				newwhere = where.clone();
 			q = new Query(id, select, newset, from, newwhere, type);
 		} else {
-			q = new Query(id, from, this.insert_vals);
+			q = new Query(id, from, this.insert_vals, this.attr_names);
 		}
 		// q.variables = this.variables;
 		return q;
