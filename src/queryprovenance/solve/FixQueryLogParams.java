@@ -1,6 +1,7 @@
 package queryprovenance.solve;
 // Define parameters for FixQueryLog function
 public class FixQueryLogParams {
+	public enum FixQueryLogType {NUM, STR};
 	// Initialization: default settings. 
 	public FixQueryLogParams() {}
 	
@@ -25,7 +26,7 @@ public class FixQueryLogParams {
 	}
 	// parameters for cplex
 	public double epsilon = 0.001;
-	public double M = 100000;
+	public double M = 1000000;
 	public int precision = (int) Math.pow(10, (double) (String.valueOf(epsilon).length()
 			- String.valueOf(epsilon).lastIndexOf(".") - 1));
 	// parameters for fix process
@@ -40,5 +41,5 @@ public class FixQueryLogParams {
 	public boolean fix_all_query = false;
 	public boolean fix_all_attr = false;
 	public boolean fix_approx = false;
-	
+	public FixQueryLogType fix_type = FixQueryLogType.NUM;
 }

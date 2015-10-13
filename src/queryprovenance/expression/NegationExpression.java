@@ -72,4 +72,10 @@ public class NegationExpression extends OperationExpression{
 		}
 	}
 	
+	@Override
+	public void StrToNum(HashMap<String, Integer> attr_value_map, String attr) {
+		// TODO Auto-generated method stub
+		this.right.StrToNum(attr_value_map, attr);
+		this.left.StrToNum(attr_value_map, attr);
+	}
 }

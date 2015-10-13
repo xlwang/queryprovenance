@@ -183,7 +183,7 @@ public class FixQueryLog {
 				bestrm = linearization.queryRemoveList;
 				bestobj = linearization.getObjective();
 				//
-				if(i < sortedcandidate.length - 1) {
+				if(i < sortedcandidate.length) {
 					// print the objective
 					System.out.println(String.valueOf(bestobj));  
 				}

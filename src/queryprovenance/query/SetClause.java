@@ -172,4 +172,21 @@ public class SetClause {
 			cloned.set_exprs.add(set.clone());
 		return cloned;
 	}
+	
+	// Update where expr by converting string value into integer value
+	public void StrToNum(HashMap<String, Integer> attr_value_map, String attr) {
+		// check if current expression is involved in the update
+		for(SetExpr expr : this.set_exprs) {
+			expr.StrToNum(attr_value_map, attr);
+		}
+	}
+	
+	// Convert into JSON format
+	public String[] QueryToJSON() {
+		String[] set_clause = new String[this.set_exprs.size()];
+		for(int i = 0; i < this.set_exprs.size(); ++i) {
+			set_clause[i] = this.set_exprs.get(i).QueryToJSON();
+		}
+		return set_clause;
+	}
 }

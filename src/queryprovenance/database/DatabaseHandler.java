@@ -86,12 +86,22 @@ public class DatabaseHandler {
 			result = preparedquery.executeQuery();
 
 		}catch(Exception ex){
-			String exstr = ex.toString();
-			if (!exstr.contains("No results were returned") && !exstr.contains("does not exist"))
-				System.out.println(ex);
 		}
 		return result;
 	}
+	
+	public void updateExecution(String query) throws Exception{
+		PreparedStatement preparedquery = db.prepareStatement(query+";");
+		preparedquery.clearParameters();
+		try{
+			preparedquery.execute();
+
+		}catch(Exception ex){
+			System.out.println(query);
+			System.out.println(ex);
+		}
+	}
+
 
 	public String getUrl() { 
 		return this.dbUrl;

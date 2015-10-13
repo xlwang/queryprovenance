@@ -18,7 +18,7 @@ import queryprovenance.query.Query;
 import queryprovenance.solve.FixQueryLog;
 
 public class WorkloadHarness extends HarnessBase {
-	static final String TABNAME_QLOG = "CLEANQLOGS";
+	static final String TABNAME_QLOG = "num_CLEANQLOGS";
 	static final String QLOG_QUERY = "SELECT id, type, setc, wherec, vals, attrs, query FROM "
 			+ TABNAME_QLOG + " ORDER BY id;";
 	static final String TAB_QUERY = "SELECT DISTINCT table_names FROM "
@@ -45,8 +45,8 @@ public class WorkloadHarness extends HarnessBase {
 		ResultSet tab_rset = handler.queryExecution(TAB_QUERY);
 		while (tab_rset.next()) {
 			table = Table.tableFromDB(handler,
-					tab_rset.getString("table_names") + "_ini");
-			tablebase = tab_rset.getString("table_names") + "_ini";
+					tab_rset.getString("table_names"));
+			tablebase = tab_rset.getString("table_names");
 			break;
 		}
 		// process querylogs
@@ -88,7 +88,6 @@ public class WorkloadHarness extends HarnessBase {
 	// Transform the querylog
 	void transformQueries(ExpParams params, int qlogsize) throws Exception {
 		fix_params.attr_per_iteration = 5;
-		fix_params.M = Double.MAX_VALUE/2;
 		int pre = cleanQueries.size();
 		Transform trans = new Transform(pre);
 		trans.generate(params, 1);
@@ -134,8 +133,8 @@ public class WorkloadHarness extends HarnessBase {
 					cleanqparam);
 			String dirtyq = String.format("INSERT INTO qlogs VALUES(%s)",
 					dirtyqparam);
-			handler.queryExecution(cleanq);
-			handler.queryExecution(dirtyq);
+			handler.updateExecution(cleanq);
+			handler.updateExecution(dirtyq);
 		}
 	}
 
@@ -197,7 +196,7 @@ public class WorkloadHarness extends HarnessBase {
 				String fixedq = String.format("INSERT INTO qlogs VALUES(%s)",
 						fixedqparam);
 				System.out.println(fixedq);
-				handler.queryExecution(fixedq);
+				handler.updateExecution(fixedq);
 			}
 			System.out.println("Finished iteration " + iterationIdx);
 		}
@@ -237,7 +236,7 @@ public class WorkloadHarness extends HarnessBase {
 				computetime[1], computetime[2], computetime[3],
 				prob_params.p_fp, nconstraints, nvariables);
 		String q = String.format("INSERT INTO exps VALUES(%s)", params);
-		handler.queryExecution(q);
+		handler.updateExecution(q);
 	}
 
 	public static void main(String[] args) throws Exception {

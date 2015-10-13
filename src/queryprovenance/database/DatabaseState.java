@@ -16,14 +16,12 @@ public class DatabaseState {
 
 	// private ResultSet state; // tuple values in this state
 	private HashMap<String, Tuple> state;
-	private HashMap<String, Integer> linearized_key = new HashMap<String, Integer>();
 	private Table table;
 
 	public DatabaseState(DatabaseState ds) throws Exception {
 		state = new HashMap<String, Tuple>();
 		for (String pk : ds.state.keySet()) {
 			this.state.put(pk, ds.state.get(pk).clone());
-			linearized_key.put(pk, ds.linearized_key.get(pk));
 		}
 
 		table = ds.table.clone();
@@ -73,7 +71,6 @@ public class DatabaseState {
 				}
 				String pk = tuple.getKey(table);
 				state.put(pk, tuple);
-				linearized_key.put(pk, linearized_key.size());
 			}
 		}
 	}
@@ -294,5 +291,15 @@ public class DatabaseState {
 	/* return table */
 	public Table getTable() {
 		return this.table;
+	}
+	
+	public String[] getTupleKeys() {
+		Set<String> keys = state.keySet();
+		String[] keylist = new String[keys.size()];
+		int keyidx = 0;
+		for(String key : keys) {
+			keylist[keyidx++] = key;
+		}
+		return keylist;
 	}
 }

@@ -33,7 +33,7 @@ public class CplexHandler {
 		cplex.clearModel();
 	}
 	/* solve cplex */
-	public List<WhereExpr> solve(WhereClause where, DatabaseState pre, HashMap<Integer, String> classinfo, String method) throws Exception{
+	public List<WhereExpr> solve(WhereClause where, DatabaseState pre, HashMap<String, String> classinfo, String method) throws Exception{
 		double[] fixed_values = new double[where.getWhereExprs().size()];
 		
 		long starttime = System.nanoTime(); // get time stamp
@@ -89,7 +89,7 @@ public class CplexHandler {
 	}
 	
 	/* prepare all constraints */
-	public void addAllConstraint(WhereClause where, DatabaseState pre, HashMap<Integer, String> classinfo) throws Exception {
+	public void addAllConstraint(WhereClause where, DatabaseState pre, HashMap<String, String> classinfo) throws Exception {
 		// check input parameters
 		if(pre.size() != classinfo.size()){
 			System.out.println("Where Clause Error: value length not equals to class information");
@@ -99,7 +99,7 @@ public class CplexHandler {
 		var = cplex.numVarArray(where.getWhereExprs().size(), Double.MIN_VALUE, Double.MAX_VALUE);
 
 		// for each tuple, add constraints
-		for(Integer key:pre.getKeySet()){			
+		for(String key : pre.getKeySet()){			
 			Tuple tuple = pre.getTuple(key);
 			boolean isTrue = classinfo.get(key).equals("b") ? true : false;
 			this.addConstraint(where, pre.getColumnNames(), tuple, isTrue);
@@ -108,12 +108,12 @@ public class CplexHandler {
 	}
 	
 	/* prepare all constraints */
-	public void addAllConstraintIncomplete(WhereClause where, DatabaseState pre, HashMap<Integer, String> classinfo) throws Exception {
+	public void addAllConstraintIncomplete(WhereClause where, DatabaseState pre, HashMap<String, String> classinfo) throws Exception {
 		// prepare cplex variables
 		var = cplex.numVarArray(where.getWhereExprs().size(), Double.MIN_VALUE, Double.MAX_VALUE);
 
 		// for each tuple, add constraints
-		for(Integer key : classinfo.keySet()){	
+		for(String key : classinfo.keySet()){	
 			Tuple tuple = pre.getTuple(key);
 			boolean isTrue = classinfo.get(key).equals("b")?true:false;
 			this.addConstraint(where, pre.getColumnNames(), tuple, isTrue);

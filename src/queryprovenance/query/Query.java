@@ -25,7 +25,17 @@ import queryprovenance.solve.varX;
 
 public class Query {
 	public static enum Type {
-		INSERT, DELETE, UPDATE, SELECT, EMPTY
+		INSERT("insert"), DELETE("delete"), UPDATE("update"), SELECT("select"), EMPTY(
+				"empty");
+		private final String type;
+
+		private Type(String type_) {
+			type = type_;
+		}
+
+		public String toString() {
+			return this.type;
+		}
 	};
 
 	// protected String query; // query content
@@ -45,26 +55,27 @@ public class Query {
 									// query log
 
 	// transform insert values
-	public List<String> generate(List<String> values, List<String> attrs, QueryParams params){
+	public List<String> generate(List<String> values, List<String> attrs,
+			QueryParams params) {
 		Table t = params.from;
 		Random rand = new Random();
 		List<String> transvalue = new ArrayList<String>();
-		
-		for(String attr : attrs) {
+
+		for (String attr : attrs) {
 			int col = t.getColumnIdx(attr);
 			long[] dom = t.getNumDomain(col);
 			long v;
-			if(dom[0] == dom[1]) {
+			if (dom[0] == dom[1]) {
 				v = dom[0];
 			} else {
-				v = rand.nextInt((int)(dom[1]-dom[0])) + dom[0];
-				v = v==0?v+1:v;
+				v = rand.nextInt((int) (dom[1] - dom[0])) + dom[0];
+				v = v == 0 ? v + 1 : v;
 			}
 			transvalue.add(String.valueOf(v));
 		}
 		return transvalue;
 	}
-	
+
 	public List<String> getModifiedAttr() {
 		List<String> attrs = new ArrayList<String>();
 		if (type == Type.INSERT || type == Type.DELETE) {
@@ -83,8 +94,8 @@ public class Query {
 	 * 
 	 * @throws Exception
 	 */
-	public HashMap<String, varX> querySAT(IloCplex cplex, SingleComplaint scp, String[] values_)
-			throws Exception {
+	public HashMap<String, varX> querySAT(IloCplex cplex, SingleComplaint scp,
+			String[] values_) throws Exception {
 		HashMap<String, varX> varXList = new HashMap<String, varX>();
 		if (where != null) {
 			for (WhereExpr whereexpr : where.getWhereExprs()) {
@@ -95,7 +106,7 @@ public class Query {
 				for (int i = 0; i < from.getColumns().length; ++i) {
 					String attr = from.getColumnName(i);
 					double value;
-					if(values_[i] == null) {
+					if (values_[i] == null) {
 						value = Double.MIN_VALUE;
 					} else {
 						value = Double.valueOf(values_[i]);
@@ -125,8 +136,8 @@ public class Query {
 					sat = left != right;
 					break;
 				}
-				varX x = new varX(cplex, scp, whereexpr.toString(), sat == true ? 1
-						: 0);
+				varX x = new varX(cplex, scp, whereexpr.toString(),
+						sat == true ? 1 : 0);
 				varXList.put(whereexpr.toString(), x);
 			}
 		} else if (values != null && values.size() > 0) {
@@ -299,14 +310,9 @@ public class Query {
 		this.type = Type.INSERT;
 		this.from = from;
 		this.insert_vals = values;
-		// this.values = values;
-		for (String value : values) {
-			VariableExpression variable = new VariableExpression(
-					Double.valueOf(value), false);
-			variables.add(variable);
-		}
+		variableInit();
 	}
-	
+
 	public Query(int id, Table from, List<String> values, List<String> attrs) {
 		this(id, from, values);
 		this.attr_names = attrs;
@@ -321,12 +327,28 @@ public class Query {
 		this.from = from;
 		this.where = where;
 		this.type = type;
-		if (set != null && where != null) {
+		variableInit();
+	}
+
+	public void variableInit() {
+		variables.clear();
+		// update set/where clause
+		if (set != null) {
 			for (SetExpr setexpr : set.getSetExprs()) {
 				variables.addAll(setexpr.getExpr().getUnassignedVariable());
 			}
+		}
+		if (where != null) {
 			for (WhereExpr wherexpr : where.getWhereExprs()) {
 				variables.addAll(wherexpr.getVarExpr().getUnassignedVariable());
+			}
+		}
+		// update insert
+		if (this.insert_vals != null) {
+			for (String value : this.insert_vals) {
+				VariableExpression variable = new VariableExpression(
+						Double.valueOf(value), false);
+				variables.add(variable);
 			}
 		}
 	}
@@ -342,7 +364,7 @@ public class Query {
 		if (type == Type.INSERT) {
 			l.add("INSERT INTO");
 			l.add(from.toString());
-			if(this.attr_names != null && attr_names.size() > 0)
+			if (this.attr_names != null && attr_names.size() > 0)
 				l.add(" (" + Util.join(this.attr_names, ", ") + " ) ");
 			l.add("VALUES(");
 			l.add(Util.join(variables, ", ")); // XXX: not exactly right...
@@ -491,7 +513,7 @@ public class Query {
 	public Query clone() {
 		Query q;
 		if (this.type == Type.UPDATE) {
-			SetClause newset = null; 
+			SetClause newset = null;
 			WhereClause newwhere = null;
 			if (set != null)
 				newset = set.clone();
@@ -589,5 +611,60 @@ public class Query {
 
 	public Set<Integer> getImpact() {
 		return this.impact;
+	}
+
+	// Update the querylog based on attr_value_map
+	public void StrToNum(HashMap<String, Integer> attr_value_map, String attr) {
+		switch (type) {
+		case INSERT:
+			int attr_idx = -1;
+			if (attr_names != null && attr_names.size() > 0) {
+				for (int i = 0; i < attr_names.size(); ++i) {
+					if (attr_names.get(i).equals(attr)) {
+						attr_idx = i;
+						break;
+					}
+				}
+			} else {
+				attr_idx = this.from.getColumnIdx(attr);
+			}
+			// Get original value
+			int num_attr_value = -1;
+			if(attr_value_map.containsKey(insert_vals.get(attr_idx))) {
+				num_attr_value = attr_value_map.get(insert_vals.get(attr_idx));
+			} else if (attr_value_map.containsKey(String.valueOf(Double.valueOf(insert_vals.get(attr_idx))))) {
+				num_attr_value = attr_value_map.get(String.valueOf(Double.valueOf(insert_vals.get(attr_idx))));
+			} else {
+				num_attr_value = attr_value_map.size();
+				attr_value_map.put(String.valueOf(insert_vals.get(attr_idx)), num_attr_value);
+			}
+			this.insert_vals.set(attr_idx, String.valueOf(num_attr_value));
+			break;
+		case UPDATE:
+			this.set.StrToNum(attr_value_map, attr);
+			this.where.StrToNum(attr_value_map, attr);
+			break;
+		case DELETE:
+			this.where.StrToNum(attr_value_map, attr);
+			break;
+		}
+	}
+
+	public void QueryToJSON(String[] components) {
+		// process value
+		if (this.insert_vals != null) {
+			components[0] = "[" + Util.join(this.insert_vals, ",") + "]";
+		}
+		if (this.attr_names != null) {
+			components[1] = "[" + Util.join(this.attr_names, ",") + "]";
+		}
+		// process set clause
+		if (this.set != null) {
+			components[2] = "[[" + Util.join(this.set.QueryToJSON(), "],[") + "]]";
+		}
+		// process where clause
+		if (this.where != null) {
+			components[3] = "[[" + Util.join(this.where.QueryToJSON(), "],[") + "]]";
+		}
 	}
 }

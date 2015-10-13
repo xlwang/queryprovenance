@@ -73,6 +73,8 @@ public abstract class Expression {
 	
 	public abstract IloNumExpr convertExpr(IloCplex cplex, HashMap<String, Integer> attrs, IloNumVar[] prestate, HashMap<VariableExpression, varQuery> varQMap, HashSet<varQuery> currentVar, boolean fix) throws Exception;
 	
+	public abstract void StrToNum(HashMap<String, Integer> attr_value_map, String attr);
+	
 	public abstract boolean compare(Expression expr);
 	/* return Expression type */
 	public Type getType(){ 

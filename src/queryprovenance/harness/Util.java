@@ -60,7 +60,7 @@ public class Util {
 			Op op = expr.getOperator();
 			JSONArray wa = new JSONArray();
 			wa.add(expr.getAttrExpr().toString());
-			wa.add(expr.getOperatorString());
+			wa.add(expr.getOperator().toString());
 			wa.add(expr.getVar());
 			ret.add(wa);
 		}
@@ -120,7 +120,7 @@ public class Util {
 			JSONArray wa = (JSONArray) wc;
 			String col = (String) wa.get(0);
 			String op = (String) wa.get(1);
-			long v = (long) wa.get(2);
+			double v = Double.valueOf(String.valueOf(wa.get(2)));
 			WhereExpr expr = new WhereExpr(new VariableExpression(col, true),
 					WhereExpr.getOperator(op), new VariableExpression(v, false));
 			exprs.add(expr);
@@ -145,7 +145,7 @@ public class Util {
 				rhs = new AdditionExpression(new VariableExpression(col, true),
 						new VariableExpression(exprv, false));
 			} else {
-				long exprv = (long) seta.get(1);
+				double exprv = Double.valueOf(String.valueOf(seta.get(1)));
 				rhs = new VariableExpression(exprv, false);
 			}
 

@@ -2,6 +2,7 @@ package queryprovenance.query;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 import queryprovenance.database.DatabaseState;
@@ -16,13 +17,18 @@ public class InsertQuery extends Query {
 		super(id, from, values);
 	}
 	
+	public InsertQuery(int id, Table from, List<String> values, List<String> attrs) {
+		super(id, from, values, attrs);
+	}
+	
 	
 	/* prepare data for insert query*/
 	public HashMap<String, Tuple> prepareData(DatabaseState stat){
 		HashMap<String, Tuple> datavalues = new HashMap<String, Tuple>();
 		
 		// get primary keys
-		String keys = super.from.getPrimaryKey();
+		HashSet<String> keys = new HashSet<String>();
+		keys.addAll(super.from.getPrimaryKey());
 		String[] column_names;
 		
 		// get insert column names
@@ -45,11 +51,10 @@ public class InsertQuery extends Query {
 			}
 			else{
 				for(int i = 0; i < column_names.length; ++i)
-					if(keys.equals(column_names[i]))
-						key_value = splited_value[i];
-				Integer keyvalue = Integer.valueOf(key_value);
-				if(stat.containTuple(keyvalue))
-					datavalues.put(key_value, stat.getTuple(keyvalue));
+					if(keys.contains(column_names[i]))
+						key_value = splited_value[i] + "\t";
+				if(stat.containTuple(key_value))
+					datavalues.put(key_value, stat.getTuple(key_value));
 				else
 					datavalues.put(key_value, null);
 			}

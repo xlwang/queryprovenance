@@ -36,7 +36,7 @@ public class DecisionTreeHandler {
 	}
 	
 	/* build decision tree given fileanme and parameters */
-	public List<WhereExpr> buildTree(WhereClause where, DatabaseState pre, HashMap<Integer, String> classinfo) throws Exception{
+	public List<WhereExpr> buildTree(WhereClause where, DatabaseState pre, HashMap<String, String> classinfo) throws Exception{
 		// define fixed where expression list
 		List<WhereExpr> fixed_values;
 		
@@ -118,7 +118,7 @@ public class DecisionTreeHandler {
 	}
 	
 	/* prepare input file for Decision tree solver */
-	public void prepareARFF(WhereClause where, DatabaseState pre, HashMap<Integer, String> classinfo) throws Exception {
+	public void prepareARFF(WhereClause where, DatabaseState pre, HashMap<String, String> classinfo) throws Exception {
 		
 		// prepare file for Decision tree solver
 		File filename = new File("./data/feature.arff");
@@ -144,7 +144,7 @@ public class DecisionTreeHandler {
 		
 		// write data from dbstate
 		String[] column_names = pre.getColumnNames();
-		for(Integer key: pre.getKeySet()){
+		for(String key: pre.getKeySet()){
 			// for every tuple
 			Tuple tuple = pre.getTuple(key);
 			

@@ -268,4 +268,23 @@ public class VariableExpression extends Expression{
 			}
 		}
 	}
+	
+	@Override
+	public void StrToNum(HashMap<String, Integer> attr_value_map, String attr) {
+		if(!isTrue) {
+			if(attr.equals("ui_i_id") && Double.valueOf(value) == 178120948056065L) {
+				System.out.println(String.valueOf(value) + "\t" + String.valueOf(value.intValue()));
+			}
+			int num_attr_value = -1;
+			if(attr_value_map.containsKey(String.valueOf(value))) {
+				num_attr_value = attr_value_map.get(String.valueOf(value));
+			} else if (attr_value_map.containsKey(String.valueOf(value.longValue()))) {
+				num_attr_value = attr_value_map.get(String.valueOf(value.longValue()));
+			} else {
+				num_attr_value = attr_value_map.size();
+				attr_value_map.put(String.valueOf(value), num_attr_value);
+			}
+			this.value = Double.valueOf(num_attr_value);
+		}
+	}
 }
