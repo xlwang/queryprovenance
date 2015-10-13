@@ -213,7 +213,6 @@ public class WorkloadHarness extends HarnessBase {
 				cleanQueries, cleanDss, dirtyQueries, dirtyDss, fixedqlog,
 				fixedds);
 
-		String metric_value = Metrics.toString(metrics);
 		long[] time = solver2.getTime();
 		double[] computetime = new double[time.length];
 		for (int j = 0; j < computetime.length; ++j) {
@@ -226,14 +225,14 @@ public class WorkloadHarness extends HarnessBase {
 		double nvariables = solver2.avgvariable;
 		// insert data into result table
 		String params = String.format(
-				"DEFAULT, %d, %d, %d, %d, %f, %f, %f, %f, %f, %f, %f, %f, %f",
+				"DEFAULT, %d, %d, %d, %d, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f",
 				cid,
 				iterationIdx,
 				// metrics.get(Metrics.Type.BADCOMPLAINT).intValue(),
 				complaints.size(), metrics.get(Metrics.Type.FIXEDCOMPLAINT)
 						.intValue(), metrics.get(Metrics.Type.REMOVEDRATE),
 				metrics.get(Metrics.Type.NOISERATE), computetime[0],
-				computetime[1], computetime[2], computetime[3],
+				computetime[1], computetime[2], computetime[3], computetime[4],
 				prob_params.p_fp, nconstraints, nvariables);
 		String q = String.format("INSERT INTO exps VALUES(%s)", params);
 		handler.updateExecution(q);

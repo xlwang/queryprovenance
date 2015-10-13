@@ -169,11 +169,19 @@ public class Linearization {
 		// create current variable map and current variable X map
 		HashSet<varQuery> current_var = new HashSet<varQuery>();
 		HashSet<varX> current_x = new HashSet<varX>();
+		// prepare constraints
 		IloNumExpr query_sat_obj = addConstraints(cplex, attrs_map,
-				current_var, current_x, startidx);
-
-		// add objective function
+				current_var, current_x, startidx);	
+		// prepare objective function
 		IloNumExpr query_var_obj = addObjective(cplex);
+		endtime = System.nanoTime();
+		times[1] += endtime - starttime;
+		
+		starttime = System.nanoTime();
+		// add constraints once
+		IloConstraint[] constraintsary = cplexConstraints.toArray(new IloConstraint[cplexConstraints.size()]);
+		cplex.add(constraintsary);
+		// add objective function
 		IloObjective maxobj;
 		if (params.objective_full) {
 			maxobj = cplex.addMinimize(cplex.sum(query_sat_obj, query_var_obj));
@@ -181,13 +189,13 @@ public class Linearization {
 			maxobj = cplex.addMinimize(query_var_obj);
 		}
 		endtime = System.nanoTime();
-		times[1] += endtime - starttime;
+		times[2] += endtime - starttime;
 
 		// solve
 		starttime = System.nanoTime();
 		boolean solved = cplex.solve();
 		endtime = System.nanoTime();
-		times[2] += endtime - starttime;
+		times[3] += endtime - starttime;
 
 		// process result
 		starttime = System.nanoTime();
@@ -350,7 +358,7 @@ public class Linearization {
 				double value = org_valary == null || org_valary[idx] == null ? NOTEXIST
 						: Double.valueOf(org_valary[idx]);
 				
-				cplexConstraints.add(cplex.addEq(cplex_varary[varidx], value));
+				cplexConstraints.add(cplex.eq(cplex_varary[varidx], value));
 			} catch (Exception e) {
 				System.out.println(org_valary[idx]);
 				boolean temp = org_valary == null || org_valary[idx] == null;
@@ -432,7 +440,7 @@ public class Linearization {
 			int idx = attrs_map.get(attr);
 			IloNumExpr nextvalue = null;
 			if (query.getType() == Query.Type.DELETE) {
-				cplexConstraints.add(cplex.addEq(nextvalue, NOTEXIST));
+				cplexConstraints.add(cplex.eq(nextvalue, NOTEXIST));
 			} else {
 				nextvalue = query
 						.getValue()
@@ -443,23 +451,23 @@ public class Linearization {
 			// linearize
 			// create for previous value
 			IloNumVar pre = cplex.numVar(Double.MIN_VALUE, Double.MAX_VALUE);
-			cplexConstraints.add(cplex.addLe(pre, prestate[idx]));
-			cplexConstraints.add(cplex.addLe(pre,
+			cplexConstraints.add(cplex.le(pre, prestate[idx]));
+			cplexConstraints.add(cplex.le(pre,
 					cplex.prod(cplex.diff(1, X), params.M)));
-			cplexConstraints.add(cplex.addGe(pre,
+			cplexConstraints.add(cplex.ge(pre,
 					cplex.diff(prestate[idx], cplex.prod(X, params.M))));
 
 			// create for set value
 			IloNumVar next = cplex.numVar(Double.MIN_VALUE, Double.MAX_VALUE);
-			cplexConstraints.add(cplex.addLe(next, nextvalue));
-			cplexConstraints.add(cplex.addLe(next, cplex.prod(X, params.M)));
-			cplexConstraints.add(cplex.addGe(
+			cplexConstraints.add(cplex.le(next, nextvalue));
+			cplexConstraints.add(cplex.le(next, cplex.prod(X, params.M)));
+			cplexConstraints.add(cplex.ge(
 					next,
 					cplex.diff(nextvalue,
 							cplex.prod(cplex.diff(1, X), params.M))));
 
 			// add condition
-			cplexConstraints.add(cplex.addEq(nextstate[idx],
+			cplexConstraints.add(cplex.eq(nextstate[idx],
 					cplex.sum(pre, next)));
 		}
 
@@ -490,25 +498,25 @@ public class Linearization {
 				// create for previous value
 				IloNumVar pre = cplex
 						.numVar(Double.MIN_VALUE, Double.MAX_VALUE);
-				cplexConstraints.add(cplex.addLe(pre, prestate[idx]));
-				cplexConstraints.add(cplex.addLe(pre,
+				cplexConstraints.add(cplex.le(pre, prestate[idx]));
+				cplexConstraints.add(cplex.le(pre,
 						cplex.prod(cplex.diff(1, X), params.M)));
-				cplexConstraints.add(cplex.addGe(pre,
+				cplexConstraints.add(cplex.ge(pre,
 						cplex.diff(prestate[idx], cplex.prod(X, params.M))));
 
 				// create for set value
 				IloNumVar next = cplex.numVar(Double.MIN_VALUE,
 						Double.MAX_VALUE);
-				cplexConstraints.add(cplex.addLe(next, nextvalue));
+				cplexConstraints.add(cplex.le(next, nextvalue));
 				cplexConstraints
-						.add(cplex.addLe(next, cplex.prod(X, params.M)));
-				cplexConstraints.add(cplex.addGe(
+						.add(cplex.le(next, cplex.prod(X, params.M)));
+				cplexConstraints.add(cplex.ge(
 						next,
 						cplex.diff(nextvalue,
 								cplex.prod(cplex.diff(1, X), params.M))));
 
 				// add condition
-				cplexConstraints.add(cplex.addEq(nextstate[idx],
+				cplexConstraints.add(cplex.eq(nextstate[idx],
 						cplex.sum(pre, next)));
 				modified.add(attr.toString());
 			}
@@ -519,7 +527,7 @@ public class Linearization {
 				// maintain the same value
 				int idx = attrs_map.get(attr);
 				cplexConstraints
-						.add(cplex.addEq(nextstate[idx], prestate[idx]));
+						.add(cplex.eq(nextstate[idx], prestate[idx]));
 			}
 		}
 		return nextstate;
@@ -570,7 +578,7 @@ public class Linearization {
 						condition = cplex.eq(cplex.eq(left, right), 0);
 						break;
 					}
-					cplexConstraints.add(cplex.addEq(x.var, condition));
+					cplexConstraints.add(cplex.eq(x.var, condition));
 					break;
 				}
 			}
@@ -585,15 +593,15 @@ public class Linearization {
 			} else {
 				// add constraints on processed varX
 				double solvedval = x.solvedval == 1 ? 1 : 0;
-				cplexConstraints.add(cplex.addEq(x.var, solvedval));
+				cplexConstraints.add(cplex.eq(x.var, solvedval));
 			}
 		}
 		if (where.getOperator().equals(WhereClause.Op.CONJ)) {
 			// every condition must satisfy 'isTrue' value
-			cplexConstraints.add(cplex.addEq(X, cplex.and(cons)));
+			cplexConstraints.add(cplex.eq(X, cplex.and(cons)));
 		} else {
 			// one of the consition must satisfy 'isTrue' value
-			cplexConstraints.add(cplex.addEq(X, cplex.or(cons)));
+			cplexConstraints.add(cplex.eq(X, cplex.or(cons)));
 		}
 	}
 

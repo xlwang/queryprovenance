@@ -110,7 +110,7 @@ public class FixQueryLog {
 	 * */
 	public QueryLog fixQueries(IloCplex cplex, FixQueryLogParams params)
 			throws Exception {
-		times = new long[4];
+		times = new long[5];
 		// define initial database state
 		DatabaseState badInitialDs = badDss.get(0);
 		// define attribute provenance
@@ -193,7 +193,7 @@ public class FixQueryLog {
 		if (bestfix != null)
 			fixedQueries = updateFix(bestfix, bestrm);
 		endtime = System.nanoTime();
-		times[3] += endtime - starttime;
+		times[4] += endtime - starttime;
 		// finish all the attributes, solve remaining unsolved variables
 		// update average number of constraints and variables
 		avgconstraint = avgconstraint / counttime;
