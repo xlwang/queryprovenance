@@ -90,7 +90,7 @@ public class WorkloadHarness extends HarnessBase {
 		fix_params.attr_per_iteration = 5;
 		int pre = cleanQueries.size();
 		Transform trans = new Transform(pre);
-		trans.generate(params, 1);
+		trans.generate(params, cleanQueries, 0.5);
 		dirtyQueries = trans.apply(cleanQueries);
 		// Get database states
 		cleanDss = cleanQueries.execute(table.getName(), "clean", handler,
@@ -100,7 +100,7 @@ public class WorkloadHarness extends HarnessBase {
 		complaints = new Complaint(cleanDss.get(cleanDss.size() - 1),
 				dirtyDss.get(dirtyDss.size() - 1));
 		while (complaints.size() < 1 && trans.pre > 0) {
-			trans.generate(params, 1);
+			trans.generate(params, cleanQueries, 0.5);
 			System.out.println(trans.qidx);
 			dirtyQueries = trans.apply(cleanQueries);
 			dirtyDss = dirtyQueries.execute(table.getName(), "dirty", handler,
@@ -140,13 +140,11 @@ public class WorkloadHarness extends HarnessBase {
 
 	// Run solver
 	void run(int cid) throws Exception {
+		fix_params.batch_per_iteration = this.dirtyQueries.size();
 		QueryLog fixedQueries = new QueryLog();
 
 		// CPLEX stuff
 		IloCplex cplex = new IloCplex();
-		int solverind = -1;
-		String[] options = new String[] { "-M", String.valueOf(solverind),
-				"-E", "0.1", "-O", "abs" };
 
 		Complaint _complaints = complaints.clone();
 		// sample 10 complaint
@@ -235,6 +233,7 @@ public class WorkloadHarness extends HarnessBase {
 				computetime[1], computetime[2], computetime[3], computetime[4],
 				prob_params.p_fp, nconstraints, nvariables);
 		String q = String.format("INSERT INTO exps VALUES(%s)", params);
+		System.out.println(Metrics.Type.REMOVEDRATE + "\t" + Metrics.Type.NOISERATE);
 		handler.updateExecution(q);
 	}
 
@@ -243,22 +242,24 @@ public class WorkloadHarness extends HarnessBase {
 		String dbsetupname = args[1];
 		DatabaseHandler handler = new DatabaseHandler();
 		handler.getConnected(dbconfigname);
-		handler.executePrepFile(dbsetupname);
-
-		for (int i = 50; i <= 750; i = i + 50) {
+		// handler.executePrepFile(dbsetupname);
+		// int[] test_size = {150, 160, 170, 180, 190, 200};
+		for (int i = 10; i < 500; i = i+10) {
+			System.out.println("CURSIZE:" + i);
+			int cur_size = i;
 			ExpParams params = ExpParams.instance();
 			WorkloadHarness harness = new WorkloadHarness(handler);
-			harness.loadQueries(i);
+			harness.loadQueries(cur_size);
 			params.table = harness.table;
-			params.ql_nqueries = i;
-			params.ql_nclauses = 3;
-			params.ql_qtypes = new Query.Type[i];
-			for (int qidx = 0; qidx < i; ++qidx) {
+			params.ql_nqueries = cur_size;
+			params.ql_nclauses = 6;
+			params.ql_qtypes = new Query.Type[cur_size];
+			for (int qidx = 0; qidx < cur_size; ++qidx) {
 				params.ql_qtypes[qidx] = harness.cleanQueries.get(qidx)
 						.getType();
 			}
 
-			harness.transformQueries(params, i);
+			harness.transformQueries(params, cur_size);
 			harness.run(i);
 
 		}

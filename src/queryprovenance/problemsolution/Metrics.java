@@ -98,8 +98,8 @@ public class Metrics {
 	
 		HashMap<Type, Double> metrics = new HashMap<Type, Double>();
 		// compare database state differences
-		Complaint true2badc = new Complaint(ds.get(ds.size()-1), badds.get(badds.size()-1));	 // complaint set from true db state to bad db state
-		Complaint true2fixc = new Complaint(ds.get(ds.size()-1), fixedds.get(fixedds.size()-1));	// complaint set from true db state to fixed db state
+		Complaint true2badc = new Complaint(ds.getFull(ds.size()-1), badds.getFull(badds.size()-1));	 // complaint set from true db state to bad db state
+		Complaint true2fixc = new Complaint(ds.getFull(ds.size()-1), fixedds.getFull(fixedds.size()-1));	// complaint set from true db state to fixed db state
 		metrics.put(Type.BADCOMPLAINT, (double) true2badc.size()); // insert # of complaints in bad db state
 		metrics.put(Type.FIXEDCOMPLAINT, (double) true2fixc.size()); // insert # of complaints in fixed db state
 		if(true2fixc.size() > 0){

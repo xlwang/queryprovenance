@@ -58,7 +58,7 @@ public class StrToNum {
 	}
 
 	// Linearize the base table
-	public void StrToNumPerDbState() throws Exception {
+	public void strToNumPerDbState() throws Exception {
 		// convert into integer
 		String[] table_attrs = new String[numDs.getTable().getColumns().length];
 		String[] keylist = numDs.getTupleKeys();
@@ -66,7 +66,7 @@ public class StrToNum {
 			double ratio = (numDs.getTable().getNumDomain(i)[1] - numDs
 					.getTable().getNumDomain(i)[0]) / (numDs.size() + 0.0);
 			// Check domain
-			StrToNumPerAttr(keylist, numDs.getTable().getColumnName(i));
+			strToNumPerAttr(keylist, numDs.getTable().getColumnName(i));
 			// Update table def.
 			if (numDs.getTable().getKeyIdx().contains(i) || ratio > RATIO_BOUND) {
 				table_attrs[i] = numDs.getTable().getColumnName(i) + "\t int";
@@ -82,13 +82,13 @@ public class StrToNum {
 		table_basetable_keys = String.format(table_basetable_keys, num_tablename, Util.join(numDs.getPrimaryKey(), ","));
 		handler.updateExecution(table_basetable_keys);
 		// Update querylog
-		StrToNumQlog();
+		strToNumQlog();
 		// Update table
-		StrToNumTable(keylist);
+		strToNumTable(keylist);
 	}
 
 	// Linearize by attribute name
-	public void StrToNumPerAttr(String[] keylist, String attr) throws Exception {
+	public void strToNumPerAttr(String[] keylist, String attr) throws Exception {
 		HashMap<String, Integer> attr_value_map = new HashMap<String, Integer>();
 		int attr_idx = numDs.getTable().getColumnIdx(attr);
 		// Convert attribute from str/long into numeric value
@@ -112,7 +112,7 @@ public class StrToNum {
 		// Update querylog
 		for (int i = 0; i < num_qlog.size(); ++i) {
 			Query query = num_qlog.get(i);
-			query.StrToNum(attr_value_map, attr);
+			query.strToNum(attr_value_map, attr);
 		}
 		// Insert str-num mapping into mapping table
 		for (String str : attr_value_map.keySet()) {
@@ -123,10 +123,10 @@ public class StrToNum {
 	}
 
 	// Update querylogs in database
-	public void StrToNumQlog() throws Exception {
+	public void strToNumQlog() throws Exception {
 		for (Query query : num_qlog) {
 			String[] components = new String[4];
-			query.QueryToJSON(components);
+			query.queryToJSON(components);
 			// update insert querylog
 			String insert_cleanqlog = String.format(insert_cleanqlogs,
 					"DEFAULT", "'" + num_tablename + "'", "'" + query.getType() + "'",
@@ -138,7 +138,7 @@ public class StrToNum {
 	}
 
 	// Update base table in database
-	public void StrToNumTable(String[] keylist) throws Exception {
+	public void strToNumTable(String[] keylist) throws Exception {
 		for (String key : keylist) {
 			Tuple num_tuple = numDs.getTuple(key);
 			String[] values = new String[numDs.getTable().getColumns().length];
@@ -160,6 +160,6 @@ public class StrToNum {
 		harness.loadQueries(750);
 		StrToNum instance = new StrToNum(handler, harness.cleanQueries,
 				harness.tablebase);
-		instance.StrToNumPerDbState();
+		instance.strToNumPerDbState();
 	}
 }

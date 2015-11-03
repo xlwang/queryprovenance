@@ -41,11 +41,10 @@ public class SetClause {
 		return attrs;
 	}
 
-	public static SetClause generate(QueryParams params) {
+	public static SetClause generate(QueryParams params, String[] cols) {
 		// generate <random col> = <random col> + <random value>
 		Table t = params.from;
-		String[] cols = t.getColumns();
-		int ncols = t.getColumns().length;
+		int ncols = cols.length;
 		Random rand = new Random();
 		List<SetExpr> conds = new ArrayList<SetExpr>();
 		HashSet<Integer> selected = new HashSet<Integer>();
@@ -174,19 +173,28 @@ public class SetClause {
 	}
 	
 	// Update where expr by converting string value into integer value
-	public void StrToNum(HashMap<String, Integer> attr_value_map, String attr) {
+	public void strToNum(HashMap<String, Integer> attr_value_map, String attr) {
 		// check if current expression is involved in the update
 		for(SetExpr expr : this.set_exprs) {
-			expr.StrToNum(attr_value_map, attr);
+			expr.strToNum(attr_value_map, attr);
 		}
 	}
 	
 	// Convert into JSON format
-	public String[] QueryToJSON() {
+	public String[] queryToJSON() {
 		String[] set_clause = new String[this.set_exprs.size()];
 		for(int i = 0; i < this.set_exprs.size(); ++i) {
-			set_clause[i] = this.set_exprs.get(i).QueryToJSON();
+			set_clause[i] = this.set_exprs.get(i).queryToJSON();
 		}
 		return set_clause;
+	}
+	
+	public List<String> getRelvAttr() {
+		List<String> relv_attr = new ArrayList<String>();
+		for (SetExpr expr : this.set_exprs) {
+			relv_attr.add(expr.getAttr().toString());
+			relv_attr.addAll(expr.getExpr().getAssignedVariable());
+		}
+		return relv_attr;
 	}
 }

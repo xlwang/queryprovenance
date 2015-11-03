@@ -48,6 +48,11 @@ public class DatabaseStates {
 		}
 	}
 	
+	public DatabaseState getFull(int idx) throws Exception {
+		
+		return new DatabaseState(handler, tablenames.get(idx), null);
+	}
+	
 	public int size() {
 		int size = dbstates.size() > tablenames.size() ? dbstates.size() : tablenames.size();
 		return size;

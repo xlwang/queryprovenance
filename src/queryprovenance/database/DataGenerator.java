@@ -5,43 +5,67 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Random;
+
+import queryprovenance.harness.Util;
 
 public class DataGenerator {
 
-	public static void generatorData(int tuple_count) throws Exception{
-		BufferedReader reader = new BufferedReader( 
-				 new FileReader("./data/names.txt"));
-		String str;
-		String[] names = new String[7000];
-		int count = 0;
-		while((str=reader.readLine())!=null){
-			String[] list = str.split(" ");
-			names[count++] = list[0].toLowerCase().trim();
-		}
+	public static String insert_sql = "INSERT INTO synth VALUES (DEFAULT, %s);";
+	public static String drop_table = "DROP TABLE synth CASCADE;";
+	public static String define_table = "CREATE TABLE synth (id serial PRIMARY KEY, %s);";
+
+	public static void generatorData(int tuple_count, String[] attr_def, int domain_max) throws Exception{
+		
 		File filename = new File("./data/inserts.sql");
 		if(!filename.exists())
 			filename.createNewFile();
-		String[] departments = new String[]{"sale","engineer","hr","finance","mangement"};
+
 		FileWriter filewriter = new FileWriter(filename);
 		BufferedWriter writer = new BufferedWriter(filewriter); 
+		// Add table def.
+		writer.write(drop_table);
+		writer.newLine();
+		writer.write(String.format(define_table, Util.join(attr_def, ",")));
+		writer.newLine();
+		// Add tuples
 		for(int i=0; i<tuple_count; ++i){
 			Random rand = new Random();
-			int val0 = rand.nextInt(20) + 20;
-			int val2 = rand.nextInt(60-val0) ;  //employment year
-			int val1 = val2 + val0; //age
+			ArrayList<Integer> insert_val = new ArrayList<Integer>();
+			for (int j = 0; j < attr_def.length; ++j) {
+				int val = rand.nextInt(domain_max);
+				insert_val.add(val);
+			}
 			
-			
-			int val4 = rand.nextInt(100); // level
-			int val5 = rand.nextInt(150000)+50000; // salary
-			
-			int val3 = (int) (((double)rand.nextInt(30)/100.0)*val5); //tax
-			writer.write("INSERT INTO Employee VALUES ("+String.valueOf(i)+"," + String.valueOf(val4) +","+ String.valueOf(val1) + "," + String.valueOf(val2) + "," + String.valueOf(val3) + "," + String.valueOf(val5)+");");
+			// Construct insert sql
+			writer.write(String.format(insert_sql, Util.join(insert_val, ",")));
 			writer.newLine();
 		}
 		writer.close();
-		reader.close();
 	}
 	
-
+	public static void generatorData(DatabaseHandler handler, int attr_count, int tuple_count, int domain_max) throws Exception{
+		
+		// Drop existing table
+		handler.updateExecution(drop_table);
+		// Create table definition
+		String[] attr_def = new String[attr_count];
+		for (int num_attr = 0; num_attr < attr_count; ++num_attr) {
+			attr_def[num_attr] = "a" + num_attr + "\t int";
+		}
+		handler.updateExecution(String.format(define_table, Util.join(attr_def, ",")));
+		
+		// Insert tuples
+		for(int i = 0; i < tuple_count; ++i){
+			Random rand = new Random();
+			Integer[] insert_val = new Integer[attr_count];
+			for (int num_attr = 0; num_attr < attr_count; ++num_attr) {
+				insert_val[num_attr] = rand.nextInt(domain_max);
+			}
+			// Insert
+			handler.updateExecution(String.format(insert_sql, Util.join(insert_val, ",")));
+		}
+	}
 }

@@ -11,6 +11,7 @@ import java.util.List;
 import queryprovenance.database.DatabaseHandler;
 import queryprovenance.database.DatabaseState;
 import queryprovenance.database.DatabaseStates;
+import queryprovenance.database.Tuple;
 import queryprovenance.expression.VariableExpression;
 import queryprovenance.harness.Metrics;
 import queryprovenance.problemsolution.Complaint;
@@ -20,7 +21,7 @@ import queryprovenance.problemsolution.SingleComplaint;
 import queryprovenance.query.Query;
 
 public class FixQueryLog {
-
+	public static final double TIMERATIO = 1000000000.0;
 	long[] times;
 	HashMap<Metrics.Type, Double> metrics; // evaluation metrics
 
@@ -39,6 +40,13 @@ public class FixQueryLog {
 	public HashSet<Integer> modifiedList = new HashSet<Integer>();
 	public int avgconstraint = 0;
 	public int avgvariable = 0;
+
+	public int num_relv_attr = 0;
+	public int num_relv_query = 0;
+
+	public HashSet<String> dirty_attr = new HashSet<String>();
+
+	public static String exps_detail_inset = "INSERT INTO exps_detail VALUES (DEFAULT, %d, %d, %d, %d, %d, %f, %f, %f, '%s')";
 
 	/**
 	 * Initialize
@@ -71,8 +79,8 @@ public class FixQueryLog {
 			ArrayList<HashMap<String, varX>> complVarXList = new ArrayList<HashMap<String, varX>>();
 			for (int i = 0; i < fixedQueries.size(); ++i) {
 				Query query = fixedQueries.get(i);
-				HashMap<String, varX> varXList = query.querySAT(cplex, scp, badDss
-						.get(i).getTuple(scp.key).values);
+				HashMap<String, varX> varXList = query.querySAT(cplex, scp,
+						badDss.get(i).getTuple(scp.key).values);
 				complVarXList.add(varXList);
 			}
 			varXMap.put(scp, complVarXList);
@@ -85,6 +93,22 @@ public class FixQueryLog {
 			for (VariableExpression variable : variables) {
 				varQMap.put(variable, new varQuery(cplex, variable));
 				varMap.put(variable, i);
+			}
+		}
+		// initialize incorrect attributes
+		for (SingleComplaint scp : complaints.compmap.values()) {
+			Tuple dirty_tuple = badDss.get(badDss.size() - 1).getTuple(scp.key);
+			for (String attr : badDss.get(badDss.size() - 1).getTable()
+					.getColumns()) {
+				Object dirtyobj = dirty_tuple.getValue(badDss
+						.get(badDss.size() - 1).getTable().getColumnIdx(attr));
+				Object scpobj = scp.values[badDss.get(badDss.size() - 1)
+						.getTable().getColumnIdx(attr)];
+				if ((dirtyobj == null && scpobj != null)
+						|| (dirtyobj != null && scpobj == null)
+						|| !dirtyobj.toString().equals(scpobj.toString())) {
+					dirty_attr.add(attr);
+				}
 			}
 		}
 	}
@@ -107,7 +131,7 @@ public class FixQueryLog {
 	 * @param falsepositive
 	 *            flag for false positive complaints pruning
 	 * @throws Exception
-	 * */
+	 */
 	public QueryLog fixQueries(IloCplex cplex, FixQueryLogParams params)
 			throws Exception {
 		times = new long[5];
@@ -116,13 +140,12 @@ public class FixQueryLog {
 		// define attribute provenance
 		long starttime = System.nanoTime();
 		// preprocess the querylog
-		HashSet<Integer> candidate = preprocess(true);
+		HashSet<Integer> candidate = preprocess(params.pre_proc);
+
 		Integer[] sortedcandidate = new Integer[candidate.size()];
 		sortedcandidate = candidate.toArray(sortedcandidate);
 		Arrays.sort(sortedcandidate);
 
-		AttributeProvenance attrprov = new AttributeProvenance(fixedQueries,
-				candidate);
 		long endtime = System.nanoTime();
 		// record time
 		times[0] += endtime - starttime;
@@ -133,9 +156,11 @@ public class FixQueryLog {
 
 		// divide the problem by batches
 		// count number of times call linearization solver
-		int counttime = 0;
+		int num_cplex_prob = 0;
 		for (int i = sortedcandidate.length - 1; i >= 0; i = i
-				- params.batch_per_iteration) { // batch of 2
+				- params.batch_per_iteration) { // batch
+												// of
+												// 2
 			// add candidate set, only include the current query
 			int startidx = sortedcandidate[i];
 			System.out.println("Index: " + String.valueOf(startidx));
@@ -144,6 +169,12 @@ public class FixQueryLog {
 				queryToFix.add(sortedcandidate[i - j]);
 				startidx = sortedcandidate[i - j];
 			}
+			// get relevant attributes
+			AttributeProvenance attrprov = new AttributeProvenance(
+					fixedQueries, queryToFix, params.attr_per_iteration,
+					params.fix_relv_attr, this.dirty_attr, params.random_num,
+					params.objective_attr_impact);
+
 			// define linearization solver
 			Linearization linearization = new Linearization(badDss,
 					fixedQueries, complaints, varQMap, varXMap, queryToFix,
@@ -153,41 +184,68 @@ public class FixQueryLog {
 			int processed = 0;
 			HashMap<VariableExpression, varQuery> current = null;
 
+			// record stats
+			long[] curtimes = new long[5];
+			int curconstraint = 0, curvariable = 0;
+
 			while (processed < attrprov.sortedAttributes.size()) {
 				// solve for current attributes
-				int attrsnum = processed + params.attr_per_iteration < attrprov.sortedAttributes
-						.size() ? processed + params.attr_per_iteration
-						: attrprov.sortedAttributes.size();
 
-				current = linearization.fixParameters(cplex,
-						attrprov.sortedAttributes.subList(processed, attrsnum),
-						times, startidx);
+				List<String> cur_attr = null;
+				cur_attr = attrprov.getCurIterAttr(queryToFix,
+						params.fix_relv_attr, processed,
+						params.attr_per_iteration);
+
+				// solve current cplex prob.
+				current = linearization.fixParameters(cplex, cur_attr,
+						curtimes, startidx);
 
 				// add processed
-				processed += params.attr_per_iteration;
-				// record constraint and variable amount
-				avgconstraint += linearization.cplexConstraints.size();
-				avgvariable += linearization.linearization_procs.num_cplex_var;
-				counttime++;
+				processed += cur_attr.size();
 
-				if (current == null
-						|| (!params.fix_all_attr && linearization.linearization_procs.stop_procs)) {
+				// record constraint and variable amount
+				curconstraint += linearization.cplexConstraints.size();
+				curvariable += linearization.linearization_procs.num_cplex_var;
+				// record relv_attr amount
+				this.num_relv_attr += cur_attr.size();
+				num_cplex_prob++;
+
+				if ((current == null || (!params.fix_all_attr && linearization.linearization_procs.stop_procs))) {
 					break;
 				}
 
 			}
+			// update stats
+			avgconstraint += curconstraint;
+			avgvariable += curvariable;
+			for (int timeidx = 1; timeidx < 4; ++timeidx) {
+				times[timeidx] += curtimes[timeidx];
+			}
+
 			// check if current fix is valid
-			if (current != null && linearization.getObjective() < bestobj
+			double objective = linearization.getObjective()
+					+ params.objective_attr_impact
+					* attrprov.sortedAttributes.size()
+					* (this.fixedQueries.size() - startidx);
+			if (current != null && objective < bestobj
 					&& linearization.getObjective() > 0) {
 				bestfix = linearization.querySolvedVar;
 				bestrm = linearization.queryRemoveList;
-				bestobj = linearization.getObjective();
+				bestobj = objective;
 				//
-				if(i < sortedcandidate.length) {
+				if (i < sortedcandidate.length) {
 					// print the objective
-					System.out.println(String.valueOf(bestobj));  
+					System.out.println(String.valueOf(bestobj) + "  ");
 				}
 			}
+			// Record exps details
+			int feasible = current != null ? 1 : 0;
+			String exps_insert = String.format(exps_detail_inset,
+					0 , this.fixedQueries.size(), startidx, feasible,
+					curconstraint, (double) (curtimes[1] / TIMERATIO),
+					(double) (curtimes[2] / TIMERATIO),
+					(double) (curtimes[3] / TIMERATIO), String.valueOf(bestobj));
+			handler.updateExecution(exps_insert);
 		}
 		starttime = System.nanoTime();
 		if (bestfix != null)
@@ -196,8 +254,12 @@ public class FixQueryLog {
 		times[4] += endtime - starttime;
 		// finish all the attributes, solve remaining unsolved variables
 		// update average number of constraints and variables
-		avgconstraint = avgconstraint / counttime;
-		avgvariable = avgvariable / counttime;
+		avgconstraint = avgconstraint / num_cplex_prob;
+		avgvariable = avgvariable / num_cplex_prob;
+		num_relv_attr = num_relv_attr / num_cplex_prob;
+		num_relv_query = candidate.size();
+
+		// return result
 		return fixedQueries;
 	}
 
@@ -226,8 +288,8 @@ public class FixQueryLog {
 				if (var.expr.getValue() != var.fixedval) {
 					modifiedList.add(varMap.get(var.expr));
 					// System.out.println(varMap.get(var.expr).toString()
-					//		+ " modificedvalue:" + var.expr.getValue() + "->"
-					//		+ var.fixedval);
+					// + " modificedvalue:" + var.expr.getValue() + "->"
+					// + var.fixedval);
 					var.expr.setVariable(var.expr, var.fixedval);
 				}
 			}

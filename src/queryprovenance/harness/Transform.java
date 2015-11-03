@@ -45,8 +45,8 @@ public class Transform {
 	/*
 	 * Apply this transformation to a query log
 	 */
-	public QueryLog apply(QueryLog ql) {
-		ql = (QueryLog) ql.clone();
+	public QueryLog apply(QueryLog q_) {
+		QueryLog ql = (QueryLog) q_.subList(0, pre).clone();
 		Query q;
 		switch (this.type) {
 		case DELETE:
@@ -77,11 +77,11 @@ public class Transform {
 			break;
 		case WHERE:
 			// XXX: replace where clause completely with new clause
-			where = WhereClause.generate(ql.get(qidx).getWhere(), params);
+			where = WhereClause.generateSame(ql.get(qidx).getWhere(), params);
 			while (ql.get(qidx).getWhere().toString().equals(where.toString())) {
-				System.out.println("where : "
+				System.out.println("where :  "
 						+ ql.get(qidx).getWhere().toString());
-				where = WhereClause.generate(ql.get(qidx).getWhere(), params);
+				where = WhereClause.generateSame(ql.get(qidx).getWhere(), params);
 			}
 			q = ql.get(qidx);
 			q = q.clone();
@@ -97,28 +97,21 @@ public class Transform {
 	/*
 	 * Create a transformation for our experiments
 	 */
-	public void generate(ExpParams params, double percentage) {
+	public void generate(ExpParams params, QueryLog queries, double percentage) {
 		Random rand = new Random();
-		int lowerbd = (int) (params.ql_nqueries * ((double) (percentage - 0.2) > 0 ? percentage - 0.2
-				: 0));
-		int upperbd = (int) (params.ql_nqueries * ((double) (percentage + 0.2) < 1 ? percentage + 0.2
-				: 1));
-		upperbd = upperbd == 0 ? 1 : upperbd;
-		for(int tmp = pre - 1; tmp >= 0; --tmp) {
-			if(params.ql_qtypes[tmp] == Query.Type.UPDATE) {
-				this.qidx = tmp;
-				this.pre = qidx;
-				System.out.println(String.valueOf(qidx));
-				break;
-			}
-		}
+		int lowerbd = (int) (pre * percentage);
+		int upperbd = pre;
+		int randidx = upperbd - lowerbd > 0 ? rand.nextInt(upperbd - lowerbd) + lowerbd : upperbd - 1;
+		
+		qidx = randidx < pre ? randidx : pre - 1;
+		
 		if(qidx == -1) {
 			return;
 		}
 		this.params = new QueryParams();
 		this.params.from = params.table;
 		this.params.nclauses = 1;
-		this.params.queryType = params.ql_qtypes[qidx];
+		this.params.queryType = queries.get(qidx).getType();
 		
 		Transform.Type transtype = null;
 		switch (this.params.queryType) {

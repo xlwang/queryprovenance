@@ -4,6 +4,7 @@ import ilog.concert.IloNumVar;
 import ilog.cplex.IloCplex;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -20,6 +21,7 @@ import queryprovenance.problemsolution.Complaint;
 import queryprovenance.problemsolution.QueryLog;
 import queryprovenance.problemsolution.SingleComplaint;
 import queryprovenance.query.WhereClause.Op;
+import queryprovenance.solve.Linearization;
 import queryprovenance.solve.varQuery;
 import queryprovenance.solve.varX;
 
@@ -55,7 +57,7 @@ public class Query {
 									// query log
 
 	// transform insert values
-	public List<String> generate(List<String> values, List<String> attrs,
+	public static List<String> generate(List<String> values, List<String> attrs,
 			QueryParams params) {
 		Table t = params.from;
 		Random rand = new Random();
@@ -98,6 +100,12 @@ public class Query {
 			String[] values_) throws Exception {
 		HashMap<String, varX> varXList = new HashMap<String, varX>();
 		if (where != null) {
+			boolean sat;
+			if (where.getOperator().equals(WhereClause.Op.CONJ)) {
+				sat = true;
+			} else {
+				sat = false;
+			}
 			for (WhereExpr whereexpr : where.getWhereExprs()) {
 				// for each where expression
 				// set value for each attribute
@@ -116,31 +124,37 @@ public class Query {
 				}
 				double left = leftexpr.Evaluate();
 				double right = rightexpr.Evaluate();
-				boolean sat = true;
+				boolean expr_sat = true; 
 				switch (whereexpr.getOperator()) {
 				case g:
-					sat = left > right;
+					expr_sat = left > right;
 					break;
 				case l:
-					sat = left < right;
+					expr_sat = left < right;
 				case ge:
-					sat = left >= right;
+					expr_sat = left >= right;
 					break;
 				case le:
-					sat = left <= right;
+					expr_sat = left <= right;
 					break;
 				case eq:
-					sat = left == right;
+					expr_sat = left == right;
 					break;
 				case ne:
-					sat = left != right;
+					expr_sat = left != right;
 					break;
 				}
-				varX x = new varX(cplex, scp, whereexpr.toString(),
-						sat == true ? 1 : 0);
-				varXList.put(whereexpr.toString(), x);
+				if (where.getOperator().equals(WhereClause.Op.CONJ)) {
+					sat &= expr_sat;
+				} else {
+					sat |= expr_sat;
+				}
 			}
-		} else if (values != null && values.size() > 0) {
+			varX x = new varX(cplex, scp, where.toString(),
+					sat == true ? 1 : 0);
+			varXList.put(where.toString(), x);
+			
+		} else if (this.insert_vals != null && this.insert_vals.size() > 0) {
 			// for insert query
 			varX x = new varX(cplex, scp, this.toString(), 1);
 			varXList.put(this.toString(), x);
@@ -159,7 +173,7 @@ public class Query {
 				setattrs.addAll(setexpr.attrs);
 			}
 		}
-		if (values != null && values.size() > 0) {
+		if (this.insert_vals != null && this.insert_vals.size() > 0) {
 			for (String attr : from.getColumns()) {
 				setattrs.add(attr);
 			}
@@ -314,8 +328,27 @@ public class Query {
 	}
 
 	public Query(int id, Table from, List<String> values, List<String> attrs) {
-		this(id, from, values);
-		this.attr_names = attrs;
+		this.id = id;
+		this.type = Type.INSERT;
+		this.from = from;
+		if (attrs == null || attrs.size() == 0) {
+			this.insert_vals = values;
+		
+		} else {
+			this.insert_vals = new ArrayList<String>();
+			for (int i = 0; i < from.getColumns().length; ++i) {
+				String attr = from.getColumnName(i);
+				String value = String.valueOf(Linearization.NOTEXIST);
+				// search value
+				for(int j = 0; j < attrs.size(); ++j) {
+					if (attrs.get(j).equals(attr)) {
+						value = values.get(j);
+					}
+				}
+				this.insert_vals.add(value);
+			}
+		}
+		variableInit();		
 	}
 
 	/* initialization */
@@ -506,8 +539,9 @@ public class Query {
 
 	/* get values for insert query */
 	public List<VariableExpression> getValue() {
-		return this.values;
+		return this.variables;
 	}
+	
 
 	/* clone query */
 	public Query clone() {
@@ -531,14 +565,16 @@ public class Query {
 	 * Genereate a random Query object. NOTE: if params doesn't set an id field,
 	 * the query's id field is initialized to -1
 	 */
-	public static Query generate(QueryParams params) {
+	public static Query generate(QueryParams params, String[] cols, int range) {
 		Query q = null;
-		WhereClause clause = WhereClause.generate(params);
-		SetClause set = SetClause.generate(params);
+		WhereClause clause = WhereClause.generate(params, cols, range);
+		SetClause set = SetClause.generate(params, cols);
 		switch (params.queryType) {
 		case INSERT:
 			// generate values
-			q = new Query(-1, params.from, null);
+			List<String> insert_attrs = new ArrayList<String>(Arrays.asList(params.from.getColumns()));
+			List<String> values = Query.generate(null, insert_attrs, params) ;
+			q = new Query(-1, params.from, values, insert_attrs);
 			break;
 		case UPDATE:
 			q = new Query(-1, set, params.from, clause, Type.UPDATE);
@@ -614,7 +650,7 @@ public class Query {
 	}
 
 	// Update the querylog based on attr_value_map
-	public void StrToNum(HashMap<String, Integer> attr_value_map, String attr) {
+	public void strToNum(HashMap<String, Integer> attr_value_map, String attr) {
 		switch (type) {
 		case INSERT:
 			int attr_idx = -1;
@@ -641,16 +677,16 @@ public class Query {
 			this.insert_vals.set(attr_idx, String.valueOf(num_attr_value));
 			break;
 		case UPDATE:
-			this.set.StrToNum(attr_value_map, attr);
-			this.where.StrToNum(attr_value_map, attr);
+			this.set.strToNum(attr_value_map, attr);
+			this.where.strToNum(attr_value_map, attr);
 			break;
 		case DELETE:
-			this.where.StrToNum(attr_value_map, attr);
+			this.where.strToNum(attr_value_map, attr);
 			break;
 		}
 	}
 
-	public void QueryToJSON(String[] components) {
+	public void queryToJSON(String[] components) {
 		// process value
 		if (this.insert_vals != null) {
 			components[0] = "[" + Util.join(this.insert_vals, ",") + "]";
@@ -660,11 +696,32 @@ public class Query {
 		}
 		// process set clause
 		if (this.set != null) {
-			components[2] = "[[" + Util.join(this.set.QueryToJSON(), "],[") + "]]";
+			components[2] = "[[" + Util.join(this.set.queryToJSON(), "],[") + "]]";
 		}
 		// process where clause
 		if (this.where != null) {
-			components[3] = "[[" + Util.join(this.where.QueryToJSON(), "],[") + "]]";
+			components[3] = "[[" + Util.join(this.where.queryToJSON(), "],[") + "]]";
 		}
+	}
+	
+	public List<String> getRelvAttr() {
+		List<String> relv_attr = new ArrayList<String>();
+		switch(type) {
+		case INSERT: 
+			if (attr_names != null && attr_names.size() > 0) {
+				relv_attr.addAll(attr_names);
+			} else {
+				relv_attr = new ArrayList<String>(Arrays.asList(this.from.getColumns()));
+			}
+			break;
+		case UPDATE:
+			relv_attr.addAll(set.getRelvAttr());
+			relv_attr.addAll(where.getRelvAttr());
+			break;
+		case DELETE:
+			break;
+		}
+		return relv_attr;
+		
 	}
 }

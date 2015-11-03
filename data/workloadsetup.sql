@@ -79,3 +79,15 @@ drop table if exists  exps cascade;
         avgnconstraints int,
         avgnvariables int
       );
+
+drop table if exists exps_detail cascade;
+      CREATE TABLE exps_detail (
+        id serial primary key,
+        querylog_size int,
+        query_index int,
+	feasible int,
+	avgnconstraints int,
+        solver_prep_cons_time numeric,
+        solver_add_cons_time numeric,
+        solve_time numeric
+      );

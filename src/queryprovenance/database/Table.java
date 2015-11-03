@@ -62,7 +62,15 @@ public class Table {
 	}
 	
 	public long[] getNumDomain(int colidx) {
-		return (long[]) domains[colidx];
+		try {
+			return (long[]) domains[colidx];
+		} catch(Exception e) {
+			int[] domain = (int[]) domains[colidx];
+			long[] tmp = new long[2];
+			tmp[0] = domain[0];
+			tmp[1] = domain[1];
+			return tmp;
+		}
 	}
 	
 	public String toString() {

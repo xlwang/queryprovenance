@@ -11,7 +11,7 @@ public class FixQueryLogParams {
 			boolean print_, boolean objective_full_, int objective_varconstr_ratio_,
 			boolean fix_all_query_,
 			boolean fix_all_attr_,
-			boolean fix_approx_) {
+			boolean fix_approx_, boolean pre_proc_) {
 		epsilon = epsilon_;
 		M = M_;
 		attr_per_iteration = attr_per_iteration_;
@@ -23,6 +23,7 @@ public class FixQueryLogParams {
 		objective_varconstr_ratio = objective_varconstr_ratio_;
 		fix_all_attr = fix_all_attr_;
 		fix_approx = fix_approx_;
+		pre_proc = pre_proc_;
 	}
 	// parameters for cplex
 	public double epsilon = 0.001;
@@ -39,7 +40,13 @@ public class FixQueryLogParams {
 	public boolean objective_full = false;
 	public int objective_varconstr_ratio = 10;
 	public boolean fix_all_query = false;
-	public boolean fix_all_attr = false;
+	public boolean fix_all_attr = true;
+	public boolean fix_relv_attr = false;
 	public boolean fix_approx = false;
 	public FixQueryLogType fix_type = FixQueryLogType.NUM;
+	public boolean pre_proc = true;
+	
+	public int random_num = 0;
+	public int objective_attr_impact = 0;
+	public boolean post_process = false;
 }

@@ -9,7 +9,11 @@ import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Properties;
+
+import ilog.cplex.IloCplex;
+import queryprovenance.harness.SyntheticHarness2;
 
 public class DatabaseHandler {
 
@@ -20,6 +24,8 @@ public class DatabaseHandler {
 	private static String postgreSQLDriver;
 	private static String postgreSQLUser;
 	private static String postgreSQLPassword;
+	
+	int portnumber = 5432;
 
 	// DB Connection
 	private Connection db;
@@ -27,6 +33,11 @@ public class DatabaseHandler {
 	// connected to databasse
 	public DatabaseHandler() {
 	}
+	
+	public DatabaseHandler(int portnum) {
+		portnumber = portnum;
+	}
+	
 	public void executePrepFile(String filename){
 		String s            = new String();  
 		StringBuffer sb = new StringBuffer();  	  
@@ -45,7 +56,7 @@ public class DatabaseHandler {
 			{   
 				if(!inst[i].trim().equals(""))  
 				{  
-					queryExecution(inst[i]+";"); 
+					updateExecution(inst[i]+";"); 
 				}  
 			}      
 		}catch(Exception e){
@@ -67,7 +78,7 @@ public class DatabaseHandler {
 		postgreSQLUser     = configProps.getProperty("postgreSQLUser");
 		postgreSQLPassword = configProps.getProperty("postgreSQLPassword");
 
-
+		dbUrl = String.format(dbUrl, this.portnumber);
 		/* load jdbc drivers */
 		Class.forName(postgreSQLDriver).newInstance();
 
@@ -121,5 +132,15 @@ public class DatabaseHandler {
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	public void commit() throws Exception {
+		db.commit();
+	}
+	
+	
+	public static void main(String[] argv) throws Exception {
+		DatabaseHandler handler = new DatabaseHandler();
+		handler.getConnected(argv[0]);
 	}
 }

@@ -109,7 +109,7 @@ public class WhereExpr {
 	}
 
 	// Update where expr by converting string value into integer value.
-	public void StrToNum(HashMap<String, Integer> attr_value_map, String attr) {
+	public void strToNum(HashMap<String, Integer> attr_value_map, String attr) {
 		// check if current expression is involved in the update
 		if (attr_expr.containsVar(attr)) {
 			var.StrToNum(attr_value_map, attr);
@@ -117,7 +117,7 @@ public class WhereExpr {
 	}
 
 	// Convert where expression into JSON format.
-	public String QueryToJSON() {
+	public String queryToJSON() {
 		String whereexpr_json = "\"" + attr_expr.toString() + "\"" + "," + "\""
 				+ this.operator.toString() + "\"" + "," + "\"" + var.toString() + "\"";
 		return whereexpr_json;

@@ -63,7 +63,7 @@ public class SetExpr {
 	}
 	
 	// Update where expr by converting string value into integer value
-	public void StrToNum(HashMap<String, Integer> attr_value_map, String attr_) {
+	public void strToNum(HashMap<String, Integer> attr_value_map, String attr_) {
 		// check if current expression is involved in the update
 		if(attr.containsVar(attr_)) {
 			expr.StrToNum(attr_value_map, attr_);
@@ -71,7 +71,7 @@ public class SetExpr {
 	}
 	
 	// Convert set expression into JSON format
-	public String QueryToJSON() {
+	public String queryToJSON() {
 		String setexpr_json = "\"" + attr.toString() + "\"" + "," +
 			 "\"" + expr.toString() + "\"";
 		return setexpr_json;

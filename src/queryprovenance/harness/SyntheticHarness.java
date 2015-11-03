@@ -1,4 +1,5 @@
-         package queryprovenance.harness;
+package queryprovenance.harness;
+
 import ilog.cplex.IloCplex;
 
 import java.io.BufferedReader;
@@ -55,7 +56,7 @@ public class SyntheticHarness extends HarnessBase {
 	}
 
 	public void loadConfigParams() throws Exception {
-		String q = "SELECT epsilon, M, batchsize, p_fp, p_fn, niterations, solvertype, alg2_attrsize, alg2_obj, alg2_objratio, alg2_fixq, alg2_fixattr, approx FROM configs WHERE id = "
+		String q = "SELECT epsilon, M, batchsize, p_fp, p_fn, niterations, solvertype, alg2_attrsize, alg2_obj, alg2_objratio, alg2_fixq, alg2_fixattr, approx, preproc FROM configs WHERE id = "
 				+ cid;
 		ResultSet rset = handler.queryExecution(q);
 		rset.next();
@@ -63,7 +64,10 @@ public class SyntheticHarness extends HarnessBase {
 				(double) (rset.getFloat(2)), rset.getInt(8), rset.getInt(3),
 				rset.getFloat(4) > 0, false, rset.getInt(9) == 0,
 				rset.getInt(10), rset.getInt(11) == 0, rset.getInt(12) == 0,
-				rset.getInt(13) == 0);
+				rset.getInt(13) == 0, rset.getInt(14) == 1);
+		fix_params.epsilon = 0.001;
+		fix_params.M = 10000000;
+		fix_params.attr_per_iteration = 10;
 		prob_params = new ProbParams((double) (rset.getFloat(4)),
 				(double) (rset.getFloat(5)), rset.getInt(7), rset.getInt(6));
 	}
@@ -111,13 +115,14 @@ public class SyntheticHarness extends HarnessBase {
 				fixedlog = solver2.fixQueries(cplex, fix_params);
 			}
 			// update exprs result
-			DatabaseStates fixedds = fixedlog.execute(tableBase, "fixed", handler, true);
+			DatabaseStates fixedds = fixedlog.execute(tableBase, "fixed",
+					handler, true);
 			computeMetrics(fixedlog, fixedds, solver, solver2, complaints, 0);
 			// update complaint set
 			Complaint newcmp = new Complaint(cleanDss.get(cleanDss.size() - 1),
 					fixedds.get(fixedds.size() - 1));
 			newcmp = Complaint.getPartial(newcmp, prob_params.n_compl_iter);
-			_complaints.addAll(newcmp);
+			_complaints_sub.addAll(newcmp);
 
 			System.out.println("Finished iteration " + iterationIdx);
 		}
@@ -162,14 +167,14 @@ public class SyntheticHarness extends HarnessBase {
 		}
 		// insert data into result table
 		String params = String.format(
-				"DEFAULT, %d, %d, %d, %d, %f, %f, %f, %f, %f, %f, %f, %d, %d",
+				"DEFAULT, %d, %d, %d, %d, %f, %f, %f, %f, %f, %f, %f, %f, %d, %d",
 				cid,
 				iterationIdx,
 				// metrics.get(Metrics.Type.BADCOMPLAINT).intValue(),
 				complaints.size(), metrics.get(Metrics.Type.FIXEDCOMPLAINT)
 						.intValue(), metrics.get(Metrics.Type.REMOVEDRATE),
 				metrics.get(Metrics.Type.NOISERATE), computetime[0],
-				computetime[1], computetime[2], computetime[3],
+				computetime[1], computetime[2], computetime[3],computetime[4], 
 				prob_params.p_fp, nconstraints, nvariables);
 		String q = String.format("INSERT INTO exps VALUES(%s)", params);
 		handler.queryExecution(q);
@@ -226,13 +231,14 @@ public class SyntheticHarness extends HarnessBase {
 						wherejson));
 				break;
 			case "INSERT":
-				queries.add(Util.jsonToInsertQuery(qidx, curTable, valsjson, null));
+				queries.add(Util.jsonToInsertQuery(qidx, curTable, valsjson,
+						null));
 				break;
 			}
 		}
 		return queries;
 	}
-	
+
 	public static List<Query> loadQueryLog(String fname, Table table)
 			throws Exception {
 		List<Query> qlog = new ArrayList<Query>();
@@ -281,7 +287,7 @@ public class SyntheticHarness extends HarnessBase {
 			int qid = q.getId();
 			if (type == Query.Type.INSERT) {
 				JSONArray vals = new JSONArray();
-				vals.addAll(q.getValue());
+				vals.addAll(q.insert_vals);
 				vals_str = vals.toJSONString();
 				type_str = "INSERT";
 			} else if (type == Query.Type.UPDATE) {
@@ -325,7 +331,6 @@ public class SyntheticHarness extends HarnessBase {
 		return dss;
 	}
 
-
 	/*
 	 * config array: [ N_D, N_dim, N_q, N_pred, N_ins, N_set, N_where, idx, p_I,
 	 * p_pk, p_fp, p_fn, exptype, passtype, optchoice, qfixtype, epsilon, M,
@@ -360,14 +365,21 @@ public class SyntheticHarness extends HarnessBase {
 		String dbconfigname = args[0];
 		DatabaseHandler handler = new DatabaseHandler();
 		handler.getConnected(dbconfigname);
-
-		for (int i = 1; i < args.length; i++) {
-			int cid = Integer.parseInt(args[i]);
+		// update db
+		String dbsql = "drop table if exists exps_detail cascade; CREATE TABLE exps_detail (id serial primary key, querylog_size int, query_index int, feasible int, avgnconstraints int, solver_prep_cons_time numeric, "
+				+ "solver_add_cons_time numeric, solve_time numeric);";
+		handler.updateExecution(dbsql);
+		// execute all problems
+		String prob_size = "SELECT distinct id FROM configs";
+		ResultSet rset = handler.queryExecution(prob_size);
+		int idx = 2;
+		while (rset.next() && idx < 60) {
+			int cid = idx;
 			String tablebase = "synth_" + cid;
 			Table table = Table.tableFromDB(handler, tablebase);
 			SyntheticHarness harness = loadHarness(handler, table, cid);
 			harness.run();
-
+			idx++;
 		}
 	}
 

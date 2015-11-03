@@ -14,6 +14,9 @@ public class Tuple {
 	}
 	public Tuple(int count) {
 		values = new String[count];
+		for(int i = 0; i < count; ++i) {
+			values[i] = String.valueOf(Double.MIN_VALUE);
+		}
 	}
 	
 	public Tuple(int count, String[] v_) {
@@ -56,8 +59,14 @@ public class Tuple {
 		return t;
 	}
 	
+	// Connects key according to key index sequence
+	// Connects by keys by \t
 	public String getKey(Table table) {
-		return values[table.getKeyIdx()];
+		String keyvalue = "";
+		for(int keyidx : table.getKeyIdx()) {
+			keyvalue += values[keyidx] + "\t";
+		}
+		return keyvalue;
 	}
 	
 	public boolean compare(String[] v) {

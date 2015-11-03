@@ -54,13 +54,13 @@ public class QueryLog extends ArrayList<Query> {
 			String curTable = baseTableName + "_" + mid + "_" + i;
 			qstr = "SELECT * from " + prevTable;
 			try {
-				handler.queryExecution("DROP TABLE " + curTable);
+				handler.updateExecution("DROP TABLE " + curTable);
 			} catch (Exception e) {
 				// XXX: should do something with this?
 			}
-			handler.queryExecution("CREATE TABLE " + curTable + " AS (" + qstr
+			handler.updateExecution("CREATE TABLE " + curTable + " AS (" + qstr
 					+ ");");
-			handler.queryExecution("ALTER TABLE " + curTable
+			handler.updateExecution("ALTER TABLE " + curTable
 					+ " ADD PRIMARY KEY (" + Util.join(keys, ",") + ");");
 
 			// execute
@@ -113,7 +113,7 @@ public class QueryLog extends ArrayList<Query> {
 	 * 
 	 * @param params
 	 */
-	public static QueryLog generate(ExpParams params) {
+	public static QueryLog generate(ExpParams params, String[] cols, int range) {
 		QueryLog ql = new QueryLog();
 		for (int i = 0; i < params.ql_nqueries; i++) {
 			// generate a QueryParam
@@ -121,7 +121,7 @@ public class QueryLog extends ArrayList<Query> {
 			qparams.from = params.table;
 			qparams.nclauses = params.ql_nclauses;
 			qparams.queryType = Query.Type.UPDATE;
-			Query q = Query.generate(qparams);
+			Query q = Query.generate(qparams, cols, range);
 			ql.add(q);
 
 		}
