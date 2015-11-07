@@ -17,23 +17,24 @@
 %
 \section{Experiments}
 
-In this paper, we have described an exact, albeit less-scalable,
-constraint-based solution to the \prob problem, as well as several
-extensions to the solution that 1) trade off scalability with
-diagnosis quality, and 2) support noise in the input complaint set.
+In this paper, we have described several heuristic algorithms based on decision trees 
+and bounding box algorithms, as well as an exact, albeit less-scalable,
+constraint-based solution to the \prob problem.  In addition, we 
+introduced  several extensions to the CPLEX-based solution that 
+1) improve the scalability of the system and 2) tolerate false positives and 
+negatives in the input complaint set.
 Our goals in the evaluation is to understand these trade-offs in
 controlled synthetic scenarios, as well as study the effectiveness
-in typical database query workloads.
+in typical database query workloads based on widely used benchmarks.
 
-To this end, our experiments are organized as follows: First, we
-study \exact on a small controlled, synthetic workload with a single
-corrupted query and explore the parameters that make the problem
-challenging.  Second, we decompose \exact into rollback and \qfix algorithms and study each
-in isolation using a series of micro-experiments, as well as together in an end-to-end-system.  
-Third, we add noise to the input complaint sets to evaluate \density, and study
-number of corrupted queries to understand how our algorithms scale to 
-based.  Lastly, evaluate on real-world workloads based on TPC-C as
-well as a data-cleaning application.
+To this end, our experiments are organized as follows: First, 
+establish the quality limitations of existing heuristics and the need for a formal, 
+constraint-based algorithm (\exact).  Second, we study how each of the 
+optimizations described in Section~\ref{s:optimiztaions} improves algorithm scalability.
+Third, we introduce different forms of error in the input complaint sets and study the 
+effectiveness of our noise-handling heuristics.  Finally, we use two
+representative database transaction benchmarks, TPC-C XXX~\cite{tpcc} and AuctionMark~\cite{auctionmark}
+to study \sys in realistic scenarios.
 
 
 
@@ -44,30 +45,114 @@ well as a data-cleaning application.
 
 \subsection{Experimental Setup}
 
-We ran a combination of synthetically generated query logs, and
-well as logs generated using a subset of the TPC-C~\cite{tpcc}
-transaction log that consists of inserts and updates.  In each
-experiment, we corrupt the query log as described below, execute
-the original and corrupt logs on an initial (possibly empty) database,
-and compare the resulting database states to generate a true complaint
-set.  We then add noise to the complaint set by adding false positive
-complaints, and removing true complaints to simulate false negatives.
-Finally, we execute \sys on the complaints and compare the fixed
+
+Each of our experiments follows a standard procedure.  
+We generate a sequence of queries using a synthetic query generator or 
+the benchmark program, and corrupt the query log as described below. 
+We then execute the original and corrupt query logs on an initial (possibly empty) database,
+and perform a tuple-wise comparison between the resulting database states 
+to generate a true complaint set.  
+We then add noise to the complaint set by 1) picking random tuples not in the true
+complaint set to add false positive complaints, and 2) removing true complaints to simulate false negatives.
+Finally, we execute the evaluated algorithms on the complaints and compare the fixed
 query log with the true query log, as well as the fixed and true
 final database states to measure performance and accuracy metrics.
 
-\subsubsection{Metrics}
+Tables~\ref{t:params} and~\ref{t:metrics} summarize the key parameters that
+we vary throughout our experiments, as well as the metrics we use to evaluate
+the quality of the algorithm solutions, respectively.
 
-\begin{itemize}
-\item {\it Fixrate}: Percentage of true complaints correctly modified
-\item {\it Err}: Percentage of errors introduced
-\item {\it $Cost_{all,preproc,prep,solver}$}: Execution times overall ($cost_{all}$), 
-      pre-processing time for XXX ($cost_{preproc}$), time for constructing the problem that is
-      passed to the solver ($cost_{prep}$), and the time to run the simplex solver ($cost_{solver}$).
-\item {\it $Dist_{measure}$}: Distance from corrected modification  
-      (str distance, clause distance, numerical distance)
-\end{itemize}
 
+\subsubsection{Datasets and Workloads}
+
+This subsection describes the query and data generation process in greater detail.
+
+% Anant's workload?
+
+\stitle{TPC-C} We use the data and query workload over the {\it
+CUSTOMER} table in TPC-C~\cite{}.  We generate a database at scale
+1 with one warehouse, and keep only the queries that modify the
+{\it CUSTOMER} table.  We then randomly perturb a subset of the
+queries to generate the corrupted query log.
+\xlw{Describe how corrupted}
+
+\stitle{AuctionMark} \xlw{Describe benchmark and how queries are corrupted}
+
+
+
+\stitle{Synthetic} 
+We generate an initial database of $N_D$ random tuples.  
+The schema contains $N_a=5$ attributes $a_1\ldots a_5$, whose values are
+picked from $V_d = [0, 100]$ uniformly at random, along with a primary key $id$.
+A sequence of $N_q$ queries is generated containing a mixture of insert queries,
+point update queries, and range update queries.  The \texttt{UPDATE} queries have
+the following respective forms, where \verb|?| is a query parameter:
+
+{\scriptsize
+\begin{verbatim}
+UPDATE SET (a_i = ?),.. WHERE a_j = ? AND ...
+UPDATE SET (a_i = ?),.. WHERE a_j in [?, ?+10] AND ...
+\end{verbatim}
+}
+
+\texttt{INSERT} queries use values picked uniformly at random.  
+The \texttt{SET} clauses of the \texttt{UPDATE} queries either set attributes to random values, 
+or increment attributes by a random amount.  The \texttt{WHERE} clauses are a
+conjunction of equality or range predicates.
+
+We first consider three different homogenous query logs: \texttt{INSERT} only ($p_I = 1$), 
+\texttt{PK} update only ($p_I = 0, p_{pk} = 1$), and \texttt{RANGE} update only ($p_I = 0, p_{pk} = 0$).
+These query logs help us understand \sys's performance characteristics for each query type individually.  
+Finally, we investigate heterogenous mixtures of the three query types to simulate varying amounts of real settings.
+
+Within each query log, we independently vary the log size, the
+database size, the complexity of the \texttt{WHERE} clause predicates, and
+location of the query, and the number of attributes that are corrupted
+(by replacing the constant with a random value within $[0, 100]$).
+
+
+
+
+
+\begin{table}[h]\small
+  \centering
+  \begin{tabular}{c|l|c}
+  {\bf Parameter} & {\bf Description} & {\bf Default} \\
+  $V_d$  & Domain range of the attributes  & $[0, 100]$ \\
+  $N_D$  & \# tuples in final database & $1000$ \\
+  $N_a$  & \# attributes in database & $10$ \\
+  $N_w$  & \# predicates in \texttt{WHERE} clauses & $1$ \\
+  $N_s$  & \# \texttt{SET} clauses & $1$ \\
+  $N_q$  & \# queries in query log & $100$ \\
+  $idx$  & Index of corrupted query & $\frac{N_q}{2}$ \\
+  $s$    & Skewness of query attributes, & $0$ \\
+         & power low distribution $P(v) = v^{-s}$ & \\\end{tabular}
+  \label{t:params}
+  \caption{Experimental Parameters}
+\end{table}
+
+
+\begin{table}[h]\small
+  \centering
+  \begin{tabular}{c|l}
+  {\bf Parameter} & {\bf Description} \\
+  $TP$ & True positive rate: \% of true complaints corrected \\
+  $FP$ & False positive rate: \% of errors introduced\\
+  $t_{prep}$ & Time to construct CPLEX problem \\
+  $t_{send}$ & Time to send CPLEX problem to solver \\
+  $t_{solve}$ & Time for solver to generate a solutions\\
+  $t_{total}$ & End-to-end execution time \\ 
+  $d_{measure}$ & \red{Some sort of distance measure} \\\end{tabular}
+  \label{t:metrics}
+  \caption{Metrics Compared}
+\end{table}
+
+
+
+
+
+
+\iffalse
 \subsubsection{Algorithms}
 
 \sys fixes query logs in two distinct steps: first, we filter the query log using 
@@ -109,48 +194,6 @@ Conditions, given a database ${\cal D}$ and query log $qlog$:
 \item {\bf $p_{FP}$: } Percentage of false positives in the complaint set.
 \item {\bf $p_{FN}$: } Percentage of false negatives in the complaint set.
 \end{itemize}
-
-\subsubsection{Dataset and Workload}
-
-% Anant's workload?
-
-\stitle{TPC-C} We use the data and query workload over the {\it
-CUSTOMER} table in TPC-C~\cite{}.  We generate a database at scale
-1 with one warehouse, and keep only the queries that modify the
-{\it CUSTOMER} table.  We then randomly perturb a subset of the
-queries to generate the corrupted query log.
-
-\stitle{Synthetic} 
-We generate an initial database of $N_{\cal D}$ random tuples.  
-The schema contains 5 attributes $a_1\ldots a_5$ with a value
-within $[0, 100]$ and a primary key $id$. 
-Generate $N_q$ queries containing a mixture of insert queries 
-and two types of update
-queries, Point updates and Range updates, that have the following respective forms, 
-where \verb|?| is a query parameter:
-
-{\scriptsize
-\begin{verbatim}
-UPDATE SET (a_i = ?),.. WHERE a_j = ? AND ...
-UPDATE SET (a_i = ?),.. WHERE a_j in [?, ?+10] AND ...
-\end{verbatim}
-}
-
-The insert queries use randomly generated values.  The SET clauses
-of the update queries either set attributes to random values, or
-increment attributes by a random amount.  The WHERE clauses are a
-conjunction of equality or range predicates.
-
-We first consider three different homogenous query logs: {\it INSERT} only ($p_I = 1$), 
-{\it PK} update only ($p_I = 0, p_{pk} = 1$), and {\it RANGE} update only ($p_I = 0, p_{pk} = 0$).
-These query logs help us understand \sys's performance characteristics for each query type individually.  
-Finally, we investigate heterogenous mixtures of the three query types to simulate varying amounts of real settings.
-
-Within each query log, we independently vary the log size, the
-database size, the complexity of the WHERE clause predicates, and
-location of the query, and the number of attributes that are corrupted
-(by replacing the constant with a random value within $[0, 100]$).
-
 
 
 
@@ -304,3 +347,4 @@ while varying the query batch size.
   100 times and plot the average and standard deviation of the results.
 
 }
+\fi
