@@ -1,0 +1,190 @@
+\section{Optimizing the Basic Approach}
+\label{sec:opt}
+
+In the previous section, we introduce the basic approach to derive
+the log repair by incorporating information from every query
+and every tuple into a single MILP problem. However, oftentimes, 
+this basic approach end up with 
+a huge problem as the query log size and table size increase. 
+In Figure~\ref{fig:querysize_vs_time}, 
+\begin{wrapfigure}{R}{0.25\textwidth}
+    \centering
+        \includegraphics[width=0.25\textwidth]{figures/auctionmark_qsize_time}
+    \caption{\# of queries vs. execution time on Auctionmark dataset. }
+    \label{fig:querysize_vs_time}
+\end{wrapfigure}
+we observe that the total solver (IBM CPLEX) solving time 
+grows exponentially and 
+unpredictably as the query 
+log size increases. As a result, the basic approach does not scale over 
+large problems (large query log size and large table size).\\
+To resolve the scalability limitation of the basic approach, 
+we explored a number of approaches to improve the performance of the 
+MILP-based algorithm.
+
+\subsection{A Naive but Flawed approach}
+\ewu{Better explained as: CPLEX searches through an exponential space of all possible combinations of MILP variables.  In a chunked approach, the solution of each chunk is one out of a potentially arbitrary number of possible solutions, thus it is easy to pick an incorrect one}
+A natural idea to optimize the basic approach is 
+to \textbf{chunk the query log} into
+smaller, fixed size pieces and then solve each piece at a time: starting
+from the most recent piece, the system linearizes and parameterizes queries 
+in the current piece and derives a corresponding log repair; 
+it then examines the other pieces iteratively
+in the same way. Since complaints only provides
+true values for the most recent database state, in order to avoid 
+linearizing additional queries, 
+we need to know \textbf{rollback} the true values of tuples 
+until the last query in each query log piece. \\
+However, rollback the database is non-easy. An ideal, precise rollback
+algorithm would generate a set of valid ranges for each attribute of a tuple. 
+But the size of valid ranges also grows exponentially with the number queries
+we want to rollback, which, in turn, could not improve the system performance. 
+On the other hand, an approximate, imprecise 
+rollback algorithm would either make the rest of the problems
+infeasible to solve (only maintain fixed number of valid ranges) 
+or result in deriving 
+incorrect log repairs (maintain the lower 
+bound and upper bound among all valid ranges).
+  
+
+In order to improve the system performance without losing accuracy, we propose
+the following two optimizations: query-slicing optimization 
+based on provenance over queries and
+attribute-slicing optimization based on provenance over 
+attributes. 
+
+\subsection{Query-Slicing}
+\label{sec:opt:query}
+The exhaustive parameterization of all queries in the query log, as described
+in the basic approach, is typically unnecessary because many queries in the log
+could not have affected the tuple attribute values in the complaint set.
+To avoid such redundant computation, \textit{query-slicing} 
+removes \texttt{UPDATE} queries whose \texttt{SET} clauses did not modify 
+attributes that could possibly have affected the {\it complaint attributes} 
+specified in the complaint set.
+
+\ewu{changed INcorrect attributes to Complaint Attributes}
+
+\begin{definition} [Complaint Attributes]
+	The complaint attributes $\mathcal{A}(C)$ are attributes in 
+	table $R$ with incorrect values: 
+	\[\mathcal{A}(C) = \{A_i|A_i\in R, \exists t.A_i \neq t.A_i^*, t\in C\}\]
+\end{definition} 
+
+\ewu{Why don't we use lineage/provenance language?}
+\begin{definition}[Query dependency\& impact]
+    The \textbf{dependency}, $\mathcal{P}(q)$, of a query $q$
+    is the set of 
+    attributes involved in the condition function of $q$:
+    \[\mathcal{P}(q) = \Pi_{f_{q}.\sigma}(R)\]
+    The \textbf{direct-impact} of query $q$, denoted
+    by $\mathcal{I}(q)$, is the set of attributes 
+    involved in the update function of $q$:
+    \[\mathcal{I}(q) = \Pi_{f_{q}.\mu}(R)\]
+    The \textbf{full-impact}
+    of $q$, $\mathcal{F}(q)$, propogates the $q$'s direct impact through
+    the subsequent queries in the query log to describe {\it all} attributes
+    that are affected by the changes caused by $q$'s \texttt{SET} clause.
+    We describe its implications and calculation next.
+    \ewu{Is this correct?}
+\end{definition}
+
+
+By comparing $\mathcal{F}(q)$ and $\mathcal{A}(C)$, we know whether
+or not corrupting query $q$'s parameters could possibly have caused the complaint
+set.  Specifically, when $|\mathcal{F}(q) \cap \mathcal{A}(C)|=|\mathcal{A}(C)|$, 
+$q$ potentially affected all of the attributes referenced in the complaint set and is
+a candidate for fixing; 
+when $0 < |\mathcal{F}(q) \cap \mathcal{A}(C)|< |\mathcal{A}(C)|$, 
+$q$ contributed to a subset of the attributes in the complaint set; 
+and when $|\mathcal{F}(q) \cap \mathcal{A}(C)|=0$, $q$ is irrelevant 
+and can be ignored as a candidate for fixing. 
+We use $Rel\mathcal{(Q)}$ to denote the set of relevant queries. 
+
+Algorithm~\ref{alg:fullimpact} describes how we find
+$\mathcal{F}(q_i)$ for $q_i$ in the query log:
+
+\begin{algorithm}[htbp]
+\caption{$FullImpact$ algorithm for finding $\mathcal{F}(q)$.}
+\label{alg:fullimpact}
+\begin{algorithmic}
+\REQUIRE {$\mathcal{Q}$, $q_i$}
+% \ENSURE {$\mathcal{F}(\mathcal{Q})=\{\{\mathcal{F}(q_1)\}, ..., \{\mathcal{F}(q_n)\}\}$}
+% \FOR {each $q_i$ in $q_n, ..., q_1$}
+\STATE $\mathcal{F}(q_i) \leftarrow \mathcal{I}(q_i)$
+\FOR {each $q_j$ in $q_{i+1}, ..., q_{n}$}
+\IF {\red{$\mathcal{F}(q_i)\cap \mathcal{P}(q_j) \neq \emptyset$}}
+\STATE $\mathcal{F}(q_i) \leftarrow \mathcal{F}(q_i) \cup \mathcal{F}(q_j)$
+\ENDIF
+\ENDFOR
+\STATE $\mathcal{F}(\mathcal{Q}) \leftarrow \mathcal{F}(\mathcal{Q}) \cup {\red{\{\mathcal{F}(q_i)\}}}$
+% \ENDFOR
+\STATE Return $\mathcal{F}(\mathcal{Q})$
+\end{algorithmic}
+\end{algorithm}
+
+Finally, we can compute $Rel\mathcal{(Q)}$
+
+
+
+\subsubsection{I don't understand this}
+
+
+In addition to pruning out irrelevant queries,
+we also prune irrelevant attributes. \\
+Let $Rel\mathcal{(Q)}$ as the set of 
+relevant queries, we can find the relevant 
+attributes as following:
+\[Rel\mathcal{(A)} = \cup_{q_i \in Rel\mathcal{Q)}} 
+(\mathcal{F}(q_i)\cup \mathcal{P}(q_i)) \]
+
+
+
+\subsection{Incremental Computation}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=.4\textwidth]{figures/placeholder}
+  \caption{Solver time vs size of encoded query log.}
+  \label{fig:badscaling}
+\end{figure}
+
+
+Despite the previous optimizations, it is still expensive to parameterize all 
+queries in $Rel\mathcal{(Q)}$ and solve for all parameterized values.
+In particular, the cost of solving a MILP problem increases \ewu{cubically?}
+with respect to the number of variables.
+For example, Figure~\ref{f:badscaling} shows the time cost of the CPLEX solver
+as we increase the number of query logs that are encoded and sent to the solver.  
+The solid line is when the values in all of the queries are parameterized, while
+the dashed line illustrates the time if only the oldest query is parameterized. 
+These results suggest that it is {\it faster} to run a separate MILP problem for each 
+suffix of the query log (e.g., $q_i, \ldots, q_m$) where $q_i$ is parameterized, 
+rather than encode and parameterize the entire log.
+Thus we use use an incremental approach, where we individually test each relevant query from the most recent
+to the oldest:
+
+
+\begin{algorithm}[htbp]
+\caption{$QueryFix_{inc}$ algorithm.}
+\label{alg:incalg}
+\begin{algorithmic}
+\REQUIRE {$Rel\mathcal{(Q)}$}
+\STATE Sort $Rel\mathcal{(Q)}$ from most to least recent
+\FOR {each $q_i \in Rel\mathcal{(Q)}$}
+  \STATE $q_i^*$ $\leftarrow$ $QueryFix(\{q_j | j \ge i \wedge q_j \in Rel\mathcal{(Q)}\})$
+  \IF {$q_i^* \neq \emptyset$}
+    \STATE Return $q_i^*$
+  \ENDIF
+\ENDFOR
+\end{algorithmic}
+\end{algorithm}
+
+
+
+A benefit of this approach is that complaints are more likely to be the result of
+recent queries rather than very old queries, and our experiments in Section~\ref{exp:}
+speak towards this point.
+
+
+

@@ -83,7 +83,7 @@ queries to generate the corrupted query log.
 \stitle{Synthetic} 
 We generate an initial database of $N_D$ random tuples.  
 The schema contains $N_a=5$ attributes $a_1\ldots a_5$, whose values are
-picked from $V_d = [0, 100]$ uniformly at random, along with a primary key $id$.
+picked from $V_d$ uniformly at random, along with a primary key $id$.
 A sequence of $N_q$ queries is generated containing a mixture of insert queries,
 point update queries, and range update queries.  The \texttt{UPDATE} queries have
 the following respective forms, where \verb|?| is a query parameter:
@@ -124,9 +124,10 @@ location of the query, and the number of attributes that are corrupted
   $N_w$  & \# predicates in \texttt{WHERE} clauses & $1$ \\
   $N_s$  & \# \texttt{SET} clauses & $1$ \\
   $N_q$  & \# queries in query log & $100$ \\
-  $idx$  & Index of corrupted query & $\frac{N_q}{2}$ \\
-  $s$    & Skewness of query attributes, & $0$ \\
-         & power low distribution $P(v) = v^{-s}$ & \\\end{tabular}
+  $idx$  & Index (backwards from most recent) & $\{0, 25, 50,$ \\
+         & of corrupted query & $100, 200, 250 \}$ \\ %$\frac{N_q}{2}$ \\
+  $s$    & Zipf $\alpha$ param of query attributes, & $1$ \\ \end{tabular}
+         %& power low distribution $P(v) = v^{-s}$ & \\\end{tabular}
   \label{t:params}
   \caption{Experimental Parameters}
 \end{table}
