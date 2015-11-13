@@ -172,10 +172,45 @@ and the complaint set.  It turns out that queries very far back are unlikely to 
 
 
 
+\subsection{Heuristics and Baseline Experiments}
+
+\subsection{Scalabalitiy}
+
+\subsection{Skew}
+
+\subsection{Handling Noise}
+
+In this set of experiments, we add false positive and false negative complaints to the input
+complaint set and evaluate our noise handling algorithms (Section~\ref{sec:noise}).
+To generate false positives ($FP$), we select a random set of tuples in the database, and for each one, 
+pick a random attribute and set its XXX to a random value within $V_D$.
+To generate false negatives ($FN$), we select a random subset of the true complaint set.
+
+
+\begin{figure}[h]
+\centering
+  \begin{subfigure}[t]{.48\columnwidth}
+  \includegraphics[width = .95\columnwidth]{figures/placeholder}
+  \caption{.}
+  \label{f:falsepositive} 
+  \end{subfigure}
+  \begin{subfigure}[t]{.48\columnwidth}
+  \includegraphics[width = .95\columnwidth]{figures/placeholder}
+  \caption{.}
+  \label{f:falsenegative} 
+  \end{subfigure}
+  \caption{cap}
+
+\end{figure}
 
 
 
+Figure~\ref{f:falsepositive} shows \sys performance and quality as we vary $FP \in \{\}$.
 
+Figure~\ref{f:falsenegative} varies $FN \in \{\}$.
+
+
+\subsection{Benchmark Experiments}
 
 
 
