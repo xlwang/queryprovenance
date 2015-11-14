@@ -48,8 +48,9 @@ to study \sys in realistic scenarios.
 
 \begin{table}[t]\small
   \centering
-  \begin{tabular}{c|l|c}
-  {\bf Param} & {\bf Description} & {\bf Default} \\
+  \begin{tabular}{@{}cll@{}}
+  \toprule
+  {\bf Param} & {\bf Description} & {\bf Default} \\ \midrule
   $V_d$  & Domain range of the attributes  & $[0, 100]$ \\
   $N_D$  & \# tuples in final database & $1000$ \\
   $N_a$  & \# attributes in database & $10$ \\
@@ -60,26 +61,27 @@ to study \sys in realistic scenarios.
          & of corrupted query & $100, 200, 250 \}$ \\ %$\frac{N_q}{2}$ \\
   $r$    & Range size of \texttt{UPDATE} queries & 10 \\
   $s$    & Zipf $\alpha$ param of query attributes, & $1$ \\ 
-  $set$  & Constant vs relative \texttt{SET} clauses. & const \\ \end{tabular}
+  $set$  & Constant vs relative \texttt{SET} clauses. & const \\ \bottomrule \end{tabular}
          %& power low distribution $P(v) = v^{-s}$ & \\\end{tabular}
-  \label{t:params}
   \caption{Experimental Parameters}
+  \label{t:params}
 \end{table}
 
 
 \begin{table}[t]\small
   \centering
-  \begin{tabular}{c|l}
-  {\bf Param} & {\bf Description} \\
+  \begin{tabular}{@{}cl@{}}
+  \toprule
+  {\bf Param} & {\bf Description} \\ \midrule
   $TP$ & True positive rate: \% of true complaints corrected \\
   $FP$ & False positive rate: \% of errors introduced\\
   $t_{prep}$ & Time to construct CPLEX problem \\
   $t_{send}$ & Time to send CPLEX problem to solver \\
   $t_{solve}$ & Time for solver to generate a solutions\\
   $t_{total}$ & End-to-end execution time \\ 
-  $d_{measure}$ & \red{Some sort of distance measure} \\\end{tabular}
-  \label{t:metrics}
+  $d_{measure}$ & \red{Some sort of distance measure} \\ \bottomrule \end{tabular}
   \caption{Metrics Compared}
+  \label{t:metrics}
 \end{table}
 
 
@@ -199,6 +201,17 @@ reversed, and older corruptions tend to result in larger complaint sets.  This i
 subsequent \texttt{UPDATE} queries increment or decrement the attribute value, rather than
 overwriting it with a constant value.  The clustering of data values due to query overlap
 then increases the number of other tuples affected.
+
+
+\ewu{summarize findings and implications to experiments here.}
+not all corruptions result in complaint sets.
+In constant SET clause workloads, larger complaints sets are more likely to
+result from more recent corrupted queries -- particularly if the queries are range updates or
+the updated attributes are skewed.
+For this reason, our experiments corrupt the query log at six positions 
+$idx \in \{0, 25, 50, 100, 200, 250\}$ , relative 
+to the most recent query (e.g., the most recent query, the $25^th$ most recent query, and so on).
+
 
 % \begin{figure}[h]
 % \centering

@@ -5,13 +5,15 @@
 
 Poor data quality is estimated to cost the US economy more than \$600 billion
 per year~\cite{eckerson2002} and erroneous price data in retail databases
-alone cost the US consumers \$2.5 billion each year~\cite{Fan2008}. Data
-cleaning tools can purge datasets of many errors before the data is used.
-However, databases are dynamic: applications and users interact with the
-database constantly, executing queries that modify the data. Mistakes in these
-queries introduce errors in the data; subsequent queries can spread these
-errors in complex ways, making them hard to trace and correct. Identifying and
-correcting errors in the data directly is suboptimal: it treats the symptom,
+alone cost the US consumers \$2.5 billion each year~\cite{Fan2008}. Although data
+cleaning tools can purge many errors from a dataset before downstream 
+applications use the data, databases are constantly changing as applications
+and users execute queries that modify the data.
+Mistakes in these queries can introduce errors that spread through the database
+due to subsequent database modification queries; 
+by the time errors are detected, it is difficult to trace those errors back to the 
+erroneous query and correct it.
+Identifying and correcting errors in the data directly is suboptimal: it treats the symptom,
 rather than the underlying cause. Fixing the manifested data errors on a
 case-by-case basis often obscures the root of the problem other data that was
 affected. Therefore, traditional data cleaning approaches are not well-suited
