@@ -46,6 +46,44 @@ to study \sys in realistic scenarios.
 \subsection{Experimental Setup}
 
 
+\begin{table}[t]\small
+  \centering
+  \begin{tabular}{c|l|c}
+  {\bf Param} & {\bf Description} & {\bf Default} \\
+  $V_d$  & Domain range of the attributes  & $[0, 100]$ \\
+  $N_D$  & \# tuples in final database & $1000$ \\
+  $N_a$  & \# attributes in database & $10$ \\
+  $N_w$  & \# predicates in \texttt{WHERE} clauses & $1$ \\
+  $N_s$  & \# \texttt{SET} clauses & $1$ \\
+  $N_q$  & \# queries in query log & $100$ \\
+  $idx$  & Index (backwards from most recent) & $\{0, 25, 50,$ \\
+         & of corrupted query & $100, 200, 250 \}$ \\ %$\frac{N_q}{2}$ \\
+  $r$    & Range size of \texttt{UPDATE} queries & 10 \\
+  $s$    & Zipf $\alpha$ param of query attributes, & $1$ \\ 
+  $set$  & Constant vs relative \texttt{SET} clauses. & const \\ \end{tabular}
+         %& power low distribution $P(v) = v^{-s}$ & \\\end{tabular}
+  \label{t:params}
+  \caption{Experimental Parameters}
+\end{table}
+
+
+\begin{table}[t]\small
+  \centering
+  \begin{tabular}{c|l}
+  {\bf Param} & {\bf Description} \\
+  $TP$ & True positive rate: \% of true complaints corrected \\
+  $FP$ & False positive rate: \% of errors introduced\\
+  $t_{prep}$ & Time to construct CPLEX problem \\
+  $t_{send}$ & Time to send CPLEX problem to solver \\
+  $t_{solve}$ & Time for solver to generate a solutions\\
+  $t_{total}$ & End-to-end execution time \\ 
+  $d_{measure}$ & \red{Some sort of distance measure} \\\end{tabular}
+  \label{t:metrics}
+  \caption{Metrics Compared}
+\end{table}
+
+
+
 Each of our experiments follows a standard procedure.  
 We generate a sequence of queries using a synthetic query generator or 
 the benchmark program, and corrupt the query log as described below. 
@@ -60,7 +98,8 @@ final database states to measure performance and accuracy metrics.
 
 Tables~\ref{t:params} and~\ref{t:metrics} summarize the key parameters that
 we vary throughout our experiments, as well as the metrics we use to evaluate
-the quality of the algorithm solutions, respectively.
+the quality of the algorithm solutions, respectively.  The rest of this section
+outlines our datasets, workloads, and parameters used to generate the synthetic query log.
 
 
 \subsubsection{Datasets and Workloads}
@@ -84,83 +123,64 @@ queries to generate the corrupted query log.
 We generate an initial database of $N_D$ random tuples.  
 The schema contains $N_a=5$ attributes $a_1\ldots a_5$, whose values are
 picked from $V_d$ uniformly at random, along with a primary key $id$.
-A sequence of $N_q$ queries is generated containing a mixture of insert queries,
-point update queries, and range update queries.  The \texttt{UPDATE} queries have
-the following respective forms, where \verb|?| is a query parameter:
+We then generate a sequence of $N_q$ queries containing a mixture of \texttt{INSERT} queries,
+point \texttt{UPDATE} queries, and range \texttt{UPDATE} queries.  
+The \texttt{UPDATE} queries have the following respective forms, where \verb|?| is a query parameter 
+and \verb|r| is the size of the range.
 
 {\scriptsize
 \begin{verbatim}
-UPDATE SET (a_i = ?),.. WHERE a_j = ? AND ...
-UPDATE SET (a_i = ?),.. WHERE a_j in [?, ?+10] AND ...
+  UPDATE SET (a_i = ?),.. WHERE a_j = ? AND ...
+  UPDATE SET (a_i = ?),.. WHERE a_j in [?, ?+r] AND ...
 \end{verbatim}
 }
 
-\texttt{INSERT} queries use values picked uniformly at random.  
-The \texttt{SET} clauses of the \texttt{UPDATE} queries either set attributes to random values, 
-or increment attributes by a random amount.  The \texttt{WHERE} clauses are a
-conjunction of equality or range predicates.
+The $set$ parameter controls whether the \texttt{UPDATED} queries set attributes to random constant values ({\it const}),  
+or increment attributes by a random amount ({\it rel}).  The \texttt{WHERE} clauses form a conjunction.
+In addition we varied a skew parameter $s$, which determines the attributes referenced in the \texttt{WHERE}
+and \texttt{SET} clauses.  Each attribute in  a query is picked from a zipfian~\cite{zipf} distribution
+with exponent $1+s$.  This allows our experiments to vary between a near-uniform distribution, where each attribute is
+equally likely to be picked, and a skewed distribution where nearly all attributes are the same.
+\texttt{INSERT} queries simply insert values picked uniformly at random from $V_d$.  
 
+\xlw{Replace with what we actually do:
 We first consider three different homogenous query logs: \texttt{INSERT} only ($p_I = 1$), 
 \texttt{PK} update only ($p_I = 0, p_{pk} = 1$), and \texttt{RANGE} update only ($p_I = 0, p_{pk} = 0$).
 These query logs help us understand \sys's performance characteristics for each query type individually.  
 Finally, we investigate heterogenous mixtures of the three query types to simulate varying amounts of real settings.
+}
 
-Within each query log, we independently vary the log size, the
-database size, the complexity of the \texttt{WHERE} clause predicates, and
-location of the query, and the number of attributes that are corrupted
-(by replacing the constant with a random value within $[0, 100]$).
-
-
-
-
-
-\begin{table}[h]\small
-  \centering
-  \begin{tabular}{c|l|c}
-  {\bf Parameter} & {\bf Description} & {\bf Default} \\
-  $V_d$  & Domain range of the attributes  & $[0, 100]$ \\
-  $N_D$  & \# tuples in final database & $1000$ \\
-  $N_a$  & \# attributes in database & $10$ \\
-  $N_w$  & \# predicates in \texttt{WHERE} clauses & $1$ \\
-  $N_s$  & \# \texttt{SET} clauses & $1$ \\
-  $N_q$  & \# queries in query log & $100$ \\
-  $idx$  & Index (backwards from most recent) & $\{0, 25, 50,$ \\
-         & of corrupted query & $100, 200, 250 \}$ \\ %$\frac{N_q}{2}$ \\
-  $s$    & Zipf $\alpha$ param of query attributes, & $1$ \\ \end{tabular}
-         %& power low distribution $P(v) = v^{-s}$ & \\\end{tabular}
-  \label{t:params}
-  \caption{Experimental Parameters}
-\end{table}
-
-
-\begin{table}[h]\small
-  \centering
-  \begin{tabular}{c|l}
-  {\bf Parameter} & {\bf Description} \\
-  $TP$ & True positive rate: \% of true complaints corrected \\
-  $FP$ & False positive rate: \% of errors introduced\\
-  $t_{prep}$ & Time to construct CPLEX problem \\
-  $t_{send}$ & Time to send CPLEX problem to solver \\
-  $t_{solve}$ & Time for solver to generate a solutions\\
-  $t_{total}$ & End-to-end execution time \\ 
-  $d_{measure}$ & \red{Some sort of distance measure} \\\end{tabular}
-  \label{t:metrics}
-  \caption{Metrics Compared}
-\end{table}
-
-
-\subsection{Effect of Index of Corrupted Query}
-
-We ran a bunch of experiments to understand the relationships between the position of the corrupted query
-and the complaint set.  It turns out that queries very far back are unlikely to be shown in a complaint set.
+\noindent {\it Effect of Index of Corrupted Query:}
+A key parameter for our experiments is the location of the corrupted query ($idx$).  
+This parameter deteremines the number of queries \sys must consider when searching for a fix,
+and affects the size of the complaint set.  Both of these characteristics directly impact \sys's 
+runtime performance. For this reason, it is undesirable to randomly pick and corrupt queries
+throughout the query log, as the performance and accuracy results may not be comparable. 
+To better understand the relationship between $idx$ and the size of the complaint set, we ran
+simulations using a database with $20$ attributes, and a query log of size $1000$ 
+that varied $idx$ for query logs containing o
+nly $set = const$ and $set = rel$ \texttt{UPDATE} queries.
+In addition, we varied the skew $s$ and range $r$ parameters to study how they affect this relationship.
 
 
   \begin{figure}[h]
   \centering
-  \includegraphics[width = 3.5in]{figures/qidxsimulation/qidx_v_ncomplaints}
+  \includegraphics[width = 3.5in]{figures/qidxsimulation/qidx_v_ncomplaints_20attrs_const}
   \caption{.}
   \label{f:qidx_v_ncomplaints} 
   \end{figure}
+
+  \begin{figure}[h]
+  \centering
+  \includegraphics[width = 3.5in]{figures/qidxsimulation/qidx_v_ncomplaints_20attrs_rel}
+  \caption{.}
+  \label{f:qidx_v_ncomplaints} 
+  \end{figure}
+
+
+
+Figure~\ref{f:qidx_v_ncomplaints} compares the location of the corrupted query 
+with the complaint set.  We find 
 
 
   \begin{figure}[h]
@@ -172,18 +192,32 @@ and the complaint set.  It turns out that queries very far back are unlikely to 
 
 
 
+Within each query log, we independently vary the log size, the
+database size, the complexity of the \texttt{WHERE} clause predicates, and
+location of the query, and the number of attributes that are corrupted
+(by replacing the constant with a random value within $[0, 100]$).
+
+
+
+
+
+
 \subsection{Heuristics and Baseline Experiments}
+
+\subsection{Skew}
+
 
 \subsection{Scalabalitiy}
 
-\subsection{Skew}
+
+
 
 \subsection{Handling Noise}
 
 In this set of experiments, we add false positive and false negative complaints to the input
 complaint set and evaluate our noise handling algorithms (Section~\ref{sec:noise}).
 To generate false positives ($FP$), we select a random set of tuples in the database, and for each one, 
-pick a random attribute and set its XXX to a random value within $V_D$.
+pick a random attribute and set its XXX to a random value within $V_d$.
 To generate false negatives ($FN$), we select a random subset of the true complaint set.
 
 
