@@ -18,11 +18,12 @@
 \section{Experiments}
 
 In this paper, we have described several heuristic algorithms based on decision trees 
-and bounding box algorithms, as well as an exact, albeit less-scalable,
+and bounding box algorithms \alex{do we talk about bounding box algorithms?}, as well as an exact, albeit less-scalable,
 constraint-based solution to the \prob problem.  In addition, we 
-introduced  several extensions to the CPLEX-based solution that 
-1) improve the scalability of the system and 2) tolerate false positives and 
+introduced  several extensions to the CPLEX-based solution~\alex{We should be careful and not tie it to CPLEX.  CPLEX is just a particular solver.  ILP-based is better.} that 
+1) improves the scalability of the system and 2) tolerates false positives and 
 negatives in the input complaint set.
+\alex{The wording is a bit anemic.  It makes it sound like we suggested a few naive approaches and hacks.  Add more oomph!}
 Our goals in the evaluation is to understand these trade-offs in
 controlled synthetic scenarios, as well as study the effectiveness
 in typical database query workloads based on widely used benchmarks.
@@ -34,7 +35,7 @@ optimizations described in Section~\ref{s:optimiztaions} improves algorithm scal
 Third, we introduce different forms of error in the input complaint sets and study the 
 effectiveness of our noise-handling heuristics.  Finally, we use two
 representative database transaction benchmarks, TPC-C XXX~\cite{tpcc} and AuctionMark~\cite{auctionmark}
-to study \sys in realistic scenarios.
+to study \sys in realistic scenarios. \alex{So, which algorithm do we call \sys?}
 
 
 
@@ -63,7 +64,7 @@ to study \sys in realistic scenarios.
   $s$    & Zipf $\alpha$ param of query attributes, & $1$ \\ 
   $set$  & Constant vs relative \texttt{SET} clauses. & const \\ \bottomrule \end{tabular}
          %& power low distribution $P(v) = v^{-s}$ & \\\end{tabular}
-  \caption{Experimental Parameters}
+  \caption{Experimental Parameters \alex{Do we need the presentation to include this level of detail?}}
   \label{t:params}
 \end{table}
 
@@ -86,7 +87,7 @@ to study \sys in realistic scenarios.
 
 
 
-Each of our experiments follows a standard procedure.  
+Each of our experiments follows a standard procedure.  \alex{what is a ``standard procedure''??}
 We generate a sequence of queries using a synthetic query generator or 
 the benchmark program, and corrupt the query log as described below. 
 We then execute the original and corrupt query logs on an initial (possibly empty) database,
@@ -102,7 +103,7 @@ Tables~\ref{t:params} and~\ref{t:metrics} summarize the key parameters that
 we vary throughout our experiments, as well as the metrics we use to evaluate
 the quality of the algorithm solutions, respectively.  The rest of this section
 outlines our datasets, workloads, and parameters used to generate the synthetic query log.
-
+\alex{Why is this description separate from the synthetic data listed below?}
 
 \subsubsection{Datasets and Workloads}
 
@@ -137,7 +138,7 @@ and \verb|r| is the size of the range.
 \end{verbatim}
 }
 
-The $set$ parameter controls whether the \texttt{UPDATED} queries set attributes to random constant values ({\it const}),  
+The $set$ parameter controls whether the \texttt{UPDATE} queries set attributes to random constant values ({\it const}),  
 or increment attributes by a random amount ({\it rel}).  The \texttt{WHERE} clauses form a conjunction.
 In addition we varied a skew parameter $s$, which determines the attributes referenced in the \texttt{WHERE}
 and \texttt{SET} clauses.  Each attribute in  a query is picked from a zipfian~\cite{zipf} distribution
@@ -154,8 +155,11 @@ Finally, we investigate heterogenous mixtures of the three query types to simula
 
 \noindent {\it Effect of Index of Corrupted Query:}
 A key parameter for our experiments is the location of the corrupted query ($idx$).  
-This parameter deteremines the number of queries \sys must consider when searching for a fix,
-and affects the size of the complaint set.  Both of these characteristics directly impact \sys's 
+\alex{Have we discussed anywhere yet that we focus on single errors?}
+This parameter determines the number of queries \sys must consider when searching for a fix,
+and affects the size of the complaint set.  
+\alex{It won't be clear to the reader how this relates to the size of the complaint set.}
+Both of these characteristics directly impact \sys's 
 runtime performance. For this reason, it is undesirable to randomly pick and corrupt queries
 throughout the query log, as the performance and accuracy results may not be comparable. 
 To better understand the relationship between $idx$ and the size of the complaint set, we ran
@@ -227,7 +231,7 @@ to the most recent query (e.g., the most recent query, the $25^th$ most recent q
 \subsection{Skew}
 
 
-\subsection{Scalabalitiy}
+\subsection{Scalabality}
 
 
 
