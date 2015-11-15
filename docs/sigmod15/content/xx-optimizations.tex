@@ -16,13 +16,102 @@ In Figure~\ref{fig:querysize_vs_time},
 we observe that the total solver (IBM CPLEX) solving time 
 grows exponentially and 
 unpredictably as the query 
-log size increases. As a result, the basic approach does not scale over 
+log size or the table size increases. As a result, the basic approach does not scale over 
 large problems (large query log size and large table size).\\
 To resolve the scalability limitation of the basic approach, 
 we explored a number of approaches to improve the performance of the 
-MILP-based algorithm.
+MILP-based algorithm. We divide these approaches into two groups:
+reduce tuples in the MILP problem and reduce queries linearized/parameterized in
+the MILP problem. \\
 
-\subsection{A Naive but Flawed approach}
+\subsection{Optimization: table size (this part overlap with false negative)}
+\label{sec:opt:tbsize}
+The basic solution, which suggests to linearize every tuple in the database into the MILP problem,
+has two major disadvantages: 1. the system may end up with a large MILP problem that requires 
+the solver to run forever to solve; 2. we can only linearize the every tuple
+when the complaint set is complete, which is often hard to guarantee. Thus, in the first 
+optimization, we propose a two-iteration approach handles both of these two problems 
+by linearizing tuples in the complaint set in
+the 1st iteration and refining the log repair in the 2nd iteration. \\
+\subsubsection{1st iteration}
+We use tuples in the complaints $\mathcal{C}$ to construct the MILP problem and derive a 
+inaccurate log repair $\mathcal{Q}^*$\xlw {we need to find a term for this}. This inaccurate 
+log repair resolves tuples in the complaints $\mathcal{C}$, but, at the same time, 
+introduces noises by over correcting tuples that are not involved in the MILP problem. 
+As shown in Example~\ref{ex:2nditer}, by resolving tuples in complaints $\mathcal{C}$, 
+the system derives a log repair that introduces other errors. 
+\begin{example}\label{ex:2nditer}
+Including tuples in the complaints $\mathcal{C}$ to solve problem in Example~\ref{ex:taxes2} 
+and using Euclidean distance of variables in the query as the objective function, the system 
+derives a log repair $\mathcal{Q}^*$ with $q_1^*=$ \texttt{\small UPDATE Taxes SET rate = 30}
+\texttt{\small WHERE income >= \color{red}{9500.0001} \color{black}{and income <=} \color{red}{90000}}. 
+This log repair resolve tuples in the complaints. However, the fixed query $q_1$ has a much wider range 
+and it it incorrectly modifies tuples that are not in the complaint, e.g., tuple $t_4$.
+\end{example}
+
+To avoid introducing such noises, we introduce the 
+2nd iteration which targets on refining the log repair derived in 
+the 1st iteration. 
+\subsubsection{2nd iteration}
+The goal for 2nd iteration is to optimize the impact of the log repair (tuples
+modified by $\mathcal{Q}$). 
+Let $\mathcal{Q}^*_{sub} = \mathcal{Q}^*-\mathcal{Q}$ as 
+queries modified in the log repair, in the 2nd iteration, we 
+construct a separate MILP problem by linearizing 
+ queries between the first and the last query in
+$\mathcal{Q}^*_{sub}$, parameterizing variables in 
+the where clause for queries in $\mathcal{Q}^*_{sub}$,
+and maximizing the log repair impact score. 
+
+We define the impact score by dividing the 
+impacted tuples $T$ into three groups and defining the 
+impact score accordingly. \xlw {we need to fix these terms}. 
+
+\smallskip
+
+\noindent\textbf{Group 1}: tuples in the complaints $\mathcal{C}$. Impact of 
+$\mathcal{Q}^*$ on this group
+are guaranteed as correct. \textbf{Rule:} 
+strictly satisfy, including these tuples as 
+constraints in the 2nd iteration MILP problem. 
+
+\smallskip
+
+\noindent\textbf{Group 2:} tuples not in $\mathcal{C}$, but also modified 
+by the original query log $\mathcal{Q}$. Impact of $\mathcal{Q}^*$ 
+on the group 2 are likely to
+be correct. \textbf{Rule:} adding these tuples into the 
+rewarded tuple set $T_{reward}$. 
+
+\smallskip
+
+\noindent\textbf{Group 3:} tuples not in $\mathcal{C}$ and not modified 
+by the original query log $\mathcal{Q}$. Impact of 
+$\mathcal{Q}^*$ on the last group should penalized, thus 
+we put them into $T_{penalize}$ (\textbf{Rule}).
+
+\smallskip
+
+The impact score, which is also the objective function for
+the MILP problem, is $T_{reward} - T_{penalize}$. We further 
+optimize the 2nd iteration to reduce the size of $T$ 
+by searching for K-nearest-neighbors
+of tuples in complaints $\mathcal{C}$. 
+There are multiple benefits for the two-iteration approach:
+\begin{itemize}
+\item It minimizes the size of MILP problem in the 1st iteration. 
+\item It refines the log repair while avoid over correcting tuples not in 
+the complaints $\mathcal{C}$. 
+\item It pptimizes the impacted tuples efficiently by controlling the queries 
+and number of impacted tuples
+involved in the 2nd MILP problem.
+\item In addition, it handles cases when we don't have complete complaints
+$\mathcal{C}$ (false negatives). 
+\end{itemize}
+\subsection{Optimization: log size}
+
+
+\subsubsection{A Naive but Flawed approach}
 \ewu{Better explained as: CPLEX searches through an exponential space of all possible combinations of MILP variables.  In a chunked approach, the solution of each chunk is one out of a potentially arbitrary number of possible solutions, thus it is easy to pick an incorrect one}
 A natural idea to optimize the basic approach is 
 to \textbf{chunk the query log} into
@@ -53,7 +142,7 @@ based on provenance over queries and
 attribute-slicing optimization based on provenance over 
 attributes. 
 
-\subsection{Query-Slicing}
+\subsubsection{Query-Slicing}
 \label{sec:opt:query}
 The exhaustive parameterization of all queries in the query log, as described
 in the basic approach, is typically unnecessary because many queries in the log
@@ -140,7 +229,7 @@ attributes as following:
 
 
 
-\subsection{Incremental Computation}
+\subsubsection{Incremental Computation}
 
 \begin{figure}[t]
   \centering
@@ -185,6 +274,7 @@ to the oldest:
 A benefit of this approach is that complaints are more likely to be the result of
 recent queries rather than very old queries, and our experiments in Section~\ref{exp:}
 speak towards this point.
+
 
 
 
