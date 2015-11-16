@@ -4,162 +4,204 @@
 
 
 
-\section{Deriving a log repair}
+\section{A MILP-based Solution}
 \label{sec:sol}
-In this section, we 
-introduce a basic solver-based approach to 
+In this section, we introduce an exhaustive solver-based approach to 
 resolve the incorrectness reflected by the complaints. 
-This approach 
-constructs a mixed-integer linear 
-programming (MILP) problem by
-linearizing and parameterizing the 
-original query log over tuples
-in the database. 
-\subsection{Linearizing \& Parameterizing Single Query}
+This approach constructs a mixed-integer linear 
+programming (MILP) problem~\cite{milp} by linearizing and parameterizing the 
+corrupted query log over the tuples in the database. 
+{\xlw{need to introduce MILP problems a little bit here, so readers know what undetermined
+variables are and why things need to be linearized}}
+
+
+We will first describe the process of encoding a single query,
+then extend the process to the entire query log.
+Subsequent sections describe several optimizations that  both
+improve the speed and quality of the results, as well as trade-off between the two. 
+
+
+
+
+\subsection{Encoding a Single Query}%Linearizing \& Parameterizing Single Query}
 \label{sec:linearize}
-% describe how to linearize a single query
-We linearize and parameterize a query $q$ by considering its effects on the 
-targeted table $R(A_1, ..., A_m)$: we treat the query $q$ as a 
-conditional function over each tuple $t\in R$ and convert the effects of $q$ 
-over $t$ into a set of linear inequality constraints. 
-\subsubsection{Query as a Conditional Function}
-The effect of query $q$ over a tuple $t$ can be expressed in a conditional
-function $f_q(t)$ as the following:
+
+We model a query $q_i$ as a conditional function $f_{q_i}(t)$ that takes as input a tuple $t$
+and returns its next state $t'$.  $f_{q_i}$ is applied to each 
+tuple $t \in \mathcal{D}_{i-1} \cup \{\bcancel{t}\}$ in the input relation along with a special
+non-existant tuple $\bcancel{t}$. \ewu{maybe fold this into the data model.}
+By treating the query as a function, we are able to encode its effects into a set
+of linear inequality constraints.  We call this process the linearization and 
+parameterization of a query.
+
 \begin{definition} [Conditional Function]
 \label{def:cond}
 	The conditional function for query $q$ is:
 	\[
-    f_q(t)= 
-\begin{cases}
-    f_{q.\mu} (t) ,& \text{if } f_{q.\sigma} (t)\\
+    f_{q_i}(t)= 
+    \begin{cases}
+    f_{q_i.\mu} (t) ,& \text{if } f_{q_i.\sigma} (t)\\
     t,              & \text{otherwise}
-\end{cases}
+    \end{cases}
 \]
-$f_{q.\mu}$ is the \textit{update function} consists of
- a set of \textit{update equation(s)};\\
- $f_{q.\sigma}$ is the 
- \textit{condition function} consists of a 
-set of \textit{logical expression(s)} in 
+where the \textit{update function} $f_{q_i.\mu}$ models a set of \textit{update equation(s)};
+and the \textit{condition function} $f_{q_i.\sigma}$ models a set of \textit{logical expression(s)} in 
 disjunctive or conjunctive form.
 \end{definition} 
 
- This conditional function applies 
-to all kinds of \emph{update queries} (Section~\ref{sec:model}): \\
-\texttt{UPDATE} query: $f_{q.\mu}(t)$, $f_{q.\sigma}(t)$ reflects the 
-equations in
-set clause and the expressions in where clause over attributes in
-$R$. \\
-\texttt{INSERT} query: $f_{q.\mu}(t)$ reflects the inserted values in
-values clause and 
-$f_{q.\sigma}(t)$ is a boolean variable 
-reflects the existence of tuple $t$; 
-$\vee_{t\in R} f_{q.\sigma}(t)$ 
-represents
-the existence of this insert query.  \\
-\texttt{DELETE} query: $f_{q.\mu}(t)$ reflects the deleted values for 
-each attribute and 
-$f_{q.\sigma}(t)$ reflects the expressions in where clause (similar to
-$f_{q.\sigma}(t)$ in \texttt{UPDATE} query).
 
-\smallskip
+% We linearize and parameterize a query $q$ by considering its effects on the 
+% targeted table $R(A_1, ..., A_m)$: we treat the query $q$ as a 
+% conditional function over each tuple $t\in R$ and convert the effects of $q$ 
+% over $t$ into a set of linear inequality constraints. 
+% \subsubsection{Query as a Conditional Function}
+% The effect of query $q$ over a tuple $t$ can be expressed in a conditional
+% function $f_q(t)$ as the following:
 
-We parameterize query $q$ by replacing 
- all numeric values 
-in the above conditional function into
-undetermined variables (Example~\ref{ex:parameterize}).
-\begin{example}\label{ex:parameterize}
-Consider a \texttt{UPDATE} query $q$:
-\texttt{UPDATE R SET A$_1$ = 3 WHERE A$_2$ $\leq$ 10},
-the conditional function of this query is: 
-\[
-    f_q(t)= 
-\begin{cases}
-    f_{q.\mu}(t) = \{t.A_1 = 3\} ,& \text{if } f_{q.\sigma}(t) = \wedge\{t.A_2 \leq 10\}\\
-    t,              & \text{otherwise}
-\end{cases}
-\]
-The numeric variables in query $q$ including \texttt{3} in $f_{q.\mu}(t)$ and \texttt{10}
-in $f_{q.\sigma}(t)$. Thus, we parameterize query $q$ by replacing the value \texttt{3, 10}
-by two undetermined variables \texttt{var1, var2}. 
-\end{example} 
+Conditional functions can describe the common classes of update queries:
+\begin{enumerate}
+\item \texttt{UPDATE}: $f_{q_i.\mu}(t)$, $f_{q_i.\sigma}(t)$ model the \texttt{SET}
+      and \texttt{WHERE} clauses.  For example, $f_{q_i.\mu}(<t.a, t.b>) = <t.a + 1, 2>$ and
+      $f_{q_i.\sigma}(t) = (t.a > 20)$ corresponds to the query 
+      \texttt{UPDATE D SET a = a + 1, b = 2 WHERE a > 20}.
+
+\item \texttt{INSERT}: $f_{q_i.\mu}(t)$ returns the inserted tuple, while 
+      $f_{q_i.\sigma}(t) = (t = \bcancel{t})$ evaluates to true when it is executed over
+      the special nonexistant tuple.
+      %is a boolean variable reflects 
+      %the existence of tuple $t$; $\vee_{t\in R} f_{q.\sigma}(t)$ represents 
+      %the existence of this insert query.  
+
+\item \texttt{DELETE}: $f_{q_i.\mu}(t) = \bcancel{t}$ returns a nonexistant tuple whenever
+      the predicate encoded in $f_{q_i.\sigma}(t)$ evaluates to true.
+      For example, the query \texttt{DELETE FROM T WHERE a < 20} represents 
+      $f_{q_i.\sigma}(t) = (t.a < 20)$.
+      
+      % the deleted values for 
+      % each attribute and $f_{q.\sigma}(t)$ reflects the expressions in where clause 
+      % (similar to $f_{q.\sigma}(t)$ in \texttt{UPDATE} query).
+\end{enumerate}
+
+Finally, we parameterize $q_i$ by replacing all numeric constants in the
+conditional function with undetermined variables.   Consider the conditional
+function for \texttt{UPDATE} above: the constants $1$, $2$ in $f_{q_i.\mu}$
+as well as $20$ in $f_{q_i.\sigma}$ will be transformed into undetermined
+variables \texttt{v1, v2, v3} that are solved by the MILP solver.
+
+% We parameterize query $q$ by replacing all numeric values in the above conditional 
+% function into undetermined variables (Example~\ref{ex:parameterize}).
+% \begin{example}\label{ex:parameterize}
+% Consider a \texttt{UPDATE} query $q$:
+% \texttt{UPDATE R SET A$_1$ = 3 WHERE A$_2$ $\leq$ 10},
+% the conditional function of this query is: 
+% \[
+%     f_q(t)= 
+% \begin{cases}
+%     f_{q.\mu}(t) = \{t.A_1 = 3\} ,& \text{if } f_{q.\sigma}(t) = \wedge\{t.A_2 \leq 10\}\\
+%     t,              & \text{otherwise}
+% \end{cases}
+% \]
+% The numeric variables in query $q$ including \texttt{3} in $f_{q.\mu}(t)$ and \texttt{10}
+% in $f_{q.\sigma}(t)$. Thus, we parameterize query $q$ by replacing the value \texttt{3, 10}
+% by two undetermined variables \texttt{var1, var2}. 
+% \end{example} 
+
+
+
+
 \subsubsection{Constructing Linear Inequality Constraints}
-We linearize query $q$ by transforming its conditional function 
-over each tuple $t\in R$ into a set of linear (in)equality constraints. \\
-According to Definition~\ref{def:cond}, 
-the updated value $t'$ for tuple $t$ in attribute $A_i$ can be expressed as  
+MILP problems require that the constraints are expressed as a set of linear
+(in)equality constraints, thus our final task is to linearize the parameterized
+conditional function.   We will describe this linearization process for the value 
+of a single attribute $A_j$; extending the process to the rest of the attributes
+is a straighforward exercise.
+% Now that we have modeled $q_i$ as a parameterized conditional function, 
+% we must linearize $f_{q_i}$ into a set of linear (in)equality constraints
+% for the MILP problem.
+
+Given Definition~\ref{def:cond}, we can re-express the value of attribute $A_j$ 
+in the updated tuple $t'$ as a linear equation:
+{\scriptsize
 \begin{eqnarray}
 \label{eq:linearization}
-t.A_i' = x\otimes f_{q.\mu(A_i)} (t.A_i) + (1-x)\otimes t.A_i. 
+t.A_j' = x\otimes f_{q_i.\mu(A_j)} (t.A_j) + (1-x)\otimes t.A_j. 
 \end{eqnarray} 
-Linearizing Equation~\ref{eq:linearization} is equivalent as linearzing
-query $q$.  
-To linearize Equation~\ref{eq:linearization}, 
-we first introduce a boolean variable $x$ to represent the satisfactory 
-of tuple $t$ on the condition function of query $q$:
+}
+\noindent Where the boolean variable $x$ is introduced to represent the output of 
+the condition function $f_{q_i.\sigma}$:
+{\scriptsize
 \begin{eqnarray}
 \label{eq:x}
-x = f_{q.\sigma}(t)
+x = f_{{q_i}.\sigma}(t)
 \end{eqnarray}
-
-We then create two set of intermediate variables,
-$u=\{u.A_1, ..., u.A_m\}$, $v = \{v.A_1, ..., v.A_m\}$, 
-for each attribute $A_i$ in tuple $t$:
+}
+We then introduce two variables $u.A_j$ and $v.A_j$ to represent 
+the respective components in Equation~\ref{eq:linearization}, where
+$M$ representes the upper bound of $t.A_j$'s domain:
+{\scriptsize 
 \begin{eqnarray}
 \label{eq:uv}
-u.A_i &\leq & f_{q.\mu(A_i)} (t.A_i) \nonumber\\
-u.A_i &\leq & xM \nonumber\\ 
-u.A_i &\geq & f_{q.\mu(A_i)} (t.A_i) - (1-x)M ; \nonumber \\\nonumber \\
-v.A_i &\leq & t.A_i \nonumber\\
-v.A_i &\leq & (1-x)M \nonumber\\
-v.A_i &\geq & t.A_i - xM
+u.A_j &\leq & f_{q_i.\mu(A_j)} (t.A_j) \nonumber\\
+u.A_j &\leq & xM \nonumber\\ 
+u.A_j &\geq & f_{q_i.\mu(A_j)} (t.A_j) - (1-x)M ; \nonumber \\\nonumber \\
+v.A_j &\leq & t.A_j \nonumber\\
+v.A_j &\leq & (1-x)M \nonumber\\
+v.A_j &\geq & t.A_j - xM
 \end{eqnarray}
-Here, $M$ denotes a very large number (greater than the upper bound for the $t.A_i$).
-By doing so, we may express Equation~\ref{eq:linearization} as:
-\begin{eqnarray}
+}
+The first set of conditions forces $u.A_j = f_{q_i.\mu(A_j)}$ if the condition function
+is true, and $0$ otherwise.  The second set forces $v.A_j = t.A_j$ if the condition function
+is false, and $0$ otherwise.  Now, Equation~\ref{eq:linearization} is simply a linear equation:
+{\scriptsize\begin{eqnarray}
 \label{eq:tnew}
-t.A_i' = u.A_i + v.A_i
-\end{eqnarray}
-By combining these linear (in)equality constraints 
-(~\ref{eq:x}~\ref{eq:uv}~\ref{eq:tnew}), we form the transformation 
-of a single attribute $A_i$ from a single tuple $t$ 
-by a single query $q$. To fully linearize a query, 
-similar constraints should be
-derived for the other attributes and the other tuples. 
+t.A_j' = u.A_j + v.A_j
+\end{eqnarray}}
 
-\xlw{Briefly describe what the settings of the variables $u.A_i$ and $v.A_i$ represent in terms of the queries.}
 
-\subsection{A Basic Solver-based Approach}
+The above constraints (\ref{eq:x})(\ref{eq:uv})(\ref{eq:tnew})
+form the MILP subproblem for a single attribute $A_j$ of a single tuple $t$.
+To linearize $q_i$, we can simply apply the same procedure for each attribute in the 
+query and every tuple in the database.
+In the case of an \texttt{INSERT} query, we additionally encode a subproblem for
+the non-existant tuple $\bcancel{t}$.
+The final step is to use the complaint set $\mathcal{C}$ to derive the correct values
+of each tuple in the next state, and set the before and after attribute values $A_j$
+for each tuple in the problem to those correct values.
+In this way, solving the encoded problem will assign values to the undetermined variables
+such that the resulting query is one of possibly many correct transformations from 
+$\mathcal{D}_{i-1}$ to $\mathcal{D}_i$.
+The next subsection will describe how to extend the above encoding procedure to the 
+entire query log, and how to incorporate an objective function that minimizes the amount 
+of changes to the query log.
+
+
+
+
+
+
+\subsection{Encoding the Query Log}
 \label{sec:milp}
-Using the linearization
- method in Section~\ref{sec:linearize}, we can further
-linearize
-the entire query log by converting every tuples in the table $R$. 
+Using the linearization method in Section~\ref{sec:linearize}, we can further
+linearize the entire query log by converting every tuples in the table $R$. 
 During the linearization, we further parameterize each
-query in the query log $\mathcal{Q}$ in order by 
-derive the log repair. 
+query in the query log $\mathcal{Q}$ in order by derive the log repair. 
 The linearized and parameterized query log
 should start from and end at clean database states.
-To achieve this, we add constraints
-by assigning the true initial and end database 
-states' values (based on complaints) 
-to the corresponding variables. 
-Following the above steps 
-(Algorithm~\ref{alg:basic}), we convert the 
-query log into a collection of constraints 
-with newly introduced variables. 
-Some of these variables
-are introduced to linearize the query log 
-and the rest usually
-represent the numeric values in the query log
+To achieve this, we add constraints by assigning the true initial and end database 
+states' values (based on complaints) to the corresponding variables. 
+Following the above steps (Algorithm~\ref{alg:basic}), we convert the 
+query log into a collection of constraints with newly introduced variables. 
+Some of these variables are introduced to linearize the query log 
+and the rest usually represent the numeric values in the query log
 during the paramerization process. 
-The latter set of 
-variables often involved in the objective function 
+The latter set of variables often involved in the objective function 
 according to the pre-defined distance function $d$ 
-(as described in Definition~\ref{def:problem}). \\
+(as described in Definition~\ref{def:problem}). 
+
 \xlw{The above is pretty dense.  Describe and justify objective function, outline how to encode database state. }
 
 \begin{algorithm}[htbp]
-\caption{$QueryFix_{exh}$ algorithm based based on MILP formulation.}
+\caption{$QueryFix_{exh}$ based on MILP formulation.}
 \label{alg:basic}
 \begin{algorithmic}
 \REQUIRE {$\mathcal{Q}, D_0, D_n, \mathcal{C}$}
