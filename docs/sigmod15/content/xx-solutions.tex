@@ -156,12 +156,25 @@ is false, and $0$ otherwise.  Now, Equation~\ref{eq:linearization} is simply a l
 \label{eq:tnew}
 t.A_j' = u.A_j + v.A_j
 \end{eqnarray}}
-The above constraints (~\ref{eq:x})(~\ref{eq:uv})(~\ref{eq:tnew})
+
+
+The above constraints (\ref{eq:x})(\ref{eq:uv})(\ref{eq:tnew})
 form the MILP subproblem for a single attribute $A_j$ of a single tuple $t$.
 To linearize $q_i$, we can simply apply the same procedure for each attribute in the 
 query and every tuple in the database.
+In the case of an \texttt{INSERT} query, we additionally encode a subproblem for
+the non-existant tuple $\bcancel{t}$.
+The final step is to use the complaint set $\mathcal{C}$ to derive the correct values
+of each tuple in the next state, and set the before and after attribute values $A_j$
+for each tuple in the problem to those correct values.
+In this way, solving the encoded problem will assign values to the undetermined variables
+such that the resulting query is one of possibly many correct transformations from 
+$\mathcal{D}_{i-1}$ to $\mathcal{D}_i$.
+The next subsection will describe how to extend the above encoding procedure to the 
+entire query log, and how to incorporate an objective function that minimizes the amount 
+of changes to the query log.
 
-\xlw{Briefly describe what the settings of the variables $u.A_i$ and $v.A_i$ represent in terms of the queries.}
+
 
 
 
@@ -188,7 +201,7 @@ according to the pre-defined distance function $d$
 \xlw{The above is pretty dense.  Describe and justify objective function, outline how to encode database state. }
 
 \begin{algorithm}[htbp]
-\caption{$QueryFix_{exh}$ algorithm based based on MILP formulation.}
+\caption{$QueryFix_{exh}$ based on MILP formulation.}
 \label{alg:basic}
 \begin{algorithmic}
 \REQUIRE {$\mathcal{Q}, D_0, D_n, \mathcal{C}$}
