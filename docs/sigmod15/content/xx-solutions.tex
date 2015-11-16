@@ -162,47 +162,74 @@ The above constraints (\ref{eq:x})(\ref{eq:uv})(\ref{eq:tnew})
 form the MILP subproblem for a single attribute $A_j$ of a single tuple $t$.
 To linearize $q_i$, we can simply apply the same procedure for each attribute in the 
 query and every tuple in the database.
-In the case of an \texttt{INSERT} query, we additionally encode a subproblem for
+In the case of an \texttt{INSERT} query, we additionally encode constraints for
 the non-existant tuple $\bcancel{t}$.
+
 The final step is to use the complaint set $\mathcal{C}$ to derive the correct values
-of each tuple in the next state, and set the before and after attribute values $A_j$
+of each tuple in the next state, and set the before and after attribute values ($u.A_j$, $v.A_j$)
 for each tuple in the problem to those correct values.
 In this way, solving the encoded problem will assign values to the undetermined variables
 such that the resulting query is one of possibly many correct transformations from 
 $\mathcal{D}_{i-1}$ to $\mathcal{D}_i$.
 The next subsection will describe how to extend the above encoding procedure to the 
-entire query log, and how to incorporate an objective function that minimizes the amount 
-of changes to the query log.
+entire query log, and how to incorporate an objective function that encourages solutions
+that minimize the amount of changes to the query log.
 
 
 
 
 
 
-\subsection{Encoding the Query Log}
+\subsection{Encoding and Fixing the Query Log}
 \label{sec:milp}
-Using the linearization method in Section~\ref{sec:linearize}, we can further
-linearize the entire query log by converting every tuples in the table $R$. 
-During the linearization, we further parameterize each
-query in the query log $\mathcal{Q}$ in order by derive the log repair. 
-The linearized and parameterized query log
-should start from and end at clean database states.
-To achieve this, we add constraints by assigning the true initial and end database 
-states' values (based on complaints) to the corresponding variables. 
-Following the above steps (Algorithm~\ref{alg:basic}), we convert the 
-query log into a collection of constraints with newly introduced variables. 
-Some of these variables are introduced to linearize the query log 
-and the rest usually represent the numeric values in the query log
-during the paramerization process. 
-The latter set of variables often involved in the objective function 
-according to the pre-defined distance function $d$ 
-(as described in Definition~\ref{def:problem}). 
 
-\xlw{The above is pretty dense.  Describe and justify objective function, outline how to encode database state. }
+In this section, we describe the algorithm (Algorithm~\ref{alg:basic}) to encode 
+the full query log into a MILP problem, and solve the MILP problem to derive a proposed query log fix.
+The algorithm takes as input the query log $\mathcal{Q}$, the initial and final (dirty) database states 
+$\mathcal{D}_{0, n}$, and the complaint set $\mathcal{C}$, and outputs a fixed query 
+log $\mathcal{Q}^*$.  We first extend $D_0$ with one non-existent tuple $\bcancel{t}$
+for each \texttt{INSERT} query in $\mathcal{Q}$.
+\ewu{Need a normalized query log where each INSERT only adds a single tuple!}
+We then apply the above linearization procedure (called \textit{LinearizeQuery})
+to each tuple in $\mathcal{D}_0$ and each query in $\mathcal{Q}$, 
+and add the result to a set of constraints \textit{milp\_cons}.
+Similar to the single-query procedure, we additionally add constraints to fix the
+values of the inputs to $q_0$ and the outputs of $q_N$ to their respective values in
+$\mathcal{D}_0$ and $\mathcal{C}(\mathcal{D}_N)$
+
+Next, we add constraints to take into account the fact that the output of 
+query $q_i$ is the input of $q_{i+1}$ (\textit{ConnectQueries}).
+Finally, we use the undetermined variables in \textit{milp\_cons}, along with $\mathcal{Q}$,
+to encode the distance function $d$ described in Section~\ref{def:obj} 
+into the MILP objective function, and submit it to a MILP solver.
+\textit{ConvertQLog} replaces the constants in the query log with the 
+assigned values for the undetermined variables in the solution, and constructs
+the fixed query log $\mathcal{Q}^*$.
+
+
+
+% Using the linearization method in Section~\ref{sec:linearize}, we can further
+% linearize the entire query log by converting every tuples in the table $R$. 
+% During the linearization, we further parameterize each
+% query in the query log $\mathcal{Q}$ in order by derive the log repair. 
+% The linearized and parameterized query log
+% should start from and end at clean database states.
+% To achieve this, we add constraints by assigning the true initial and end database 
+% states' values (based on complaints) to the corresponding variables. 
+% Following the above steps (Algorithm~\ref{alg:basic}), we convert the 
+% query log into a collection of constraints with newly introduced variables. 
+% Some of these variables are introduced to linearize the query log 
+% and the rest usually represent the numeric values in the query log
+% during the paramerization process. 
+% The latter set of variables often involved in the objective function 
+% according to the pre-defined distance function $d$ 
+% (as described in Definition~\ref{def:problem}). 
+
 
 \begin{algorithm}[htbp]
 \caption{$QueryFix_{exh}$ based on MILP formulation.}
 \label{alg:basic}
+\scriptsize
 \begin{algorithmic}
 \REQUIRE {$\mathcal{Q}, D_0, D_n, \mathcal{C}$}
 \ENSURE {$\mathcal{Q^*}$}
@@ -212,19 +239,23 @@ according to the pre-defined distance function $d$
 \STATE $milp\_cons \leftarrow milp\_cons \cup LinearAndParam(q, t)$
 \ENDFOR
 \STATE $milp\_cons \leftarrow milp\_cons \cup AssignVals(D_0.t, D_n.t, \mathcal{C})$
+\FOR {each $i$ in $\{0,\ldots,N-1\}$}
+\STATE $milp\_cons \leftarrow milp\_cons \cup ConnectQueries(q_i, q_{i+1})$
+\ENDFOR
 \ENDFOR 
-\STATE $milp\_obj \leftarrow FormObj (milp\_cons, \mathcal{Q})$
+\STATE $milp\_obj \leftarrow EncodeObjective(milp\_cons, \mathcal{Q})$
 \STATE $solved\_vals \leftarrow MILPSolver(milp\_cons, milp\_obj)$
 \STATE $\mathcal{Q}^* \leftarrow ConvertQLog(Q, solved\_vals)$
 \STATE Return $\mathcal{Q}^*$
 \end{algorithmic}
 \end{algorithm}
 
-By constructing linear (in)equality constraints and
-defining a objective function, we convert the problem into
- a mixed-integer linear programming (MILP) problem that can be 
- solved by MILP solvers. By solving this MILP problem, we collect the
-corrections for the parameterized variables and form the log repair. 
+% By constructing linear (in)equality constraints and
+% defining a objective function, we convert the problem into
+%  a mixed-integer linear programming (MILP) problem that can be 
+%  solved by MILP solvers. By solving this MILP problem, we collect the
+% corrections for the parameterized variables and form the log repair. 
+
 % describe how to linearize the whole querylog with provided
 % database states info. 
 
