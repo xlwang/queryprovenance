@@ -334,16 +334,15 @@ the single query must have caused errors in all of the complaint attributes.  Th
 for this important problem setting.}
 Finally, we use $Rel\mathcal{(Q)}$ to denote the set of relevant queries that are candidates for repair.
 
-\subsubsection{I don't understand this}
+\subsubsection{Attribute Slicing}
+
+In addition to removing irrelevant queries, we additionally avoid encoding irrelevant attributes.
+Given $Rel\mathcal{(Q)}$, the relevant attributes can be defined as:
+$Rel\mathcal{(A)} = \cup_{q_i \in Rel\mathcal{Q)}} (\mathcal{F}(q_i)\cup \mathcal{P}(q_i))$
+Attribute slicing only encodes constraints using Equation~\ref{eq:uv} for attributes within $Rel\mathcal{(A)}$.
 
 
-In addition to pruning out irrelevant queries,
-we also prune irrelevant attributes. \\
-Let $Rel\mathcal{(Q)}$ as the set of 
-relevant queries, we can find the relevant 
-attributes as following:
-\[Rel\mathcal{(A)} = \cup_{q_i \in Rel\mathcal{Q)}} 
-(\mathcal{F}(q_i)\cup \mathcal{P}(q_i)) \]
+
 
 
 
