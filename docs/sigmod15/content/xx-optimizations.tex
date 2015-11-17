@@ -58,104 +58,141 @@ only tuples modified by the fixed queries
 \subsection{Reducing Tuples}
 \label{sec:opt:tbsize}
 
+We opt to aggressively reduce the number of tuples by only encoding the tuples
+mentioned in the complaint set $\mathcal{C}$.
+Derives an inaccurate log repair.  It is guaranteed by the problem formulation
+that the fix will resolve the errors in $\mathcal{C}$.  However, because the problem
+only encodes $\mathcal{C}$, there are certain problem settings where 
+the resulting fix may not generalize to all of the tuples in the database, 
+and thus introduce new errors.    
+% However, there are cases
+% where the predicate of the fixed query matches tuples were not part of $\mathcal{C}$.  
+% In that case, it is possible that when the fixed query is applied to the database, 
+% it will introduce new errors.
 
-\subsubsection{Adjusting Over-generalized Fixes}
-
-fix is always the smallest possible, so it can only require a sceond iteration if the dirty and clean
-ranges don't overlap at all.  
-
-The basic solution, which suggests to linearize every tuple in the database into the MILP problem,
-has two major disadvantages: 1. the system may end up with a large MILP problem that requires 
-the solver to run forever to solve; 2. we can only linearize the every tuple
-when the complaint set is complete, which is often hard to guarantee. Thus, in the first 
-optimization, we propose a two-iteration approach handles both of these two problems 
-by linearizing tuples in the complaint set in
-the 1st iteration and refining the log repair in the 2nd iteration. \\
-\subsubsection{1st iteration}
-We use tuples in the complaints $\mathcal{C}$ to construct the MILP problem and derive a 
-inaccurate log repair $\mathcal{Q}^*$\xlw {we need to find a term for this}. This inaccurate 
-log repair resolves tuples in the complaints $\mathcal{C}$, but, at the same time, 
-introduces noises by over correcting tuples that are not involved in the MILP problem. 
-As shown in Example~\ref{ex:2nditer}, by resolving tuples in complaints $\mathcal{C}$, 
-the system derives a log repair that introduces other errors. 
-\begin{example}\label{ex:2nditer}
-Including tuples in the complaints $\mathcal{C}$ to solve problem in Example~\ref{ex:taxes2} 
-and using Euclidean distance of variables in the query as the objective function, the system 
-derives a log repair $\mathcal{Q}^*$ with $q_1^*=$ \texttt{\small UPDATE Taxes SET rate = 30}
-\texttt{\small WHERE income >= \color{red}{9500.0001} \color{black}{and income <=} \color{red}{90000}}. 
-This log repair resolve tuples in the complaints. However, the fixed query $q_1$ has a much wider range 
-and it it incorrectly modifies tuples that are not in the complaint, e.g., tuple $t_4$.
-\end{example}
-\ewu{why would this happen if we encoded all the tuples?  Doesn't the objective penalize this case?}
-
-
-To avoid introducing such noises, we introduce the 
-2nd iteration which targets on refining the log repair derived in 
-the 1st iteration. 
-\subsubsection{2nd iteration}
-The goal for 2nd iteration is to optimize the impact of the log repair (tuples
-modified by $\mathcal{Q}$). 
-Let $\mathcal{Q}^*_{sub} = \mathcal{Q}^*-\mathcal{Q}$ as 
-queries modified in the log repair, in the 2nd iteration, we 
-construct a separate MILP problem by linearizing 
- queries between the first and the last query in
-$\mathcal{Q}^*_{sub}$, parameterizing variables in 
-the where clause for queries in $\mathcal{Q}^*_{sub}$,
-and maximizing the log repair impact score. 
-
-\begin{figure}{h}
+\begin{figure}[h]
     \centering
     \includegraphics[width=0.4\textwidth]{figures/2nditerationgroups}
     \caption{Graphical depiction of the group 2 and group 3. }
     \label{fig:groups}
 \end{figure}
 
-We define the impact score by dividing the 
-impacted tuples $T$ into three groups and defining the 
-impact score accordingly. \xlw {we need to fix these terms}. 
+Figure~\ref{fig:groups} depicts the two cases where the fixed query may contain tuples in the full
+database that were not in $\mathcal{C}$.
+Each solid and empty circle represents a tuple in the database that is in or not in $\mathcal{C}$, respectively.  
+Each thick line represents the interval of query $q$'s single range predicate: 
+dirty is the incorrect range in the corrupted version,
+truth is the correct range in the true query, 
+and fix is the range returned by the solver.
+Recall that our goal is to reproduce the truth range given the tuples in $\mathcal{C}$ (solid circles)
+and the dirty range.  
 
-\smallskip
+In (a), the dirty range overlaps with the true range, thus the tuples within the overlapping 
+region are not complaints, are correctly modified by the dirty range, and should be included
+in the fixed range.  In general, non-complaint tuples that match the fix query as well as 
+the dirty range are by definition correctly part of the fixed range.
 
-\noindent\textbf{Group 1}: tuples in the complaints $\mathcal{C}$. Impact of 
-$\mathcal{Q}^*$ on this group
-are guaranteed as correct. \textbf{Rule:} 
-strictly satisfy, including these tuples as 
-constraints in the 2nd iteration MILP problem. 
+In contrast, consider (b), where the dirty and clean ranges are non-overlapping.
+The non-complaint tuples shown should not be modified by $q$, and so the proposed
+fix has incorrectly generalized.  In this case we use this additional information to
+encode a second MILP problem to adjust the fixed range while taking the non-complaint tuples
+into account.
 
-\smallskip
 
-\noindent\textbf{Group 2:} tuples not in $\mathcal{C}$, but also modified 
-by the original query log $\mathcal{Q}$. Impact of $\mathcal{Q}^*$ 
-on the group 2 are likely to
-be correct. \textbf{Rule:} adding these tuples into the 
-rewarded tuple set $T_{reward}$. 
-\ewu{what does "modified by the original query log Q mean?}
 
-\smallskip
 
-\noindent\textbf{Group 3:} tuples not in $\mathcal{C}$ and not modified 
-by the original query log $\mathcal{Q}$. Impact of 
-$\mathcal{Q}^*$ on the last group should penalized, thus 
-we put them into $T_{penalize}$ (\textbf{Rule}).
+% fix is always the smallest possible, so it can only require a sceond iteration if the dirty and clean
+% ranges don't overlap at all.  
+% 
+% The basic solution, which suggests to linearize every tuple in the database into the MILP problem,
+% has two major disadvantages: 1. the system may end up with a large MILP problem that requires 
+% the solver to run forever to solve; 2. we can only linearize the every tuple
+% when the complaint set is complete, which is often hard to guarantee. Thus, in the first 
+% optimization, we propose a two-iteration approach handles both of these two problems 
+% by linearizing tuples in the complaint set in
+% the 1st iteration and refining the log repair in the 2nd iteration. \\
+% \subsubsection{1st iteration}
+% We use tuples in the complaints $\mathcal{C}$ to construct the MILP problem and derive a 
+% inaccurate log repair $\mathcal{Q}^*$\xlw {we need to find a term for this}. This inaccurate 
+% log repair resolves tuples in the complaints $\mathcal{C}$, but, at the same time, 
+% introduces noises by over correcting tuples that are not involved in the MILP problem. 
+% As shown in Example~\ref{ex:2nditer}, by resolving tuples in complaints $\mathcal{C}$, 
+% the system derives a log repair that introduces other errors. 
+% \begin{example}\label{ex:2nditer}
+% Including tuples in the complaints $\mathcal{C}$ to solve problem in Example~\ref{ex:taxes2} 
+% and using Euclidean distance of variables in the query as the objective function, the system 
+% derives a log repair $\mathcal{Q}^*$ with $q_1^*=$ \texttt{\small UPDATE Taxes SET rate = 30}
+% \texttt{\small WHERE income >= \color{red}{9500.0001} \color{black}{and income <=} \color{red}{90000}}. 
+% This log repair resolve tuples in the complaints. However, the fixed query $q_1$ has a much wider range 
+% and it it incorrectly modifies tuples that are not in the complaint, e.g., tuple $t_4$.
+% \end{example}
+% \ewu{why would this happen if we encoded all the tuples?  Doesn't the objective penalize this case?}
+% 
+% 
+% To avoid introducing such noises, we introduce the 
+% 2nd iteration which targets on refining the log repair derived in 
+% the 1st iteration. 
+% \subsubsection{2nd iteration}
+% The goal for 2nd iteration is to optimize the impact of the log repair (tuples
+% modified by $\mathcal{Q}$). 
+% Let $\mathcal{Q}^*_{sub} = \mathcal{Q}^*-\mathcal{Q}$ as 
+% queries modified in the log repair, in the 2nd iteration, we 
+% construct a separate MILP problem by linearizing 
+%  queries between the first and the last query in
+% $\mathcal{Q}^*_{sub}$, parameterizing variables in 
+% the where clause for queries in $\mathcal{Q}^*_{sub}$,
+% and maximizing the log repair impact score. 
+% 
+% 
+% We define the impact score by dividing the 
+% impacted tuples $T$ into three groups and defining the 
+% impact score accordingly. \xlw {we need to fix these terms}. 
+% 
+% \smallskip
+% 
+% \noindent\textbf{Group 1}: tuples in the complaints $\mathcal{C}$. Impact of 
+% $\mathcal{Q}^*$ on this group
+% are guaranteed as correct. \textbf{Rule:} 
+% strictly satisfy, including these tuples as 
+% constraints in the 2nd iteration MILP problem. 
+% 
+% \smallskip
+% 
+% \noindent\textbf{Group 2:} tuples not in $\mathcal{C}$, but also modified 
+% by the original query log $\mathcal{Q}$. Impact of $\mathcal{Q}^*$ 
+% on the group 2 are likely to
+% be correct. \textbf{Rule:} adding these tuples into the 
+% rewarded tuple set $T_{reward}$. 
+% \ewu{what does "modified by the original query log Q mean?}
+% 
+% \smallskip
+% 
+% \noindent\textbf{Group 3:} tuples not in $\mathcal{C}$ and not modified 
+% by the original query log $\mathcal{Q}$. Impact of 
+% $\mathcal{Q}^*$ on the last group should penalized, thus 
+% we put them into $T_{penalize}$ (\textbf{Rule}).
+% 
+% \smallskip
+% 
+% The impact score, which is also the objective function for
+% the MILP problem, is $T_{reward} - T_{penalize}$. \ewu{what exactly is this objective function?  the number of tuples modified?}We further 
+% optimize the 2nd iteration to reduce the size of $T$ 
+% by searching for K-nearest-neighbors
+% of tuples in complaints $\mathcal{C}$. 
+% There are multiple benefits for the two-iteration approach:
+% \begin{itemize}
+% \item It minimizes the size of MILP problem in the 1st iteration. 
+% \item It refines the log repair while avoid over correcting tuples not in 
+% the complaints $\mathcal{C}$. 
+% \item It pptimizes the impacted tuples efficiently by controlling the queries 
+% and number of impacted tuples
+% involved in the 2nd MILP problem.
+% \item In addition, it handles cases when we don't have complete complaints
+% $\mathcal{C}$ (false negatives). 
+% \end{itemize}
 
-\smallskip
 
-The impact score, which is also the objective function for
-the MILP problem, is $T_{reward} - T_{penalize}$. \ewu{what exactly is this objective function?  the number of tuples modified?}We further 
-optimize the 2nd iteration to reduce the size of $T$ 
-by searching for K-nearest-neighbors
-of tuples in complaints $\mathcal{C}$. 
-There are multiple benefits for the two-iteration approach:
-\begin{itemize}
-\item It minimizes the size of MILP problem in the 1st iteration. 
-\item It refines the log repair while avoid over correcting tuples not in 
-the complaints $\mathcal{C}$. 
-\item It pptimizes the impacted tuples efficiently by controlling the queries 
-and number of impacted tuples
-involved in the 2nd MILP problem.
-\item In addition, it handles cases when we don't have complete complaints
-$\mathcal{C}$ (false negatives). 
-\end{itemize}
+
 \subsection{Optimization: log size}
 
 
