@@ -58,47 +58,61 @@ only tuples modified by the fixed queries
 \subsection{Reducing Tuples}
 \label{sec:opt:tbsize}
 
-We opt to aggressively reduce the number of tuples by only encoding the tuples
-mentioned in the complaint set $\mathcal{C}$.
-Derives an inaccurate log repair.  It is guaranteed by the problem formulation
-that the fix will resolve the errors in $\mathcal{C}$.  However, because the problem
-only encodes $\mathcal{C}$, there are certain problem settings where 
-the resulting fix may not generalize to all of the tuples in the database, 
-and thus introduce new errors.    
-% However, there are cases
-% where the predicate of the fixed query matches tuples were not part of $\mathcal{C}$.  
-% In that case, it is possible that when the fixed query is applied to the database, 
-% it will introduce new errors.
+\ewu{Assume reader is clear that we are fixing WHERE clause range predicates}
 
-\begin{figure}[h]
+Our first optimization aggressively reduces the number of tuples by only encoding those 
+tuples in the complaint set $\mathcal{C}$.  One reason is because each tuples necessitates
+the linearization of the entire query log, thus only encoding the complaints minimizes the 
+size of the problem with respect to the relevant tuples.
+Although this optimization is guaranteed by the MILP problem to 
+will resolve $\mathcal{C}$, the problem may overfit to $\mathcal{C}$ 
+and not generalize well to the entire database.
+Specifically, there are problem settings where the fixed range predicate is a superset of 
+the true range predicate, match tuples not in the complaint set, and thus introduce new errors.    
+
+\begin{figure}[t]
     \centering
     \includegraphics[width=0.4\textwidth]{figures/2nditerationgroups}
     \caption{Graphical depiction of the group 2 and group 3. }
     \label{fig:groups}
 \end{figure}
 
-Figure~\ref{fig:groups} depicts the two cases where the fixed query may contain tuples in the full
-database that were not in $\mathcal{C}$.
-Each solid and empty circle represents a tuple in the database that is in or not in $\mathcal{C}$, respectively.  
+Figure~\ref{fig:groups} depicts examples of the two cases where the fixed query contains non-complaint tuples.
+Each solid and empty circle represents a complaint and non-complaint tuple, respectively.
 Each thick line represents the interval of query $q$'s single range predicate: 
-dirty is the incorrect range in the corrupted version,
+dirty is the incorrect range in the corrupted query,
 truth is the correct range in the true query, 
 and fix is the range returned by the solver.
 Recall that our goal is to reproduce the truth range given the tuples in $\mathcal{C}$ (solid circles)
-and the dirty range.  
+and the corrupted query.
 
-In (a), the dirty range overlaps with the true range, thus the tuples within the overlapping 
-region are not complaints, are correctly modified by the dirty range, and should be included
-in the fixed range.  In general, non-complaint tuples that match the fix query as well as 
-the dirty range are by definition correctly part of the fixed range.
+In (a), the dirty range overlaps with the true range, thus the non-complaint tuples 
+within the overlapping region are correctly modified by the dirty range, and corruectly included
+in the fixed range.  In this case, the proposed fix was correct, and the algorithm is complete.
+In contrast, (b) highlights a case where \sys generalized incorrectly.
+The dirty and clean ranges are non-overlapping, so the non-complaint tuple shown should not 
+be modified by $q$, and has been incorrectly included in the fix range.
+Note that in both of these cases, the objective function will ensure that the fix range 
+does not extend beyond the truth range towards the right.  Thus, the fix range
+can only over-generalize in the direction of the dirty range.
 
-In contrast, consider (b), where the dirty and clean ranges are non-overlapping.
-The non-complaint tuples shown should not be modified by $q$, and so the proposed
-fix has incorrectly generalized.  In this case we use this additional information to
-encode a second MILP problem to adjust the fixed range while taking the non-complaint tuples
-into account.
+Our goal is to reduce the fix range to exclude those non-complaint tuples.  
+There are many possible mechanisms to achieve this and we choose to solve this using
+a second MILP problem in the case where multiple queries have been fixed.
+Let $\mathcal{Q}^*_{sub}$ be the set of fixed queries from the first MILP problem.
+We first construct a set of constraints by linearizing the queries in the query log
+between the least and most recent queries in $\mathcal{Q}^*_{sub}$ with respect to $\mathcal{C}$.
+The key difference is that we fix all of the undetermined variables for $x$ in Equation~\ref{}
+based on the solutions to the first MILP problem.  
+In addition, we call $LinearAndParams$ for each non-complaint tuple in the fixed range.
+The objective function is to minimize the sum of the undetermined $x$ variables in the encoded
+problem.
+
+Based on our experimental runs, we find that this second iteration of MILP 
+commonly adds an additional $0.1-0.5\%$ overhead on top of the first MILP solver time.
 
 
+\ewu{Need to clarify that the solver is a black box, who knows what goes on there.  Maybe where we introduce MILP-solvers}
 
 
 % fix is always the smallest possible, so it can only require a sceond iteration if the dirty and clean
