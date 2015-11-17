@@ -1,31 +1,63 @@
 \section{Optimizing the Basic Approach}
 \label{sec:opt}
 
-In the previous section, we introduce the basic approach to derive
-the log repair by incorporating information from every query
-and every tuple into a single MILP problem. However, oftentimes, 
-this basic approach end up with 
-a huge problem as the query log size and table size increase. 
-In Figure~\ref{fig:querysize_vs_time}, 
-\begin{wrapfigure}{R}{0.25\textwidth}
+A large drawback of the MILP-based approach described in the previous section is
+that it exhaustively encodes the combination of all tuples in the database and all queries
+in the query log.  In this approach, the number of constraints grows quadratically with respect to
+the database and the query log; the number of undetermined variables also increases quandratically.
+Both of these properties typically .
+In a simple experiment, shown in Figure~\ref{fig:querysize_vs_time}, we generated increasingly 
+larger query logs for a database of $XXX$ tuples, encoded the problem using $\sys_{exh}$, and solved
+the problem using an ILP-solver (CPLEX~\cite{cplex} in our experiments).
+We find that the solver time increases exponentially as the number of encoded queries increases,
+due exponential increase in the number of possible states for the undetermined variables.
+Although the solver performance varies widely depending on the specific problem, this experiment 
+illustrates the limitations of the naive approach.
+
+\begin{figure}{h}
     \centering
-        \includegraphics[width=0.25\textwidth]{figures/auctionmark_qsize_time}
+        \includegraphics[width=0.4\textwidth]{figures/auctionmark_qsize_time}
     \caption{\# of queries vs. execution time on Auctionmark dataset. }
     \label{fig:querysize_vs_time}
-\end{wrapfigure}
-we observe that the total solver (IBM CPLEX) solving time 
-grows exponentially and 
-unpredictably as the query 
-log size or the table size increases. As a result, the basic approach does not scale over 
-large problems (large query log size and large table size).\\
-To resolve the scalability limitation of the basic approach, 
-we explored a number of approaches to improve the performance of the 
-MILP-based algorithm. We divide these approaches into two groups:
-reduce tuples in the MILP problem and reduce queries linearized/parameterized in
-the MILP problem. \\
+\end{figure}
 
-\subsection{Optimization: table size (this part overlap with false negative)}
+To resolve this limitation, we explored two classes of optimizations that seek to
+reduce the number of encoded tuples and the number of linearized queries in the MILP problem.
+In addition, incremental algorithm that is faster if the corruption is recent.  
+We see in experiments that this is likely the case.
+
+
+
+
+% In the previous section, we introduce the basic approach to derive
+% the log repair by incorporating information from every query
+% and every tuple into a single MILP problem. However, oftentimes, 
+% this basic approach end up with 
+% a huge problem as the query log size and table size increase. 
+% In Figure~\ref{fig:querysize_vs_time}, 
+% we observe that the total solver (IBM CPLEX) solving time 
+% grows exponentially and 
+% unpredictably as the query 
+% log size or the table size increases. As a result, the basic approach does not scale over 
+% large problems (large query log size and large table size).
+
+
+linearize whole query log, so cost of adding an additional tuple is very high.
+second iteration generally takes ~1 - 10%
+for large databases knn cost is pretty high: ~
+
+if the solver returns, it is always a super set of the clean range
+
+only tuples modified by the fixed queries
+- tuples already in the complaints (correct)
+- not in complaints, but any of the originial queries modified it
+- not in complaints, but no original queries modified it
+
+
+
+\subsection{Reducing Tuples}
 \label{sec:opt:tbsize}
+
 The basic solution, which suggests to linearize every tuple in the database into the MILP problem,
 has two major disadvantages: 1. the system may end up with a large MILP problem that requires 
 the solver to run forever to solve; 2. we can only linearize the every tuple
@@ -48,6 +80,8 @@ derives a log repair $\mathcal{Q}^*$ with $q_1^*=$ \texttt{\small UPDATE Taxes S
 This log repair resolve tuples in the complaints. However, the fixed query $q_1$ has a much wider range 
 and it it incorrectly modifies tuples that are not in the complaint, e.g., tuple $t_4$.
 \end{example}
+\ewu{why would this happen if we encoded all the tuples?  Doesn't the objective penalize this case?}
+
 
 To avoid introducing such noises, we introduce the 
 2nd iteration which targets on refining the log repair derived in 
@@ -62,6 +96,13 @@ construct a separate MILP problem by linearizing
 $\mathcal{Q}^*_{sub}$, parameterizing variables in 
 the where clause for queries in $\mathcal{Q}^*_{sub}$,
 and maximizing the log repair impact score. 
+
+\begin{figure}{h}
+    \centering
+    \includegraphics[width=0.4\textwidth]{figures/2nditerationgroups}
+    \caption{Graphical depiction of the group 2 and group 3. }
+    \label{fig:groups}
+\end{figure}
 
 We define the impact score by dividing the 
 impacted tuples $T$ into three groups and defining the 
@@ -82,6 +123,7 @@ by the original query log $\mathcal{Q}$. Impact of $\mathcal{Q}^*$
 on the group 2 are likely to
 be correct. \textbf{Rule:} adding these tuples into the 
 rewarded tuple set $T_{reward}$. 
+\ewu{what does "modified by the original query log Q mean?}
 
 \smallskip
 
@@ -93,7 +135,7 @@ we put them into $T_{penalize}$ (\textbf{Rule}).
 \smallskip
 
 The impact score, which is also the objective function for
-the MILP problem, is $T_{reward} - T_{penalize}$. We further 
+the MILP problem, is $T_{reward} - T_{penalize}$. \ewu{what exactly is this objective function?  the number of tuples modified?}We further 
 optimize the 2nd iteration to reduce the size of $T$ 
 by searching for K-nearest-neighbors
 of tuples in complaints $\mathcal{C}$. 
@@ -111,6 +153,7 @@ $\mathcal{C}$ (false negatives).
 \subsection{Optimization: log size}
 
 
+\if{0}
 \subsubsection{A Naive but Flawed approach}
 \ewu{Better explained as: CPLEX searches through an exponential space of all possible combinations of MILP variables.  In a chunked approach, the solution of each chunk is one out of a potentially arbitrary number of possible solutions, thus it is easy to pick an incorrect one}
 A natural idea to optimize the basic approach is 
@@ -141,6 +184,7 @@ the following two optimizations: query-slicing optimization
 based on provenance over queries and
 attribute-slicing optimization based on provenance over 
 attributes. 
+\fi
 
 \subsubsection{Query-Slicing}
 \label{sec:opt:query}
