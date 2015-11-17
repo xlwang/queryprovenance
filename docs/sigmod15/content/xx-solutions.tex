@@ -1,16 +1,80 @@
 \section{A Naive/Heuristic Approach}
-
 \xlw{describe decision tree based approach}
-
-
-
+In this section, we discuss a naive approach to fix
+a single incorrect \texttt{UPDATE} query. 
+This approach first uses 
+Decision Tree to derive a ``correct'' where clause 
+and then solve the set clause by configuring the set 
+expressions into a linear system problem. 
+\subsection{Decision Tree for Where Clause}
+The conditions in the where clause divide tuples in
+the database into two groups: tuples satisfy 
+the condition and tuples fail to satisfy the condition. 
+Thus, it is natural to treat the where clause as a rule-based
+binary classifier and the errors we observe in the database 
+are caused by an imprecise classifier that mistakenly 
+classifies tuples in the wrong class(es). Therefore, 
+we fix this incorrect
+where clause by configuring a classification problem.
+Let $D_0, D_1^*$ denote the clean database states before and after 
+execute the incorrect query $q$, 
+we convert each tuple $t \in D_0$ as 
+an element in the input training data for the classifier where
+the values (in each attribute) of the $t$ is the feature vector 
+and the label for $t$ is as following:
+	\[
+    label(t)= 
+    \begin{cases}
+    true ,& D_0.t \neq D_n^*.t\\
+    false,              & \text{otherwise}
+    \end{cases}
+\]
+We use Decision Tree [] to solve this problem and thus find the correct 
+rules for the where clause. 
+\subsection{Linear System for Set Clause}
+After we find the correct where clause, we can check whether the problem
+is solved by comparing 
+with the complaint set $\mathcal{C}$. If the errors are not entirely solved, 
+it is highly likely that the set clause in this query is also incorrect. 
+o resolve this, we further correct the set clause by converting the set
+clause into a linear system: each set expression is transformed into a linear
+equation $D_1^*.t = f(D_0.t)$ with unknown variables in $f()$, 
+the value on the left side is the correct value at database state $D_1^*$, 
+and the input value on the right side is the values at database state $D_0^*$.
+By solving this linear system, we will get the correct value for the variable 
+in the set clause. 
+\subsection{Why not?}
+This naive/heuristic approach is able to fix a single incorrect query. However, 
+there are many limitations for this Decision Tree and Linear System based approach:
+\begin{itemize}
+\item This naive approach only applies for fixing single query as it relies on the
+clean database state before and after execute the query. Thus, we cannot use
+this approach to solve incorrect queries far from the most recent one without 
+an effective algorithm that rollbacks database states. 
+\item This naive approach may derive a fixed where clause that is very different 
+with the original one: the covered attributes may different as well as the number of 
+conditions. 
+\item Moreover, the decision tree classifier in the naive approach 
+may even fail to generate a valid fix. For example, 
+when 99.9\% of tuples are labeled
+in the same class, decision tree may conclude that all tuples should be in the 
+same class where no rule will be generated. 
+\end{itemize}
+Due to these limitations, we propose an advanced solver-based approach 
+that is able to fix queries far from the most recent one. 
 \section{A MILP-based Solution}
 \label{sec:sol}
 In this section, we introduce an exhaustive solver-based approach to 
 resolve the incorrectness reflected by the complaints. 
 This approach constructs a mixed-integer linear 
 programming (MILP) problem~\cite{milp} by linearizing and parameterizing the 
-corrupted query log over the tuples in the database. 
+corrupted query log over the tuples in the database. \xlw{Essentially, 
+we convert the updating process of the query log into a set of 
+constraints, transform values in queries (in the query log)
+as undetermined variables, and 
+using these values to form the objective function. Thus, the problem of 
+deriving a log repair is converted into a mixed-integer linear 
+programming (MILP) optimization problem. }\\
 {\xlw{need to introduce MILP problems a little bit here, so readers know what undetermined
 variables are and why things need to be linearized}}
 
