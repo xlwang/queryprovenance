@@ -42,6 +42,7 @@ We see in experiments that this is likely the case.
 % large problems (large query log size and large table size).
 
 
+\if{0}
 linearize whole query log, so cost of adding an additional tuple is very high.
 second iteration generally takes ~1 - 10%
 for large databases knn cost is pretty high: ~
@@ -52,13 +53,14 @@ only tuples modified by the fixed queries
 - tuples already in the complaints (correct)
 - not in complaints, but any of the originial queries modified it
 - not in complaints, but no original queries modified it
+\fi
 
 
 
 \subsection{Reducing Tuples}
 \label{sec:opt:tbsize}
 
-\ewu{Assume reader is clear that we are fixing WHERE clause range predicates}
+\ewu{Assume reader is clear that we are only repairing WHERE clause range predicates}
 
 Our first optimization aggressively reduces the number of tuples by only encoding those 
 tuples in the complaint set $\mathcal{C}$.  One reason is because each tuples necessitates
@@ -67,7 +69,7 @@ size of the problem with respect to the relevant tuples.
 Although this optimization is guaranteed by the MILP problem to 
 will resolve $\mathcal{C}$, the problem may overfit to $\mathcal{C}$ 
 and not generalize well to the entire database.
-Specifically, there are problem settings where the fixed range predicate is a superset of 
+Specifically, there are problem settings where the repaired range predicate is a superset of 
 the true range predicate, match tuples not in the complaint set, and thus introduce new errors.    
 
 \begin{figure}[t]
@@ -77,34 +79,34 @@ the true range predicate, match tuples not in the complaint set, and thus introd
     \label{fig:groups}
 \end{figure}
 
-Figure~\ref{fig:groups} depicts examples of the two cases where the fixed query contains non-complaint tuples.
+Figure~\ref{fig:groups} depicts examples of the two cases where the repaired query contains non-complaint tuples.
 Each solid and empty circle represents a complaint and non-complaint tuple, respectively.
 Each thick line represents the interval of query $q$'s single range predicate: 
 dirty is the incorrect range in the corrupted query,
 truth is the correct range in the true query, 
-and fix is the range returned by the solver.
+and repair is the range returned by the solver.
 Recall that our goal is to reproduce the truth range given the tuples in $\mathcal{C}$ (solid circles)
 and the corrupted query.
 
 In (a), the dirty range overlaps with the true range, thus the non-complaint tuples 
 within the overlapping region are correctly modified by the dirty range, and corruectly included
-in the fixed range.  In this case, the proposed fix was correct, and the algorithm is complete.
+in the repaired range.  In this case, the proposed repair was correct, and the algorithm is complete.
 In contrast, (b) highlights a case where \sys generalized incorrectly.
 The dirty and clean ranges are non-overlapping, so the non-complaint tuple shown should not 
-be modified by $q$, and has been incorrectly included in the fix range.
-Note that in both of these cases, the objective function will ensure that the fix range 
-does not extend beyond the truth range towards the right.  Thus, the fix range
+be modified by $q$, and has been incorrectly included in the repaired range.
+Note that in both of these cases, the objective function will ensure that the repaired range 
+does not extend beyond the truth range towards the right.  Thus, the repaired range
 can only over-generalize in the direction of the dirty range.
 
-Our goal is to reduce the fix range to exclude those non-complaint tuples.  
+Our goal is to reduce the repaired range to exclude those non-complaint tuples.  
 There are many possible mechanisms to achieve this and we choose to solve this using
-a second MILP problem in the case where multiple queries have been fixed.
-Let $\mathcal{Q}^*_{sub}$ be the set of fixed queries from the first MILP problem.
+a second MILP problem in the case where multiple queries have been repaired.
+Let $\mathcal{Q}^*_{sub}$ be the set of repaired queries from the first MILP problem.
 We first construct a set of constraints by linearizing the queries in the query log
 between the least and most recent queries in $\mathcal{Q}^*_{sub}$ with respect to $\mathcal{C}$.
-The key difference is that we fix all of the undetermined variables for $x$ in Equation~\ref{}
+The key difference is that we repair all of the undetermined variables for $x$ in Equation~\ref{}
 based on the solutions to the first MILP problem.  
-In addition, we call $LinearAndParams$ for each non-complaint tuple in the fixed range.
+In addition, we call $LinearAndParams$ for each non-complaint tuple in the repaired range.
 The objective function is to minimize the sum of the undetermined $x$ variables in the encoded
 problem.
 
@@ -211,88 +213,93 @@ commonly adds an additional $0.1-0.5\%$ overhead on top of the first MILP solver
 
 
 \if{0}
-\subsubsection{A Naive but Flawed approach}
-\ewu{Better explained as: CPLEX searches through an exponential space of all possible combinations of MILP variables.  In a chunked approach, the solution of each chunk is one out of a potentially arbitrary number of possible solutions, thus it is easy to pick an incorrect one}
-A natural idea to optimize the basic approach is 
-to \textbf{chunk the query log} into
-smaller, fixed size pieces and then solve each piece at a time: starting
-from the most recent piece, the system linearizes and parameterizes queries 
-in the current piece and derives a corresponding log repair; 
-it then examines the other pieces iteratively
-in the same way. Since complaints only provides
-true values for the most recent database state, in order to avoid 
-linearizing additional queries, 
-we need to know \textbf{rollback} the true values of tuples 
-until the last query in each query log piece. \\
-However, rollback the database is non-easy. An ideal, precise rollback
-algorithm would generate a set of valid ranges for each attribute of a tuple. 
-But the size of valid ranges also grows exponentially with the number queries
-we want to rollback, which, in turn, could not improve the system performance. 
-On the other hand, an approximate, imprecise 
-rollback algorithm would either make the rest of the problems
-infeasible to solve (only maintain fixed number of valid ranges) 
-or result in deriving 
-incorrect log repairs (maintain the lower 
-bound and upper bound among all valid ranges).
-  
+  \subsubsection{A Naive but Flawed approach}
+  \ewu{Better explained as: CPLEX searches through an exponential space of all possible combinations of MILP variables.  In a chunked approach, the solution of each chunk is one out of a potentially arbitrary number of possible solutions, thus it is easy to pick an incorrect one}
+  A natural idea to optimize the basic approach is 
+  to \textbf{chunk the query log} into
+  smaller, fixed size pieces and then solve each piece at a time: starting
+  from the most recent piece, the system linearizes and parameterizes queries 
+  in the current piece and derives a corresponding log repair; 
+  it then examines the other pieces iteratively
+  in the same way. Since complaints only provides
+  true values for the most recent database state, in order to avoid 
+  linearizing additional queries, 
+  we need to know \textbf{rollback} the true values of tuples 
+  until the last query in each query log piece. \\
+  However, rollback the database is non-easy. An ideal, precise rollback
+  algorithm would generate a set of valid ranges for each attribute of a tuple. 
+  But the size of valid ranges also grows exponentially with the number queries
+  we want to rollback, which, in turn, could not improve the system performance. 
+  On the other hand, an approximate, imprecise 
+  rollback algorithm would either make the rest of the problems
+  infeasible to solve (only maintain fixed number of valid ranges) 
+  or result in deriving 
+  incorrect log repairs (maintain the lower 
+  bound and upper bound among all valid ranges).
+    
 
-In order to improve the system performance without losing accuracy, we propose
-the following two optimizations: query-slicing optimization 
-based on provenance over queries and
-attribute-slicing optimization based on provenance over 
-attributes. 
+  In order to improve the system performance without losing accuracy, we propose
+  the following two optimizations: query-slicing optimization 
+  based on provenance over queries and
+  attribute-slicing optimization based on provenance over 
+  attributes. 
 \fi
+
+
+
+
 
 \subsubsection{Query-Slicing}
 \label{sec:opt:query}
-The exhaustive parameterization of all queries in the query log, as described
-in the basic approach, is typically unnecessary because many queries in the log
-could not have affected the tuple attribute values in the complaint set.
-To avoid such redundant computation, \textit{query-slicing} 
-removes \texttt{UPDATE} queries whose \texttt{SET} clauses did not modify 
-attributes that could possibly have affected the {\it complaint attributes} 
-specified in the complaint set.
 
-\ewu{changed INcorrect attributes to Complaint Attributes}
 
-\begin{definition} [Complaint Attributes]
-	The complaint attributes $\mathcal{A}(C)$ are attributes in 
-	table $R$ with incorrect values: 
-	\[\mathcal{A}(C) = \{A_i|A_i\in R, \exists t.A_i \neq t.A_i^*, t\in C\}\]
+In practice, many of the queries in the query log could not have affected the 
+{\it complaint attributes} (defined below) in the complaint set, regardless of what their \texttt{WHERE} 
+and \texttt{SET} clause parameters have been set to. For example, if $q_{N-1}$ and $q_{N}$ 
+only read and wrote attribute $A_1$, then they could not have contributed to an error in $A_2$.  
+However, if $q_{N}$ instead wrote to $A_2$, then either or both queries may have caused the error. 
+In short, if we model a query as a set of attribute read and write operations, those that form a 
+causal read-write chain to the {\it complaint attributes} must be linearized, whereas those that
+do not can be ignored.  This is the foundation of the {\it Query-slicing} optimization described in 
+the subsequent text.
+
+% The exhaustive parameterization of all queries in the query log, as described
+% in the basic approach, is typically unnecessary because many queries in the log
+% could not have affected the tuple attribute values in the complaint set.
+% To avoid such redundant computation, \textit{query-slicing} 
+% removes \texttt{UPDATE} queries whose \texttt{SET} clauses did not modify 
+% attributes that could possibly have affected the {\it complaint attributes} 
+% specified in the complaint set.
+
+\begin{definition} [Complaint Attributes $\mathcal{A}(\mathcal{C})$]
+	Attributes mentioned in the complaint set.
+	\[\mathcal{A}(\mathcal{C}) = \{A_i | t.A_i \neq t^*.A_i, c(t,t^*) \in \mathcal{C}\}\]
 \end{definition} 
 
-\ewu{Why don't we use lineage/provenance language?}
-\begin{definition}[Query dependency\& impact]
-    The \textbf{dependency}, $\mathcal{P}(q)$, of a query $q$
-    is the set of 
-    attributes involved in the condition function of $q$:
-    \[\mathcal{P}(q) = \Pi_{f_{q}.\sigma}(R)\]
-    The \textbf{direct-impact} of query $q$, denoted
-    by $\mathcal{I}(q)$, is the set of attributes 
-    involved in the update function of $q$:
-    \[\mathcal{I}(q) = \Pi_{f_{q}.\mu}(R)\]
-    The \textbf{full-impact}
-    of $q$, $\mathcal{F}(q)$, propogates the $q$'s direct impact through
-    the subsequent queries in the query log to describe {\it all} attributes
-    that are affected by the changes caused by $q$'s \texttt{SET} clause.
-    We describe its implications and calculation next.
-    \ewu{Is this correct?}
+
+\begin{definition}[Query dependency \& impact]
+  \begin{enumerate}
+    \item The \textbf{dependency}, $\mathcal{P}(q)$, of a query $q$
+    is the set of attributes  involved in the condition function $f_{q.\sigma}$ of $q$.
+    %\[\mathcal{P}(q) = \Pi_{f_{q}.\sigma}(R)\]
+    \item The \textbf{direct-impact} of query $q$, 
+    $\mathcal{I}(q)$, is the set of attributes 
+    updated in the update function $f_{q.\mu}$ 
+    (e.g., \texttt{SET} clause) of $q$.
+    %\[\mathcal{I}(q) = \Pi_{f_{q}.\mu}(R)\]
+    \item The \textbf{full-impact}
+    of $q$, $\mathcal{F}(q)$, propagates $q$'s direct impact through
+    the subsequent queries in the query log to collect {\it all} attributes
+    that are affected by the changes caused by $q$'s update function.
+    We describe its implications and computation below and in Algorithm~\ref{alg:fullimpact}.
+  \end{enumerate}
 \end{definition}
 
+% By comparing $\mathcal{F}(q)$ and $\mathcal{A}(C)$, we know whether
+% or not corrupting query $q$'s parameters could possibly have caused the complaint
+% set.  
 
-By comparing $\mathcal{F}(q)$ and $\mathcal{A}(C)$, we know whether
-or not corrupting query $q$'s parameters could possibly have caused the complaint
-set.  Specifically, when $|\mathcal{F}(q) \cap \mathcal{A}(C)|=|\mathcal{A}(C)|$, 
-$q$ potentially affected all of the attributes referenced in the complaint set and is
-a candidate for fixing; 
-when $0 < |\mathcal{F}(q) \cap \mathcal{A}(C)|< |\mathcal{A}(C)|$, 
-$q$ contributed to a subset of the attributes in the complaint set; 
-and when $|\mathcal{F}(q) \cap \mathcal{A}(C)|=0$, $q$ is irrelevant 
-and can be ignored as a candidate for fixing. 
-We use $Rel\mathcal{(Q)}$ to denote the set of relevant queries. 
-
-Algorithm~\ref{alg:fullimpact} describes how we find
-$\mathcal{F}(q_i)$ for $q_i$ in the query log:
+Algorithm~\ref{alg:fullimpact} describes how $\mathcal{F}(q_i)$ can be computed:
 
 \begin{algorithm}[htbp]
 \caption{$FullImpact$ algorithm for finding $\mathcal{F}(q)$.}
@@ -302,19 +309,27 @@ $\mathcal{F}(q_i)$ for $q_i$ in the query log:
 % \ENSURE {$\mathcal{F}(\mathcal{Q})=\{\{\mathcal{F}(q_1)\}, ..., \{\mathcal{F}(q_n)\}\}$}
 % \FOR {each $q_i$ in $q_n, ..., q_1$}
 \STATE $\mathcal{F}(q_i) \leftarrow \mathcal{I}(q_i)$
-\FOR {each $q_j$ in $q_{i+1}, ..., q_{n}$}
+\FOR {each $q_j$ in $q_{i+1}, ..., q_{n} \in \mathcal{Q}$}
 \IF {\red{$\mathcal{F}(q_i)\cap \mathcal{P}(q_j) \neq \emptyset$}}
 \STATE $\mathcal{F}(q_i) \leftarrow \mathcal{F}(q_i) \cup \mathcal{F}(q_j)$
 \ENDIF
 \ENDFOR
-\STATE $\mathcal{F}(\mathcal{Q}) \leftarrow \mathcal{F}(\mathcal{Q}) \cup {\red{\{\mathcal{F}(q_i)\}}}$
+%\STATE $\mathcal{F}(\mathcal{Q}) \leftarrow \mathcal{F}(\mathcal{Q}) \cup {\red{\{\mathcal{F}(q_i)\}}}$
 % \ENDFOR
-\STATE Return $\mathcal{F}(\mathcal{Q})$
+\STATE Return $\mathcal{F}(\mathcal{q_i})$
 \end{algorithmic}
 \end{algorithm}
 
-Finally, we can compute $Rel\mathcal{(Q)}$
 
+By computing the full-impact of $q$, we can determine the extent that it affects $\mathcal{C}$
+based on its overlap with the complaint attributes.
+Specifically, 
+%when $|\mathcal{F}(q) \cap \mathcal{A}(C)|=|\mathcal{A}(C)|$, $q$ may affect all complaint attributes and is a candidate for fixing; 
+when $0 < |\mathcal{F}(q) \cap \mathcal{A}(C)| \le |\mathcal{A}(C)|$, 
+$q$ contributed to a subset of the complaint attributes and is a candidate for repair;
+when $|\mathcal{F}(q) \cap \mathcal{A}(C)|=0$, $q$ is irrelevant 
+and can be ignored during the repair process.
+We use $Rel\mathcal{(Q)}$ to denote the set of relevant queries that are candidates for repair.
 
 
 \subsubsection{I don't understand this}
@@ -330,7 +345,7 @@ attributes as following:
 
 
 
-\subsubsection{Incremental Computation}
+\subsubsection{Incremental Computation for Single Corrupted Queries}
 
 \begin{figure}[t]
   \centering
