@@ -81,7 +81,7 @@ The conditional function $\sigma_q(t)$ is a boolean function that represents the
     &\mu_{q_2}(t)=(t.rate, t.income, \frac{t.income\cdot t.rate}{100})\\
     &\sigma_{q_2}(t)=\texttt{true}
 \end{align*} 
-
+% 
 As an insertion query, $q_3$ has $\sigma_{q_3}(t)=\texttt{false}$ and $t_new=(25, 85800, 21450)$.
 
 
@@ -135,7 +135,8 @@ and $t_4^*=(25,86500,21625)$.  For both these cases, each complaint denotes a va
 means that $t$ should be removed from the database.
 
 
-% 
+\smallskip
+\noindent
 \emph{Complaint set ($\mathcal{C}$):}
 We use $\mathcal{C}$ to denote the set of all known complaints, and we call it
 \emph{complaint set}. Each complaint in $\mathcal{C}$ represents a
@@ -144,7 +145,6 @@ Applying all these transformations to $D_n$ results in a new database instance
 $D_n'$, and we write $D_n'=\mathcal{T}_\mathcal{C}(D_n)$. If $D_n'$ has no
 remaining data errors ($D_n'=D_n^*$), we say that $\mathcal{C}$ is a
 \emph{complete complaint set}.
-\alex{there is some notion of minimality here...}
 In our work, we do not assume that the complaint set is complete, but, as is
 more common in practice, we only know a subset of the errors.
 
@@ -153,16 +153,14 @@ more common in practice, we only know a subset of the errors.
 \emph{Log repair ($\mathcal{Q}^*$):}
 The goal of our framework is to derive a diagnosis as a log repair
 $\mathcal{Q}^*=\{q_1^*,\dots, q_n^*\}$, such that
-$\mathcal{Q}^*(D_0)\models\mathcal{C}$. In this work, we assume that each
-query $q_i^*\in\mathcal{Q}^*$ is either $q_i^*=q_i$ or
-$q_i^*=\mathcal{T}(q_i)$, where $\mathcal{T}(q_i)$ is a \emph{non-structural
-modification} of $q_i$.
-\alex{Need different notation to avoid confusion with complaint transformation.}
-A non-structural modification $\mathcal{T}$ may change the value of the
-constants that appear in a query, but it will not alter the attributes and
-functions used in the query, or any of its structure. For example, a
-non-structural modification of query $q_1$ in Figure~\ref{fig:example} could
-be $q_1^*$=\texttt{UPDATE Taxes SET rate = 30 WHERE income >= 87500}.
+$\mathcal{Q}^*(D_0)=D_n^*$. In this work, we focus on errors produced
+by incorrect parameters in queries, so our repairs focus on altering
+query constants rather than query structure. Therefore, for each query
+$q_i^*\in\mathcal{Q}^*$ $q_i^*$ has the same structure as $q_i$, but
+possibly different parameters. For example, a good log repair for the
+example of Figure~\ref{fig:example} is
+$\mathcal{Q}^*=\{q_1^*,q_2,q_3\}$, where $q_1^*$=\texttt{UPDATE Taxes
+SET rate = 30 WHERE income >= 87500}.
 
 
 \subsubsection*{Problem definition}
