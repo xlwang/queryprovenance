@@ -65,6 +65,27 @@ including insertion and deletion queries.
 
 \smallskip
 \noindent
+\emph{Query ($q_i$):}  We model each update query as a function over a database $D$, resulting in a new database $D'$:  
+\begin{align*}
+    D'=q(D)= &\{\mu_{q}(t)\;|\;t\in D, \sigma_{q}(t)\}\\
+    &\cup\{t\;|\;t\in D, \neg\sigma_{q}(t)\}\\
+    &\cup\{t_{new}\;|\;q\in\texttt{INSERT}\}
+\end{align*}
+% 
+In this definition, the modifier function $\mu_q(t)$ represents the query's update equations, and it transforms a tuple by either deleting it ($\mu_q(t)=\bot$) or changing the values of some of its attributes.
+The conditional function $\sigma_q(t)$ is a boolean function that represents the query's condition predicates.  In the example of Figure~\ref{fig:example}:
+\begin{align*}
+    &\mu_{q_1}(t)=(10, t.income, t.owed)\\
+    &\sigma_{q_1}(t)=(t.income\ge 85700)\\
+    &\mu_{q_2}(t)=(t.rate, t.income, \frac{t.income\cdot t.rate}{100})\\
+    &\sigma_{q_2}(t)=\texttt{true}
+\end{align*} 
+
+As an insertion query, $q_3$ has $\sigma_{q_3}(t)=\texttt{false}$ and $t_new=(25, 85800, 21450)$.
+
+
+\smallskip
+\noindent
 \emph{Database state ($D_i$):}
 We use $D_i$ to represent the state of a database $D$ after the application of
 queries $q_1$ through $q_i$ from the log $\mathcal{Q}$. $D_0$ represents the
