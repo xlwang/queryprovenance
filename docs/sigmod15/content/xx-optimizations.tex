@@ -58,6 +58,12 @@ only tuples modified by the fixed queries
 \subsection{Reducing Tuples}
 \label{sec:opt:tbsize}
 
+
+\subsubsection{Adjusting Over-generalized Fixes}
+
+fix is always the smallest possible, so it can only require a sceond iteration if the dirty and clean
+ranges don't overlap at all.  
+
 The basic solution, which suggests to linearize every tuple in the database into the MILP problem,
 has two major disadvantages: 1. the system may end up with a large MILP problem that requires 
 the solver to run forever to solve; 2. we can only linearize the every tuple
