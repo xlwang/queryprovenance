@@ -320,17 +320,19 @@ Algorithm~\ref{alg:fullimpact} describes how $\mathcal{F}(q_i)$ can be computed:
 \end{algorithmic}
 \end{algorithm}
 
-
 By computing the full-impact of $q$, we can determine the extent that it affects $\mathcal{C}$
 based on its overlap with the complaint attributes.
 Specifically, 
-%when $|\mathcal{F}(q) \cap \mathcal{A}(C)|=|\mathcal{A}(C)|$, $q$ may affect all complaint attributes and is a candidate for fixing; 
-when $0 < |\mathcal{F}(q) \cap \mathcal{A}(C)| \le |\mathcal{A}(C)|$, 
+when $|\mathcal{F}(q) \cap \mathcal{A}(C)|=|\mathcal{A}(C)|$, $q$ may affect all complaint attributes and is a candidate for repair; 
+when $0 < |\mathcal{F}(q) \cap \mathcal{A}(C)| < |\mathcal{A}(C)|$, 
 $q$ contributed to a subset of the complaint attributes and is a candidate for repair;
 when $|\mathcal{F}(q) \cap \mathcal{A}(C)|=0$, $q$ is irrelevant 
 and can be ignored during the repair process.
-We use $Rel\mathcal{(Q)}$ to denote the set of relevant queries that are candidates for repair.
-
+\ewu{We distinguish between the first and second conditions in the special case where we are repairing a {\it single} 
+corrupted query in the query log.  In this case, only queries in the first conditions are candidates for repair because 
+the single query must have caused errors in all of the complaint attributes.  This enables \sys to scale significantly better
+for this important problem setting.}
+Finally, we use $Rel\mathcal{(Q)}$ to denote the set of relevant queries that are candidates for repair.
 
 \subsubsection{I don't understand this}
 
