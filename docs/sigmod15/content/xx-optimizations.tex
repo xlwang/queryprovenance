@@ -57,7 +57,7 @@ only tuples modified by the fixed queries
 
 
 
-\subsection{Reducing Tuples}
+\subsection{Reducing Tuples (Tuple Slicing)}
 \label{sec:opt:tbsize}
 
 \ewu{Assume reader is clear that we are only repairing WHERE clause range predicates}
@@ -209,8 +209,6 @@ commonly adds an additional $0.1-0.5\%$ overhead on top of the first MILP solver
 
 
 
-\subsection{Optimization: log size}
-
 
 \if{0}
   \subsubsection{A Naive but Flawed approach}
@@ -249,7 +247,7 @@ commonly adds an additional $0.1-0.5\%$ overhead on top of the first MILP solver
 
 
 
-\subsubsection{Query-Slicing}
+\subsection{Reducing Queries (Query-Slicing)}
 \label{sec:opt:query}
 
 
@@ -334,53 +332,49 @@ the single query must have caused errors in all of the complaint attributes.  Th
 for this important problem setting.}
 Finally, we use $Rel\mathcal{(Q)}$ to denote the set of relevant queries that are candidates for repair.
 
-\subsubsection{Attribute Slicing}
+\subsection{Reducing Attributes (Attribute Slicing)}
 
 In addition to removing irrelevant queries, we additionally avoid encoding irrelevant attributes.
 Given $Rel\mathcal{(Q)}$, the relevant attributes can be defined as:
 $Rel\mathcal{(A)} = \cup_{q_i \in Rel\mathcal{Q)}} (\mathcal{F}(q_i)\cup \mathcal{P}(q_i))$
 Attribute slicing only encodes constraints using Equation~\ref{eq:uv} for attributes within $Rel\mathcal{(A)}$.
 This technique is effective for wide tables and query logs that focus a small subset of the attributes, for example
-in TPC-C style transaction workloads.
+in TPC-C style transaction workloads.\ewu{verify claim}
 
 
 
-\subsubsection{Incremental Computation for Single Corrupted Queries}
+\subsection{Single Query Incremental Repairs}
 
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=.4\textwidth]{figures/placeholder}
-  \caption{Solver time vs size of encoded query log.}
-  \label{fig:badscaling}
-\end{figure}
+Despite the previous optimizations, the number of undetermined variables can still be very high, causing 
+the MILP-solver to take a very long time to solve for all of the values.  As we saw in
+Figure~\ref{fig:querysize_vs_time}, the solver performance increases \ewu{cubically}
+as the number of undetermined variables increases (solid line).
+In contrast, we find that the scalability is significantly better when only a {\it single query}
+is parameterized, despite linearizing the same number of queries (dashed line).
 
-\ewu{Need to justify why we incremental algorithm steps back query at a time given Figure~\ref{fig:querysize_vs_time} suggests parameterizing >1 query is the same speed.}
-
-Despite the previous optimizations, it is still expensive to parameterize all 
-queries in $Rel\mathcal{(Q)}$ and solve for all parameterized values.
-In particular, the cost of solving a MILP problem increases \ewu{cubically?}
-with respect to the number of variables.
-For example, Figure~\ref{f:badscaling} shows the time cost of the CPLEX solver
-as we increase the number of query logs that are encoded and sent to the solver.  
-The solid line is when the values in all of the queries are parameterized, while
-the dashed line illustrates the time if only the oldest query is parameterized. 
 These results suggest that it is {\it faster} to run a separate MILP problem for each 
-suffix of the query log (e.g., $q_i, \ldots, q_m$) where $q_i$ is parameterized, 
-rather than encode and parameterize the entire log.
-Thus we use use an incremental approach, where we individually test each relevant query from the most recent
-to the oldest:
+suffix of the query log (e.g., $q_i, q_{i+1}\ldots, q_n$) where only $q_i$'s constraints contain
+undetermined variables, rather than encode and parameterize the entire log.
+In the special case where there is a single corrupted query (or the user searches for a single repair),
+we propose an incremental approach (Algorithm~\ref{incalg}), 
+where each query from the most to least recent is individually tested.
+In the algorithm below, we use a modified version of the exhaustive algorithm 
+(Algorithm~\ref{alg:basic}) called $QueryFix_{exh,param}(\mathcal{Q}, \mathcal{D}_0, \mathcal{D}_n, \mathcal{C}, q)$,
+which takes an extra parameter $q$.  The modified algorithm only parameterizes $q$, 
+and fixes the values for the parameters for the rest of the queries in $\mathcal{Q}$.
 
-
+\ewu{Should the inputs be $D_j$ or $D_0$???}
 \begin{algorithm}[htbp]
 \caption{$QueryFix_{inc}$ algorithm.}
 \label{alg:incalg}
 \begin{algorithmic}
-\REQUIRE {$Rel\mathcal{(Q)}$}
+\REQUIRE {$Rel\mathcal{(Q)}, \mathcal{D}_j, \mathcal{D}_n, \mathcal{C}$}
 \STATE Sort $Rel\mathcal{(Q)}$ from most to least recent
 \FOR {each $q_i \in Rel\mathcal{(Q)}$}
-  \STATE $q_i^*$ $\leftarrow$ $QueryFix(\{q_j | j \ge i \wedge q_j \in Rel\mathcal{(Q)}\})$
-  \IF {$q_i^* \neq \emptyset$}
-    \STATE Return $q_i^*$
+  \STATE $\mathcal{Q}_{suffix}$ = $\{q_j | j \ge i \wedge q_j \in Rel\mathcal{(Q)}\}$
+  \STATE $\mathcal{Q}^*$ $\leftarrow$ $QueryFix_{exh,param}(\mathcal{Q}_{suffix}, \mathcal{D}_j, \mathcal{D}_n, \mathcal{C}, q_i)$
+  \IF {$\mathcal{Q}^* \neq \emptyset$}
+    \STATE Return $q_i^* \in \mathcal{Q}^*$
   \ENDIF
 \ENDFOR
 \end{algorithmic}
@@ -388,10 +382,7 @@ to the oldest:
 
 
 
-A benefit of this approach is that complaints are more likely to be the result of
-recent queries rather than very old queries, and our experiments in Section~\ref{exp:}
-speak towards this point.
-
-
-
+This approach prioritizes repairs for complaints that are due to more recent corruptions.
+We believe this is a natural property to expect in practice, and our experiments \ewu{$foo\times$}
+performance improvement on top of the slicing-based approaches described in this section.
 
