@@ -340,9 +340,8 @@ In addition to removing irrelevant queries, we additionally avoid encoding irrel
 Given $Rel\mathcal{(Q)}$, the relevant attributes can be defined as:
 $Rel\mathcal{(A)} = \cup_{q_i \in Rel\mathcal{Q)}} (\mathcal{F}(q_i)\cup \mathcal{P}(q_i))$
 Attribute slicing only encodes constraints using Equation~\ref{eq:uv} for attributes within $Rel\mathcal{(A)}$.
-
-
-
+This technique is effective for wide tables and query logs that focus a small subset of the attributes, for example
+in TPC-C style transaction workloads.
 
 
 
