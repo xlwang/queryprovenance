@@ -123,7 +123,7 @@ that tuple's correct value assignment. We formally define complaints
 below:
 
 \begin{definition}[Complaint]
-    A complaint $c$ is a mapping between two tuples: $c: t\mapsto t^*$, such that $t$ and $t^*$ have the same schema, $t\in D_n$, and $t\neq t^*$. A complaint defines a
+    A complaint $c$ is a mapping between two tuples: $c: t\mapsto t^*$, such that $t$ and $t^*$ have the same schema, $t\in D_n\cup\{\bot\}$, and $t\neq t^*$. A complaint defines a
     transformation $\mathcal{T}_c$ on a database state $D$: $\mathcal{T}_c(D)
     = (D\setminus\{t\})\cup\{t^*\}$.
 \end{definition}
@@ -138,15 +138,25 @@ means that $t$ should be removed from the database.
 \smallskip
 \noindent
 \emph{Complaint set ($\mathcal{C}$):}
-We use $\mathcal{C}$ to denote the set of all known complaints, and we call it
-\emph{complaint set}. Each complaint in $\mathcal{C}$ represents a
-transformation (addition, deletion, or modification) of a tuple in $D_n$.
-Applying all these transformations to $D_n$ results in a new database instance
-$D_n'$, and we write $D_n'=\mathcal{T}_\mathcal{C}(D_n)$. If $D_n'$ has no
-remaining data errors ($D_n'=D_n^*$), we say that $\mathcal{C}$ is a
-\emph{complete complaint set}.
-In our work, we do not assume that the complaint set is complete, but, as is
-more common in practice, we only know a subset of the errors.
+We use $\mathcal{C}$ to denote the set of all known complaints
+$\mathcal{C}=\{c_1,\dots,c_k\}$, and we call it \emph{complaint set}.
+Each complaint in $\mathcal{C}$ represents a transformation (addition,
+deletion, or modification) of a tuple in $D_n$. We assume that the
+complaint set is consistent, i.e., there are no two complaints that
+propose different transformations to the same tuple $t\in D_n$.
+Applying all these transformations to $D_n$ results in a new database
+instance
+$D_n'=\mathcal{T}_{c_1}(\mathcal{T}_{c_2}(\dots\mathcal{T}_{c_k}(D_n)))$.\footnote{Since
+the complaint set is consistent, it is easy to see that the order of
+transformations is inconsequential.} $\mathcal{C}$ is \emph{complete}
+if it contains a complaint for each error in $D_n$. In that case,
+$D_n'=D_n^*$. In our work, we do not assume that the complaint set is
+complete, but, as is more common in practice, we only know a subset of
+the errors (incomplete complaint set). Further, we focus our analysis
+on \emph{valid} complaints; we briefly discuss dealing with invalid
+complaints (complaints identifying a correct value as an error) in
+Section\ref{???}\alex{add brief discussion somewhere}, but these
+techniques are beyond the scope of this paper.
 
 \smallskip
 \noindent
@@ -165,112 +175,128 @@ SET rate = 30 WHERE income >= 87500}.
 
 \subsubsection*{Problem definition}
 
-We now formalize the definition of the problem of diagnosing data errors using
-query histories. A diagnosis is a log repair $\mathcal{Q}^*$ that resolves all
-complaints in the set $\mathcal{C}$.
+We now formalize the definition of the problem of diagnosing data
+errors using query histories. A diagnosis is a log repair
+$\mathcal{Q}^*$ that resolves all complaints in the set $\mathcal{C}$
+and leads to a correct database state $D_n^*$.
 
 \begin{definition}[Optimal diagnosis]\label{def:problem}
-    Given a set of data errors in the form of complaints $\mathcal{C}$, a query log $\mathcal{Q}$, and a distance function $d$, the optimal diagnosis is a log repair $\mathcal{Q}^*$, such that:
+    Given database states $D_0$ and $D_n$, a query log $\mathcal{Q}$ such that $\mathcal{Q}(D_0)=D_n$, a set of complaints $\mathcal{C}$ on $D_n$,  and a distance function $d$, the optimal diagnosis is a log repair $\mathcal{Q}^*$, such that:
     \begin{itemize}[itemsep=0pt, parsep=0pt]
-        \item $\mathcal{Q}^*(D_0)\models\mathcal{C}$
+        \item $\mathcal{Q}^*(D_0)=D_n^*$, where $D_n^*$ has no errors
         \item $d(\mathcal{Q}, \mathcal{Q}^*)$ is minimized
     \end{itemize}
 \end{definition}
+
+More informally, we seek the minimum changes to the log $\mathcal{Q}$
+that would result in a clean database state $D_n^*$. Obviously, a
+challenge is that $D_n^*$ is unknown, unless we know that the
+complaint set is complete. We first proceed to describe a naive
+approach based on decision trees that need to rely on the assumption
+that $\mathcal{C}$ is complete (Section~\ref{????}).\alex{Is this
+correct?}
+We then proceed to describe a constraint programming formulation that
+allows us to express this diagnosis problem as a mixed integer
+program, and remove the completeness assumption (Section~\ref{????}).
+Further, we show several optimization techniques that allow us to
+scale our diagnostic framework to large data and log sizes
+(Section~\ref{????}). \alex{clean this up and add more oomph.}
 
 
 \begin{figure}[t]
 \centering
 \includegraphics[width = 0.75\columnwidth]{figures/probtransform}
-\caption{Graphical depiction of the diagnosis problem in our \sys framework.  $D_0$, $D_n$, $\mathcal{Q}$, and $\mathcal{C}$ are given, and \sys uses them to derive the log repair $\mathcal{Q}^*$}
+\caption{Graphical depiction of the diagnosis problem in our \sys framework.  $D_0$, $D_n$, $\mathcal{Q}$, and $\mathcal{C}$ are given, and \sys uses them to derive the log repair $\mathcal{Q}^*$.
+\alex{not sure if this figure is actually useful.}}
 \label{f:probtransform} 
 \end{figure}
 
 
-\deprecate{
-\subsection{Naive Formulation}
-
-The most general version of the problem
-(depicted in Figure~\ref{f:probtransform}) is to find a sequence of
-transformations $T$ that insert, delete, and/or modify queries in $Q_{seq}$ 
-such that the resulting sequence, $Q'_{seq} = T(Q_{seq})$, resolves the user's complaint set. 
-
-However this problem is ill-defined because there exist an unbounded set of transformations that
-can resolve the user's complaint set.  A naive solution is to append to the query log a statement
-that deletes all the records in the database, followed by a query that insert all of the correct records.
-Unfortunately this naive solution does not help explain the complaints in any way!
-
-\subsection{Constraints}
-
-For this reason, we constrain the set of possible transformations $\mathcal{T}$ to the following:
-
-\begin{itemize}
-\item delete query
-\item modify insert statement constants
-\item modify constants in WHERE clause
-\end{itemize}
-
-Our transformations don't include adding new queries, synthesizing arbitrary queries, or modifying the
-number of clauses in a WHERE condition.  We apply these restrictions because we believe it is more likely
-for the user to mis-type a constant value as opposed to having an error in the query structure.
-
-Futhermore we define a distance metric between two query logs in order to evaluate
-the qulatiy of a transformation.
-\xxx{define $\mathcal{T}$ here.}
-
-
-
-\subsection{Problem Statements}
-
-In this paper, we present three variants of this problem.
-
-\begin{problem}[Prob-Complete]\label{prob:complete}
-Given $C = P_{D_n, D^*_n}$, $Q_{seq}$, and the sequence of database states $D_0,\ldots,D_n$, 
-identify a sequence of transformations $T$ such that:
-\begin{itemize}
-\item $T(Q_{seq})(D_0) = C(D_n)$
-\item $|T| = 1$
-\item $T$ metric is minimized
-\end{itemize}
-\end{problem}
-
-This variation of the problme relaxes the constraint that the complaint set must be complete, and allows
-for both false positives as well as false negatives.  The goal is the same, however the constraints are relaxed:
-
-\begin{problem}[Prob-Incomplete]\label{prob:incomplete}
-Given $C$ where $acc_C < 1$, $Q_{seq}$, and the sequence of database states $D_0,\ldots,D_n$, 
-identify a sequence of transformations $T$ such that:
-\begin{itemize}
-\item $T(Q_{seq})(D_0) = D^*_n$
-\item $T$ metric is minimized.
-\item $|T| = 1$
-\end{itemize}
-\end{problem}
-
-Finally, we extend the problem to allow transformations with one or more operations.
-
-\begin{problem}[Prob-MultiQ]\label{prob:multi}
-Given $C$ where $acc_C < 1$, $Q_{seq}$, and the sequence of database states $D_0,\ldots,D_n$, 
-identify a sequence of transformations $T$ such that:
-\begin{itemize}
-\item $T(Q_{seq})(D_0) = D^*_n$
-\item $T$ metric is minimized.
-\end{itemize}
-\end{problem}
-
-
-
-
-\subsection{A Naive Approach}
-
-\begin{itemize}
-\item roll back complaints to penultimate state using algebraic expressions 
-\item perturb each expression in query until the query result matches correct state
-\item if an expression cannot be found, iterate
-\end{itemize}
-
-
-Not clear how to roll back complaints
-
-Ways to perturb query expressions is unbounded
-
-}
+% \deprecate{
+% \subsection{Naive Formulation}
+% 
+% The most general version of the problem
+% (depicted in Figure~\ref{f:probtransform}) is to find a sequence of
+% transformations $T$ that insert, delete, and/or modify queries in $Q_{seq}$ 
+% such that the resulting sequence, $Q'_{seq} = T(Q_{seq})$, resolves the user's complaint set. 
+% 
+% However this problem is ill-defined because there exist an unbounded set of transformations that
+% can resolve the user's complaint set.  A naive solution is to append to the query log a statement
+% that deletes all the records in the database, followed by a query that insert all of the correct records.
+% Unfortunately this naive solution does not help explain the complaints in any way!
+% 
+% \subsection{Constraints}
+% 
+% For this reason, we constrain the set of possible transformations $\mathcal{T}$ to the following:
+% 
+% \begin{itemize}
+% \item delete query
+% \item modify insert statement constants
+% \item modify constants in WHERE clause
+% \end{itemize}
+% 
+% Our transformations don't include adding new queries, synthesizing arbitrary queries, or modifying the
+% number of clauses in a WHERE condition.  We apply these restrictions because we believe it is more likely
+% for the user to mis-type a constant value as opposed to having an error in the query structure.
+% 
+% Futhermore we define a distance metric between two query logs in order to evaluate
+% the qulatiy of a transformation.
+% \xxx{define $\mathcal{T}$ here.}
+% 
+% 
+% 
+% \subsection{Problem Statements}
+% 
+% In this paper, we present three variants of this problem.
+% 
+% \begin{problem}[Prob-Complete]\label{prob:complete}
+% Given $C = P_{D_n, D^*_n}$, $Q_{seq}$, and the sequence of database states $D_0,\ldots,D_n$, 
+% identify a sequence of transformations $T$ such that:
+% \begin{itemize}
+% \item $T(Q_{seq})(D_0) = C(D_n)$
+% \item $|T| = 1$
+% \item $T$ metric is minimized
+% \end{itemize}
+% \end{problem}
+% 
+% This variation of the problme relaxes the constraint that the complaint set must be complete, and allows
+% for both false positives as well as false negatives.  The goal is the same, however the constraints are relaxed:
+% 
+% \begin{problem}[Prob-Incomplete]\label{prob:incomplete}
+% Given $C$ where $acc_C < 1$, $Q_{seq}$, and the sequence of database states $D_0,\ldots,D_n$, 
+% identify a sequence of transformations $T$ such that:
+% \begin{itemize}
+% \item $T(Q_{seq})(D_0) = D^*_n$
+% \item $T$ metric is minimized.
+% \item $|T| = 1$
+% \end{itemize}
+% \end{problem}
+% 
+% Finally, we extend the problem to allow transformations with one or more operations.
+% 
+% \begin{problem}[Prob-MultiQ]\label{prob:multi}
+% Given $C$ where $acc_C < 1$, $Q_{seq}$, and the sequence of database states $D_0,\ldots,D_n$, 
+% identify a sequence of transformations $T$ such that:
+% \begin{itemize}
+% \item $T(Q_{seq})(D_0) = D^*_n$
+% \item $T$ metric is minimized.
+% \end{itemize}
+% \end{problem}
+% 
+% 
+% 
+% 
+% \subsection{A Naive Approach}
+% 
+% \begin{itemize}
+% \item roll back complaints to penultimate state using algebraic expressions 
+% \item perturb each expression in query until the query result matches correct state
+% \item if an expression cannot be found, iterate
+% \end{itemize}
+% 
+% 
+% Not clear how to roll back complaints
+% 
+% Ways to perturb query expressions is unbounded
+% 
+% }
