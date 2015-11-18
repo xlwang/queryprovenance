@@ -144,12 +144,12 @@ extending the process to the rest of the attributes is a straighforward exercise
 
 \stitle{\textbf{UPDATE:} }
 Recall from Section~\ref{sec:models} that query $q_i$ can be modeled as
-the combination of a modifying function $\mu_q_i(t)$ and conditional function $\sigma_q_i(t)$.
+the combination of a modifying function $\mu_{q_i}(t)$ and conditional function $\sigma_{q_i}(t)$.
 We can re-express the value of attribute $A_j$ in the updated tuple $t'$ as the following equation:
 {\scriptsize
 \begin{eqnarray}
 \label{eq:linearization}
-t'.A_j = x\otimes \mu_q_i(t).A_j + (1-x)\otimes t.A_j 
+t'.A_j = x\otimes \mu_{q_i}(t).A_j + (1-x)\otimes t.A_j 
 \end{eqnarray} 
 }
 
@@ -159,7 +159,7 @@ the conditional function:
 {\scriptsize
 \begin{eqnarray}
 \label{eq:x}
-x = \sigma_q(t_i)
+x = \sigma_{q_i}(t)
 \end{eqnarray}
 }
 We then introduce two variables $u.A_j$ and $v.A_j$ to represent 
@@ -168,15 +168,15 @@ $M$ representes the upper bound of $t.A_j$'s domain:
 {\scriptsize 
 \begin{eqnarray}
 \label{eq:uv}
-u.A_j &\leq & \mu_q_i(t).A_j \nonumber\\
+u.A_j &\leq & \mu_{q_i}(t).A_j \nonumber\\
 u.A_j &\leq & xM \nonumber\\ 
-u.A_j &\geq & \mu_q_i(t).A_j - (1-x)M \nonumber \\\nonumber \\
+u.A_j &\geq & \mu_{q_i}(t).A_j - (1-x)M \nonumber \\\nonumber \\
 v.A_j &\leq & t.A_j \nonumber\\
 v.A_j &\leq & (1-x)M \nonumber\\
 v.A_j &\geq & t.A_j - xM
 \end{eqnarray}
 }
-The first set of conditions forces $u.A_j = \mu_q_i(t).A_j$ if $x=1$, and $0$ otherwise.  
+The first set of conditions forces $u.A_j = \mu_{q_i}(t).A_j$ if $x=1$, and $0$ otherwise.  
 The second set forces $v.A_j = t.A_j$ if $x=0$, and $0$ otherwise.  
 Now, Equation~\ref{eq:linearization} is simply a linear equation:
 {\scriptsize\begin{eqnarray}
@@ -212,7 +212,7 @@ in the MILP problem:
 \begin{eqnarray}
 \label{eq:delete}
 t'.A_j = x \otimes M^+ + (1-x) \otimes t.A_j \nonumber \\
-x = \sigma_q_i(t)
+x = \sigma_{q_i}(t)
 \end{eqnarray}
 }
 
@@ -224,7 +224,7 @@ The above constraints (\ref{eq:x}--\ref{eq:delete})
 form the main structure of MILP subproblem for a single attribute $A_j$ of a single tuple $t$.
 In this incomplete form, all of the variables including the binary variables $x$,
 the real-valued attribute values (e.g., $u.A_j$),
-and the real-valued constants in $\mu_q_i$ and $\sigma_q_i$ are all undetermined
+and the real-valued constants in $\mu_{q_i}$ and $\sigma_{q_i}$ are all undetermined
 and need to be assigned values by a MILP solver.  
 To linearize $q_i$, we can simply apply the same procedure for each attribute in the 
 query and every tuple in the database.
