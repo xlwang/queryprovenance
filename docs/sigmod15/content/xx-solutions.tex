@@ -193,7 +193,7 @@ an undetermined variable for each of the inserted tuple's attributes:
 {\scriptsize
 \begin{eqnarray}
 \label{eq:insert}
-t'.A_j = x \otimes t_{new} + (1-x) \otimes v.A_j 
+t'.A_j = x \otimes t_{new}.A_j + (1-x) \otimes v.A_j 
 \end{eqnarray}
 }
 \noindent Where $x$ is an undetermined binary variable that represents whether
@@ -211,8 +211,8 @@ in the MILP problem:
 {\scriptsize
 \begin{eqnarray}
 \label{eq:delete}
-t'.A_j = x \otimes M^+ + (1-x) \otimes t.A_j \nonumber \\
-x = \sigma_{q_i}(t)
+t'.A_j &=& x \otimes M^+ + (1-x) \otimes t.A_j \nonumber \\
+x &=& \sigma_{q_i}(t)
 \end{eqnarray}
 }
 
