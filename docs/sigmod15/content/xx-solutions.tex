@@ -228,6 +228,8 @@ and the real-valued constants in $\mu_{q_i}$ and $\sigma_{q_i}$ are all undeterm
 and need to be assigned values by a MILP solver.  
 To linearize $q_i$, we can simply apply the same procedure for each attribute in the 
 query and every tuple in the database.
+We describe the above linearization process as the function 
+$Linearize(q, t)$, which takes a query $q$ and tuple $t$ as input.
 
 The final step is to assign concrete values to the starting and ending attribute values 
 $t.A_j$ and $t'.A_j$ based on the starting database state $D_{i-1}$ and the ending database 
@@ -235,9 +237,11 @@ state that has been transformed by $\mathcal{C}$, $D'_i$.
 In this way, only the query parameters and the binary $x$ variables are undetermined;
 a solution to the MILP formulation will assign values to those undetermined variables
 such that the resulting query fixes the complaints correctly.
+
 The next subsection will describe how to extend the above encoding procedure to the 
 entire query log, and how to incorporate an objective function that encourages solutions
-that minimize the amount of changes to the query log.
+that minimize the amount of changes to the query log.  
+
 
 
 
@@ -301,7 +305,7 @@ the fixed query log $\mathcal{Q}^*$.
 \STATE $milp\_cons \leftarrow \emptyset$
 \FOR {each $t$ in $R$}
 \FOR {each $q$ in $\mathcal{Q}$}
-\STATE $milp\_cons \leftarrow milp\_cons \cup LinearAndParam(q, t)$
+\STATE $milp\_cons \leftarrow milp\_cons \cup Linearize(q, t)$
 \ENDFOR
 \STATE $milp\_cons \leftarrow milp\_cons \cup AssignVals(D_0.t, D_n.t, \mathcal{C})$
 \FOR {each $i$ in $\{0,\ldots,N-1\}$}
