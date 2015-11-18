@@ -248,26 +248,27 @@ that minimize the amount of changes to the query log.
 
 
 
-\subsection{Encoding and Fixing the Query Log}
+\subsection{Encoding and Repairing the Query Log}
 \label{sec:milp}
 
-In this section, we describe the algorithm (Algorithm~\ref{alg:basic}) to encode 
-the full query log into a MILP problem, and solve the MILP problem to derive a proposed query log fix.
-The algorithm takes as input the query log $\mathcal{Q}$, the initial and final (dirty) database states 
+We are now ready to describe the procedure (Algorithm~\ref{alg:basic}) to encode 
+the full query log into a MILP problem, and solve the MILP problem to derive $\mathcal{Q}^*$.
+The algorithm takes as input the query log $\mathcal{Q}$, 
+the initial and final (dirty) database states 
 $\mathcal{D}_{0, n}$, and the complaint set $\mathcal{C}$, and outputs a fixed query 
-log $\mathcal{Q}^*$.  We first extend $D_0$ with one non-existent tuple $\bcancel{t}$
-for each \texttt{INSERT} query in $\mathcal{Q}$.
-\ewu{Need a normalized query log where each INSERT only adds a single tuple!}
-We then call \textit{Linearize} on each tuple in $\mathcal{D}_0$ and each query in $\mathcal{Q}$, 
-and add the result to a set of constraints \textit{milp\_cons}.
-Similar to the single-query procedure, we additionally add constraints to fix the
-values of the inputs to $q_0$ and the outputs of $q_N$ to their respective values in
-$\mathcal{D}_0$ and $\mathcal{C}(\mathcal{D}_N)$
+log $\mathcal{Q}^*$.  
 
+We first call \textit{Linearize} on each tuple in $\mathcal{D}_0$ and each query in $\mathcal{Q}$, 
+and add the result to a set of constraints \textit{milp\_cons}.
+Similar to the single-query procedure, \textit{AssignVals} additionally 
+adds constraints to fix the values of the inputs to $q_0$ and 
+the outputs of $q_n$ to their respective values in
+$\mathcal{D}_0$ and $\mathcal{C}(\mathcal{D}_n)$.
 Next, we add constraints to take into account the fact that the output of 
 query $q_i$ is the input of $q_{i+1}$ (\textit{ConnectQueries}).
 This function simply equates $t'$ from the linearized result for $q_i$ to the $t$ input 
 for the linearized result of $q_{i+1}$.
+
 Finally, we use the undetermined variables in \textit{milp\_cons}, along with $\mathcal{Q}$,
 to encode the distance function $d$ described in Section~\ref{def:obj} 
 into the MILP objective function, and submit it to a MILP solver.
