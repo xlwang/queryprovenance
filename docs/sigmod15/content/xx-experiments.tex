@@ -121,30 +121,6 @@ system solver.
 
 This subsection describes the query and data generation process in greater detail.
 
-% Anant's workload?
-{ \color{blue}
-\stitle{TPC-C} We use the data and query workload over the {\it
-ORDER} table in TPC-C~\cite{}.  We generate a database at scale
-1 with one warehouse, and keep only the queries that modify the
-{\it ORDER} table. The initial table contains 4570 tuples and we capture 
-1000 update queries in which 530 are \texttt{UPDATE} query and the others
-are \texttt{INSERT} query. 
-%We then randomly perturb a subset of the queries to generate the corrupted query log. 
-We corrupt the query log at certain indexes (default indexes) and for each selected query we 
-replace the correct parameter(s) into randomly value within the 
-corresponding attribute domain. 
-
-\stitle{AuctionMark} Auctionmark workload simulates the 
-actual action market. We generate a database 
-with 8729 tuples and 650 queries (540 \texttt{UPDATE} query and 110 \texttt{INSERT} query) 
-and we perturb the query log in the same way as for the TPC-C workload.
-
-Both workloads generated from OLTP workload 
-project.\footnote{https://github.com/oltpbenchmark/oltpbench}. 
-
-}
-
-
 \stitle{Synthetic} 
 We generate an initial database of $N_D$ random tuples.  
 The schema contains $N_a=5$ attributes $a_1\ldots a_5$, whose values are
@@ -248,6 +224,32 @@ to the most recent query (e.g., the most recent query, the $25^th$ most recent q
 % \caption{.}
 % \label{f:numinrange} 
 % \end{figure}
+
+
+
+% Anant's workload?
+{ \color{blue}
+\stitle{TPC-C} We use the data and query workload over the {\it
+ORDER} table in TPC-C~\cite{}.  We generate a database at scale
+1 with one warehouse, and keep only the queries that modify the
+{\it ORDER} table. The initial table contains 4570 tuples and we capture 
+1000 update queries in which 530 are \texttt{UPDATE} query and the others
+are \texttt{INSERT} query. 
+%We then randomly perturb a subset of the queries to generate the corrupted query log. 
+We corrupt the query log at certain indexes (default indexes) and for each selected query we 
+replace the correct parameter(s) into randomly value within the 
+corresponding attribute domain. 
+
+\stitle{AuctionMark} Auctionmark workload simulates the 
+actual action market. We generate a database 
+with 8729 tuples and 650 queries (540 \texttt{UPDATE} query and 110 \texttt{INSERT} query) 
+and we perturb the query log in the same way as for the TPC-C workload.
+
+Both workloads generated from the OLTP-bench project~\cite{oltpbench,oltpbenchgit}.
+}
+
+
+
 
 \subsection{MILP-based Approach vs Alternatives}
 {\color{blue}

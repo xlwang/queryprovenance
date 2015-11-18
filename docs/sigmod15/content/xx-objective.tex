@@ -1,30 +1,41 @@
 \section{The Objective Function}
 
-\ewu{mention goal is to minimie the objective unction}
+The solution of a MILP problem is designed to minimize an objective function defined by the user.
+A natural object function is to simply use the distance function $d(\mathcal{Q}, \mathcal{Q}^*)$ 
+(Definition~\ref{def:problem}) so that the proposed solution
+does not deviate significantly from the original query log e.g., does not modify too many queries.  
+This has the added benefit of interpretability, since the user is presented with less diagnoses.
+
+The general form of $d(\mathcal{Q}, \mathcal{Q}^*$ provides us with substantial flexibility in the precise
+function implementation so that different function can potentially be customized towards different scenarios.
+For example, when the query log only involves numeric attributes, 
+the normalized Manhattan distance~\cite{manhattan} between the parameters 
+in $\mathcal{Q}$ and $\mathcal{Q}^*$ is a natural objective function.
+Alternatively, we may use the number of parameters that are different with the original ones 
+in order to penalize repairs that modify too many parameters. 
+
+Moving beyond the queries themselves, we may also augment the distance function
+by penalizing the number and magnitude of the tuples that are modified by the repair.
+In this paper, for simplicity, we use Manhattan distance between parameters 
+in the query log as our objective function.  We use $q.param_i$ to denote the $i^{th}$ paramater of query $q$,
+and $|q.param|$ to denote the total number of parameters in $q$:
+\[d(\mathcal{Q}, \mathcal{Q}^*) = \sum_{i = 1} ^{n} \sum_{j = 1}^{|q_i.para|} |q_i.para_j - q_i.para_j^*|\]
+
+% impact of the log repair $\mathcal{Q}^*$ can also be involved 
+% in the distance function: one would prefer that $\mathcal{Q}^*$
+% modifies as few tuples as possible, in which case the distance 
+% function could be the number of tuples that modified by the log repair.
+% By allowing this custmizable distance function, we increase the flexibility 
+% of our system. \\
+% 
+% 
+% the distance function is the Manhattan distance between parameters in 
+% the query log $\mathcal{Q}$ and the log repair $\mathcal{Q}^*$; 
+% 
+% w.r.t the property of the query log and its
+% impact over the database. 
+% he
+% \ewu{mention goal is to minimie the objective unction}
 % talked about moving the t.A_j = CONSTANT constraints for non-complaints
 % into obj functino as |t.A_j - CONSTANT|, however makes problems slower
 % so only use soft constraints during second iteration.
-
-The distance function $d(\mathcal{Q}, \mathcal{Q}^*)$ 
-in Definition~\ref{def:problem} is customizable 
-in different scenarios w.r.t the property of the query log and its
-impact over the database. 
-When the query log only involves numeric attributes, one option for 
-the distance function is the Manhattan distance between parameters in 
-the query log $\mathcal{Q}$ and the log repair $\mathcal{Q}^*$; 
-alternatively, it could be the number of 
-parameters that are different with the original ones. The
-impact of the log repair $\mathcal{Q}^*$ can also be involved 
-in the distance function: one would prefer that $\mathcal{Q}^*$
-modifies as few tuples as possible, in which case the distance 
-function could be the number of tuples that modified by the log repair.
-By allowing this custmizable distance function, we increase the flexibility 
-of our system. \\
-In this paper, we use Manhattan distance between parameters 
-in the query log as our objective function: 
-\[d(\mathcal{Q}, \mathcal{Q}^*) = \sum\limits_{\substack{ q_i \in \mathcal{Q}\\ q_i^* \in \mathcal{Q}^*}}  
-\sum\limits_{\substack{para_j \in q_i\\ para_j^* \in q_i^*}}|para_j - para_j^*|\]
-OR
-\[d(\mathcal{Q}, \mathcal{Q}^*) = \sum_{i = 1} ^{n} \sum_{j = 1}^{|q_i.para|} |q_i.para_j - q_i.para_j^*|\]
-\xlw{$q_i.para_j$ is not defined in previous section, should we include them in Definition for query in 
-Section~\ref{sec:model}?}
