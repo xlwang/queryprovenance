@@ -1,0 +1,16 @@
+\section{Customize distance function}
+The distance function $d(\mathcal{Q}, \mathcal{Q}^*)$ 
+in Definition~\ref{def:problem} is customizable 
+in different scenarios w.r.t the property of the query log and its
+impact over the database. 
+When the query log only involves numeric attributes, one option for 
+the distance function is the Euclidean distance between variables in 
+the query log $\mathcal{Q}$ and the log repair $\mathcal{Q}^*$; 
+alternatively, it could be the number of 
+variables that are different with the original ones. The
+impact of the log repair $\mathcal{Q}^*$ can also be involved 
+in the distance function: one would prefer that $\mathcal{Q}^*$
+modifies as few tuples as possible, in which case the distance 
+function could be the number of tuples that modified by the log repair.
+By allowing this custmizable distance function, we increase the flexibility 
+of our system.
