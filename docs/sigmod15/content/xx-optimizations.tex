@@ -107,7 +107,7 @@ We first construct a set of constraints by linearizing the queries in the query 
 between the least and most recent queries in $\mathcal{Q}^*_{sub}$ with respect to $\mathcal{C}$.
 The key difference is that we repair all of the undetermined variables for $x$ in Equation~\ref{}
 based on the solutions to the first MILP problem.  
-In addition, we call $LinearAndParams$ for each non-complaint tuple in the repaired range.
+In addition, we call $Linearize$ for each non-complaint tuple in the repaired range.
 The objective function is to minimize the sum of the undetermined $x$ variables in the encoded
 problem.
 
