@@ -107,6 +107,14 @@ Tables~\ref{t:params} and~\ref{t:metrics} summarize the key parameters that
 we vary throughout our experiments, as well as the metrics we use to evaluate
 the quality of the algorithm solutions, respectively.  The rest of this section
 outlines our datasets, workloads, and parameters used to generate the synthetic query log.
+
+{
+\color{blue} 
+We ran experiments on machines with 
+2.66 GHz processor and 16GB RAM. And we use IBM CPLEX 12.6.1 to solve the 
+MILP problem, WEKA J48 for as the classifier, and JAMA as the linear 
+system solver. 
+}
 \alex{Why is this description separate from the synthetic data listed below?}
 
 \subsubsection{Datasets and Workloads}
@@ -114,16 +122,27 @@ outlines our datasets, workloads, and parameters used to generate the synthetic 
 This subsection describes the query and data generation process in greater detail.
 
 % Anant's workload?
-
+{ \color{blue}
 \stitle{TPC-C} We use the data and query workload over the {\it
-CUSTOMER} table in TPC-C~\cite{}.  We generate a database at scale
+ORDER} table in TPC-C~\cite{}.  We generate a database at scale
 1 with one warehouse, and keep only the queries that modify the
-{\it CUSTOMER} table.  We then randomly perturb a subset of the
-queries to generate the corrupted query log.
-\xlw{Describe how corrupted}
+{\it ORDER} table. The initial table contains 4570 tuples and we capture 
+1000 update queries in which 530 are \texttt{UPDATE} query and the others
+are \texttt{INSERT} query. 
+%We then randomly perturb a subset of the queries to generate the corrupted query log. 
+We corrupt the query log at certain indexes (default indexes) and for each selected query we 
+replace the correct parameter(s) into randomly value within the 
+corresponding attribute domain. 
 
-\stitle{AuctionMark} \xlw{Describe benchmark and how queries are corrupted}
+\stitle{AuctionMark} Auctionmark workload simulates the 
+actual action market. We generate a database 
+with 8729 tuples and 650 queries (540 \texttt{UPDATE} query and 110 \texttt{INSERT} query) 
+and we perturb the query log in the same way as for the TPC-C workload.
 
+Both workloads generated from OLTP workload 
+project.\footnote{https://github.com/oltpbenchmark/oltpbench}. 
+
+}
 
 
 \stitle{Synthetic} 
@@ -155,7 +174,9 @@ We first consider three different homogenous query logs: \texttt{INSERT} only ($
 \texttt{PK} update only ($p_I = 0, p_{pk} = 1$), and \texttt{RANGE} update only ($p_I = 0, p_{pk} = 0$).
 These query logs help us understand \sys's performance characteristics for each query type individually.  
 Finally, we investigate heterogenous mixtures of the three query types to simulate varying amounts of real settings.
-}
+} \\
+\xlw{We only have UPDATE query in the synthetic dataset. In single error case, how to fix a insert query is 
+quite straightforward as well as the delete query. Should we cut words for insert and delete query?}
 
 \noindent {\it Effect of Index of Corrupted Query:}
 A key parameter for our experiments is the location of the corrupted query ($idx$).  
@@ -228,19 +249,64 @@ to the most recent query (e.g., the most recent query, the $25^th$ most recent q
 % \label{f:numinrange} 
 % \end{figure}
 
+\subsection{MILP-based Approach vs Alternatives}
+{\color{blue}
+In this section, we first compare the basic MILP-based approach (Section~\ref{sec:heuristic})
+with the heuristic approach (Section~\ref{sec:sol}) and demonstrate that MILP-based approach 
+can solve single query effectively and efficiently compared to the heuristic
+approach. We then compare the the basic MILP approach with basic MILP + optimizations 
+(Section~\ref{sec:opt}) and we prove that the basic MILP approach maintain high accuracy 
+in solving errors but does not scale over larger size problems. 
+
+\smallskip 
+
+\noindent \textbf{Heuristic Approach vs. Basic MILP-based Approach} \\
+We first evaluate the performance of the MILP-based approach (Section~\ref{sec:sol}) with 
+the heuristic approach, which uses decision tree
+to fix the where clause and linear equations 
+for the set clause (Section~\ref{sec:heuristic}). \\
+\textbf{Dataset: }
+Synthetic dataset with range size from [5, 10, 50, 100, 500].\\
+\textbf{Performance: } ... we show heuristic approach is not as good as milp-based approach 
+even on single query.  
+
+\smallskip 
+
+\noindent \textbf{Basic MILP-based Approach vs Optimizations} \\
+We further evaluate the performance of the basic MILP-based approach with its optimizations. \\
+\textbf{Comparisons: }\\
+\texttt{MILP searchall}: basic MILP-based approach (MILP);\\
+\texttt{MILP searchall + compl}: basic MILP-based approach with tuples in complaints only; \\
+\texttt{MILP stopearly + compl}: basic MILP-based approach with tuple slicing optimization. \\
+\texttt{MILP stopearly + tuple opt.}: basic MILP-based approach with all optiomizations. \\
+\textbf{Dataset: } synthetic dataset with default settings.  \\
+\textbf{Performance: } ... we show \texttt{MILP searchall} does not scale, 
+\texttt{MILP searchall + compl} scale better but not as accurate, 
+\texttt{MILP stopearly + compl} scale well but low precision, 
+and \texttt{MILP stopearly + tuple opt.} scale well with high accuracy.
+
+\subsection{Benchmark data}
+We will show that the proposed algorithm works very well on benchmarks. We get stable
+performance as the corrupt query further from the most recent query. Benchmark query log
+only consist KEY updates and insert query, thus query impact over the database is 
+very sparse and it makes queries more independent to each other. 
+
+\subsection{Synthetic data}
+We study the performance of the proposed MILP-based approach explicitly on the synthetic data 
+by adjusting the property of the query log and database. 
+\subsubsection{Skew}
+We first study the performance of proposed MILP-based approach over 
 
 
-\subsection{Heuristics and Baseline Experiments}
+\subsubsection{Scalabality}
+\textbf{Adjusting query log size}\\
 
-\subsection{Skew}
+\textbf{Adjusting database size} \\
 
+\textbf{Adjusting query complexity} \\
 
-\subsection{Scalabality}
-
-
-
-
-\subsection{Handling Noise}
+}
+\subsubsection{Handling Noise}
 
 In this set of experiments, we add false positive and false negative complaints to the input
 complaint set and evaluate our noise handling algorithms (Section~\ref{sec:noise}).
@@ -270,9 +336,6 @@ To generate false negatives ($FN$), we select a random subset of the true compla
 Figure~\ref{f:falsepositive} shows \sys performance and quality as we vary $FP \in \{\}$.
 
 Figure~\ref{f:falsenegative} varies $FN \in \{\}$.
-
-
-\subsection{Benchmark Experiments}
 
 
 
