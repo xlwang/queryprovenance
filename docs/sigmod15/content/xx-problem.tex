@@ -76,13 +76,14 @@ including insertion and deletion queries.
 In this definition, the modifier function $\mu_q(t)$ represents the query's update equations, and it transforms a tuple by either deleting it ($\mu_q(t)=\bot$) or changing the values of some of its attributes.
 The conditional function $\sigma_q(t)$ is a boolean function that represents the query's condition predicates.  In the example of Figure~\ref{fig:example}:
 \begin{align*}
-    &\mu_{q_1}(t)=(10, t.income, t.owed)\\
+    &\mu_{q_1}(t)=(30, t.income, t.owed)\\
     &\sigma_{q_1}(t)=(t.income\ge 85700)\\
     &\mu_{q_2}(t)=(t.rate, t.income, \frac{t.income\cdot t.rate}{100})\\
     &\sigma_{q_2}(t)=\texttt{true}
 \end{align*} 
 % 
 As an insertion query, $q_3$ has $\sigma_{q_3}(t)=\texttt{false}$ and $t_{new}=(25, 85800, 21450)$.
+\ewu{why does it return false?  should it only be true if input is $\bot$?}
 
 
 \smallskip
@@ -94,7 +95,7 @@ original database state, and $D_n$ the final, or current, database state. Out
 of all the states, the system only maintains $D_0$ and $D_n$. In practice,
 $D_0$ can be a checkpoint: a state of the database that we assume is correct;
 we cannot diagnose errors before this state. The intermediate states can be
-derived by repeating the log: $D_i=q_i(q_{i-1}(\dots q_1(D_0)))$. We also
+derived by executing the log: $D_i=q_i(q_{i-1}(\dots q_1(D_0)))$. We also
 write $D_n=\mathcal{Q}(D_0)$ to denote that the final database state $D_n$ can
 be derived by applying the sequence of queries in the log to the original
 database state $D_0$.
@@ -109,14 +110,14 @@ would have occurred if there had been no errors in the queries.
 The true database states are unknown; our goal is to find and correct the errors in $\mathcal{Q}$ and retrieve the correct database state $D_n^*$.
 
 For ease of exposition, in the remainder of the paper we assume that the
-database contains a single relation, but this is not a requirement in our
-framework.
+database contains a single relation \ewu{with attribute $A_i,\ldots,A_m$, }
+but the single table is not a requirement in our framework.\ewu{this suggests we actually handle >1 tables}
 
 
 \subsubsection*{Error models}
 
-Following our motivating examples (Examples~\ref{ex:telco}
-and~\ref{ex:taxes}), we model a set of identified or user-reported
+Following the terminology in Examples~\ref{ex:telco}
+and~\ref{ex:taxes}, we model a set of identified or user-reported
 data errors as \emph{complaints}. A complaint corresponds to a
 particular tuple in the final database state $D_n^*$, and identifies
 that tuple's correct value assignment. We formally define complaints
@@ -139,7 +140,7 @@ means that $t$ should be removed from the database.
 \noindent
 \emph{Complaint set ($\mathcal{C}$):}
 We use $\mathcal{C}$ to denote the set of all known complaints
-$\mathcal{C}=\{c_1,\dots,c_k\}$, and we call it \emph{complaint set}.
+$\mathcal{C}=\{c_1,\dots,c_k\}$, and we call it the \emph{complaint set}.
 Each complaint in $\mathcal{C}$ represents a transformation (addition,
 deletion, or modification) of a tuple in $D_n$. We assume that the
 complaint set is consistent, i.e., there are no two complaints that
@@ -155,8 +156,7 @@ complete, but, as is more common in practice, we only know a subset of
 the errors (incomplete complaint set). Further, we focus our analysis
 on \emph{valid} complaints; we briefly discuss dealing with invalid
 complaints (complaints identifying a correct value as an error) in
-Section\ref{???}\alex{add brief discussion somewhere}, but these
-techniques are beyond the scope of this paper.
+Section\ref{sec:noise}, but these techniques are beyond the scope of this paper.
 
 \smallskip
 \noindent
@@ -166,8 +166,9 @@ $\mathcal{Q}^*=\{q_1^*,\dots, q_n^*\}$, such that
 $\mathcal{Q}^*(D_0)=D_n^*$. In this work, we focus on errors produced
 by incorrect parameters in queries, so our repairs focus on altering
 query constants rather than query structure. Therefore, for each query
-$q_i^*\in\mathcal{Q}^*$, $q_i^*$ has the same structure as $q_i$, but
-possibly different parameters. For example, a good log repair for the
+$q_i^*\in\mathcal{Q}^*$, $q_i^*$ has the same structure as $q_i$
+(e.g., the same number of predicates and the same variables in the \texttt{WHERE} clause), 
+but possibly different parameters. For example, a good log repair for the
 example of Figure~\ref{fig:example} is
 $\mathcal{Q}^*=\{q_1^*,q_2,q_3\}$, where $q_1^*$=\texttt{UPDATE Taxes
 SET rate = 30 WHERE income >= 87500}.
@@ -175,8 +176,8 @@ SET rate = 30 WHERE income >= 87500}.
 
 \subsubsection*{Problem definition}
 
-We now formalize the definition of the problem of diagnosing data
-errors using query histories. A diagnosis is a log repair
+We now formalize the problem definition for diagnosing data
+errors using query \ewu{logs}. A diagnosis is a log repair
 $\mathcal{Q}^*$ that resolves all complaints in the set $\mathcal{C}$
 and leads to a correct database state $D_n^*$.
 
@@ -191,25 +192,27 @@ and leads to a correct database state $D_n^*$.
 More informally, we seek the minimum changes to the log $\mathcal{Q}$
 that would result in a clean database state $D_n^*$. Obviously, a
 challenge is that $D_n^*$ is unknown, unless we know that the
-complaint set is complete. We first proceed to describe a naive
-approach based on decision trees that relies on the assumption
-that $\mathcal{C}$ is complete (Section~\ref{????}).\alex{Is this
-correct?}
-We then proceed to describe a constraint programming formulation that
-allows us to express this diagnosis problem as a mixed integer
-program, and remove the completeness assumption (Section~\ref{????}).
+complaint set is complete. 
+
+We first outline an obvious  but flawed approach based on decision trees
+that only works for query logs of size one, and complete complaint sets.
+%that ass that $\mathcal{C}$ is complete (Section~\ref{????}).\alex{Is this correct?}
+We then describe a constraint programming formulation that
+expresses this diagnosis problem as a mixed integer linear
+program (MILP), and remove the limiting assumptions in the 
+decision tree approach (Section~\ref{sec:sol}).
 Further, we show several optimization techniques that allow us to
 scale our diagnostic framework to large data and log sizes
-(Section~\ref{????}). \alex{clean this up and add more oomph.}
+(Section~\ref{sec:opt}). \alex{clean this up and add more oomph.}
 
 
-\begin{figure}[t]
-\centering
-\includegraphics[width = 0.75\columnwidth]{figures/probtransform}
-\caption{Graphical depiction of the diagnosis problem in our \sys framework.  $D_0$, $D_n$, $\mathcal{Q}$, and $\mathcal{C}$ are given, and \sys uses them to derive the log repair $\mathcal{Q}^*$.
-\alex{not sure if this figure is actually useful.}}
-\label{f:probtransform} 
-\end{figure}
+% \begin{figure}[t]
+% \centering
+% \includegraphics[width = 0.75\columnwidth]{figures/probtransform}
+% \caption{Graphical depiction of the diagnosis problem in our \sys framework.  $D_0$, $D_n$, $\mathcal{Q}$, and $\mathcal{C}$ are given, and \sys uses them to derive the log repair $\mathcal{Q}^*$.
+% \alex{not sure if this figure is actually useful.}}
+% \label{f:probtransform} 
+% \end{figure}
 
 
 % \deprecate{
