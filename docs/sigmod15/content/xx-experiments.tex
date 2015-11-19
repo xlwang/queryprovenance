@@ -194,6 +194,49 @@ To standardize our procedures, we selected a fixed set of indexes $idx$
 that are used in all experiments.  Appendix~\ref{app:qidx} presents
 experiments that justify the rationale behind our selection.
 
+  \begin{figure*}[h]
+  \centering
+    \vspace*{-.2in}
+    \begin{subfigure}[t]{.3\textwidth}
+    \includegraphics[width = .99\columnwidth]{figures/scale_allalgs}
+    \vspace*{-.1in}
+    \caption{.}
+    \label{f:multiquery} 
+    \end{subfigure}
+    \begin{subfigure}[t]{.3\textwidth}
+    \includegraphics[width = .99\columnwidth]{figures/incrementalcompare_time}
+    \vspace*{-.1in}
+    \caption{.}
+    \label{f:singlequeryinc_time} 
+    \end{subfigure}
+    \begin{subfigure}[t]{.3\textwidth}
+    \includegraphics[width = .99\columnwidth]{figures/placeholder}
+    \vspace*{-.1in}
+    \caption{.}
+    \label{f:qtype} 
+    \end{subfigure}
+    \\
+    \begin{subfigure}[t]{.3\textwidth}
+    \includegraphics[width = .99\columnwidth]{figures/scale_allalgs}
+    \vspace*{-.1in}
+    \caption{.}
+    \label{f:multiquery} 
+    \end{subfigure}
+    \begin{subfigure}[t]{.3\textwidth}
+    \includegraphics[width = .99\columnwidth]{figures/incrementalcompare_acc}
+    \vspace*{-.1in}
+    \caption{.}
+    \label{f:singlequeryinc_acc} 
+    \end{subfigure}
+    \begin{subfigure}[t]{.3\textwidth}
+    \includegraphics[width = .99\columnwidth]{figures/placeholder}
+    \vspace*{-.1in}
+    \caption{.}
+    \label{f:qtype} 
+    \end{subfigure}
+    \vspace*{-.1in}
+    \caption{Preliminary Experiments}
+  \end{figure*}
 
 
 \subsection{Preliminaries}
@@ -204,43 +247,6 @@ as the number of corrupted queries increases.
 We find that \ewu{XXX}.
 We then establish the difficulty of \texttt{UPDATE} workloads as compared to other query types.
 
-  \begin{figure*}[t]
-  \centering
-    \vspace*{-.2in}
-    \begin{subfigure}[t]{.3\textwidth}
-    \includegraphics[width = .95\columnwidth]{figures/scale_allalgs}
-    \caption{.}
-    \label{f:multiquery} 
-    \end{subfigure}
-    \begin{subfigure}[t]{.3\textwidth}
-    \includegraphics[width = .95\columnwidth]{figures/incrementalcompare_time}
-    \caption{.}
-    \label{f:singlequeryinc_time} 
-    \end{subfigure}
-    \begin{subfigure}[t]{.3\textwidth}
-    \includegraphics[width = .95\columnwidth]{figures/placeholder}
-    \caption{.}
-    \label{f:qtype} 
-    \end{subfigure}
-    \\
-    \begin{subfigure}[t]{.3\textwidth}
-    \includegraphics[width = .95\columnwidth]{figures/scale_allalgs}
-    \caption{.}
-    \label{f:multiquery} 
-    \end{subfigure}
-    \begin{subfigure}[t]{.3\textwidth}
-    \includegraphics[width = .95\columnwidth]{figures/incrementalcompare_acc}
-    \caption{.}
-    \label{f:singlequeryinc_acc} 
-    \end{subfigure}
-    \begin{subfigure}[t]{.3\textwidth}
-    \includegraphics[width = .95\columnwidth]{figures/placeholder}
-    \caption{.}
-    \label{f:qtype} 
-    \end{subfigure}
-    \vspace*{-.1in}
-    \caption{Preliminary Experiments}
-  \end{figure*}
 
 
 \stitle{Multiple Corrupt Queries:}
@@ -289,19 +295,41 @@ and on a small set of representative algorithms \ewu{XXX}.
   \begin{figure*}[h]
     \centering
     \begin{subfigure}[t]{.3\textwidth}
-    \includegraphics[width = .95\columnwidth]{figures/placeholder}
-    \caption{.}
-    \label{f:scale1} 
+      \includegraphics[width = \columnwidth]{figures/placeholder}
+      \vspace*{-.1in}
+      \caption{.}
+      \label{f:scale1} 
     \end{subfigure}
     \begin{subfigure}[t]{.3\textwidth}
-    \includegraphics[width = .95\columnwidth]{figures/placeholder}
-    \caption{.}
-    \label{f:scale2} 
+      \includegraphics[width = \columnwidth]{figures/dbsize_time}
+      \vspace*{-.1in}
+      \caption{.}
+      \label{f:scale2} 
     \end{subfigure}
     \begin{subfigure}[t]{.3\textwidth}
-    \includegraphics[width = .95\columnwidth]{figures/placeholder}
-    \caption{.}
-    \label{f:scale3} 
+      \includegraphics[width = \columnwidth]{figures/where_time}
+      \vspace*{-.1in}
+      \caption{.}
+      \label{f:scale3} 
+    \end{subfigure}
+    \\
+    \begin{subfigure}[t]{.3\textwidth}
+      \includegraphics[width = .95\columnwidth]{figures/placeholder}
+      \vspace*{-.1in}
+      \caption{.}
+      \label{f:scale1} 
+    \end{subfigure}
+    \begin{subfigure}[t]{.3\textwidth}
+      \includegraphics[width = .95\columnwidth]{figures/dbsize_acc}
+      \vspace*{-.1in}
+      \caption{.}
+      \label{f:scale2} 
+    \end{subfigure}
+    \begin{subfigure}[t]{.3\textwidth}
+      \includegraphics[width = .95\columnwidth]{figures/where_acc}
+      \vspace*{-.1in}
+      \caption{.}
+      \label{f:scale3} 
     \end{subfigure}
     \caption{cap}
   \end{figure*}
@@ -317,8 +345,13 @@ space in the MILP problem.
  
   \begin{figure}[h]
     \centering
-    \begin{subfigure}[t]{.48\columnwidth}
-    \includegraphics[width = .95\columnwidth]{figures/placeholder}
+    \begin{subfigure}[t]{.9\columnwidth}
+    \includegraphics[width = \columnwidth]{figures/skew_time}
+    \caption{.}
+    \label{f:multiquery} 
+    \end{subfigure}
+    \begin{subfigure}[t]{.9\columnwidth}
+    \includegraphics[width = \columnwidth]{figures/skew_acc}
     \caption{.}
     \label{f:multiquery} 
     \end{subfigure}
