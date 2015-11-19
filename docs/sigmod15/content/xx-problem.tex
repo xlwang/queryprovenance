@@ -8,7 +8,7 @@ Example~\ref{ex:taxes}, and describe the model abstractions that we use to
 formalize the diagnosis problem.
 
 
-\ewu{Add text to say false positive complaints are an orthogonal problem.}
+% \ewu{Add text to say false positive complaints are an orthogonal problem.}
 
 \input{content/example}
 
@@ -36,7 +36,7 @@ obtained in different ways: traditional data cleaning tools may identify
 discrepancies in the data (e.g., a tuple with lower income has higher tax
 rate), or errors can be reported directly from users (e.g., customers
 reporting discrepancies to customer service). \emph{Our goal is not to correct
-the errors directly, but to analyze them as a ``symptom'' and provide a
+the errors directly in the data, but to analyze them as a ``symptom'' and provide a
 diagnosis.} The diagnosis can produce a targeted treatment: knowing how the
 errors were introduced guides the proper way to trace and resolve them.
 
@@ -67,11 +67,15 @@ including insertion and deletion queries.
 
 \smallskip
 \noindent
-\emph{Query ($q_i$):}  We model each update query as a function over a database $D$, resulting in a new database $D'$:  
+\emph{Query ($q_i$):} We model each query as a function over a
+database $D$, resulting in a new database $D'$. For \texttt{INSERT}
+queries, $D'=q(D)=D\cup\{t_{new}\}$.
+We model \texttt{UPDATE} and \texttt{DELETE} queries as follows:  
 \begin{align*}
-    D'=q(D)= &\{\mu_{q}(t)\;|\;t\in D, \sigma_{q}(t)\}\\
-    &\cup\{t\;|\;t\in D, \neg\sigma_{q}(t)\}\\
-    &\cup\{t_{new}\;|\;q\in\texttt{INSERT}\}
+    D'=q(D)= &\{\mu_{q}(t)\;|\;t\in D, \sigma_{q}(t)\}%\\
+    % &
+    \cup\{t\;|\;t\in D, \neg\sigma_{q}(t)\}%\\
+    % &\cup\{t_{new}\;|\;q\in\texttt{INSERT}\}
 \end{align*}
 % 
 In this definition, the modifier function $\mu_q(t)$ represents the query's update equations, and it transforms a tuple by either deleting it ($\mu_q(t)=\bot$) or changing the values of some of its attributes.
@@ -83,8 +87,8 @@ The conditional function $\sigma_q(t)$ is a boolean function that represents the
     &\sigma_{q_2}(t)=\texttt{true}
 \end{align*} 
 % 
-As an insertion query, $q_3$ has $\sigma_{q_3}(t)=\texttt{false}$ and $t_{new}=(25, 85800, 21450)$.
-\ewu{why does it return false?  should it only be true if input is $\bot$?}
+% As an insertion query, $q_3$ has $\sigma_{q_3}(t)=\texttt{false}$ and $t_{new}=(25, 85800, 21450)$.
+% \ewu{why does it return false?  should it only be true if input is $\bot$?}
 
 
 \smallskip
@@ -111,8 +115,8 @@ would have occurred if there had been no errors in the queries.
 The true database states are unknown; our goal is to find and correct the errors in $\mathcal{Q}$ and retrieve the correct database state $D_n^*$.
 
 For ease of exposition, in the remainder of the paper we assume that the
-database contains a single relation \ewu{with attribute $A_i,\ldots,A_m$, }
-but the single table is not a requirement in our framework.\ewu{this suggests we actually handle >1 tables}
+database contains a single relation with attributes $A_i,\ldots,A_m$,
+but the single table is not a requirement in our framework.
 
 
 \subsubsection*{Error models}
@@ -157,7 +161,7 @@ complete, but, as is more common in practice, we only know a subset of
 the errors (incomplete complaint set). Further, we focus our analysis
 on \emph{valid} complaints; we briefly discuss dealing with invalid
 complaints (complaints identifying a correct value as an error) in
-Section\ref{sec:noise}, but these techniques are beyond the scope of this paper.
+Section~\ref{sec:noise}, but these techniques are beyond the scope of this paper.
 
 \smallskip
 \noindent
@@ -178,7 +182,7 @@ SET rate = 30 WHERE income >= 87500}.
 \subsubsection*{Problem definition}
 
 We now formalize the problem definition for diagnosing data
-errors using query \ewu{logs}. A diagnosis is a log repair
+errors using query logs. A diagnosis is a log repair
 $\mathcal{Q}^*$ that resolves all complaints in the set $\mathcal{C}$
 and leads to a correct database state $D_n^*$.
 
@@ -195,18 +199,19 @@ that would result in a clean database state $D_n^*$. Obviously, a
 challenge is that $D_n^*$ is unknown, unless we know that the
 complaint set is complete. 
 
-We first outline an obvious  but flawed approach based on decision trees
-that only works for query logs of size one, and complete complaint sets.
-%that ass that $\mathcal{C}$ is complete (Section~\ref{????}).\alex{Is this correct?}
-We then describe a constraint programming formulation that
-expresses this diagnosis problem as a mixed integer linear
-program (MILP), and remove the limiting assumptions in the 
-decision tree approach (Section~\ref{sec:sol}).
-Further, we show several optimization techniques that allow us to
-scale our diagnostic framework to large data and log sizes,
-including optimizations for single query case that lets us scale by $y\times$ 
-beyond the basic MILP approach
-(Section~\ref{sec:opt}). \alex{clean this up and add more oomph.}
+In Section~\ref{sec:sol}, we describe our basic method \naive, which
+uses a constraint programming formulation that expresses this
+diagnosis problem as a mixed integer linear program (MILP). We justify
+using this constraint formulation as opposed to methods, such as
+classification, that can analyze one query at a time in
+Section~\ref{sec:heuristic}. We show that the latter, heuristic
+approach is flawed, and one needs to encode the constraints in the
+entire log. In Section~\ref{sec:opt}, we present several optimization
+techniques that extend our basic method, allowing \sys to (1)~handle
+cases of incomplete information (incomplete complaint set), and
+(2)~scale to large data and log sizes. Specifically, our incremental
+repair method (\incremental, Section~\ref{sec:incremental}), can
+handle $y\times$ \red{FIX!!!} compared to the basic MILP approach.
 
 
 % \begin{figure}[t]

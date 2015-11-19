@@ -3,7 +3,7 @@
 \section{A MILP-based Solution}
 \label{sec:sol}
 
-In this section, we introduce an exhaustive solver-based approach to 
+In this section, we introduce \naive, an exhaustive solver-based approach to 
 resolve the errors reflected in the complaint set.
 This approach constructs a mixed-integer linear 
 programming (MILP) problem~\cite{milp} by linearizing and parameterizing the 
@@ -206,6 +206,7 @@ Equation~\eqref{eq:linearization}: $u.A_j=x_{q_i, t}\otimes
 \mu_{q_i}(t).A_j$ and $v.A_j=(1-x_{q_i, t})\otimes t.A_j$. Assuming a
 number $M$ as the upper bound of the domain of $t.A_j$, we get the
 following constraints:
+% 
 {\scriptsize
 \begin{align}
 \label{eq:uv}
@@ -346,7 +347,7 @@ $\mathcal{Q}^*$.
 
 
 \begin{algorithm}[t]
-\caption{$QueryFix_{exh}$ based on MILP formulation.}
+\caption{\naive (MILP formulation).}
 \label{alg:basic}
 \scriptsize
 \begin{algorithmic}[1]
