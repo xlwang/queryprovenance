@@ -80,4 +80,22 @@ Based on these observations, we only include the performance of \milpadvtuple an
 in the rest of the experiments. 
 
 
+\section{Heuristic Approaches}
+In this section, we compare \heurstic and \milpall on query log with size 1. 
+We use \textbf{Synthetic} data generator (Section~\ref{sec:syntheticgen}) 
+to generate a initial table with 1000 tuples and one 
+\texttt{UPDATE} query with range update. 
+We further adjust the range (\# of tuples modified by the query) 
+from 5 tuples to 500 tuples. 
+
+ \begin{figure}[h]
+\centering
+  \begin{subfigure}[t]{.48\columnwidth}
+  \includegraphics[width = .95\columnwidth]{figures/placeholder}
+  \caption{.}
+  \label{f:heursticvsmilp} 
+  \end{subfigure}
+  \caption{Heuristic Approach vs. MILP-based Approach on Single-Query. }
+\end{figure}
+
 
