@@ -96,7 +96,7 @@ In Figure~\ref{fig:groups}(a), the dirty and truth intervals overlap, thus the n
 within the overlapping region are correctly modified by the dirty interval.  
 In this case, the proposed repair correctly contains the non-complaint tuples and the algorithm is successful.
 %We call these non-complaint tuples {\it safe}.
-In contrast, Figure~\ref{fig:groups}(b) highlights a case where \sys generalized incorrectly.
+In contrast, Figure~\ref{fig:groups}(b) highlights a case where \naive generalized incorrectly.
 The dirty and clean intervals are non-overlapping, so the non-complaint tuple shown is not modified by $q$ (otherwise it would be a complaint!). This tuple is incorrectly included in the repaired interval, \emph{because the MILP formulation does not constrain its value}.
 Note that in both of these cases, the objective function will ensure that the repair
 does not over-generalize the upper bound towards the right because that strictly increases the objective function.
@@ -124,7 +124,7 @@ is $\sum_{q \in \mathcal{Q}^*_{sub}} \sum_{t \in \mathcal{NC}} x_{q,t}$.
 % We use this same mechanism to address incomplete complaint sets.
 In our experiments, we find that this second MILP iteration adds
 minimal overhead ($0.1-0.5\%$) with respect to the initial MILP
-problem.
+problem, making \tslice and effective method to improve the performance of the basic approach, without compromising accuracy.
 
 % \ewu{Need to clarify that the solver is a black box, who knows what goes on there.  Maybe where we introduce MILP-solvers}
 % \xlw{The number of noncomplaints differs case by case. }
@@ -364,10 +364,10 @@ when $0 < |\mathcal{F}(q) \cap \mathcal{A}(C)| < |\mathcal{A}(C)|$,
 $q$ contributed to a subset of the complaint attributes and is a candidate for repair;
 when $|\mathcal{F}(q) \cap \mathcal{A}(C)|=0$, $q$ is irrelevant 
 and can be ignored during the repair process.
-\ewu{We distinguish between the first and second conditions in the special case where we are repairing a {\it single} 
+We distinguish between the first and second conditions in the special case where we are repairing a \emph{single} 
 corrupted query in the query log.  In this case, only queries in the first conditions are candidates for repair because 
 the single query must have caused errors in all of the complaint attributes.  This enables \sys to scale significantly better
-for this important problem setting.} \alex{Is this just a note, or text meant to stay?}
+for this important problem setting. 
 Finally, we use $Rel\mathcal{(Q)}$ to denote the set of relevant
 queries that are candidates for repair. Our \emph{query slicing}
 optimization, \qslice, linearizes only the queries in
@@ -402,7 +402,7 @@ which takes an extra parameter $q_i$.  The modified algorithm only parameterizes
 and fixes the values for the parameters for the rest of the queries in $\mathcal{Q}$.
 
 \begin{algorithm}[t]
-\caption{\incremental algorithm. \ewu{Should the inputs be $D_j$ or $D_0$???}
+\caption{\incremental algorithm. 
 }
 \label{alg:incalg}
 \begin{algorithmic}[2]
