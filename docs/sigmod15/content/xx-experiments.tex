@@ -74,13 +74,13 @@ All experiments were run on \ewu{X Core} 2.66 GHz  machines with 16GB RAM runnin
   $N_w$  & \# predicates in \texttt{WHERE} clauses & $1$ \\
   $N_s$  & \# \texttt{SET} clauses & $1$ \\
   $N_q$  & \# queries in query log & $300$ \\
-  $idx$  & Index (backwards from most recent) & $\{0, 25, 50,$ \\
-         & of corrupted query & $100, 200, 250 \}$ \\ %$\frac{N_q}{2}$ \\
+  $idx$  & Index of corrupted query & $\{0, 25, 50,$ \\
+         & (backwards from most recent) & $100, 200, 250 \}$ \\ %$\frac{N_q}{2}$ \\
   $r$    & Range size of \texttt{UPDATE} queries & 8 (tuples) \\
   $s$    & Zipf $\alpha$ param of query attributes, & $1$ \\ 
   $set$  & Constant vs relative \texttt{SET} clauses. & const \\ \bottomrule \end{tabular}
          %& power low distribution $P(v) = v^{-s}$ & \\\end{tabular}
-  \caption{Experimental Parameters \alex{Do we need the presentation to include this level of detail?}}
+  \caption{Experimental Parameters}
   \label{t:params}
 \end{table}
 
@@ -194,45 +194,23 @@ To standardize our procedures, we selected a fixed set of indexes $idx$
 that are used in all experiments.  Appendix~\ref{app:qidx} presents
 experiments that justify the rationale behind our selection.
 
-% \begin{figure}[h]
-% \centering
-% \includegraphics[width = 3.5in]{figures/qidxsimulation/numinrange}
-% \caption{.}
-% \label{f:numinrange} 
-% \end{figure}
 
 
 \subsection{Preliminaries}
 The following set of experiments are designed to establish the rationale for 
 our experimental settings in the subsequent experiments.  
 Specifically, we compare the exhaustive approach with the suite of optimizations
-as the number of corrupted queries increases.  We find that \ewu{XXX}.
+as the number of corrupted queries increases.  
+We find that \ewu{XXX}.
 We then establish the difficulty of \texttt{UPDATE} workloads as compared to other query types.
 
 \stitle{Multiple Corrupt Queries:}
+In this experiment, we compare the naive exhaustive algorithm with four types of algorithms
+$\sys_S$, where $S \in \{t, q, a, tqa\}$.  We use the default settings with $1000$ tuples and
+$50$ \texttt{update} queries.  We corrupt every tenth query starting from oldest query $q_0$,
+up to $q_{40}$.  For example, when we corrupt $3$ queries, we corrupt $q_{0,10,20}$.
 
-
-We further compare \milpall, \milptuple, \milptuplestopearly, \milpadvtuple  
-on \textbf{Synthetic} data 
-with 1000 tuples and 300 queries. We adjust the problem complexity by corrupting queries 
-at different indexes: as we error happen further from the most recent query, 
-the problem become harder to solve. 
-
-EXP 1
-Compare all algorithms for a varying number of corrupted queries.
-% - exh, tupleslice, queryslicing, attrslicing, tuplequeryslicing
-% - 1 error: oldest query
-% - 2 errors: oldest query + 10th
-% - 3 errors: oldest + 10th + 20th
-% - dbsize: 1000
-% - uniform skew
-Show that exhaustive and exh+t,q,a are all incredibly slow and the optimizations help a bit.
-
-EXP 2
-Compare exh+optimizations, inc and shows that inc is way better.
-
-
-  \begin{figure}[h]
+  \begin{figure}[t]
   \centering
     \begin{subfigure}[t]{.48\columnwidth}
     \includegraphics[width = .95\columnwidth]{figures/scale_allalgs}
@@ -242,7 +220,25 @@ Compare exh+optimizations, inc and shows that inc is way better.
     \caption{MILP-based Approach and Extensions on Multi-Query. }
   \end{figure}
 
+\stitle{Single Query Optimization:}
+In this experiment, we evaluate the efficacy of the incremental repair algorithm (Section~\ref{sec:inc})
+in the special case when only one query has been corrupted.  We compare $\sys_{exh}$ against
+$\sys_{inc}^{1st}$ and $\sys_{inc}^{all}$ using the default parameters.
+Figure~\ref{f:singlequeryinc} shows \ewu{xxx}.
+
+  \begin{figure}[t]
+  \centering
+    \begin{subfigure}[t]{.48\columnwidth}
+    \includegraphics[width = .95\columnwidth]{figures/placeholder}
+    \caption{.}
+    \label{f:singlequeryinc} 
+    \end{subfigure}
+    \caption{Comparing exhaustive and incremental algorithms for single query corruption.}
+  \end{figure}
+
+
 \stitle{Query Type Experiment:}
+We now compare $\sys_{exh}$ and $\sys_{inc}$
 
 In this set of experiments, 
 Run insert and delete only workloads.
@@ -256,12 +252,11 @@ Justify single corrupt query
 
 
 \subsection{Synthetic Experiments}
-The factors influence the complexity of the MILP-based approach fall 
-into four aspects: skewness, $s$; log size, $N_q$; database size $N_D$; and 
-query complexity $N_w$. In this section, we focus on 
-evaluate the proposed algorithm(s)
-by adjusting these four factors. 
-
+In the following set of synthetic experiments, we vary 
+the parametetrs skewness $s$, log size $N_q$, database size $N_D$, and
+query complexity $N_w$ one at a time in order  to tease apart the parameters that most affect our metrics.
+As described above, we focus query logs with a single corruption,
+and on a small set of representative algorithms \ewu{XXX}.
 
 \stitle{Skew:}
 We generate query log at 4 different skewness levels from uniform to 
