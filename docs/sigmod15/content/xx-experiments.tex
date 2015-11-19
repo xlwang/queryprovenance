@@ -57,10 +57,10 @@ to study \sys in realistic scenarios. \alex{So, which algorithm do we call \sys?
   $N_a$  & \# attributes in database & $10$ \\
   $N_w$  & \# predicates in \texttt{WHERE} clauses & $1$ \\
   $N_s$  & \# \texttt{SET} clauses & $1$ \\
-  $N_q$  & \# queries in query log & $100$ \\
+  $N_q$  & \# queries in query log & $300$ \\
   $idx$  & Index (backwards from most recent) & $\{0, 25, 50,$ \\
          & of corrupted query & $100, 200, 250 \}$ \\ %$\frac{N_q}{2}$ \\
-  $r$    & Range size of \texttt{UPDATE} queries & 10 \\
+  $r$    & Range size of \texttt{UPDATE} queries & 8 (tuples) \\
   $s$    & Zipf $\alpha$ param of query attributes, & $1$ \\ 
   $set$  & Constant vs relative \texttt{SET} clauses. & const \\ \bottomrule \end{tabular}
          %& power low distribution $P(v) = v^{-s}$ & \\\end{tabular}
@@ -346,45 +346,113 @@ than \milpall and \milptuple, however the aggressive strategy greatly reduce the
 precision. In the end, \milpadvtuple significantly improves the precision with very limited
 time cost compare to \milptuple. \\
 Based on these observations, we only include the performance of \milpadvtuple and \milpadvall
-in the rest of the experiments.
+in the rest of the experiments. 
 
 \subsection{Benchmark data}
-We will show that the proposed algorithm works very well on benchmarks. We get stable
-performance as the corrupt query further from the most recent query. Benchmark query log
-only consist KEY updates and insert query, thus query impact over the database is 
-very sparse and it makes queries more independent to each other. 
-
-\subsection{Synthetic data}
-We study the performance of the proposed MILP-based approach explicitly on the synthetic data 
-by adjusting the property of the query log and database. 
-\subsubsection{Skew}
-We first study the performance of proposed MILP-based approach over 
-
-
-\subsubsection{Scalabality}
-\textbf{Adjusting query log size}\\
-
-\textbf{Adjusting database size} \\
-
-\textbf{Adjusting query complexity} \\
-
-}
-\subsubsection{Handling Noise}
-
-In this set of experiments, we add false positive and false negative complaints to the input
-complaint set and evaluate our noise handling algorithms (Section~\ref{sec:noise}).
-To generate false positives ($FP$), we select a random set of tuples in the database, and for each one, 
-pick a random attribute and set its XXX to a random value within $V_d$.
-To generate false negatives ($FN$), we select a random subset of the true complaint set.
-
+We evaluate the proposed algorithm on two benchmarks. Queries in the benchmark 
+workloads are PRIMARY KEY updates, which modifies one tuple at a time, and insert queries. 
+This property greatly simplifies the problem and reduces searching space since queries dependency 
+become very sparse: we say one query depends on another only if the result of the latter
+query may affects the result of the first one. Thus, in a workload with PRIMARY KEY
+updates, two queries have this dependency relationship only
+when they have the exactly same where condition, which has much lower probability than 
+general updates. As a result, we observe that the proposed approaches work
+very efficient and effective 
+in fixing errors in both TPC-C and AuctionMark benchmarks. 
 
 \begin{figure}[h]
 \centering
   \begin{subfigure}[t]{.48\columnwidth}
   \includegraphics[width = .95\columnwidth]{figures/placeholder}
   \caption{.}
-  \label{f:falsepositive} 
+  \label{f:tpcc} 
   \end{subfigure}
+  \begin{subfigure}[t]{.48\columnwidth}
+  \includegraphics[width = .95\columnwidth]{figures/placeholder}
+  \caption{.}
+  \label{f:auctionmark} 
+  \end{subfigure}
+  \caption{Benchmark Performance}
+
+\end{figure}
+
+\subsection{Synthetic data}
+The factors influence the complexity of the MILP-based approach fall 
+into four aspects: skewness, $s$; log size, $N_q$; database size $N_D$; and 
+query complexity $N_w$. In this section, we focus on 
+evaluate the proposed algorithm(s)
+by adjusting these four factors. 
+\subsubsection{Skew}
+We generate query log at 4 different skewness levels from uniform to 
+super skewed with $s = 0, 1e-7, 0.5, 1$. As we can see as query log
+is more skewed, the execution time for solving same amount of queries 
+increase. This is also due to the fact that increasing skewness also
+increase the query dependency, which, in turn, increase the searching
+space in the MILP problem.
+ 
+ \begin{figure}[h]
+\centering
+  \begin{subfigure}[t]{.48\columnwidth}
+  \includegraphics[width = .95\columnwidth]{figures/placeholder}
+  \caption{.}
+  \label{f:multiquery} 
+  \end{subfigure}
+  \caption{Log size. }
+\end{figure}
+
+\subsubsection{Scalabality: log size}
+ \begin{figure}[h]
+\centering
+  \begin{subfigure}[t]{.48\columnwidth}
+  \includegraphics[width = .95\columnwidth]{figures/placeholder}
+  \caption{.}
+  \label{f:multiquery} 
+  \end{subfigure}
+  \caption{MILP-based Approach and Extensions on Multi-Query. }
+\end{figure}
+
+\subsubsection{Scalability: database size}
+We adjust the initial database sizes from 100 to 100,000 and 
+while maintain the same range $r$ in each query. As we can see, 
+for the same corrupt query index, the MILP-based approaches require
+similar amount of time to derive the log repair. 
+
+ \begin{figure}[h]
+\centering
+  \begin{subfigure}[t]{.48\columnwidth}
+  \includegraphics[width = .95\columnwidth]{figures/placeholder}
+  \caption{.}
+  \label{f:multiquery} 
+  \end{subfigure}
+  \caption{Database size}
+\end{figure}
+
+
+\subsubsection{Scalability: query complexity}
+In the end, we evaluate the MILP-based approaches by adjust 
+the query complexity: number of predicates, $N_w$, in the 
+update query while maintain the range $r$ the same. 
+
+ \begin{figure}[h]
+\centering
+  \begin{subfigure}[t]{.48\columnwidth}
+  \includegraphics[width = .95\columnwidth]{figures/placeholder}
+  \caption{.}
+  \label{f:multiquery} 
+  \end{subfigure}
+  \caption{Query complexity }
+\end{figure}
+
+}
+\subsubsection{Handling Noise}
+
+In this set of experiments, we add false negative complaints to the input
+complaint set and evaluate our noise handling algorithms (Section~\ref{sec:noise}).
+To generate false negatives ($FN$), we select a random subset of the true complaint set.
+
+
+\begin{figure}[h]
+\centering
   \begin{subfigure}[t]{.48\columnwidth}
   \includegraphics[width = .95\columnwidth]{figures/placeholder}
   \caption{.}
@@ -394,9 +462,6 @@ To generate false negatives ($FN$), we select a random subset of the true compla
 
 \end{figure}
 
-
-
-Figure~\ref{f:falsepositive} shows \sys performance and quality as we vary $FP \in \{\}$.
 
 Figure~\ref{f:falsenegative} varies $FN \in \{\}$.
 
