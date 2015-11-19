@@ -378,36 +378,32 @@ smaller problems than \naive, without any loss of accuracy.
 
 In addition to removing irrelevant queries, we additionally avoid encoding irrelevant attributes.
 Given $Rel\mathcal{(Q)}$, the relevant attributes can be defined as:
-$Rel\mathcal{(A)} = \cup_{q_i \in Rel\mathcal{Q)}} (\mathcal{F}(q_i)\cup \mathcal{P}(q_i))$
-Attribute slicing only encodes constraints using Equation~\ref{eq:uv} for attributes within $Rel\mathcal{(A)}$.
-This technique is effective for wide tables and query logs that focus a small subset of the attributes, for example
-in TPC-C style transaction workloads.\ewu{verify claim}
+$Rel\mathcal{(A)} = \cup_{q_i \in Rel\mathcal{Q}} (\mathcal{F}(q_i)\cup \mathcal{P}(q_i))$
+\aslice uses \emph{attribute slicing} to only encode constraints for attributes in $Rel\mathcal{(A)}$.
+This technique is effective for wide tables and query logs that focus a small subset of the attributes, such as TPC-C style transaction workloads.\ewu{verify claim} \alex{Should we mention here that experimentally we found that this doesn't work? I don't like that we don't understand why.}
 
 
 
 \subsection{Single Query Incremental Repairs}
 
-Despite the previous optimizations, the number of undetermined variables can still be very high, causing 
-the MILP-solver to take a very long time to solve for all of the values.  As we saw in
-Figure~\ref{fig:querysize_vs_time}, the solver performance increases \ewu{cubically}
-as the number of undetermined variables increases (solid line).
-In contrast, we find that the scalability is significantly better when only a {\it single query}
-is parameterized, despite linearizing the same number of queries (dashed line).
+Even with the slicing optimizations, the number of undetermined variables can remain high in many cases, resulting in slow runtime for the MILP solver.  As we saw in
+Figure~\ref{fig:querysize_vs_time}, the solver runtime increases \ewu{cubically} \alex{exponentially?}
+as the log size (and thus the number of variables) increases (red bars).
+In contrast, we find that the scalability is significantly better when only a \emph{single query}
+is parameterized, despite linearizing the same number of queries (\alex{teal?} bars).
 
-These results suggest that it is {\it faster} to run a separate MILP problem for each 
+These results suggest that it is \emph{faster} to run a separate MILP problem for each 
 suffix of the query log (e.g., $q_i, q_{i+1}\ldots, q_n$) where only $q_i$'s constraints contain
 undetermined variables, rather than encode and parameterize the entire log.
-In the special case where there is a single corrupted query (or the user searches for a single repair),
-we propose an incremental approach (Algorithm~\ref{incalg}), 
-where each query from the most to least recent is individually tested.
-In the algorithm below, we use a modified version of the exhaustive algorithm 
-(Algorithm~\ref{alg:basic}) called $QueryFix_{exh,param}(\mathcal{Q}, \mathcal{D}_0, \mathcal{D}_n, \mathcal{C}, q)$,
-which takes an extra parameter $q$.  The modified algorithm only parameterizes $q$, 
+\incremental (Algorithm~\ref{alg:incalg}) handles cases where the log contains a single corrupted query (or the search focuses on a single repair),
+The algorithm linearizes the entire log, incorporating any slicing optimizations, but parameterizes a single query at a time, moving from the most recent to the oldest.
+The algorithm calls a modified version of \naive,
+which takes an extra parameter $q_i$.  The modified algorithm only parameterizes $q_i$, 
 and fixes the values for the parameters for the rest of the queries in $\mathcal{Q}$.
 
-\ewu{Should the inputs be $D_j$ or $D_0$???}
-\begin{algorithm}[htbp]
-\caption{$QueryFix_{inc}$ algorithm.}
+\begin{algorithm}[t]
+\caption{\incremental algorithm. \ewu{Should the inputs be $D_j$ or $D_0$???}
+}
 \label{alg:incalg}
 \begin{algorithmic}[2]
 \REQUIRE {$Rel\mathcal{(Q)}, \mathcal{D}_j, \mathcal{D}_n, \mathcal{C}$}
@@ -424,7 +420,7 @@ and fixes the values for the parameters for the rest of the queries in $\mathcal
 
 
 
-This approach prioritizes repairs for complaints that are due to more recent corruptions.
-We believe this is a natural property to expect in practice, and our experiments \ewu{$foo\times$}
-performance improvement on top of the slicing-based approaches described in this section.
+\incremental prioritizes repairs for complaints that are due to more recent corruptions.
+We believe this is a natural property to expect in practice, and our experiments demonstrate \ewu{$foo\times$}
+performance improvement on top of the slicing-based approaches.
 
