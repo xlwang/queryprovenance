@@ -215,7 +215,7 @@ We then establish the difficulty of \texttt{UPDATE} workloads as compared to oth
     \begin{subfigure}[t]{.3\textwidth}
     \includegraphics[width = .95\columnwidth]{figures/incrementalcompare_time}
     \caption{.}
-    \label{f:singlequeryinc} 
+    \label{f:singlequeryinc_time} 
     \end{subfigure}
     \begin{subfigure}[t]{.3\textwidth}
     \includegraphics[width = .95\columnwidth]{figures/placeholder}
@@ -231,7 +231,7 @@ We then establish the difficulty of \texttt{UPDATE} workloads as compared to oth
     \begin{subfigure}[t]{.3\textwidth}
     \includegraphics[width = .95\columnwidth]{figures/incrementalcompare_acc}
     \caption{.}
-    \label{f:singlequeryinc} 
+    \label{f:singlequeryinc_acc} 
     \end{subfigure}
     \begin{subfigure}[t]{.3\textwidth}
     \includegraphics[width = .95\columnwidth]{figures/placeholder}
@@ -252,9 +252,17 @@ up to $q_{40}$.  For example, when we corrupt $3$ queries, we corrupt $q_{0,10,2
 
 \stitle{Single Query Optimization:}
 In this experiment, we evaluate the efficacy of the incremental repair algorithm (Section~\ref{sec:inc})
-in the special case when only one query has been corrupted.  We compare $\sys_{exh,t}$ against
-$\sys_{inc}^{1st}$ and $\sys_{inc}^{all}$ using the default parameters.
-Figure~\ref{f:singlequeryinc} shows \ewu{xxx}.
+in the special case when only one query has been corrupted.  We compare the exhaustive 
+algorithm against $\sys_{inc}^{1st}$ and $\sys_{inc}^{all}$ using the default parameters.
+We also compare against $\sys_{t,inc}^{1st}$ to illustrate the value of the second MILP iteration in tuple slicing.
+Figure~\ref{f:singlequeryinc_time} highlights the scalability limitations of the exhaustive algorithm 
+even $25$ queries in this experiment.  In contrast, the incremental algorithms perform at nearly the same rate
+across the different query indexes.  Figure~\ref{f:singlequeryinc_acc} shows the value of tuple-slicing --
+both basic incremental algorithms have severely degraded precision measures due to their propensity to over-generalize
+-- however the introduction of the second MILP iteration significantly improves the precision.  
+In all algorithms, the recall is near $1$ because the complaint sets are complete and the solver is able to find 
+an assignment in nearly all cases.
+
 
 \stitle{Query Type Experiment:}
 Our final preliminary experiment evaluates the exhaustive, tuple-slicing algorithm 
