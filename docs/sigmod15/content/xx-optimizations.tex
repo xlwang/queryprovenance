@@ -8,7 +8,7 @@ that it exhaustively encodes the combination of all tuples in the database and a
 in the query log.  In this approach, the number of constraints (as well as undetermined variables) 
 grows quadratically with respect to the database and the query log.
 Figure~\ref{fig:querysize_vs_time} shows a simple scalability experiment, where we generated increasingly 
-larger query logs for a database of $1000$ tuples, encoded the problem using $\sys_{exh}$ (red bars), 
+larger query logs for a database of $1000$ tuples, encoded the problem using $\naive$ (red bars), 
 and solved the problem using a MILP-solver (CPLEX~\cite{cplex} in our experiments).
 We find that the solver time increases exponentially as the number of encoded queries increases --
 at a log size of $80$, the solver failed to produce an answer within $1000$ seconds --
@@ -66,7 +66,6 @@ only tuples modified by the fixed queries
 \label{sec:opt:tbsize}
 
 % \ewu{Assume reader is clear that we are only repairing WHERE clause range predicates}
-
 Our first optimization, \emph{tuple slicing}, aggressively reduces the problem size by only encoding those 
 tuples in the complaint set $\mathcal{C}$ (Algorithm~\ref{alg:basic} line $2$ 
 is replaced with \texttt{for each t in $\mathcal{C}$}). Each tuple necessitates
@@ -284,15 +283,11 @@ problem.
 \label{sec:opt:query}
 
 
-In practice, many of the queries in the query log could not have affected the 
-{\it complaint attributes} (defined below) in the complaint set, regardless of what their \texttt{WHERE} 
-and \texttt{SET} clause parameters have been set to. For example, if $q_{N-1}$ and $q_{N}$ 
+In practice, many of the queries in the query log could not have affected the \emph{complaint attributes} (defined below). For example, if $q_{N-1}$ and $q_{N}$ 
 only read and wrote attribute $A_1$, then they could not have contributed to an error in $A_2$.  
-However, if $q_{N}$ instead wrote to $A_2$, then either or both queries may have caused the error. 
+However, if $q_{N}$  wrote $A_2$, then either or both queries may have caused the error. 
 In short, if we model a query as a set of attribute read and write operations, those that form a 
-causal read-write chain to the {\it complaint attributes} must be linearized, whereas those that
-do not can be ignored.  This is the foundation of the {\it Query-slicing} optimization described in 
-the subsequent text.
+causal read-write chain to the \emph{complaint attributes} must be linearized, whereas others can be ignored.  This is the foundation of our \emph{query-slicing} optimization.
 
 % The exhaustive parameterization of all queries in the query log, as described
 % in the basic approach, is typically unnecessary because many queries in the log
@@ -303,36 +298,46 @@ the subsequent text.
 % specified in the complaint set.
 
 \begin{definition} [Complaint Attributes $\mathcal{A}(\mathcal{C})$]
-	Attributes mentioned in the complaint set.
+	The set of attributes identified as incorrect in the complaint set.
 	\[\mathcal{A}(\mathcal{C}) = \{A_i | t.A_i \neq t^*.A_i, c(t,t^*) \in \mathcal{C}\}\]
 \end{definition} 
 
 
 \begin{definition}[Query dependency \& impact]
-  \begin{enumerate}
-    \item The \textbf{dependency}, $\mathcal{P}(q)$, of a query $q$
-    is the set of attributes  involved in the condition function $f_{q.\sigma}$ of $q$.
-    %\[\mathcal{P}(q) = \Pi_{f_{q}.\sigma}(R)\]
-    \item The \textbf{direct-impact} of query $q$, 
-    $\mathcal{I}(q)$, is the set of attributes 
-    updated in the update function $f_{q.\mu}$ 
-    (e.g., \texttt{SET} clause) of $q$.
-    %\[\mathcal{I}(q) = \Pi_{f_{q}.\mu}(R)\]
-    \item The \textbf{full-impact}
-    of $q$, $\mathcal{F}(q)$, propagates $q$'s direct impact through
-    the subsequent queries in the query log to collect {\it all} attributes
-    that are affected by the changes caused by $q$'s update function.
-    We describe its implications and computation below and in Algorithm~\ref{alg:fullimpact}.
-  \end{enumerate}
+    Query $q_i$ has \textbf{direct-impact}, $\mathcal{I}(q_i)$, which is
+    the set of attributes updated in its modifier function $\mu_{q_i}$
+    (e.g., \texttt{SET} clause). Its \textbf{dependency},
+    $\mathcal{P}(q_i)$, is the set of attributes involved in its
+    condition function $\sigma_{q_i}$.
+    
+    We derive the \textbf{full-impact}, $\mathcal{F}(q_i)$, of a query $q_i$ by propagating its direct impact through subsequent queries in the log (Algorithm~\ref{alg:fullimpact}):
+    \[
+    \mathcal{F}(q_i)=\mathcal{I}(q_i)\bigcup_{\substack{j=i+1\\ \mathcal{F}(q_i)\cap \mathcal{P}(q_j) \neq \emptyset}}^n \mathcal{F}(q_j)
+    \]
+  % \begin{enumerate}
+  %   \item The \textbf{dependency}, $\mathcal{P}(q)$, of a query $q$
+  %   is the set of attributes involved in the condition function $\sigma_q$.
+  %   %\[\mathcal{P}(q) = \Pi_{f_{q}.\sigma}(R)\]
+  %   \item The \textbf{direct-impact} of query $q$, 
+  %   $\mathcal{I}(q)$, is the set of attributes 
+  %   updated in the modifier function $\mu_q$ 
+  %   (e.g., \texttt{SET} clause).
+  %   %\[\mathcal{I}(q) = \Pi_{f_{q}.\mu}(R)\]
+  %   \item The \textbf{full-impact}
+  %   of $q$, $\mathcal{F}(q)$, propagates $q$'s direct impact through
+  %   the subsequent queries in the query log to collect {\it all} attributes
+  %   that are affected by the changes caused by $q$'s update function.
+  %   We describe its implications and computation below and in Algorithm~\ref{alg:fullimpact}.
+  % \end{enumerate}
 \end{definition}
 
 % By comparing $\mathcal{F}(q)$ and $\mathcal{A}(C)$, we know whether
 % or not corrupting query $q$'s parameters could possibly have caused the complaint
 % set.  
 
-Algorithm~\ref{alg:fullimpact} describes how $\mathcal{F}(q_i)$ can be computed:
+% Algorithm~\ref{alg:fullimpact} describes how $\mathcal{F}(q_i)$ can be computed:
 
-\begin{algorithm}[htbp]
+\begin{algorithm}[t]
 \caption{$FullImpact$ algorithm for finding $\mathcal{F}(q)$.}
 \label{alg:fullimpact}
 \begin{algorithmic}[2]
@@ -347,7 +352,7 @@ Algorithm~\ref{alg:fullimpact} describes how $\mathcal{F}(q_i)$ can be computed:
 \ENDFOR
 %\STATE $\mathcal{F}(\mathcal{Q}) \leftarrow \mathcal{F}(\mathcal{Q}) \cup {\red{\{\mathcal{F}(q_i)\}}}$
 % \ENDFOR
-\STATE Return $\mathcal{F}(\mathcal{q_i})$
+\STATE Return $\mathcal{F}(q_i)$
 \end{algorithmic}
 \end{algorithm}
 
@@ -362,43 +367,43 @@ and can be ignored during the repair process.
 \ewu{We distinguish between the first and second conditions in the special case where we are repairing a {\it single} 
 corrupted query in the query log.  In this case, only queries in the first conditions are candidates for repair because 
 the single query must have caused errors in all of the complaint attributes.  This enables \sys to scale significantly better
-for this important problem setting.}
-Finally, we use $Rel\mathcal{(Q)}$ to denote the set of relevant queries that are candidates for repair.
+for this important problem setting.} \alex{Is this just a note, or text meant to stay?}
+Finally, we use $Rel\mathcal{(Q)}$ to denote the set of relevant
+queries that are candidates for repair. Our \emph{query slicing}
+optimization, \qslice, linearizes only the queries in
+$Rel\mathcal{(Q)}$, rather than the entire log, resulting in
+smaller problems than \naive, without any loss of accuracy.
 
 \subsection{Reducing Attributes (Attribute Slicing)}
 
 In addition to removing irrelevant queries, we additionally avoid encoding irrelevant attributes.
 Given $Rel\mathcal{(Q)}$, the relevant attributes can be defined as:
-$Rel\mathcal{(A)} = \cup_{q_i \in Rel\mathcal{Q)}} (\mathcal{F}(q_i)\cup \mathcal{P}(q_i))$
-Attribute slicing only encodes constraints using Equation~\ref{eq:uv} for attributes within $Rel\mathcal{(A)}$.
-This technique is effective for wide tables and query logs that focus a small subset of the attributes, for example
-in TPC-C style transaction workloads.\ewu{verify claim}
+$Rel\mathcal{(A)} = \cup_{q_i \in Rel\mathcal{Q}} (\mathcal{F}(q_i)\cup \mathcal{P}(q_i))$
+\aslice uses \emph{attribute slicing} to only encode constraints for attributes in $Rel\mathcal{(A)}$.
+This technique is effective for wide tables and query logs that focus a small subset of the attributes, such as TPC-C style transaction workloads.\ewu{verify claim} \alex{Should we mention here that experimentally we found that this doesn't work? I don't like that we don't understand why.}
 
 
 
 \subsection{Single Query Incremental Repairs}
 
-Despite the previous optimizations, the number of undetermined variables can still be very high, causing 
-the MILP-solver to take a very long time to solve for all of the values.  As we saw in
-Figure~\ref{fig:querysize_vs_time}, the solver performance increases \ewu{cubically}
-as the number of undetermined variables increases (solid line).
-In contrast, we find that the scalability is significantly better when only a {\it single query}
-is parameterized, despite linearizing the same number of queries (dashed line).
+Even with the slicing optimizations, the number of undetermined variables can remain high in many cases, resulting in slow runtime for the MILP solver.  As we saw in
+Figure~\ref{fig:querysize_vs_time}, the solver runtime increases \ewu{cubically} \alex{exponentially?}
+as the log size (and thus the number of variables) increases (red bars).
+In contrast, we find that the scalability is significantly better when only a \emph{single query}
+is parameterized, despite linearizing the same number of queries (\alex{teal?} bars).
 
-These results suggest that it is {\it faster} to run a separate MILP problem for each 
+These results suggest that it is \emph{faster} to run a separate MILP problem for each 
 suffix of the query log (e.g., $q_i, q_{i+1}\ldots, q_n$) where only $q_i$'s constraints contain
 undetermined variables, rather than encode and parameterize the entire log.
-In the special case where there is a single corrupted query (or the user searches for a single repair),
-we propose an incremental approach (Algorithm~\ref{incalg}), 
-where each query from the most to least recent is individually tested.
-In the algorithm below, we use a modified version of the exhaustive algorithm 
-(Algorithm~\ref{alg:basic}) called $QueryFix_{exh,param}(\mathcal{Q}, \mathcal{D}_0, \mathcal{D}_n, \mathcal{C}, q)$,
-which takes an extra parameter $q$.  The modified algorithm only parameterizes $q$, 
+\incremental (Algorithm~\ref{alg:incalg}) handles cases where the log contains a single corrupted query (or the search focuses on a single repair),
+The algorithm linearizes the entire log, incorporating any slicing optimizations, but parameterizes a single query at a time, moving from the most recent to the oldest.
+The algorithm calls a modified version of \naive,
+which takes an extra parameter $q_i$.  The modified algorithm only parameterizes $q_i$, 
 and fixes the values for the parameters for the rest of the queries in $\mathcal{Q}$.
 
-\ewu{Should the inputs be $D_j$ or $D_0$???}
-\begin{algorithm}[htbp]
-\caption{$QueryFix_{inc}$ algorithm.}
+\begin{algorithm}[t]
+\caption{\incremental algorithm. \ewu{Should the inputs be $D_j$ or $D_0$???}
+}
 \label{alg:incalg}
 \begin{algorithmic}[2]
 \REQUIRE {$Rel\mathcal{(Q)}, \mathcal{D}_j, \mathcal{D}_n, \mathcal{C}$}
@@ -415,7 +420,7 @@ and fixes the values for the parameters for the rest of the queries in $\mathcal
 
 
 
-This approach prioritizes repairs for complaints that are due to more recent corruptions.
-We believe this is a natural property to expect in practice, and our experiments \ewu{$foo\times$}
-performance improvement on top of the slicing-based approaches described in this section.
+\incremental prioritizes repairs for complaints that are due to more recent corruptions.
+We believe this is a natural property to expect in practice, and our experiments demonstrate \ewu{$foo\times$}
+performance improvement on top of the slicing-based approaches.
 

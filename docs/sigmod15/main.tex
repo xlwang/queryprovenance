@@ -13,7 +13,6 @@
 \newcommand{\calF}[0]{$\cal{F}$}
 
 \newcommand{\ind}{\hspace{\algorithmicindent}}
-\newcommand{\sys}{\textsc{QueryXRay}\xspace}
 
 % \newcommand{\deprecate}[1]{}
 \newcommand{\deprecate}[1]{\noindent{\color{light-gray}{#1}}}
@@ -36,7 +35,19 @@
 %%Ensuring that equation labels remain normal size, even if we shrink the equation text
 \makeatletter
 \def\maketag@@@#1{\hbox{\m@th\normalfont\normalsize#1}}
+\DeclareRobustCommand*\textsubscript[1]{%
+          \@textsubscript{\selectfont#1}}
+        \def\@textsubscript#1{%
+          {\m@th\ensuremath{_{\mbox{\fontsize\sf@size\z@#1}}}}}
 \makeatother
+
+\newcommand{\sysname}{\textsc{QueryXRay}}
+\newcommand{\sys}{\sysname\xspace}
+\newcommand{\naive}{\sysname\textsubscript{basic}\xspace}
+\newcommand{\tslice}{\sysname\textsubscript{ts}\xspace}
+\newcommand{\qslice}{\sysname\textsubscript{qs}\xspace}
+\newcommand{\aslice}{\sysname\textsubscript{as}\xspace}
+\newcommand{\incremental}{\sysname\textsubscript{inc}\xspace}
 
 % End of preamble. Here it comes the document.
 \begin{document}
