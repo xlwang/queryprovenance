@@ -2,9 +2,9 @@
 
 \section{Introduction}
 \label{s:intro}
-\ewu{we really need to emphasize that this is a HARD problem!!}
+% \ewu{we really need to emphasize that this is a HARD problem!!}
 
-Poor data quality is estimated to cost the US economy more than \$600 billion
+Poor data quality is a hard and persistent problem.  It is estimated to cost the US economy more than \$600 billion
 per year~\cite{eckerson2002} and erroneous price data in retail databases
 alone cost the US consumers \$2.5 billion each year~\cite{Fan2008}. Although data
 cleaning tools can purge many errors from a dataset before downstream 
@@ -21,7 +21,9 @@ affected. Therefore, traditional data cleaning approaches are not well-suited
 for this setting: While they provide general-purpose tools to identify and
 rectify anomalies in the data, they are not designed to diagnose the causes of
 errors that are rooted in erroneous updates.
-\ewu{many data cleaning systems try to identify structural sources of dirtiness, but can only do it at a surface level.  They would never be able to identify those caused by a faulty query!}
+Some data cleaning systems try to identify structural sources of
+mistakes~\cite{dataxray}, but they are unable to trace the source of
+the mistakes to particular faulty queries.
 
 While improving data quality and correcting data errors has been an important
 focus for data management research, handling new errors, introduced during
@@ -35,7 +37,7 @@ questions before allowing the updates, and it is not applicable to updates
 initiated by applications.
 
 
-In this paper, we present \sys, a \emph{diagnostic} framework for data errors
+In this paper, we present \sys, a \emph{diagnosis and repair} framework for data errors
 caused by erroneous updates. In contrast to existing approaches in data
 cleaning that aim to detect and correct errors in the data directly, the goal
 of \sys is to identify errors in the queries that introduced errors in the
@@ -58,14 +60,14 @@ do not have the capacity or ability to investigate the complaints deeply. The
 standard course of action is to correct billing mistakes on a case-by-case
 basis for each complaint. As a result, unreported errors remain in the
 database for a long time, or they never get corrected, and their cause becomes
-harder to trace as the source of the errors is obscured.\footnote{This is a real-life scenario, provided to us by a US-based wireless provider. \alex{I added this for some gravitas.  Does it help?  Should we be more specific, or mention anything else?}}
+harder to trace as the source of the errors is obscured.\footnote{This is a real-life scenario, provided to us by a popular US-based wireless provider.}
 
 \end{example}
 
 \begin{example}[Tax bracket adjustment]\label{ex:taxes}
     
 Tax brackets, which determine tax rates for different income levels, are
-frequently adjusted. Accounting firms implement these changes to their
+often adjusted. Accounting firms implement these changes to their
 databases by appropriately updating the tax rates of their customers. Mistakes
 in these update queries (e.g., Figure~\ref{fig:example}) result in errors in
 the tax rates and computed taxes. 
@@ -131,40 +133,44 @@ following contributions:
 
 % \ewu{really like this organization}
 
-\ewu{add: special case optimizations for single query case.}
+% \ewu{add: special case optimizations for single query case.}
 
 \begin{itemize}[leftmargin=*, topsep=0mm, itemsep=0mm]      
     \item We formalize the problem of diagnosing a set of errors using log
     histories of updates that operated on the data. Given a set of 
     \emph{complaints} as representations of data discrepancies in the current
     state of a dataset, \sys identifies the queries in the log that require the  minimal
-    amount of changes that would resolve all of the complaints (Section~\ref{???}).
+    amount of changes that would resolve all of the complaints (Section~\ref{sec:abstractions}).
       
     \item We provide an exact error-diagnosis solution through a non-trivial
-    transformation of the problem to a mixed integer program (MIP) that
-    analyzes the data provenance of the erroneous tuples at the attribute
-    level. Our approach employs state-of-the-art MIP solvers to identify
-    optimal diagnoses that are guaranteed to resolve all complaints, and is
-    tolerant to incomplete information (missing complaints)
-    (Section~\ref{???}).
+    transformation of the problem to a mixed integer linear program (MILP) that
+    encodes the data provenance of the erroneous tuples. Our approach employs state-of-the-art MILP solvers to identify
+    optimal diagnoses that are guaranteed to resolve all complaints without introducing new errors to the data
+    (Section~\ref{sec:sol}).
     
-    \item While modern solvers can handle large numbers of variables and
-    constraints, eventually, they fail to scale to very large datasets and
-    large query logs. We present several performance optimizations that allow
-    our diagnostic methods to scale, in many cases without affecting the
-    quality of the produced solutions (Section~\ref{???}).
+    \item We present several optimizations to our basic diagnostic
+    method, which reduce the problem size without affecting the
+    quality of the produced solutions. Further, we propose an
+    incremental repair method that targets the cases where the log
+    contains a single corrupted query (or the search focuses on a
+    single repair). This incremental analysis of the log allows us to
+    scale to very large datasets and large query logs. Further, we
+    show that our optimization techniques have the additional
+    advantage of tolerating incomplete information, such as unreported
+    errors (Section~\ref{sec:opt}).
+
     
-    \item We extend our framework to also handle false positives: complaints
-    that mistakenly identify data as erroneous. We define the notion of
-    complaint \emph{density}, which is a query-driven measure of closeness of
-    a complaint to other complaints. The main intuition of our approach is
-    that complaints of low density are likely false positives and thus can be
-    safely ignored (Section~\ref{???}).
+    % \item We extend our framework to also handle false positives: complaints
+    % that mistakenly identify data as erroneous. We define the notion of
+    % complaint \emph{density}, which is a query-driven measure of closeness of
+    % a complaint to other complaints. The main intuition of our approach is
+    % that complaints of low density are likely false positives and thus can be
+    % safely ignored (Section~\ref{???}).
     
     \item We experimentally evaluate the effectiveness and efficiency of our
     methods against real-world and synthetic datasets and query logs. We
     demonstrate that \xxx{... to be completed when we know what we have}
-    (Section~\ref{???}). \alex{Ideally, we should highlight some impressive numbers here.}
+    (Section~\ref{???}). 
 \end{itemize}
 
 
@@ -175,8 +181,7 @@ following contributions:
 \begin{figure}[t]
     \centering
         \includegraphics[scale=0.35]{figures/architecture}
-    \caption{\sys processes data anomalies in the form of complaints and analyzes logged query histories to identify the causes of error. In the heart of the system, transformation algorithms express the diagnosis problem as a mixed integer program, and optimization modules ensure that the MIP programs can be evaluated efficiently.
-    \alex{Is this figure up-to-date?}}
+    \caption{\sys processes data anomalies in the form of complaints and analyzes logged query histories to identify the causes of error. In the heart of the system, transformation algorithms express the diagnosis problem as a mixed integer program, and optimization modules ensure that the MIP programs can be evaluated efficiently.}
     \label{fig:architecture}
 \end{figure}
 
@@ -189,12 +194,13 @@ The query repairs represent corrections to the queries in the log, and can be
 used to identify additional errors in the data that were not reported.
 
 The core of \sys is a transformation module that expresses the query diagnosis
-problem as a Mixed Integer Program (MIP). Two performance optimization modules
+problem as a Mixed Integer Linear Program (MILP). Two performance optimization modules
 ensure that the system can scale to large datasets efficiently, while
-maintaining high accuracy. Finally, the density filtering component ensures
-smooth handling of false errors (data that has been identified as erroneous,
-but it is in fact correct).
+maintaining high accuracy. 
+% Finally, the density filtering component ensures
+% smooth handling of false errors (data that has been identified as erroneous,
+% but it is in fact correct).
 
-
+\alex{Xiaolan, please add a couple of sentences on implementation.}
 
 
