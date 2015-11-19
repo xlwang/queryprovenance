@@ -29,13 +29,22 @@ controlled synthetic scenarios, as well as study the effectiveness
 in typical database query workloads based on widely used benchmarks.
 
 To this end, our experiments are organized as follows: First, 
-establish the quality limitations of existing heuristics and the need for a formal, 
-constraint-based algorithm (\exact).  Second, we study how each of the 
-optimizations described in Section~\ref{s:optimiztaions} improves algorithm scalability.
-Third, we introduce different forms of error in the input complaint sets and study the 
-effectiveness of our noise-handling heuristics.  Finally, we use two
-representative database transaction benchmarks, TPC-C XXX~\cite{tpcc} and AuctionMark~\cite{auctionmark}
-to study \sys in realistic scenarios. \alex{So, which algorithm do we call \sys?}
+we compare the exhaustive MILP algorithm against the different optimizations 
+to highlight the value of different optimizations.  We then compare the
+repair costs of \texttt{INSERT}, \texttt{DELETE}, or \texttt{UPDATE}-only query logs 
+and find that the latter query type is by far the most complicated and costly to repair.
+For the subsequent experiments, we focus solely on \texttt{UPDATE}-only synthetic workloads 
+to understand how \sys responds to different query logs and databases.  
+Finally, we evaluate the efficacy on real-world databases transaction benchmarks,
+TPC-C XXX~\cite{tpcc} and AuctionMark~\cite{auctionmark}.
+
+
+
+% establish the quality limitations of existing heuristics and the need for a formal, 
+% constraint-based algorithm (\exact).  Second, we study how each of the 
+% optimizations described in Section~\ref{s:optimiztaions} improves algorithm scalability.
+% Third, we introduce different forms of error in the input complaint sets and study the 
+% effectiveness of our noise-handling heuristics.  
 
 
 
@@ -76,22 +85,23 @@ to study \sys in realistic scenarios. \alex{So, which algorithm do we call \sys?
   {\bf Param} & {\bf Description} \\ \midrule
   $p$ & Precision: \% of repaired tuples that are correct. \\
   $r$ & Recall: \% of full complaint set repaired.\\
-  $t_{prep}$ & Time to construct CPLEX problem \\
-  $t_{send}$ & Time to send CPLEX problem to solver \\
-  $t_{solve}$ & Time for solver to generate a solutions\\
+  % $t_{prep}$ & Time to construct CPLEX problem \\
+  % $t_{send}$ & Time to send CPLEX problem to solver \\
+  % $t_{solve}$ & Time for solver to generate a solutions\\
   $t_{total}$ & End-to-end execution time \\ 
   $d_{measure}$ & \red{Some sort of distance measure} \\ \bottomrule \end{tabular}
   \caption{Metrics Compared}
   \label{t:metrics}
 \end{table}
 
+
+
 \ewu{one point to know is that the recall can only be less than 1 in two cases:
 1) incomplete complaint set 2) Solver infeasibility.  If the complaint set
 is complete and the solver returns a solution, the recall will be $1$. 
 This point is important to emphasize.}
 
-
-Each of our experiments follows a standard procedure.  \alex{what is a ``standard procedure''??}
+Each of our experiments follows a consistent procedure. 
 We generate a sequence of queries using a synthetic query generator or 
 the benchmark program, and corrupt the query log as described below. 
 We then execute the original and corrupt query logs on an initial (possibly empty) database,
@@ -103,10 +113,24 @@ Finally, we execute the evaluated algorithms on the complaints and compare the f
 query log with the true query log, as well as the fixed and true
 final database states to measure performance and accuracy metrics.
 
-Tables~\ref{t:params} and~\ref{t:metrics} summarize the key parameters that
-we vary throughout our experiments, as well as the metrics we use to evaluate
-the quality of the algorithm solutions, respectively.  The rest of this section
-outlines our datasets, workloads, and parameters used to generate the synthetic query log.
+We compare the following algorithms:
+$\sys_{exh}$ the naive, exhaustive MILP algorithm; 
+$\sys_{S \subseteq \{t,q,a,inc\}}$ where the subscripts $t,q,a,inc$ represent the
+application of tuple, query and attribute slicing and incremental computation -- 
+for example, $\sys_{t,q,inc}$ uses both tuple and query slicing along with the incremental computation; 
+when the algorithm uses incremental computation, the superscripts $\sys_{inc}^{first}$
+and $\sys_{inc}^{all}$ describe the incremental algorithm that either returns the first successful repair,
+or returns the repair with the lowest objective function across the entire query log.
+
+We evaluate the algorithms along several metrics.  Performance is measured as wall clock
+time between submitting a query log and retrieving the results.  In Experiment~\ref{???},
+we evaluate the total time to output {\it each repair} when running the incremental algorithm
+across the entire query log.  In addition, we measure the repair's precision (percentage of
+repaired tuples that were correctly fixed), the recall (the percentage of the full complaint set that was 
+repaired), and the F1 measure (the harmonic mean of precision and recall).
+Table~\ref{t:params} summarizes the key parameters that we vary throughout our experiments.  
+The rest of this section outlines our datasets, workloads, and parameters used to generate the data 
+and query logs in our experiments.
 
 {
 \color{blue} 
@@ -127,13 +151,13 @@ We then generate a sequence of $N_q$ \texttt{UPDATE} queries, which
 have the following respective forms: where \verb|?| is a query parameter 
 and \verb|r| is the size of the range. }
 \iffalse
-We generate an initial database of $N_D$ random tuples.  
-The schema contains $N_a=5$ attributes $a_1\ldots a_5$, whose values are
-picked from $V_d$ uniformly at random, along with a primary key $id$.
-We then generate a sequence of $N_q$ queries containing a mixture of \texttt{INSERT} queries,
-point \texttt{UPDATE} queries, and range \texttt{UPDATE} queries.  
-The \texttt{UPDATE} queries have the following respective forms, where \verb|?| is a query parameter 
-and \verb|r| is the size of the range.
+  We generate an initial database of $N_D$ random tuples.  
+  The schema contains $N_a=5$ attributes $a_1\ldots a_5$, whose values are
+  picked from $V_d$ uniformly at random, along with a primary key $id$.
+  We then generate a sequence of $N_q$ queries containing a mixture of \texttt{INSERT} queries,
+  point \texttt{UPDATE} queries, and range \texttt{UPDATE} queries.  
+  The \texttt{UPDATE} queries have the following respective forms, where \verb|?| is a query parameter 
+  and \verb|r| is the size of the range.
 \fi
 {\scriptsize
 \begin{verbatim}
@@ -150,17 +174,139 @@ a zipfian~\cite{zipf} distribution
 with exponent $0+s$.  This allows our experiments to vary between a uniform distribution, where each attribute is
 equally likely to be picked, and a skewed distribution where nearly all attributes are the same. \\
 \iffalse
-\texttt{INSERT} queries simply insert values picked uniformly at random from $V_d$.  
+  \texttt{INSERT} queries simply insert values picked uniformly at random from $V_d$.  
 
-\xlw{Replace with what we actually do:
-We first consider three different homogenous query logs: \texttt{INSERT} only ($p_I = 1$), 
-\texttt{PK} update only ($p_I = 0, p_{pk} = 1$), and \texttt{RANGE} update only ($p_I = 0, p_{pk} = 0$).
-These query logs help us understand \sys's performance characteristics for each query type individually.  
-Finally, we investigate heterogenous mixtures of the three query types to simulate varying amounts of real settings.
-} \\
-\xlw{We only have UPDATE query in the synthetic dataset. In single error case, how to fix a insert query is 
-quite straightforward as well as the delete query. Should we cut words for insert and delete query?}
+  \xlw{Replace with what we actually do:
+  We first consider three different homogenous query logs: \texttt{INSERT} only ($p_I = 1$), 
+  \texttt{PK} update only ($p_I = 0, p_{pk} = 1$), and \texttt{RANGE} update only ($p_I = 0, p_{pk} = 0$).
+  These query logs help us understand \sys's performance characteristics for each query type individually.  
+  Finally, we investigate heterogenous mixtures of the three query types to simulate varying amounts of real settings.
+  } \\
+  \xlw{We only have UPDATE query in the synthetic dataset. In single error case, how to fix a insert query is 
+  quite straightforward as well as the delete query. Should we cut words for insert and delete query?}
 \fi
+
+
+% \begin{figure}[h]
+% \centering
+% \includegraphics[width = 3.5in]{figures/qidxsimulation/numinrange}
+% \caption{.}
+% \label{f:numinrange} 
+% \end{figure}
+
+
+
+% Anant's workload?
+{ \color{blue}
+\stitle{TPC-C} We use the data and query workload over the {\it
+ORDER} table in TPC-C~\cite{}.  We generate a database at scale
+1 with one warehouse, and keep only the queries that modify the
+{\it ORDER} table. The initial table contains 4570 tuples and we capture 
+1000 queries in which 530 are \texttt{UPDATE} query and the others
+are \texttt{INSERT} query. 
+%We then randomly perturb a subset of the queries to generate the corrupted query log. 
+We pick query at certain index ($idx$ in Table~\ref{t:params}) 
+and corrupt it by replacing the correct parameter(s) into randomly 
+generated incorrect one(s) according to the corresponding attribute domain. 
+
+\stitle{AuctionMark} Auctionmark workload simulates the 
+actual action market. We generate a database 
+with 8729 tuples and 650 queries (540 \texttt{UPDATE} query and 110 \texttt{INSERT} query) 
+and we perturb the query log in the same way as for the TPC-C workload.
+
+Both workloads generated from the OLTP-bench project~\cite{oltpbench,oltpbenchgit}.
+
+
+
+}
+{\color{blue}
+\subsection{Single-Query Comparison}
+In this section, we compare \heurstic and \milpall on query log with size 1. 
+We use \textbf{Synthetic} data generator (Section~\ref{sec:syntheticgen}) 
+to generate a initial table with 1000 tuples and one 
+\texttt{UPDATE} query with range update. 
+We further adjust the range (\# of tuples modified by the query) 
+from 5 tuples to 500 tuples. 
+
+ \begin{figure}[h]
+\centering
+  \begin{subfigure}[t]{.48\columnwidth}
+  \includegraphics[width = .95\columnwidth]{figures/placeholder}
+  \caption{.}
+  \label{f:heursticvsmilp} 
+  \end{subfigure}
+  \caption{Heuristic Approach vs. MILP-based Approach on Single-Query. }
+\end{figure}
+
+\subsection{Multi-Query Comparison}
+We further compare \milpall, \milptuple, \milptuplestopearly, \milpadvtuple  
+on \textbf{Synthetic} data 
+with 1000 tuples and 300 queries. We adjust the problem complexity by corrupting queries 
+at different indexes: as we error happen further from the most recent query, 
+the problem become harder to solve. 
+
+\begin{figure}[h]
+\centering
+  \begin{subfigure}[t]{.48\columnwidth}
+  \includegraphics[width = .95\columnwidth]{figures/scale_allalgs}
+  \caption{.}
+  \label{f:multiquery} 
+  \end{subfigure}
+  \caption{MILP-based Approach and Extensions on Multi-Query. }
+\end{figure}
+
+
+
+\subsubsection{Updates Matter}
+Run insert and delete only workloads.
+Show that update queies are the really hard ones
+
+
+
+\subsubsection{Comparing Optimization Options}
+
+Compare all algorithms for a varying number of corrupted queries.
+% - exh, tupleslice, queryslicing, attrslicing, tuplequeryslicing
+% - 1 error: oldest query
+% - 2 errors: oldest query + 10th
+% - 3 errors: oldest + 10th + 20th
+% - dbsize: 1000
+% - uniform skew
+Show that exhaustive and exh+t,q,a are all incredibly slow and the optimizations help a bit.
+
+Compare exh+optimizations, inc and shows that inc is way better.
+
+End up picking $queryfix_{inc,t}$, $queryfix_{inc,t,q}$
+
+
+%
+% compair everything, naive sucks
+% 
+% add compare everything with multiple corrupted queries
+% - exh, tupleslice, queryslicing, attrslicing, tuplequeryslicing
+% - 1 error: oldest query
+% - 2 errors: oldest query + 10th
+% - 3 errors: oldest + 10th + 20th
+% - dbsize: 1000
+% - uniform skew
+% 
+% zoom in onto: inc, inc+tupleslicing, inc+query slicing, inc+attrslicing, everything (cplex2)
+% 
+% pick cplex2 as the winner
+% 
+% cplex_searchall = incremental but for everything
+% 
+% cplex3 == cplex_stop_early_2iter
+% 
+% the naive algorithms suck.
+% 
+% incremental comptuation vs non incremental comptutaion
+% 
+% show that w/wout query fix is what makes the difference
+% incremental should always be on
+
+
+
 \noindent {\it Effect of Index of Corrupted Query:}
 A key parameter for our experiments is the location of the corrupted query ($idx$).  
 \alex{Have we discussed anywhere yet that we focus on single errors?}
@@ -225,118 +371,6 @@ $idx \in \{0, 25, 50, 100, 200, 250\}$ , relative
 to the most recent query (e.g., the most recent query, the $25^th$ most recent query, and so on).
 
 
-% \begin{figure}[h]
-% \centering
-% \includegraphics[width = 3.5in]{figures/qidxsimulation/numinrange}
-% \caption{.}
-% \label{f:numinrange} 
-% \end{figure}
-
-
-
-% Anant's workload?
-{ \color{blue}
-\stitle{TPC-C} We use the data and query workload over the {\it
-ORDER} table in TPC-C~\cite{}.  We generate a database at scale
-1 with one warehouse, and keep only the queries that modify the
-{\it ORDER} table. The initial table contains 4570 tuples and we capture 
-1000 queries in which 530 are \texttt{UPDATE} query and the others
-are \texttt{INSERT} query. 
-%We then randomly perturb a subset of the queries to generate the corrupted query log. 
-We pick query at certain index ($idx$ in Table~\ref{t:params}) 
-and corrupt it by replacing the correct parameter(s) into randomly 
-generated incorrect one(s) according to the corresponding attribute domain. 
-
-\stitle{AuctionMark} Auctionmark workload simulates the 
-actual action market. We generate a database 
-with 8729 tuples and 650 queries (540 \texttt{UPDATE} query and 110 \texttt{INSERT} query) 
-and we perturb the query log in the same way as for the TPC-C workload.
-
-Both workloads generated from the OLTP-bench project~\cite{oltpbench,oltpbenchgit}.
-
-\subsubsection{Comparisons}
-We compare the MILP-based approach with the alternative heuristic approach
-on query log with a single query; and then evaluate
-the performance of MILP-based approach and extensions on query log
-with multiple queries. 
-
-\smallskip
-
-\noindent \milpall (Section~\ref{sec:sol}): This baseline algorithm 
-fixes the complaints by linearizing 
-all tuples in the database into the MILP problem. In addition, this approach 
-examines every query exhaustively and return the log repair with minimum
-objective value.
-
-\noindent \milptuple (Section~\ref{sec:sol}): This is an aggressive approach 
-that only consider tuples in the complaint set to improve the performance of
-the naive MILP-based approach. Again, this examines every query in the query log. 
-
-\smallskip
-
-\noindent \milptuplestopearly (Section~\ref{sec:sol}): Instead of validate every
-query in the query log, this approach only consider tuples in the complaint set
-and stop the searching process once it finds a valid fix (all tuples in the 
-complaints get fixed). 
-
-\smallskip
-
-\noindent \milpadvtuple (Section~\ref{sec:opt:tbsize}): This approach 
-further optimize the naive MILP-based approaches by conducting a two-iteration process 
-(Tuple Slicing) and stop immediately after it finds a valid fix. 
-
-\smallskip
-
-\noindent \milpadvall (Section~\ref{sec:opt}): This is the advanced MILP-based
-approach which include all optimization (Tuple Slicing \& Query Slicing). 
-This method also follows the stop early strategy. 
-\\
-We use IBM CPLEX 12.6.1 as the MILP solver in our experiments. 
-
-\smallskip
-
-\noindent \heurstic (Section~\ref{sec:heuristic}): This is the heuristic approach that
-fixes single incorrect query by fixes the where clause by decision tree and 
-the set clause by linear equations. We use WEKA J48 for as the decision tree 
-classifier, and JAMA as the linear 
-system solver. 
- 
-}
-{\color{blue}
-\subsection{Single-Query Comparison}
-In this section, we compare \heurstic and \milpall on query log with size 1. 
-We use \textbf{Synthetic} data generator (Section~\ref{sec:syntheticgen}) 
-to generate a initial table with 1000 tuples and one 
-\texttt{UPDATE} query with range update. 
-We further adjust the range (\# of tuples modified by the query) 
-from 5 tuples to 500 tuples. 
-
- \begin{figure}[h]
-\centering
-  \begin{subfigure}[t]{.48\columnwidth}
-  \includegraphics[width = .95\columnwidth]{figures/placeholder}
-  \caption{.}
-  \label{f:heursticvsmilp} 
-  \end{subfigure}
-  \caption{Heuristic Approach vs. MILP-based Approach on Single-Query. }
-\end{figure}
-
-\subsection{Multi-Query Comparison}
-We further compare \milpall, \milptuple, \milptuplestopearly, \milpadvtuple  
-on \textbf{Synthetic} data 
-with 1000 tuples and 300 queries. We adjust the problem complexity by corrupting queries 
-at different indexes: as we error happen further from the most recent query, 
-the problem become harder to solve. 
-
- \begin{figure}[h]
-\centering
-  \begin{subfigure}[t]{.48\columnwidth}
-  \includegraphics[width = .95\columnwidth]{figures/scale_allalgs}
-  \caption{.}
-  \label{f:multiquery} 
-  \end{subfigure}
-  \caption{MILP-based Approach and Extensions on Multi-Query. }
-\end{figure}
 
 As we observed from Figure~\ref{f:multiquery}, \milpall maintains high accuracy when errors
 happen more recent, however it does not scale when the error locate further from the most
