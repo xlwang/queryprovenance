@@ -194,6 +194,47 @@ To standardize our procedures, we selected a fixed set of indexes $idx$
 that are used in all experiments.  Appendix~\ref{app:qidx} presents
 experiments that justify the rationale behind our selection.
 
+
+
+
+
+\subsection{Benchmark}
+We evaluate the proposed algorithm on two benchmarks. Queries in the benchmark 
+workloads are PRIMARY KEY updates, which modifies one tuple at a time, and insert queries. 
+This property greatly simplifies the problem and reduces searching space since queries dependency 
+become very sparse: we say one query depends on another only if the result of the latter
+query may affects the result of the first one. Thus, in a workload with PRIMARY KEY
+updates, two queries have this dependency relationship only
+when they have the exactly same where condition, which has much lower probability than 
+general updates. As a result, we observe that the proposed approaches work
+very efficient and effective 
+in fixing errors in both TPC-C and AuctionMark benchmarks. 
+
+\stitle{TPC-C: }
+
+\stitle{AuctionMark: }
+
+
+\begin{figure}[h]
+\centering
+  \begin{subfigure}[t]{\columnwidth}
+  \includegraphics[width = .95\columnwidth]{figures/tpcc_time}
+  \caption{Performance on TPC-C Benchmark}
+  \label{f:tpcc} 
+  \end{subfigure}
+  \begin{subfigure}[t]{\columnwidth}
+  \includegraphics[width = .95\columnwidth]{figures/auction_time}
+  \caption{Performance on AuctionMark Benchmark}
+  \label{f:auctionmark} 
+  \end{subfigure}
+  \caption{Benchmark Performance}
+
+\end{figure}
+
+
+
+
+
   \begin{figure*}[h]
   \centering
     \vspace*{-.2in}
@@ -409,72 +450,6 @@ Figure~\ref{f:falsenegative} varies $FN \in \{\}$.
 \stitle{Incremental Results}
 INcremental algorithm, incremental results
 
-
-
-
-
-
-%
-% compair everything, naive sucks
-% 
-% add compare everything with multiple corrupted queries
-% - exh, tupleslice, queryslicing, attrslicing, tuplequeryslicing
-% - 1 error: oldest query
-% - 2 errors: oldest query + 10th
-% - 3 errors: oldest + 10th + 20th
-% - dbsize: 1000
-% - uniform skew
-% 
-% zoom in onto: inc, inc+tupleslicing, inc+query slicing, inc+attrslicing, everything (cplex2)
-% 
-% pick cplex2 as the winner
-% 
-% cplex_searchall = incremental but for everything
-% 
-% cplex3 == cplex_stop_early_2iter
-% 
-% the naive algorithms suck.
-% 
-% incremental comptuation vs non incremental comptutaion
-% 
-% show that w/wout query fix is what makes the difference
-% incremental should always be on
-
-
-
-
-\subsection{Benchmark}
-We evaluate the proposed algorithm on two benchmarks. Queries in the benchmark 
-workloads are PRIMARY KEY updates, which modifies one tuple at a time, and insert queries. 
-This property greatly simplifies the problem and reduces searching space since queries dependency 
-become very sparse: we say one query depends on another only if the result of the latter
-query may affects the result of the first one. Thus, in a workload with PRIMARY KEY
-updates, two queries have this dependency relationship only
-when they have the exactly same where condition, which has much lower probability than 
-general updates. As a result, we observe that the proposed approaches work
-very efficient and effective 
-in fixing errors in both TPC-C and AuctionMark benchmarks. 
-
-\stitle{TPC-C: }
-
-\stitle{AuctionMark: }
-
-
-\begin{figure}[h]
-\centering
-  \begin{subfigure}[t]{\columnwidth}
-  \includegraphics[width = .95\columnwidth]{figures/tpcc_time}
-  \caption{Performance on TPC-C Benchmark}
-  \label{f:tpcc} 
-  \end{subfigure}
-  \begin{subfigure}[t]{\columnwidth}
-  \includegraphics[width = .95\columnwidth]{figures/auction_time}
-  \caption{Performance on AuctionMark Benchmark}
-  \label{f:auctionmark} 
-  \end{subfigure}
-  \caption{Benchmark Performance}
-
-\end{figure}
 
 
 
