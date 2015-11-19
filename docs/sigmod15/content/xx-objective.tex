@@ -18,9 +18,10 @@ Moving beyond the queries themselves,  it is possible to augment the objective f
 to penalize the number and magnitude of changes to the database.
 Such a modification would require removing the hard constraints that set the
 attribute values $t.A_j$ to database values and instead add their weighted difference
-to the objective function.
+to the objective function.  The drawback of this approach is the increased number of
+undetermined variables, which severely affects performance in practice.
 
-In this paper, for simplicity, we use Manhattan distance between parameters 
+For these reasons, in this paper, we use Manhattan distance between parameters 
 in the query log as our objective function.  We use $q.param_i$ to denote the $i^{th}$ paramater of query $q$,
 and $|q.param|$ to denote the total number of parameters in $q$:
 \[d(\mathcal{Q}, \mathcal{Q}^*) = \sum_{i = 1} ^{n} \sum_{j = 1}^{|q_i.para|} |q_i.para_j - q_i.para_j^*|\]

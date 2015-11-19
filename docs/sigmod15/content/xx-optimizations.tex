@@ -66,7 +66,8 @@ only tuples modified by the fixed queries
 \ewu{Assume reader is clear that we are only repairing WHERE clause range predicates}
 
 Our first optimization aggressively reduces the number of tuples by only encoding those 
-tuples in the complaint set $\mathcal{C}$.  One reason is because each tuples necessitates
+tuples in the complaint set $\mathcal{C}$ (Algorithm~\ref{alg:basic} line $2$ 
+is replaced with \texttt{for each t in $\mathcal{C}$}).  One reason is because each tuple necessitates
 the linearization of the entire query log, thus only encoding the complaints minimizes the 
 size of the problem with respect to the relevant tuples.
 Although this optimization is guaranteed by the MILP problem to 
@@ -309,7 +310,7 @@ Algorithm~\ref{alg:fullimpact} describes how $\mathcal{F}(q_i)$ can be computed:
 \begin{algorithm}[htbp]
 \caption{$FullImpact$ algorithm for finding $\mathcal{F}(q)$.}
 \label{alg:fullimpact}
-\begin{algorithmic}
+\begin{algorithmic}[2]
 \REQUIRE {$\mathcal{Q}$, $q_i$}
 % \ENSURE {$\mathcal{F}(\mathcal{Q})=\{\{\mathcal{F}(q_1)\}, ..., \{\mathcal{F}(q_n)\}\}$}
 % \FOR {each $q_i$ in $q_n, ..., q_1$}
@@ -374,7 +375,7 @@ and fixes the values for the parameters for the rest of the queries in $\mathcal
 \begin{algorithm}[htbp]
 \caption{$QueryFix_{inc}$ algorithm.}
 \label{alg:incalg}
-\begin{algorithmic}
+\begin{algorithmic}[2]
 \REQUIRE {$Rel\mathcal{(Q)}, \mathcal{D}_j, \mathcal{D}_n, \mathcal{C}$}
 \STATE Sort $Rel\mathcal{(Q)}$ from most to least recent
 \FOR {each $q_i \in Rel\mathcal{(Q)}$}
