@@ -17,7 +17,7 @@ illustrates the limitations of the naive approach.
 \begin{figure}{h}
     \centering
         \includegraphics[width=0.4\textwidth]{figures/qsize_time_badscale}
-    \caption{Query log size vs. execution time on synthetic setup. }
+    \caption{Log size vs. execution time on synthetic setup. }
     \label{fig:querysize_vs_time}
 \end{figure}
 
@@ -95,8 +95,9 @@ In contrast, (b) highlights a case where \sys generalized incorrectly.
 The dirty and clean ranges are non-overlapping, so the non-complaint tuple shown should not 
 be modified by $q$, and has been incorrectly included in the repaired range.
 Note that in both of these cases, the objective function will ensure that the repaired range 
-does not extend beyond the truth range towards the right.  Thus, the repaired range
-can only over-generalize in the direction of the dirty range.
+does not over-generalize to the right because that would strictly increase the objective function.
+On the other hand, over-generalizing towards the dirty range on the left is possible because it decreases
+the Manhattan distance between the repaired and corrupted lower bound.
 
 \ewu{Give second iteration a name}
 Our goal is to reduce the repaired range to exclude those non-complaint tuples.  
