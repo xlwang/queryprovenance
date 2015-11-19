@@ -19,9 +19,10 @@
 
 In this section, we carefully study the performance and accuracy
 characteristics of the naive MILP-based repair algorithm, as well as 
-optimizations that improve the scalability of the system over the naive
-approach by over $Y\times$ and enable the algorithm to tolerate
-incomplete complaint sets with minimal loss in accuracy.
+slicing-based optimizations that improve the latency of the system over the naive
+approach by over $Y\times$, an incremental algorithm for single query corruptions that
+further improves the latency over the naive approach by $>Y\times$, and 
+the multi-pass tuple-slicing algorithm that tolerates incomplete complaint sets with minimal loss in accuracy.
 Our goals in the evaluation is to understand these trade-offs in
 controlled synthetic scenarios, as well as study the effectiveness
 in typical database query workloads based on widely used benchmarks.
@@ -125,17 +126,16 @@ time between submitting a query log and the system terminating after retrieving 
 (e.g., the time to the first repairt for $\sys_{inc}^{1st}$, or the time to process the full log for $\sys{inc}^{all}$).  
 Experiment~\ref{???} evaluates the time to output {\it each repair} when running the 
 incremental variant across the entire query log.  
-In addition, we measure the repair's precision (percentage of repaired tuples that were correctly fixed), 
+
+We also measure the repair's precision (percentage of repaired tuples that were correctly fixed), 
 the recall (the percentage of the full complaint set that was repaired), 
 and the F1 measure (the harmonic mean of precision and recall).
+We note that in the context of complete complaint sets, the recall will always be $1$ if \sys returns a result.
+The recall can only degrade due to solver infeasibility (the solver does not find a valid assignment within a loose time bound), 
+or in the context of incomplete complaint sets.   Thus our reported metrics are the average across multiple runs.
 Finally, Table~\ref{t:params} summarizes the key parameters that we vary throughout our experiments.  
 We describe them in the context of the datasets and workloads below.
 
-
-\ewu{one point to know is that the recall can only be less than 1 in two cases:
-1) incomplete complaint set 2) Solver infeasibility.  If the complaint set
-is complete and the solver returns a solution, the recall will be $1$. 
-This point is important to emphasize.}
 
 
 \subsubsection{Datasets and Workloads}
