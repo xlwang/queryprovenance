@@ -17,13 +17,11 @@
 %
 \section{Experiments}
 
-In this paper, we have described several heuristic algorithms based on decision trees 
-and bounding box algorithms \alex{do we talk about bounding box algorithms?}, as well as an exact, albeit less-scalable,
-constraint-based solution to the \prob problem.  In addition, we 
-introduced  several extensions to the MILP-based solution~\alex{We should be careful and not tie it to CPLEX.  CPLEX is just a particular solver.  ILP-based is better.} that 
-1) improves the scalability of the system and 2) tolerates false positives and 
-negatives in the input complaint set.
-\alex{The wording is a bit anemic.  It makes it sound like we suggested a few naive approaches and hacks.  Add more oomph!}
+In this section, we carefully study the performance and accuracy
+characteristics of the naive MILP-based repair algorithm, as well as 
+optimizations that improve the scalability of the system over the naive
+approach by over $Y\times$ and enable the algorithm to tolerate
+incomplete complaint sets with minimal loss in accuracy.
 Our goals in the evaluation is to understand these trade-offs in
 controlled synthetic scenarios, as well as study the effectiveness
 in typical database query workloads based on widely used benchmarks.
