@@ -37,6 +37,7 @@ For the subsequent experiments, we focus solely on \texttt{UPDATE}-only syntheti
 to understand how \sys responds to different query logs and databases.  
 Finally, we evaluate the efficacy on real-world databases transaction benchmarks,
 TPC-C XXX~\cite{tpcc} and AuctionMark~\cite{auctionmark}.
+All experiments were run on \ewu{X Core} 2.66 GHz  machines with 16GB RAM running \ewu{OS + Version}.
 
 
 
@@ -78,28 +79,26 @@ TPC-C XXX~\cite{tpcc} and AuctionMark~\cite{auctionmark}.
 \end{table}
 
 
-\begin{table}[t]\small
-  \centering
-  \begin{tabular}{@{}cl@{}}
-  \toprule
-  {\bf Param} & {\bf Description} \\ \midrule
-  $p$ & Precision: \% of repaired tuples that are correct. \\
-  $r$ & Recall: \% of full complaint set repaired.\\
-  % $t_{prep}$ & Time to construct CPLEX problem \\
-  % $t_{send}$ & Time to send CPLEX problem to solver \\
-  % $t_{solve}$ & Time for solver to generate a solutions\\
-  $t_{total}$ & End-to-end execution time \\ 
-  $d_{measure}$ & \red{Some sort of distance measure} \\ \bottomrule \end{tabular}
-  \caption{Metrics Compared}
-  \label{t:metrics}
-\end{table}
+\iffalse
+  \begin{table}[t]\small
+    \centering
+    \begin{tabular}{@{}cl@{}}
+    \toprule
+    {\bf Param} & {\bf Description} \\ \midrule
+    $p$ & Precision: \% of repaired tuples that are correct. \\
+    $r$ & Recall: \% of full complaint set repaired.\\
+    % $t_{prep}$ & Time to construct CPLEX problem \\
+    % $t_{send}$ & Time to send CPLEX problem to solver \\
+    % $t_{solve}$ & Time for solver to generate a solutions\\
+    $t_{total}$ & End-to-end execution time \\ 
+    $d_{measure}$ & \red{Some sort of distance measure} \\ \bottomrule \end{tabular}
+    \caption{Metrics Compared}
+    \label{t:metrics}
+  \end{table}
+\fi
 
 
 
-\ewu{one point to know is that the recall can only be less than 1 in two cases:
-1) incomplete complaint set 2) Solver infeasibility.  If the complaint set
-is complete and the solver returns a solution, the recall will be $1$. 
-This point is important to emphasize.}
 
 Each of our experiments follows a consistent procedure. 
 We generate a sequence of queries using a synthetic query generator or 
@@ -114,51 +113,46 @@ query log with the true query log, as well as the fixed and true
 final database states to measure performance and accuracy metrics.
 
 We compare the following algorithms:
-$\sys_{exh}$ the naive, exhaustive MILP algorithm; 
-$\sys_{S \subseteq \{t,q,a,inc\}}$ where the subscripts $t,q,a,inc$ represent the
-application of tuple, query and attribute slicing and incremental computation -- 
-for example, $\sys_{t,q,inc}$ uses both tuple and query slicing along with the incremental computation; 
-when the algorithm uses incremental computation, the superscripts $\sys_{inc}^{first}$
-and $\sys_{inc}^{all}$ describe the incremental algorithm that either returns the first successful repair,
-or returns the repair with the lowest objective function across the entire query log.
+$\sys_{exh}$ is the naive, exhaustive algorithma 
+$\sys_{S \subseteq \{t,q,a,inc\}}$, where the subscripts $t,q,a,inc$ represent the
+application of tuple, query and attribute slicing and single query incremental repairs, 
+and $S$ defines the set of optimizations present in the algorithm.
+For example, $\sys_{t,q,inc}$ uses both tuple and query slicing along with incremental repair.
+When the algorithm uses incremental computation, the superscripts $\sys_{inc}^{1st}$
+and $\sys_{inc}^{all}$ variants that either returns the first successful repair,
+or the repair with the lowest objective function across the entire query log.
 
 We evaluate the algorithms along several metrics.  Performance is measured as wall clock
-time between submitting a query log and retrieving the results.  In Experiment~\ref{???},
-we evaluate the total time to output {\it each repair} when running the incremental algorithm
-across the entire query log.  In addition, we measure the repair's precision (percentage of
-repaired tuples that were correctly fixed), the recall (the percentage of the full complaint set that was 
-repaired), and the F1 measure (the harmonic mean of precision and recall).
-Table~\ref{t:params} summarizes the key parameters that we vary throughout our experiments.  
-The rest of this section outlines our datasets, workloads, and parameters used to generate the data 
-and query logs in our experiments.
+time between submitting a query log and the system terminating after retrieving all relevant repairs 
+(e.g., the time to the first repairt for $\sys_{inc}^{1st}$, or the time to process the full log for $\sys{inc}^{all}$).  
+Experiment~\ref{???} evaluates the time to output {\it each repair} when running the 
+incremental variant across the entire query log.  
+In addition, we measure the repair's precision (percentage of repaired tuples that were correctly fixed), 
+the recall (the percentage of the full complaint set that was repaired), 
+and the F1 measure (the harmonic mean of precision and recall).
+Finally, Table~\ref{t:params} summarizes the key parameters that we vary throughout our experiments.  
+We describe them in the context of the datasets and workloads below.
 
-{
-\color{blue} 
-We ran experiments on machines with 
-2.66 GHz processor and 16GB RAM. 
-}
-\alex{Why is this description separate from the synthetic data listed below?}
+
+\ewu{one point to know is that the recall can only be less than 1 in two cases:
+1) incomplete complaint set 2) Solver infeasibility.  If the complaint set
+is complete and the solver returns a solution, the recall will be $1$. 
+This point is important to emphasize.}
+
 
 \subsubsection{Datasets and Workloads}
 
 This subsection describes the query and data generation process in greater detail.
 
 \stitle{Synthetic} \label{sec:syntheticgen}
-{\color{blue} We generate an initial database of $N_D$ random tuples.  
+We generate an initial database of $N_D$ random tuples.  
 The schema contains $N_a=5$ attributes $a_1\ldots a_5$, whose values are
 picked from $V_d$ uniformly at random, along with a primary key $id$.
-We then generate a sequence of $N_q$ \texttt{UPDATE} queries, which
-have the following respective forms: where \verb|?| is a query parameter 
-and \verb|r| is the size of the range. }
-\iffalse
-  We generate an initial database of $N_D$ random tuples.  
-  The schema contains $N_a=5$ attributes $a_1\ldots a_5$, whose values are
-  picked from $V_d$ uniformly at random, along with a primary key $id$.
-  We then generate a sequence of $N_q$ queries containing a mixture of \texttt{INSERT} queries,
-  point \texttt{UPDATE} queries, and range \texttt{UPDATE} queries.  
-  The \texttt{UPDATE} queries have the following respective forms, where \verb|?| is a query parameter 
-  and \verb|r| is the size of the range.
-\fi
+We then generate a sequence of $N_q$ \texttt{UPDATE} queries~\footnote{\tiny We focus on
+\texttt{UPDATE} only query logs because they are the {\it predominant} cost 
+in a query log.  Experiment~\ref{???} compares \texttt{INSERT}, \texttt{DELETE} and \texttt{UPDATE}
+only workloads to illustrate the differenc \ewu{Experiment could move to appendix}.} where 
+\verb|?| is a randomly generated value and \verb|r| is the size of the range predicate: 
 {\scriptsize
 \begin{verbatim}
   UPDATE SET (a_i = ?),.. WHERE a_j = ? AND ...
