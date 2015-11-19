@@ -8,7 +8,7 @@ resolve the errors reflected in the complaint set.
 This approach constructs a mixed-integer linear 
 programming (MILP) problem~\cite{milp} by linearizing and parameterizing the 
 corrupted query log over the tuples in the database. 
-Briefly, an MILP is a linear program~\cite{} where only a subset of the undetermined variables
+Briefly, an MILP is a linear program~\cite{???} where only a subset of the undetermined variables
 are required to be integers, while the rest are real valued.
 
 Our general strategy is to model each query as a linear equation 
@@ -18,8 +18,8 @@ In addition, the constant values in the queries are parameterized
 into a set of undetermined variables, while the database state is encoded 
 as constraints on the initial and final tuple values.
 Finally, the undetermined variables are used to construct an objective function
-that prefers value assignments that minimze both the amount that the queries change and
-the number of non-complaint tuples that are affected. \alex{I was under the impression that we stick to using the non-complaint tuples as constraints.}
+that prefers value assignments that minimize both the amount that the queries change and
+the number of non-complaint tuples that are affected. 
 
 The rest of this section will first describe the process of linearizing a single query
 and translating it into a set of constraints.  We then extend the process to the entire
@@ -132,101 +132,141 @@ improve the speed and quality of the results, as well as harness the trade-off b
 
 % \subsubsection{Constructing Linear Inequality Constraints}
 
-MILP problems require that the constraints are expressed as a set of linear
-(in)equality constraints, thus our task is to linearize the parameterized
-conditional function.   We will individually describe this linearization process 
-to represent the value of a single attribute $A_j$ and a single tuple $t$ for 
-\texttt{UPDATE}, \texttt{INSERT}, and \texttt{DELETE} queries; 
-extending the process to the rest of the attributes is a straighforward exercise.
+MILP problems express constraints as a set of linear inequalities. Our
+task is to derive such a mathematical representation for each query in
+$\mathcal{Q}$. Starting with the functional representation of a
+query (Section~\ref{sec:models}), we describe how each query type,
+\texttt{UPDATE}, \texttt{INSERT}, and \texttt{DELETE}, can be
+transformed into a set of linear constraints over a tuple $t$ and an
+attribute value $A_j$.
+
+% We will individually describe this linearization process 
+% to represent the value of a single attribute $A_j$ and a single tuple $t$ for 
+% \texttt{UPDATE}, \texttt{INSERT}, and \texttt{DELETE} queries; 
+% extending the process to the rest of the attributes is a straighforward exercise.
 % Now that we have modeled $q_i$ as a parameterized conditional function, 
 % we must linearize $f_{q_i}$ into a set of linear (in)equality constraints
 % for the MILP problem.
 
 
-
-\stitle{\textbf{UPDATE:} }
-Recall from Section~\ref{sec:models} that query $q_i$ can be modeled as
-the combination of a modifying function $\mu_{q_i}(t)$ and conditional function $\sigma_{q_i}(t)$.
-We can re-express the value of attribute $A_j$ in the updated tuple $t'$ as the following equation:
-{\scriptsize
-\begin{eqnarray}
-\label{eq:linearization}
-t'.A_j = x_{q_i, t}\otimes \mu_{q_i}(t).A_j + (1-x_{q_i, t})\otimes t.A_j 
-\end{eqnarray} 
-}
-
-
-\noindent Where the binary variable $x$ is introduced to represent the output of 
-the conditional function:
-{\scriptsize
-\begin{eqnarray}
+\smallskip
+\noindent
+\textbf{UPDATE:}
+Recall from Section~\ref{sec:models} that query $q_i$ can be modeled
+as the combination of a modifier function $\mu_{q_i}(t)$ and
+conditional function $\sigma_{q_i}(t)$. First, we introduce a binary
+variable $x_{q_i, t}$ to indicate whether $t$ satisfies the
+conditional function of $q_i$: $x_{q_i, t}=1$ if
+$\sigma_{q_i}(t)=\texttt{true}$ and $x_{q_i, t}=0$ otherwise. In a
+slight abuse of notation:
+% 
+% {\scriptsize
+\begin{align}
 \label{eq:x}
 x_{q_i, t} = \sigma_{q_i}(t)
-\end{eqnarray}
-}
-We then introduce two variables $u.A_j$ and $v.A_j$ to represent 
-the respective components in Equation~\ref{eq:linearization}, where
-$M$ representes the upper bound of $t.A_j$'s domain:
-{\scriptsize 
-\begin{eqnarray}
+\end{align}
+% }
+ 
+
+Next, we introduce real-valued variables for the attributes of $t$.
+We express the updated value
+of an attribute using semi-modules, borrowing from the models of
+provenance for aggregate operations~\cite{Amsterdamer2011}. A
+semi-module consists of a commutative semi-ring, whose elements are
+scalars, a commutative monoid whose elements are vectors, and a
+multiplication-by-scalars operation that takes a scalar $x$ and a
+vector $u$ and returns a vector $x \otimes u$. A similar formalism has
+been used in literature to model hypothetical data
+updates~\cite{tiresias}.
+
+Given a query $q_i$ and tuple $t$, we express the value of attribute $A_j$ in the updated tuple $t'$ as follows:
+% {\scriptsize
+\begin{align}
+\label{eq:linearization}
+t'.A_j = x_{q_i, t}\otimes \mu_{q_i}(t).A_j + (1-x_{q_i, t})\otimes t.A_j 
+\end{align} 
+% }
+In this expression, the $\otimes$ operation corresponds to regular
+multiplication, but we maintain the $\otimes$ notation to indicate
+that it is a semi-module multiplication by scalars. This expression
+models the action of the update: If $t$ satisfies the conditional
+function ($x_{q_i, t}=1$), then $t'.A_j$ takes the value
+$\mu_{q_i}(t).A_j$; if $t$ does not satisfy the conditional function
+($x_{q_i, t}=0$), then $t'.A_j$ takes the value $t.A_j$.
+In our running example, the rate value of a tuple $t$ after query $q_1$ would be expressed as:
+$t'.rate = x_{q_1, t}\otimes 30 + (1-x_{q_1, t})\otimes t.rate $
+
+
+Equation~\eqref{eq:linearization} does not yet provide a linear
+representation of the corresponding constraint, as it contains
+multiplication of variables. To linearize this expression, we adapt a
+method from~\cite{integerProg}: We introduce two variables $u.A_j$ and
+$v.A_j$ to represent the two terms of
+Equation~\eqref{eq:linearization}: $u.A_j=x_{q_i, t}\otimes
+\mu_{q_i}(t).A_j$ and $v.A_j=(1-x_{q_i, t})\otimes t.A_j$. Assuming a
+number $M$ as the upper bound of the domain of $t.A_j$, we get the
+following constraints:
+{\scriptsize
+\begin{align}
 \label{eq:uv}
-u.A_j &\leq & \mu_{q_i}(t).A_j \nonumber\\
-u.A_j &\leq & x_{q_i, t}M \nonumber\\ 
-u.A_j &\geq & \mu_{q_i}(t).A_j - (1-x_{q_i, t})M \nonumber \\\nonumber \\
-v.A_j &\leq & t.A_j \nonumber\\
-v.A_j &\leq & (1-x_{q_i, t})M \nonumber\\
-v.A_j &\geq & t.A_j - x_{q_i, t}M
-\end{eqnarray}
-}
-The first set of conditions forces $u.A_j = \mu_{q_i}(t).A_j$ if $x_{q_i, t}=1$, and $0$ otherwise.  
-The second set forces $v.A_j = t.A_j$ if $x_{q_i, t}=0$, and $0$ otherwise.  
-Now, Equation~\ref{eq:linearization} is simply a linear equation:
-{\scriptsize\begin{eqnarray}
+u.A_j &\leq \mu_{q_i}(t).A_j   &v.A_j &\leq t.A_j &\nonumber\\
+u.A_j &\leq x_{q_i, t}M        &v.A_j &\leq (1-x_{q_i, t})M &\\
+u.A_j &\geq \mu_{q_i}(t).A_j - (1-x_{q_i, t})M  \phantom{aa}
+&v.A_j &\geq t.A_j - x_{q_i, t}M &\nonumber
+\end{align}
+}%
+% 
+The set of conditions on $u.A_j$ ensure that $u.A_j = \mu_{q_i}(t).A_j$ if $x_{q_i, t}=1$, and $0$ otherwise. Similarly, 
+the conditions on $v.A_j$ ensure that $v.A_j = t.A_j$ if $x_{q_i, t}=0$, and $0$ otherwise.  
+Now, Equation~\eqref{eq:linearization} becomes linear:
+% {\scriptsize
+\begin{align}
 \label{eq:tnew}
 t.A_j' = u.A_j + v.A_j
-\end{eqnarray}}
+\end{align}
+% }
 
 
-
-\stitle{\textbf{INSERT:}}
+\smallskip
+\noindent
+\textbf{INSERT:}
 An insert query adds a new tuple $t_{new}$ to the database.  If the query were 
-corrupted, then the inserted values may need to be repaired.  Thus, we allocate
-an undetermined variable for each of the inserted tuple's attributes:
-{\scriptsize
+corrupted, then the inserted values need repair. We use a binary variable $x$ to model whether the query is correct.  Each attribute of the newly inserted tuple ($t'.A_j$) may take one of two values: the value specified by the insertion query ($t_{new}.A_j$) if the query is correct ($x=1$), or an undetermined value ($u.A_j$) if the query is incorrect ($x=0$).  Thus, similar with Equation~\eqref{eq:linearization}, we write:
+% {\scriptsize
 \begin{eqnarray}
 \label{eq:insert}
 t'.A_j = x \otimes t_{new}.A_j + (1-x) \otimes v.A_j 
 \end{eqnarray}
-}
-\noindent Where $x$ is an undetermined binary variable that represents whether
-the query is incorrect.  If it is, then it takes the value of an undetermined real 
-variable $v.A_j$.
+% }%
 
 
-\stitle{\textbf{DELETE:}}
+\smallskip
+\noindent
+\textbf{DELETE:}
 A delete query removes a set of tuples from the database.  
 Since the MILP problem doesn't have a way to express a non-existant value, 
 we encode a deleted tuple by setting its attributes to a value
 outside of the attribute domain $M^+$.  In this way, subsequent conditional functions
 on the attribute will return false, so it will not have an effect on subsequent queries encoded
 in the MILP problem:
-{\scriptsize
+% {\scriptsize
 \begin{eqnarray}
 \label{eq:delete}
 t'.A_j &=& x_{q_i, t} \otimes M^+ + (1-x_{q_i, t}) \otimes t.A_j \nonumber \\
-x &=& \sigma_{q_i}(t)
+x_{q_i, t} &=& \sigma_{q_i}(t)
 \end{eqnarray}
-}
+% }%
+This expression is further linearized using the same method as Equation~\eqref{eq:uv}.
 
-
-\stitle{\textbf{Putting it All Together:}}
-
+\smallskip
+\noindent
+\textbf{Putting it all together.}
+% 
 % )(\ref{eq:uv})(\ref{eq:tnew})(\ref{eq:insert})(
-The above constraints (\ref{eq:x}--\ref{eq:delete})
-form the main structure of MILP subproblem for a single attribute $A_j$ of a single tuple $t$.
-In this incomplete form, all of the variables including the binary variables $x_{q_i, t}$,
+The constraints defined in Equations \eqref{eq:x}--\eqref{eq:delete}
+form the main structure of the MILP problem for a single attribute $A_j$ of a single tuple $t$.  This formulation includes three types of variables: the binary variables $x_{q_i, t}$,
 the real-valued attribute values (e.g., $u.A_j$),
-and the real-valued constants in $\mu_{q_i}$ and $\sigma_{q_i}$ are all undetermined
+and the real-valued constants in $\mu_{q_i}$ and $\sigma_{q_i}$.  All these variables are undetermined
 and need to be assigned values by a MILP solver.  
 To linearize $q_i$, we can simply apply the same procedure for each attribute in the 
 query and every tuple in the database.
