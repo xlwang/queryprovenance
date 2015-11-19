@@ -260,7 +260,7 @@ reduce the total number of constraints for almost every setting to less than $10
     \includegraphics[width = .99\columnwidth]{figures/indelup_time}
     \vspace*{-.1in}
     \caption{Performance for different query types.}
-    \label{f:qtype} 
+    \label{f:indelup_time} 
     \end{subfigure}
     \\
     \begin{subfigure}[t]{.3\textwidth}
@@ -279,7 +279,7 @@ reduce the total number of constraints for almost every setting to less than $10
     \includegraphics[width = .99\columnwidth]{figures/indelup_acc}
     \vspace*{-.1in}
     \caption{F1-score for different query types.}
-    \label{f:qtype} 
+    \label{f:indelup_acc} 
     \end{subfigure}
     \vspace*{-.1in}
     \caption{Preliminary Experiments}
@@ -289,11 +289,11 @@ reduce the total number of constraints for almost every setting to less than $10
 \subsection{Preliminaries}
 The following set of experiments are designed to establish the rationale for 
 our experimental settings in the subsequent experiments.  
-Specifically, we compare the exhaustive approach with the suite of optimizations
+Specifically, we compare different slicing-based optimizations of the exhaustive approach
 as the number of corrupted queries increases.  
-We find that \ewu{XXX}.
-We then establish the difficulty of \texttt{UPDATE} workloads as compared to other query types.
-
+We then evaluate the scalability of the different exhaustive algorithms in the context of a single
+corrupted query and highlight the value of the second MILP iteration when using tuple-slicing.
+We then establish the difficulty of repairing \texttt{UPDATE} workloads as compared to other query types.
 
 
 \stitle{Multiple Corrupt Queries:}
@@ -301,6 +301,12 @@ In this experiment, we compare the naive exhaustive algorithm with four types of
 $\sys_S$, where $S \in \{t, q, a, tqa\}$.  We use the default settings with $1000$ tuples and
 $50$ \texttt{update} queries.  We corrupt every tenth query starting from oldest query $q_0$,
 up to $q_{40}$.  For example, when we corrupt $3$ queries, we corrupt $q_{0,10,20}$.
+We find that the number of corruptions greatly affects both the scalabality (Figure~\ref{f:multi_time}) 
+and the accuracy (Figure~\ref{f:multi_acc}) of the algorithms.  Specifically, as the number increases,
+the number of possible assignments of the MILP parameters increases exponentially and the solver often takes
+longer than our experimental time limits and returns an infeasibility error.  
+\ewu{This is a predominant reason why the accuracy degrades past $3$ corruptions.}
+
 
 
 \stitle{Single Query Optimization:}
@@ -321,11 +327,12 @@ an assignment in nearly all cases.
 Our final preliminary experiment evaluates the exhaustive, tuple-slicing algorithm 
 $\sys_{exh,t}$ on insert, delete, or update-only workloads.
 We increase the number of queries from $20$ to $100$ and corrupt the oldest query in the log.  
-The rest of the parameters use the default values.
-Figure~\ref{f:qtype} shows xxx.
+Figure~\ref{f:indelup_time} shows that while the cost of repairing insert and delete-only workloads
+remains relatively constaint, the cost for update-only workloads increases rapidly -- this is
+despite a near perfect F1-score for all settings (Figure~\ref{f:indelup_acc}).
 
 
-{\it Discussion: 
+{\it Takeaways: 
 End up picking $queryfix_{inc,t}$, $queryfix_{inc,t,q}$
 Justify single corrupt query
 }
