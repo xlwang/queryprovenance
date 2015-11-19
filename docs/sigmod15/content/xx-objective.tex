@@ -14,11 +14,12 @@ in $\mathcal{Q}$ and $\mathcal{Q}^*$ is a natural objective function.
 Alternatively, we may use the number of parameters that are different with the original ones 
 in order to penalize repairs that modify too many parameters. 
 
-Moving beyond the queries themselves,  it is possible to take the number and magnitude of changes
-to the database by augmenting the objective function with penalization terms and removing the 
+Moving beyond the queries themselves,  it is possible to augment the objective function 
+to penalize the number and magnitude of changes to the database.
+Such a modification would require removing the hard constraints that set the
+attribute values $t.A_j$ to database values and instead add their weighted difference
+to the objective function.
 
-augment the distance function
-by penalizing the number and magnitude of the tuples that are modified by the repair.
 In this paper, for simplicity, we use Manhattan distance between parameters 
 in the query log as our objective function.  We use $q.param_i$ to denote the $i^{th}$ paramater of query $q$,
 and $|q.param|$ to denote the total number of parameters in $q$:
