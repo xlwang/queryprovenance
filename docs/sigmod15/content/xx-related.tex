@@ -4,16 +4,37 @@
 \label{s:related}
 
 \sys tackles the problem of diagnosis and repair in relational query
-histories (query logs). This is in contrast to traditional data
-cleaning~\cite{rahm00} which focuses on identifying and correcting
-data ``in-place.'' \sys does not aim to correct errors in the data
+histories (query logs). It does not aim to correct errors in the data
 directly, but rather to find the underlying reason for reported errors
-in the queries that operated on the data. 
+in the queries that operated on the data. This is in contrast to
+traditional data cleaning~\cite{rahm00, Raman01, Kalashnikov06,
+Fan2008b} which focuses on identifying and correcting data
+``in-place.'' Identifying and correcting errors is an important, and
+rightfully well-studied problem. Existing literature has supplied a
+variety of tools to capture errors originating from data
+integration~\cite{Abiteboul99, Batini1986, Rahm2001, ParentS98},
+recognizing the same entities in data~\cite{Koudas2006,
+GruenheidDS14}, identifying true facts among conflicting
+data~\cite{yin2008truth, DN09, ltm2012}, and language support for
+cleaning~\cite{Galhardas2000}. All of these techniques are
+complimentary to our work. Their goal is to identify which data is
+correct and which data is incorrect, but they don't look for the
+sources of these errors in the processes or queries that generate and
+modify this data. In fact the output of such methods can be used to
+augment the complaint sets used by \sys, which focuses on identifying
+errors in the queries that produced the data, rather than the data
+itself.
+
+
 %things about diagnosis and explanations
 
+
+\cite{Golab2008,GolabKKS10 } 
+
 Studying and explaining
-data outcome has been studied in many aspects: 
-\cite{Golab2008, el2014interpretable} focuses on providing 
+data outcome has been studied in many aspects:
+\cite{GebalyAGKS14}
+focuses on providing 
 explanations to particular data outcome in tables; \cite{wang2015}
 provides error diagnosing for general data extraction systems. 
 
