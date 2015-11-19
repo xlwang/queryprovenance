@@ -17,13 +17,12 @@
 %
 \section{Experiments}
 
-In this paper, we have described several heuristic algorithms based on decision trees 
-and bounding box algorithms \alex{do we talk about bounding box algorithms?}, as well as an exact, albeit less-scalable,
-constraint-based solution to the \prob problem.  In addition, we 
-introduced  several extensions to the MILP-based solution~\alex{We should be careful and not tie it to CPLEX.  CPLEX is just a particular solver.  ILP-based is better.} that 
-1) improves the scalability of the system and 2) tolerates false positives and 
-negatives in the input complaint set.
-\alex{The wording is a bit anemic.  It makes it sound like we suggested a few naive approaches and hacks.  Add more oomph!}
+In this section, we carefully study the performance and accuracy
+characteristics of the naive MILP-based repair algorithm, as well as 
+slicing-based optimizations that improve the latency of the system over the naive
+approach by over $Y\times$, an incremental algorithm for single query corruptions that
+further improves the latency over the naive approach by $>Y\times$, and 
+the multi-pass tuple-slicing algorithm that tolerates incomplete complaint sets with minimal loss in accuracy.
 Our goals in the evaluation is to understand these trade-offs in
 controlled synthetic scenarios, as well as study the effectiveness
 in typical database query workloads based on widely used benchmarks.
@@ -37,6 +36,7 @@ For the subsequent experiments, we focus solely on \texttt{UPDATE}-only syntheti
 to understand how \sys responds to different query logs and databases.  
 Finally, we evaluate the efficacy on real-world databases transaction benchmarks,
 TPC-C XXX~\cite{tpcc} and AuctionMark~\cite{auctionmark}.
+All experiments were run on \ewu{X Core} 2.66 GHz  machines with 16GB RAM running \ewu{OS + Version}.
 
 
 
@@ -78,28 +78,26 @@ TPC-C XXX~\cite{tpcc} and AuctionMark~\cite{auctionmark}.
 \end{table}
 
 
-\begin{table}[t]\small
-  \centering
-  \begin{tabular}{@{}cl@{}}
-  \toprule
-  {\bf Param} & {\bf Description} \\ \midrule
-  $p$ & Precision: \% of repaired tuples that are correct. \\
-  $r$ & Recall: \% of full complaint set repaired.\\
-  % $t_{prep}$ & Time to construct CPLEX problem \\
-  % $t_{send}$ & Time to send CPLEX problem to solver \\
-  % $t_{solve}$ & Time for solver to generate a solutions\\
-  $t_{total}$ & End-to-end execution time \\ 
-  $d_{measure}$ & \red{Some sort of distance measure} \\ \bottomrule \end{tabular}
-  \caption{Metrics Compared}
-  \label{t:metrics}
-\end{table}
+\iffalse
+  \begin{table}[t]\small
+    \centering
+    \begin{tabular}{@{}cl@{}}
+    \toprule
+    {\bf Param} & {\bf Description} \\ \midrule
+    $p$ & Precision: \% of repaired tuples that are correct. \\
+    $r$ & Recall: \% of full complaint set repaired.\\
+    % $t_{prep}$ & Time to construct CPLEX problem \\
+    % $t_{send}$ & Time to send CPLEX problem to solver \\
+    % $t_{solve}$ & Time for solver to generate a solutions\\
+    $t_{total}$ & End-to-end execution time \\ 
+    $d_{measure}$ & \red{Some sort of distance measure} \\ \bottomrule \end{tabular}
+    \caption{Metrics Compared}
+    \label{t:metrics}
+  \end{table}
+\fi
 
 
 
-\ewu{one point to know is that the recall can only be less than 1 in two cases:
-1) incomplete complaint set 2) Solver infeasibility.  If the complaint set
-is complete and the solver returns a solution, the recall will be $1$. 
-This point is important to emphasize.}
 
 Each of our experiments follows a consistent procedure. 
 We generate a sequence of queries using a synthetic query generator or 
@@ -114,51 +112,45 @@ query log with the true query log, as well as the fixed and true
 final database states to measure performance and accuracy metrics.
 
 We compare the following algorithms:
-$\sys_{exh}$ the naive, exhaustive MILP algorithm; 
-$\sys_{S \subseteq \{t,q,a,inc\}}$ where the subscripts $t,q,a,inc$ represent the
-application of tuple, query and attribute slicing and incremental computation -- 
-for example, $\sys_{t,q,inc}$ uses both tuple and query slicing along with the incremental computation; 
-when the algorithm uses incremental computation, the superscripts $\sys_{inc}^{first}$
-and $\sys_{inc}^{all}$ describe the incremental algorithm that either returns the first successful repair,
-or returns the repair with the lowest objective function across the entire query log.
+$\sys_{exh}$ is the naive, exhaustive algorithma 
+$\sys_{S \subseteq \{t,q,a,inc\}}$, where the subscripts $t,q,a,inc$ represent the
+application of tuple, query and attribute slicing and single query incremental repairs, 
+and $S$ defines the set of optimizations present in the algorithm.
+For example, $\sys_{t,q,inc}$ uses both tuple and query slicing along with incremental repair.
+When the algorithm uses incremental computation, the superscripts $\sys_{inc}^{1st}$
+and $\sys_{inc}^{all}$ variants that either returns the first successful repair,
+or the repair with the lowest objective function across the entire query log.
 
 We evaluate the algorithms along several metrics.  Performance is measured as wall clock
-time between submitting a query log and retrieving the results.  In Experiment~\ref{???},
-we evaluate the total time to output {\it each repair} when running the incremental algorithm
-across the entire query log.  In addition, we measure the repair's precision (percentage of
-repaired tuples that were correctly fixed), the recall (the percentage of the full complaint set that was 
-repaired), and the F1 measure (the harmonic mean of precision and recall).
-Table~\ref{t:params} summarizes the key parameters that we vary throughout our experiments.  
-The rest of this section outlines our datasets, workloads, and parameters used to generate the data 
-and query logs in our experiments.
+time between submitting a query log and the system terminating after retrieving all relevant repairs 
+(e.g., the time to the first repairt for $\sys_{inc}^{1st}$, or the time to process the full log for $\sys{inc}^{all}$).  
+Experiment~\ref{???} evaluates the time to output {\it each repair} when running the 
+incremental variant across the entire query log.  
 
-{
-\color{blue} 
-We ran experiments on machines with 
-2.66 GHz processor and 16GB RAM. 
-}
-\alex{Why is this description separate from the synthetic data listed below?}
+We also measure the repair's precision (percentage of repaired tuples that were correctly fixed), 
+the recall (the percentage of the full complaint set that was repaired), 
+and the F1 measure (the harmonic mean of precision and recall).
+We note that in the context of complete complaint sets, the recall will always be $1$ if \sys returns a result.
+The recall can only degrade due to solver infeasibility (the solver does not find a valid assignment within a loose time bound), 
+or in the context of incomplete complaint sets.   Thus our reported metrics are the average across multiple runs.
+Finally, Table~\ref{t:params} summarizes the key parameters that we vary throughout our experiments.  
+We describe them in the context of the datasets and workloads below.
+
+
 
 \subsubsection{Datasets and Workloads}
 
 This subsection describes the query and data generation process in greater detail.
 
-\stitle{Synthetic} \label{sec:syntheticgen}
-{\color{blue} We generate an initial database of $N_D$ random tuples.  
+\stitle{Synthetic:} \label{sec:syntheticgen}
+We generate an initial database of $N_D$ random tuples.  
 The schema contains $N_a=5$ attributes $a_1\ldots a_5$, whose values are
 picked from $V_d$ uniformly at random, along with a primary key $id$.
-We then generate a sequence of $N_q$ \texttt{UPDATE} queries, which
-have the following respective forms: where \verb|?| is a query parameter 
-and \verb|r| is the size of the range. }
-\iffalse
-  We generate an initial database of $N_D$ random tuples.  
-  The schema contains $N_a=5$ attributes $a_1\ldots a_5$, whose values are
-  picked from $V_d$ uniformly at random, along with a primary key $id$.
-  We then generate a sequence of $N_q$ queries containing a mixture of \texttt{INSERT} queries,
-  point \texttt{UPDATE} queries, and range \texttt{UPDATE} queries.  
-  The \texttt{UPDATE} queries have the following respective forms, where \verb|?| is a query parameter 
-  and \verb|r| is the size of the range.
-\fi
+We then generate a sequence of $N_q$ \texttt{UPDATE} queries~\footnote{\scriptsize We focus on
+\texttt{UPDATE} only query logs because they are the {\it predominant} cost 
+in a query log.  Experiment~\ref{???} compares \texttt{INSERT}, \texttt{DELETE} and \texttt{UPDATE}
+only workloads to illustrate the differenc \ewu{Experiment could move to appendix}.} where 
+\verb|?| is a randomly generated value and \verb|r| is the size of the range predicate: 
 {\scriptsize
 \begin{verbatim}
   UPDATE SET (a_i = ?),.. WHERE a_j = ? AND ...
@@ -167,25 +159,33 @@ and \verb|r| is the size of the range. }
 }
 
 The $set$ parameter controls whether the \texttt{UPDATE} queries set attributes to random constant values ({\it const}),  
-or increment attributes by a random amount ({\it rel}).  The \texttt{WHERE} clauses form a conjunction.
-In addition we varied a skew parameter $s$, which determines the attributes referenced in the \texttt{WHERE}
-and \texttt{SET} clauses.  Each attribute in a query is picked from either a uniform distribution or 
-a zipfian~\cite{zipf} distribution
-with exponent $0+s$.  This allows our experiments to vary between a uniform distribution, where each attribute is
+or relative values ({\it rel}) by incrementing by a random, possibly negative, value.  
+The \texttt{WHERE} clauses form a conjunction.  
+In addition, the skew parameter $s$ determines the distribution attributes referenced in the \texttt{WHERE} and \texttt{SET} clauses.  
+Each attribute in a query is picked from either a uniform distribution when $s=0$ or a zipfian~\cite{zipf} distribution.
+This allows our experiments to vary between a uniform distribution, where each attribute is
 equally likely to be picked, and a skewed distribution where nearly all attributes are the same. \\
-\iffalse
-  \texttt{INSERT} queries simply insert values picked uniformly at random from $V_d$.  
+The \texttt{WHERE} clauses in \texttt{DELETE} queries are generated in an identical fashion, while
+\texttt{INSERT} queries insert values picked uniformly at random from $V_d$.
 
-  \xlw{Replace with what we actually do:
-  We first consider three different homogenous query logs: \texttt{INSERT} only ($p_I = 1$), 
-  \texttt{PK} update only ($p_I = 0, p_{pk} = 1$), and \texttt{RANGE} update only ($p_I = 0, p_{pk} = 0$).
-  These query logs help us understand \sys's performance characteristics for each query type individually.  
-  Finally, we investigate heterogenous mixtures of the three query types to simulate varying amounts of real settings.
-  } \\
-  \xlw{We only have UPDATE query in the synthetic dataset. In single error case, how to fix a insert query is 
-  quite straightforward as well as the delete query. Should we cut words for insert and delete query?}
-\fi
 
+
+\stitle{TPC-C:} We use the data and query workload over the {\it ORDER} table in TPC-C~\cite{tpcc}.  
+We generated a database at scale 1 with one warehouse, and kept the queries that modify the
+{\it ORDER} table. The initial table contains 4570 tuples and we ultimately generated a log with
+1000 queries, where $530$ are \texttt{UPDATE}s and the rest are \texttt{INSERT}s.
+
+\stitle{AuctionMark:} Auctionmark workload simulates the 
+actual action market. We generate a database 
+with 8729 tuples and $1000$ queries, with $540$ \texttt{UPDATE}s and $110$ \texttt{INSERT}s.
+Both TPC-C and AuctionMark setups were generated using the OLTP-bench project~\cite{oltpbench,oltpbenchgit}.
+
+
+\stitle{Corrupting Queries:} We corrupt query $q_i$ by replacing it with a randomly
+generated query of the same type based on the procedures described above.
+To standardize our procedures, we selected a fixed set of indexes $idx$
+that are used in all experiments.  Appendix~\ref{app:qidx} presents
+experiments that justify the rationale behind our selection.
 
 % \begin{figure}[h]
 % \centering
@@ -195,30 +195,6 @@ equally likely to be picked, and a skewed distribution where nearly all attribut
 % \end{figure}
 
 
-
-% Anant's workload?
-{ \color{blue}
-\stitle{TPC-C} We use the data and query workload over the {\it
-ORDER} table in TPC-C~\cite{}.  We generate a database at scale
-1 with one warehouse, and keep only the queries that modify the
-{\it ORDER} table. The initial table contains 4570 tuples and we capture 
-1000 queries in which 530 are \texttt{UPDATE} query and the others
-are \texttt{INSERT} query. 
-%We then randomly perturb a subset of the queries to generate the corrupted query log. 
-We pick query at certain index ($idx$ in Table~\ref{t:params}) 
-and corrupt it by replacing the correct parameter(s) into randomly 
-generated incorrect one(s) according to the corresponding attribute domain. 
-
-\stitle{AuctionMark} Auctionmark workload simulates the 
-actual action market. We generate a database 
-with 8729 tuples and 650 queries (540 \texttt{UPDATE} query and 110 \texttt{INSERT} query) 
-and we perturb the query log in the same way as for the TPC-C workload.
-
-Both workloads generated from the OLTP-bench project~\cite{oltpbench,oltpbenchgit}.
-
-
-
-}
 {\color{blue}
 \subsection{Single-Query Comparison}
 In this section, we compare \heurstic and \milpall on query log with size 1. 
@@ -320,80 +296,6 @@ INcremental algorithm, incremental results
 
 
 
-\noindent {\it Effect of Index of Corrupted Query:}
-A key parameter for our experiments is the location of the corrupted query ($idx$).  
-\alex{Have we discussed anywhere yet that we focus on single errors?}
-This parameter determines the number of queries \sys must consider when searching for a fix,
-and affects the size of the complaint set.  
-\alex{It won't be clear to the reader how this relates to the size of the complaint set.}
-Both of these characteristics directly impact \sys's 
-runtime performance. For this reason, it is undesirable to randomly pick and corrupt queries
-throughout the query log, as the performance and accuracy results may not be comparable. 
-To better understand the relationship between $idx$ and the size of the complaint set, we ran
-simulations using a database with $20$ attributes, and a query log of size $1000$ containing
-either all $set = const$ or $set = rel$ \texttt{UPDATE} queries.
-We varied  $idx$ uniformly throughout the query log, and additionally varied
-the skew $s$ and range $r$ parameters to study how they affect the size of the complaint sets.
-
-
-  \begin{figure}[h]
-  \centering
-  \includegraphics[width = 3.5in]{figures/qidxsimulation/qidx_v_ncomplaints_20attrs_const}
-  \caption{Query index vs complaint set size for $set = const$.}
-  \label{f:qidx_v_ncomplaints_const} 
-  \end{figure}
-
-
-Figure~\ref{f:qidx_v_ncomplaints_const} plots a representative set of parameters.  We plot one point
-for each corrupted query index that results in a complaint set with at least one complaint. 
-These results highlight several interesting trends.  When queries do not overlap ($r = 1$, leftmost column),
-the size of the complaint sets are relatively small, and their frequency is constant across the possible query indices.
-However as the possibility of overlap increases (e.g., $r$ increases), more recent queries are more likely to result in
-very large complaint sets (at times the size of the database).   
-This effect is a symptom of the fact that queries with large ranges will set groups of tuples to the same value,
-and over time, skew the distribution of tuple values to a small number of possible values.
-Thus, more recent corruptions that affect a large cluster of similar tuples will result in a large complaint set.
-We find that increasing the skew parameter also exacerbates this effect.  
-In addition, high skew increases the likelihood that queries will share the same \texttt{WHERE} and \texttt{SET} clause 
-attributes as a corrupted query, thus overwriting the error introduced by the corrupted query.  
-This is why the frequency of non-empty complaint sets decreases significantly as $s$ increases.
-
-
-\begin{figure}[h]
-\centering
-\includegraphics[width = 3.5in]{figures/qidxsimulation/qidx_v_ncomplaints_20attrs_rel}
-\caption{Query index vs complaint set size for $set = rel$.}
-\label{f:qidx_v_ncomplaints_rel} 
-\end{figure}
-
-In contrast to $set=const$ queries, Figure~\ref{f:qidx_v_ncomplaints_rel} executes the 
-same experiment using $set=rel$ queries.  In this setting, we find that the trend is
-reversed, and older corruptions tend to result in larger complaint sets.  This is because,
-subsequent \texttt{UPDATE} queries increment or decrement the attribute value, rather than
-overwriting it with a constant value.  The clustering of data values due to query overlap
-then increases the number of other tuples affected.
-
-
-\ewu{summarize findings and implications to experiments here.}
-not all corruptions result in complaint sets.
-In constant SET clause workloads, larger complaints sets are more likely to
-result from more recent corrupted queries -- particularly if the queries are range updates or
-the updated attributes are skewed.
-For this reason, our experiments corrupt the query log at six positions 
-$idx \in \{0, 25, 50, 100, 200, 250\}$ , relative 
-to the most recent query (e.g., the most recent query, the $25^th$ most recent query, and so on).
-
-
-
-As we observed from Figure~\ref{f:multiquery}, \milpall maintains high accuracy when errors
-happen more recent, however it does not scale when the error locate further from the most
-recent query. \milptuple scales better than \milpall, but ignoring tuples not 
-in the complaint set apparently hurts the precision. \milptuplestopearly run times faster
-than \milpall and \milptuple, however the aggressive strategy greatly reduce the 
-precision. In the end, \milpadvtuple significantly improves the precision with very limited
-time cost compare to \milptuple. \\
-Based on these observations, we only include the performance of \milpadvtuple and \milpadvall
-in the rest of the experiments. 
 
 \subsection{Benchmark data}
 We evaluate the proposed algorithm on two benchmarks. Queries in the benchmark 
