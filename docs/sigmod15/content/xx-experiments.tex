@@ -172,7 +172,6 @@ The \texttt{WHERE} clauses in \texttt{DELETE} queries are generated in an identi
 
 
 
-
 \stitle{TPC-C:} We use the data and query workload over the {\it ORDER} table in TPC-C~\cite{tpcc}.  
 We generated a database at scale 1 with one warehouse, and kept the queries that modify the
 {\it ORDER} table. The initial table contains 4570 tuples and we ultimately generated a log with
@@ -186,12 +185,9 @@ Both TPC-C and AuctionMark setups were generated using the OLTP-bench project~\c
 
 \stitle{Corrupting Queries:} We corrupt query $q_i$ by replacing it with a randomly
 generated query of the same type based on the procedures described above.
-Appendix
-
-We pick a query at certain index ($idx$ in Table~\ref{t:params}) 
-and corrupt it by replacing the correct parameter(s) into randomly 
-generated incorrect one(s) according to the corresponding attribute domain. 
-
+To standardize our procedures, we selected a fixed set of indexes $idx$
+that are used in all experiments.  Appendix~\ref{app:qidx} presents
+experiments that justify the rationale behind our selection.
 
 % \begin{figure}[h]
 % \centering
