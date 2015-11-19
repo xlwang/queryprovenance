@@ -3,29 +3,31 @@
 
 A large drawback of the MILP-based approach described in the previous section is
 that it exhaustively encodes the combination of all tuples in the database and all queries
-in the query log.  In this approach, the number of constraints grows quadratically with respect to
-the database and the query log; the number of undetermined variables also increases quandratically.
-Both of these properties typically .
-In a simple experiment, shown in Figure~\ref{fig:querysize_vs_time}, we generated increasingly 
-larger query logs for a database of $1000$ tuples, encoded the problem using $\sys_{exh}$ (solid line), 
+in the query log.  In this approach, the number of constraints (as well as undetermined variables) 
+grows quadratically with respect to the database and the query log.
+Figure~\ref{fig:querysize_vs_time} shows a simple scalability experiment, where we generated increasingly 
+larger query logs for a database of $1000$ tuples, encoded the problem using $\sys_{exh}$ (red bars), 
 and solved the problem using a MILP-solver (CPLEX~\cite{cplex} in our experiments).
 We find that the solver time increases exponentially as the number of encoded queries increases --
 at a log size of $80$, the solver failed to produce an answer within $1000$ seconds --
 due to the exponential increase in the number of possible states for the increasing number of undetermined variables.
-Although the solver performance varies widely depending on the specific problem, this experiment 
-illustrates the limitations of the naive approach.
+In contrast, the blue bar illustrates the near-constant performance of a similarly encoded MILP problem that 
+{\it only parameterizes the constants of the oldest query in the log}.
+Although the empirical solver performance varies widely depending on the specific problem, 
+this experiment illustrates the limitations of the naive approach.
 
-\begin{figure}{h}
+\begin{figure}[h]
     \centering
         \includegraphics[width=0.4\textwidth]{figures/qsize_time_badscale}
     \caption{Log size vs. execution time on synthetic setup. }
     \label{fig:querysize_vs_time}
 \end{figure}
 
-To resolve this limitation, we explored two classes of optimizations that seek to
-reduce the number of encoded tuples and the number of linearized queries in the MILP problem.
-In addition, incremental algorithm that is faster if the corruption is recent.  
-We see in experiments that this is likely the case.
+To resolve this limitation, we explored three classes of slicing-based optimizations that seek to
+reduce the number of tuples, queries, and attributes that are encoded in the MILP problem.
+In addition, we propose an incremental algorithm that exploits the single bar performance observed
+in the above scalability experiment, which both improves the scalability and the repair latency
+when the corrupted query is recent.  
 
 
 
