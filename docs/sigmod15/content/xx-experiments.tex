@@ -20,7 +20,7 @@
 In this paper, we have described several heuristic algorithms based on decision trees 
 and bounding box algorithms \alex{do we talk about bounding box algorithms?}, as well as an exact, albeit less-scalable,
 constraint-based solution to the \prob problem.  In addition, we 
-introduced  several extensions to the CPLEX-based solution~\alex{We should be careful and not tie it to CPLEX.  CPLEX is just a particular solver.  ILP-based is better.} that 
+introduced  several extensions to the MILP-based solution~\alex{We should be careful and not tie it to CPLEX.  CPLEX is just a particular solver.  ILP-based is better.} that 
 1) improves the scalability of the system and 2) tolerates false positives and 
 negatives in the input complaint set.
 \alex{The wording is a bit anemic.  It makes it sound like we suggested a few naive approaches and hacks.  Add more oomph!}
@@ -111,9 +111,7 @@ outlines our datasets, workloads, and parameters used to generate the synthetic 
 {
 \color{blue} 
 We ran experiments on machines with 
-2.66 GHz processor and 16GB RAM. And we use IBM CPLEX 12.6.1 to solve the 
-MILP problem, WEKA J48 for as the classifier, and JAMA as the linear 
-system solver. 
+2.66 GHz processor and 16GB RAM. 
 }
 \alex{Why is this description separate from the synthetic data listed below?}
 
@@ -121,7 +119,14 @@ system solver.
 
 This subsection describes the query and data generation process in greater detail.
 
-\stitle{Synthetic} 
+\stitle{Synthetic} \label{sec:syntheticgen}
+{\color{blue} We generate an initial database of $N_D$ random tuples.  
+The schema contains $N_a=5$ attributes $a_1\ldots a_5$, whose values are
+picked from $V_d$ uniformly at random, along with a primary key $id$.
+We then generate a sequence of $N_q$ \texttt{UPDATE} queries, which
+have the following respective forms: where \verb|?| is a query parameter 
+and \verb|r| is the size of the range. }
+\iffalse
 We generate an initial database of $N_D$ random tuples.  
 The schema contains $N_a=5$ attributes $a_1\ldots a_5$, whose values are
 picked from $V_d$ uniformly at random, along with a primary key $id$.
@@ -129,7 +134,7 @@ We then generate a sequence of $N_q$ queries containing a mixture of \texttt{INS
 point \texttt{UPDATE} queries, and range \texttt{UPDATE} queries.  
 The \texttt{UPDATE} queries have the following respective forms, where \verb|?| is a query parameter 
 and \verb|r| is the size of the range.
-
+\fi
 {\scriptsize
 \begin{verbatim}
   UPDATE SET (a_i = ?),.. WHERE a_j = ? AND ...
@@ -140,9 +145,11 @@ and \verb|r| is the size of the range.
 The $set$ parameter controls whether the \texttt{UPDATE} queries set attributes to random constant values ({\it const}),  
 or increment attributes by a random amount ({\it rel}).  The \texttt{WHERE} clauses form a conjunction.
 In addition we varied a skew parameter $s$, which determines the attributes referenced in the \texttt{WHERE}
-and \texttt{SET} clauses.  Each attribute in  a query is picked from a zipfian~\cite{zipf} distribution
-with exponent $1+s$.  This allows our experiments to vary between a near-uniform distribution, where each attribute is
-equally likely to be picked, and a skewed distribution where nearly all attributes are the same.
+and \texttt{SET} clauses.  Each attribute in a query is picked from either a uniform distribution or 
+a zipfian~\cite{zipf} distribution
+with exponent $0+s$.  This allows our experiments to vary between a uniform distribution, where each attribute is
+equally likely to be picked, and a skewed distribution where nearly all attributes are the same. \\
+\iffalse
 \texttt{INSERT} queries simply insert values picked uniformly at random from $V_d$.  
 
 \xlw{Replace with what we actually do:
@@ -153,7 +160,7 @@ Finally, we investigate heterogenous mixtures of the three query types to simula
 } \\
 \xlw{We only have UPDATE query in the synthetic dataset. In single error case, how to fix a insert query is 
 quite straightforward as well as the delete query. Should we cut words for insert and delete query?}
-
+\fi
 \noindent {\it Effect of Index of Corrupted Query:}
 A key parameter for our experiments is the location of the corrupted query ($idx$).  
 \alex{Have we discussed anywhere yet that we focus on single errors?}
@@ -233,12 +240,12 @@ to the most recent query (e.g., the most recent query, the $25^th$ most recent q
 ORDER} table in TPC-C~\cite{}.  We generate a database at scale
 1 with one warehouse, and keep only the queries that modify the
 {\it ORDER} table. The initial table contains 4570 tuples and we capture 
-1000 update queries in which 530 are \texttt{UPDATE} query and the others
+1000 queries in which 530 are \texttt{UPDATE} query and the others
 are \texttt{INSERT} query. 
 %We then randomly perturb a subset of the queries to generate the corrupted query log. 
-We corrupt the query log at certain indexes (default indexes) and for each selected query we 
-replace the correct parameter(s) into randomly value within the 
-corresponding attribute domain. 
+We pick query at certain index ($idx$ in Table~\ref{t:params}) 
+and corrupt it by replacing the correct parameter(s) into randomly 
+generated incorrect one(s) according to the corresponding attribute domain. 
 
 \stitle{AuctionMark} Auctionmark workload simulates the 
 actual action market. We generate a database 
@@ -246,46 +253,100 @@ with 8729 tuples and 650 queries (540 \texttt{UPDATE} query and 110 \texttt{INSE
 and we perturb the query log in the same way as for the TPC-C workload.
 
 Both workloads generated from the OLTP-bench project~\cite{oltpbench,oltpbenchgit}.
+
+\subsubsection{Comparisons}
+We compare the MILP-based approach with the alternative heuristic approach
+on query log with a single query; and then evaluate
+the performance of MILP-based approach and extensions on query log
+with multiple queries. 
+
+\smallskip
+
+\noindent \milpall (Section~\ref{sec:sol}): This baseline algorithm 
+fixes the complaints by linearizing 
+all tuples in the database into the MILP problem. In addition, this approach 
+examines every query exhaustively and return the log repair with minimum
+objective value.
+
+\noindent \milptuple (Section~\ref{sec:sol}): This is an aggressive approach 
+that only consider tuples in the complaint set to improve the performance of
+the naive MILP-based approach. Again, this examines every query in the query log. 
+
+\smallskip
+
+\noindent \milptuplestopearly (Section~\ref{sec:sol}): Instead of validate every
+query in the query log, this approach only consider tuples in the complaint set
+and stop the searching process once it finds a valid fix (all tuples in the 
+complaints get fixed). 
+
+\smallskip
+
+\noindent \milpadvtuple (Section~\ref{sec:opt:tbsize}): This approach 
+further optimize the naive MILP-based approaches by conducting a two-iteration process 
+(Tuple Slicing) and stop immediately after it finds a valid fix. 
+
+\smallskip
+
+\noindent \milpadvall (Section~\ref{sec:opt}): This is the advanced MILP-based
+approach which include all optimization (Tuple Slicing \& Query Slicing). 
+This method also follows the stop early strategy. 
+\\
+We use IBM CPLEX 12.6.1 as the MILP solver in our experiments. 
+
+\smallskip
+
+\noindent \heurstic (Section~\ref{sec:heuristic}): This is the heuristic approach that
+fixes single incorrect query by fixes the where clause by decision tree and 
+the set clause by linear equations. We use WEKA J48 for as the decision tree 
+classifier, and JAMA as the linear 
+system solver. 
+ 
 }
-
-
-
-
-\subsection{MILP-based Approach vs Alternatives}
 {\color{blue}
-In this section, we first compare the basic MILP-based approach (Section~\ref{sec:heuristic})
-with the heuristic approach (Section~\ref{sec:sol}) and demonstrate that MILP-based approach 
-can solve single query effectively and efficiently compared to the heuristic
-approach. We then compare the the basic MILP approach with basic MILP + optimizations 
-(Section~\ref{sec:opt}) and we prove that the basic MILP approach maintain high accuracy 
-in solving errors but does not scale over larger size problems. 
+\subsection{Single-Query Comparison}
+In this section, we compare \heurstic and \milpall on query log with size 1. 
+We use \textbf{Synthetic} data generator (Section~\ref{sec:syntheticgen}) 
+to generate a initial table with 1000 tuples and one 
+\texttt{UPDATE} query with range update. 
+We further adjust the range (\# of tuples modified by the query) 
+from 5 tuples to 500 tuples. 
 
-\smallskip 
+ \begin{figure}[h]
+\centering
+  \begin{subfigure}[t]{.48\columnwidth}
+  \includegraphics[width = .95\columnwidth]{figures/placeholder}
+  \caption{.}
+  \label{f:heursticvsmilp} 
+  \end{subfigure}
+  \caption{Heuristic Approach vs. MILP-based Approach on Single-Query. }
+\end{figure}
 
-\noindent \textbf{Heuristic Approach vs. Basic MILP-based Approach} \\
-We first evaluate the performance of the MILP-based approach (Section~\ref{sec:sol}) with 
-the heuristic approach, which uses decision tree
-to fix the where clause and linear equations 
-for the set clause (Section~\ref{sec:heuristic}). \\
-\textbf{Dataset: }
-Synthetic dataset with range size from [5, 10, 50, 100, 500].\\
-\textbf{Performance: } ... we show heuristic approach is not as good as milp-based approach 
-even on single query.  
+\subsection{Multi-Query Comparison}
+We further compare \milpall, \milptuple, \milptuplestopearly, \milpadvtuple  
+on \textbf{Synthetic} data 
+with 1000 tuples and 300 queries. We adjust the problem complexity by corrupting queries 
+at different indexes: as we error happen further from the most recent query, 
+the problem become harder to solve. 
 
-\smallskip 
+ \begin{figure}[h]
+\centering
+  \begin{subfigure}[t]{.48\columnwidth}
+  \includegraphics[width = .95\columnwidth]{figures/placeholder}
+  \caption{.}
+  \label{f:multiquery} 
+  \end{subfigure}
+  \caption{MILP-based Approach and Extensions on Multi-Query. }
+\end{figure}
 
-\noindent \textbf{Basic MILP-based Approach vs Optimizations} \\
-We further evaluate the performance of the basic MILP-based approach with its optimizations. \\
-\textbf{Comparisons: }\\
-\texttt{MILP searchall}: basic MILP-based approach (MILP);\\
-\texttt{MILP searchall + compl}: basic MILP-based approach with tuples in complaints only; \\
-\texttt{MILP stopearly + compl}: basic MILP-based approach with tuple slicing optimization. \\
-\texttt{MILP stopearly + tuple opt.}: basic MILP-based approach with all optiomizations. \\
-\textbf{Dataset: } synthetic dataset with default settings.  \\
-\textbf{Performance: } ... we show \texttt{MILP searchall} does not scale, 
-\texttt{MILP searchall + compl} scale better but not as accurate, 
-\texttt{MILP stopearly + compl} scale well but low precision, 
-and \texttt{MILP stopearly + tuple opt.} scale well with high accuracy.
+As we observed from Figure~\ref{f:multiquery}, \milpall maintains high accuracy when errors
+happen more recent, however it does not scale when the error locate further from the most
+recent query. \milptuple scales better than \milpall, but ignoring tuples not 
+in the complaint set apparently hurts the precision. \milptuplestopearly run times faster
+than \milpall and \milptuple, however the aggressive strategy greatly reduce the 
+precision. In the end, \milpadvtuple significantly improves the precision with very limited
+time cost compare to \milptuple. \\
+Based on these observations, we only include the performance of \milpadvtuple and \milpadvall
+in the rest of the experiments.
 
 \subsection{Benchmark data}
 We will show that the proposed algorithm works very well on benchmarks. We get stable
