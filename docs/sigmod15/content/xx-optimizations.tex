@@ -70,11 +70,10 @@ tuples in the complaint set $\mathcal{C}$ (Algorithm~\ref{alg:basic} line $2$
 is replaced with \texttt{for each t in $\mathcal{C}$}).  One reason is because each tuple necessitates
 the linearization of the entire query log, thus only encoding the complaints minimizes the 
 size of the problem with respect to the relevant tuples.
-Although this optimization is guaranteed by the MILP problem to 
-will resolve $\mathcal{C}$, the problem may overfit to $\mathcal{C}$ 
-and not generalize well to the entire database.
+Although this optimization is guaranteed to resolve $\mathcal{C}$, the problem may overfit 
+and not generalize to the entire database.
 Specifically, there are problem settings where the repaired range predicate is a superset of 
-the true range predicate, match tuples not in the complaint set, and thus introduce new errors.    
+the true range predicate, and introduces new errors by affecting tuples not originally part of  the complaint set.
 
 \begin{figure}[t]
     \centering
@@ -85,45 +84,71 @@ the true range predicate, match tuples not in the complaint set, and thus introd
 
 Figure~\ref{fig:groups} depicts examples of the two cases where the repaired query contains non-complaint tuples.
 Each solid and empty circle represents a complaint and non-complaint tuple, respectively.
-Each thick line represents the interval of query $q$'s single range predicate: 
-dirty is the incorrect range in the corrupted query,
-truth is the correct range in the true query, 
-and repair is the range returned by the solver.
-Recall that our goal is to reproduce the truth range given the tuples in $\mathcal{C}$ (solid circles)
-and the corrupted query.
+Each thick line represents the interval of query $q$'s range predicate: 
+dirty is the incorrect interval in the corrupted query,
+truth is the correct interval in the true query, 
+and repair is the interval returned by the solver.
+Recall that we do not have access to the truth interval, and our goal is to reproduce the 
+truth interval given $\mathcal{C}$ (solid circles) and the corrupted query.
 
-In (a), the dirty range overlaps with the true range, thus the non-complaint tuples 
-within the overlapping region are correctly modified by the dirty range, and corruectly included
-in the repaired range.  In this case, the proposed repair was correct, and the algorithm is complete.
+In (a), the dirty and truth intervals overlap, thus the non-complaint tuples 
+within the overlapping region are correctly modified by the dirty interval.  
+In this case, the proposed repair correctly contain the non-complaint tuples and the algorithm is complete.
+%We call these non-complaint tuples {\it safe}.
 In contrast, (b) highlights a case where \sys generalized incorrectly.
-The dirty and clean ranges are non-overlapping, so the non-complaint tuple shown should not 
-be modified by $q$, and has been incorrectly included in the repaired range.
-Note that in both of these cases, the objective function will ensure that the repaired range 
-does not over-generalize to the right because that would strictly increase the objective function.
-On the other hand, over-generalizing towards the dirty range on the left is possible because it decreases
-the Manhattan distance between the repaired and corrupted lower bound.
+The dirty and clean interval are non-overlapping, so the non-complaint tuple shown should not 
+be modified by $q$ (otherwise it would be a complaint!), and has been incorrectly included in the repaired interval.
+Note that in both of these cases, the objective function will ensure that the repair
+does not over-generalize the upper bound towards the right because that strictly increases the objective function.
+On the other hand, over-generalizing the lower bound towards the dirty interval
+is expected because it decreases the Manhattan distance between the repaired and corrupted lower bounds,
+which are parameters in the objective function.
 
-\ewu{Give second iteration a name}
-Our goal is to reduce the repaired range to exclude those non-complaint tuples.  
-There are many possible mechanisms to achieve this and we choose to solve this using
-a second MILP problem in the case where multiple queries have been repaired.
-Let $\mathcal{Q}^*_{sub}$ be the set of repaired queries from the first MILP problem.
-We first construct a set of constraints by linearizing the queries in the query log
-between the least and most recent queries in $\mathcal{Q}^*_{sub}$ with respect to $\mathcal{C}$.
-The key difference is that we repair all of the undetermined variables for $x$ in Equation~\ref{}
-based on the solutions to the first MILP problem.  
-In addition, we call $Linearize$ for each non-complaint tuple in the repaired range.
-The objective function is to minimize the sum of the undetermined $x$ variables in the encoded
-problem.
+The goal of \ewu{GIVE NAME} is to reduce the repaired interval and exclude those non-complaint tuples in case (b).  
+Although there are many possible mechanisms to achieve this (e.g., incrementally shrinking
+the repaired interval until the non-complaint tuples are all excluded), 
+the straightforward approaches are not effective when multiple corrupt 
+queries have been repaired because they don't take the query interactions into account.
+
+Instead, we solve this using a second, significantly smaller, MILP problem.   
+Let $\mathcal{Q}^*_{sub}$ be the set of repaired queries from the previous MILP problem,
+$\mathcal{NC}$ be the non-complaint tuples in case (b) above, and 
+$\mathcal{C}^+ = \mathcal{C} \cup \mathcal{NC}$.
+We first linearize the query log over $\mathcal{C}^+$, however we set the values of all 
+undetermined variables not part of $\mathcal{Q}^*_{sub}$ to the corresponding variable's assignment
+from the first MILP problem.  This ensures that only repaired query parameters can
+be perturbed, which vastly reduces the number of undetermined variables that must be solved for.
+Second, we modify the objective function to only penalize the number of non-complaint tuples 
+$t \in \mathcal{C}^+$ that are matched by the queries in $q \in \mathcal{Q}^*_{sub}$.
+These selections are represented by the binary variable $x_{q, t}$, thus the updated objective function
+is $\sum_{q \in \mathcal{Q}^*_{sub}} \sum_{t \in \mathcal{NC}} x_{q,t}$.
 
 We use this same mechanism to address incomplete complaint sets.
 Based on our experimental runs, we find that this second iteration of MILP 
 commonly adds an additional $0.1-0.5\%$ overhead on top of the first MILP solver time.
 
-
 \ewu{Need to clarify that the solver is a black box, who knows what goes on there.  Maybe where we introduce MILP-solvers}
 \xlw{The number of noncomplaints differs case by case. }
 
+
+% Although the query log is linearized in the same fashion as the above tuple slicing optimization,
+% we additionally include the non-complaint tuples that are selected by the repaired queries in the problem.
+% We then set the value of all of the variables to the results of the 
+% We then updae the objective function so
+% 
+% we dramatically reduce the number of undetermined variables and use a different objective function.
+% We fix all of the undetermined variables e
+% 
+% The simple approach 
+% Let $\mathcal{Q}^*_{sub}$ be the set of repaired queries.
+% We first construct a set of constraints by linearizing the queries in the query log
+% between the least and most recent queries in $\mathcal{Q}^*_{sub}$ with respect to $\mathcal{C}$.
+% The key difference is that we repair all of the undetermined variables for $x$ in Equation~\ref{}
+% based on the solutions to the first MILP problem.  
+% In addition, we call $Linearize$ for each non-complaint tuple in the repaired interval.
+% The objective function is to minimize the sum of the undetermined $x$ variables in the encoded
+% problem.
+% 
 
 % fix is always the smallest possible, so it can only require a sceond iteration if the dirty and clean
 % ranges don't overlap at all.  

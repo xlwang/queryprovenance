@@ -151,7 +151,7 @@ We can re-express the value of attribute $A_j$ in the updated tuple $t'$ as the 
 {\scriptsize
 \begin{eqnarray}
 \label{eq:linearization}
-t'.A_j = x\otimes \mu_{q_i}(t).A_j + (1-x)\otimes t.A_j 
+t'.A_j = x_{q_i, t}\otimes \mu_{q_i}(t).A_j + (1-x_{q_i, t})\otimes t.A_j 
 \end{eqnarray} 
 }
 
@@ -161,7 +161,7 @@ the conditional function:
 {\scriptsize
 \begin{eqnarray}
 \label{eq:x}
-x = \sigma_{q_i}(t)
+x_{q_i, t} = \sigma_{q_i}(t)
 \end{eqnarray}
 }
 We then introduce two variables $u.A_j$ and $v.A_j$ to represent 
@@ -171,15 +171,15 @@ $M$ representes the upper bound of $t.A_j$'s domain:
 \begin{eqnarray}
 \label{eq:uv}
 u.A_j &\leq & \mu_{q_i}(t).A_j \nonumber\\
-u.A_j &\leq & xM \nonumber\\ 
-u.A_j &\geq & \mu_{q_i}(t).A_j - (1-x)M \nonumber \\\nonumber \\
+u.A_j &\leq & x_{q_i, t}M \nonumber\\ 
+u.A_j &\geq & \mu_{q_i}(t).A_j - (1-x_{q_i, t})M \nonumber \\\nonumber \\
 v.A_j &\leq & t.A_j \nonumber\\
-v.A_j &\leq & (1-x)M \nonumber\\
-v.A_j &\geq & t.A_j - xM
+v.A_j &\leq & (1-x_{q_i, t})M \nonumber\\
+v.A_j &\geq & t.A_j - x_{q_i, t}M
 \end{eqnarray}
 }
-The first set of conditions forces $u.A_j = \mu_{q_i}(t).A_j$ if $x=1$, and $0$ otherwise.  
-The second set forces $v.A_j = t.A_j$ if $x=0$, and $0$ otherwise.  
+The first set of conditions forces $u.A_j = \mu_{q_i}(t).A_j$ if $x_{q_i, t}=1$, and $0$ otherwise.  
+The second set forces $v.A_j = t.A_j$ if $x_{q_i, t}=0$, and $0$ otherwise.  
 Now, Equation~\ref{eq:linearization} is simply a linear equation:
 {\scriptsize\begin{eqnarray}
 \label{eq:tnew}
@@ -213,7 +213,7 @@ in the MILP problem:
 {\scriptsize
 \begin{eqnarray}
 \label{eq:delete}
-t'.A_j &=& x \otimes M^+ + (1-x) \otimes t.A_j \nonumber \\
+t'.A_j &=& x_{q_i, t} \otimes M^+ + (1-x_{q_i, t}) \otimes t.A_j \nonumber \\
 x &=& \sigma_{q_i}(t)
 \end{eqnarray}
 }
@@ -224,7 +224,7 @@ x &=& \sigma_{q_i}(t)
 % )(\ref{eq:uv})(\ref{eq:tnew})(\ref{eq:insert})(
 The above constraints (\ref{eq:x}--\ref{eq:delete})
 form the main structure of MILP subproblem for a single attribute $A_j$ of a single tuple $t$.
-In this incomplete form, all of the variables including the binary variables $x$,
+In this incomplete form, all of the variables including the binary variables $x_{q_i, t}$,
 the real-valued attribute values (e.g., $u.A_j$),
 and the real-valued constants in $\mu_{q_i}$ and $\sigma_{q_i}$ are all undetermined
 and need to be assigned values by a MILP solver.  
@@ -236,7 +236,7 @@ $Linearize(q, t)$, which takes a query $q$ and tuple $t$ as input.
 The final step is to assign concrete values to the starting and ending attribute values 
 $t.A_j$ and $t'.A_j$ based on the starting database state $D_{i-1}$ and the ending database 
 state that has been transformed by $\mathcal{C}$, $D'_i$.
-In this way, only the query parameters and the binary $x$ variables are undetermined;
+In this way, only the query parameters and the binary $x_{q_i, t}$ variables are undetermined;
 a solution to the MILP formulation will assign values to those undetermined variables
 such that the resulting query fixes the complaints correctly.
 
