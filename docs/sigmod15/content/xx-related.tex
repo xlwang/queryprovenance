@@ -8,7 +8,29 @@ histories (query logs). This is in contrast to traditional data
 cleaning~\cite{rahm00} which focuses on identifying and correcting
 data ``in-place.'' \sys does not aim to correct errors in the data
 directly, but rather to find the underlying reason for reported errors
-in the queries that operated on the data.
+in the queries that operated on the data. 
+%things about diagnosis and explanations
+
+Studying and explaining
+data outcome has been studied in many aspects: 
+\cite{Golab2008, el2014interpretable} focuses on providing 
+explanations to particular data outcome in tables; \cite{wang2015}
+provides error diagnosing for general data extraction systems. 
+
+
+% things  about validating updates before executing/cmmit to database
+Related work about validating updates in time: 
+\cite{Chen2011} validate correctness of updates before performing the update;
+
+
+% things for exploring wrong or undetermined query,  why not? 
+Related works on deriving desired select query: focus on 
+Query by example, \cite{dimitriadou2014explore}  uses machine learning
+techniques to explore query that satisfy user interests. 
+
+
+% things about data provenance and data debugging
+\cite{mucslu2013data}
 
 
 
