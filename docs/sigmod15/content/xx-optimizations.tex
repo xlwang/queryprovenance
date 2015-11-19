@@ -384,7 +384,7 @@ This technique is effective for wide tables and query logs that focus a small su
 
 
 
-\subsection{Single Query Incremental Repairs}
+\subsection{Single Query Incremental Repairs}\label{sec:incremental}
 
 Even with the slicing optimizations, the number of undetermined variables can remain high in many cases, resulting in slow runtime for the MILP solver.  As we saw in
 Figure~\ref{fig:querysize_vs_time}, the solver runtime increases \ewu{cubically} \alex{exponentially?}
