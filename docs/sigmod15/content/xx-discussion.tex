@@ -1,16 +1,45 @@
-\section{Discussion}
+%!TEX root = ../main.tex
 
-Systems soluttions would be interesting
+\section{Summary and discussion}
 
-multiple corruptions in a query
+In this paper, we presented \sys, a framework for diagnosing and
+repairing data errors in the queries that operate on the data.
+Datasets are typically dynamic; so even if a dataset starts clean,
+updates on the data can introduce new errors. With \sys, we can
+analyze query logs to trace reported errors to the queries that
+introduced them. This allows us in turn to identify additional errors
+in the data that may have been missed and gone unreported.
 
-scaling further
+Our basic algorithm, \naive, uses non-trivial transformation rules to
+encode information from the data and the query log as a mixed integer
+linear program. Further, we introduce three optimizations that reduce
+the size of the problem across three dimensions: tuples, queries, and
+attributes, without compromising the accuracy of the produced
+solution. In addition, we propose a performance optimization that
+analyzes a single query at a time. Our experiments show that this
+optimization can achieve significant scaling gains for single-query
+errors, without significant reduction in accuracy.
 
-different types of queries
+To the best of our knowledge, \sys is the first approach to diagnosis
+and repair of errors in queries. Obviously, correcting such errors in
+practice poses additional challenges. For example, query errors that
+occurred far in the past are more challenging to correct in practice,
+even after they have been identified, as rolling back the effects of
+old transactions can have cascading implications. Investigating system
+solutions that can facilitate such rollback actions or maintain more
+detailed state through a dataset's evolution can help \sys operate
+more efficiently and effectively.
 
-More complex queries
+The current version of \sys focuses on linear functions, so it may not
+be able to encode complex updates that involve non-linear
+computations. Future versions can target extended models and solvers
+to represent richer scenarios. Finally, in our future work, we plan to
+investigate additional methods of scaling the constraint analysis, as
+well as techniques that can adapt the benefits of single-query
+analysis to errors in multiple queries.
 
-More complex algebraic functions
+
+
 
 
 
