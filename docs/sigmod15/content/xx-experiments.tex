@@ -197,12 +197,6 @@ experiments that justify the rationale behind our selection.
 
 
 
-\begin{figure}[h]
-\centering
-  \includegraphics[width = .95\columnwidth]{figures/benchmark_time}
-  \label{f:benchmarks} 
-  \caption{Performance on Benchmarks}
-\end{figure}
 
 
 % \begin{figure}[h]
@@ -221,20 +215,26 @@ experiments that justify the rationale behind our selection.
 % \end{figure}
 
 \subsection{Benchmark}
-We evaluate the proposed algorithm on two benchmarks. Queries in the benchmark 
-workloads are PRIMARY KEY updates, which modifies one tuple at a time, and insert queries. 
-This property greatly simplifies the problem and reduces searching space since queries dependency 
-become very sparse: we say one query depends on another only if the result of the latter
-query may affects the result of the first one. Thus, in a workload with PRIMARY KEY
-updates, two queries have this dependency relationship only
-when they have the exactly same where condition, which has much lower probability than 
-general updates. As a result, we observe that the proposed approaches work
-very efficient and effective 
-in fixing errors in both TPC-C and AuctionMark benchmarks. 
 
-\stitle{TPC-C: }
+\begin{figure}[h]
+\centering
+  \includegraphics[width = .95\columnwidth]{figures/benchmark_time}
+  \label{f:benchmarks} 
+  \vspace*{-.2in}
+  \caption{Performance on Benchmarks}
+  \vspace*{-.1in}
+\end{figure}
 
-\stitle{AuctionMark: }
+Figure~\ref{f:benchmarks} plots the performance of the incremental, optimized \sys algorithm
+on both benchmark applications.  In both workloads, the latency to derive a repair was consistenly less
+than $5$ seconds, and for TPC-C, on the order of milliseconds.  The precision and recall measures were
+$1$ both all settings.   One reason for the good performance is due to the fact that the benchmark queries
+are pre-dominantly point update queries.  In this setting, each tuples affects a very small set of 
+tuples, which results in $1$ or $2$ complaints on average.  In this case, the tuple and query slicing algorithms
+reduce the total number of constraints for almost every setting to less than $100$.  
+{\it Takeaway: many workloads in practice are dominated by point update queries.  In these settings,
+ \sys is very effective at reducing the number of constraints and can derive repairs in nearly
+ interactive latencies.}
 
 
 
@@ -304,7 +304,7 @@ up to $q_{40}$.  For example, when we corrupt $3$ queries, we corrupt $q_{0,10,2
 
 
 \stitle{Single Query Optimization:}
-In this experiment, we evaluate the efficacy of the incremental repair algorithm (Section~\ref{sec:inc})
+In this experiment, we evaluate the efficacy of the incremental repair algorithm (Section~\ref{sec:incremental})
 in the special case when only one query has been corrupted.  We compare the exhaustive 
 algorithm against $\sys_{inc}^{1st}$ and $\sys_{inc}^{all}$ using the default parameters.
 We also compare against $\sys_{t,inc}^{1st}$ to illustrate the value of the second MILP iteration in tuple slicing.
