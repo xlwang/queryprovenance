@@ -7,10 +7,11 @@ in the query log.  In this approach, the number of constraints grows quadratical
 the database and the query log; the number of undetermined variables also increases quandratically.
 Both of these properties typically .
 In a simple experiment, shown in Figure~\ref{fig:querysize_vs_time}, we generated increasingly 
-larger query logs for a database of $XXX$ tuples, encoded the problem using $\sys_{exh}$, and solved
-the problem using an ILP-solver (CPLEX~\cite{cplex} in our experiments).
-We find that the solver time increases exponentially as the number of encoded queries increases,
-due exponential increase in the number of possible states for the undetermined variables.
+larger query logs for a database of $1000$ tuples, encoded the problem using $\sys_{exh}$ (solid line), 
+and solved the problem using a MILP-solver (CPLEX~\cite{cplex} in our experiments).
+We find that the solver time increases exponentially as the number of encoded queries increases --
+at a log size of $80$, the solver failed to produce an answer within $1000$ seconds --
+due to the exponential increase in the number of possible states for the increasing number of undetermined variables.
 Although the solver performance varies widely depending on the specific problem, this experiment 
 illustrates the limitations of the naive approach.
 
