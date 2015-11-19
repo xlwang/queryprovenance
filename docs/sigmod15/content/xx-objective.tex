@@ -1,30 +1,53 @@
-\section{The Objective Function}
+%!TEX root=../main.tex
 
-The solution of a MILP problem is designed to minimize an objective function defined by the user.
-A natural object function is to simply use the distance function $d(\mathcal{Q}, \mathcal{Q}^*)$ 
-(Definition~\ref{def:problem}) so that the proposed solution
-does not deviate significantly from the original query log e.g., does not modify too many queries.  
-This has the added benefit of interpretability, since the user is presented with less diagnoses.
+\subsection{The Objective Function}
 
-The general form of $d(\mathcal{Q}, \mathcal{Q}^*$ provides us with substantial flexibility in the precise
-function implementation so that different function can potentially be customized towards different scenarios.
-For example, when the query log only involves numeric attributes, 
-the normalized Manhattan distance~\cite{manhattan} between the parameters 
-in $\mathcal{Q}$ and $\mathcal{Q}^*$ is a natural objective function.
-Alternatively, we may use the number of parameters that are different with the original ones 
-in order to penalize repairs that modify too many parameters. 
+The optimal diagnosis problem (Definition~\ref{def:problem}) seeks a
+log repair $\mathcal{Q}^*$, such that the distance
+$d(\mathcal{Q},\mathcal{Q}^*)$ is minimized. In this section, we
+describe our model for the objective function, which assumes numerical
+parameters and attributes. This assumption is not a restriction of the
+\sys framework, but rather a restriction of the distance function.
+Handling other data types, such as categorical values comes down to defining an appropriate distance function, which can then be directly incorporated into \sys.
 
-Moving beyond the queries themselves,  it is possible to augment the objective function 
-to penalize the number and magnitude of changes to the database.
-Such a modification would require removing the hard constraints that set the
-attribute values $t.A_j$ to database values and instead add their weighted difference
-to the objective function.  The drawback of this approach is the increased number of
-undetermined variables, which severely affects performance in practice.
+In our experiments, we use the normalized Manhattan
+distance~\cite{manhattan} between the parameters in $\mathcal{Q}$ and
+$\mathcal{Q}^*$. We use $q.param_i$ to denote the $i^{th}$ parameter
+of query $q$, and $|q.param|$ to denote the total number of parameters
+in $q$: \[d(\mathcal{Q}, \mathcal{Q}^*) = \sum_{i = 1} ^{n} \sum_{j =
+1}^{|q_i.para|} |q_i.para_j - q_i.para_j^*|\]
 
-For these reasons, in this paper, we use Manhattan distance between parameters 
-in the query log as our objective function.  We use $q.param_i$ to denote the $i^{th}$ paramater of query $q$,
-and $|q.param|$ to denote the total number of parameters in $q$:
-\[d(\mathcal{Q}, \mathcal{Q}^*) = \sum_{i = 1} ^{n} \sum_{j = 1}^{|q_i.para|} |q_i.para_j - q_i.para_j^*|\]
+Different choices for the objective function are also possible. For
+example, one may prioritize the total number of changes incurred in
+the log, rather than the magnitude of these changes. However, a
+thorough investigation of different possible distance metrics is
+beyond the scope of our work.
+
+% The solution of a MILP problem is designed to minimize an objective function defined by the user.
+% A natural object function is to simply use the distance function $d(\mathcal{Q}, \mathcal{Q}^*)$ 
+% (Definition~\ref{def:problem}) so that the proposed solution
+% does not deviate significantly from the original query log e.g., does not modify too many queries.  
+% This has the added benefit of interpretability, since the user is presented with less diagnoses.
+% 
+% The general form of $d(\mathcal{Q}, \mathcal{Q}^*$ provides us with substantial flexibility in the precise
+% function implementation so that different function can potentially be customized towards different scenarios.
+% For example, when the query log only involves numeric attributes, 
+% the normalized Manhattan distance~\cite{manhattan} between the parameters 
+% in $\mathcal{Q}$ and $\mathcal{Q}^*$ is a natural objective function.
+% Alternatively, we may use the number of parameters that are different with the original ones 
+% in order to penalize repairs that modify too many parameters. 
+% 
+% Moving beyond the queries themselves,  it is possible to augment the objective function 
+% to penalize the number and magnitude of changes to the database.
+% Such a modification would require removing the hard constraints that set the
+% attribute values $t.A_j$ to database values and instead add their weighted difference
+% to the objective function.  The drawback of this approach is the increased number of
+% undetermined variables, which severely affects performance in practice.
+% 
+% For these reasons, in this paper, we use Manhattan distance between parameters 
+% in the query log as our objective function.  We use $q.param_i$ to denote the $i^{th}$ paramater of query $q$,
+% and $|q.param|$ to denote the total number of parameters in $q$:
+% \[d(\mathcal{Q}, \mathcal{Q}^*) = \sum_{i = 1} ^{n} \sum_{j = 1}^{|q_i.para|} |q_i.para_j - q_i.para_j^*|\]
 
 % impact of the log repair $\mathcal{Q}^*$ can also be involved 
 % in the distance function: one would prefer that $\mathcal{Q}^*$
