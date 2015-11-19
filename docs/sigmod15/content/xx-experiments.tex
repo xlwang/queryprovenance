@@ -74,13 +74,13 @@ All experiments were run on \ewu{X Core} 2.66 GHz  machines with 16GB RAM runnin
   $N_w$  & \# predicates in \texttt{WHERE} clauses & $1$ \\
   $N_s$  & \# \texttt{SET} clauses & $1$ \\
   $N_q$  & \# queries in query log & $300$ \\
-  $idx$  & Index (backwards from most recent) & $\{0, 25, 50,$ \\
-         & of corrupted query & $100, 200, 250 \}$ \\ %$\frac{N_q}{2}$ \\
+  $idx$  & Index of corrupted query & $\{0, 25, 50,$ \\
+         & (backwards from most recent) & $100, 200, 250 \}$ \\ %$\frac{N_q}{2}$ \\
   $r$    & Range size of \texttt{UPDATE} queries & 8 (tuples) \\
   $s$    & Zipf $\alpha$ param of query attributes, & $1$ \\ 
   $set$  & Constant vs relative \texttt{SET} clauses. & const \\ \bottomrule \end{tabular}
          %& power low distribution $P(v) = v^{-s}$ & \\\end{tabular}
-  \caption{Experimental Parameters \alex{Do we need the presentation to include this level of detail?}}
+  \caption{Experimental Parameters}
   \label{t:params}
 \end{table}
 
@@ -194,73 +194,117 @@ To standardize our procedures, we selected a fixed set of indexes $idx$
 that are used in all experiments.  Appendix~\ref{app:qidx} presents
 experiments that justify the rationale behind our selection.
 
-% \begin{figure}[h]
-% \centering
-% \includegraphics[width = 3.5in]{figures/qidxsimulation/numinrange}
-% \caption{.}
-% \label{f:numinrange} 
-% \end{figure}
 
 
 \subsection{Preliminaries}
 The following set of experiments are designed to establish the rationale for 
 our experimental settings in the subsequent experiments.  
 Specifically, we compare the exhaustive approach with the suite of optimizations
-as the number of corrupted queries increases.  We find that \ewu{XXX}.
+as the number of corrupted queries increases.  
+We find that \ewu{XXX}.
 We then establish the difficulty of \texttt{UPDATE} workloads as compared to other query types.
 
-\stitle{Multiple Corrupt Queries:}
-
-
-We further compare \milpall, \milptuple, \milptuplestopearly, \milpadvtuple  
-on \textbf{Synthetic} data 
-with 1000 tuples and 300 queries. We adjust the problem complexity by corrupting queries 
-at different indexes: as we error happen further from the most recent query, 
-the problem become harder to solve. 
-
-EXP 1
-Compare all algorithms for a varying number of corrupted queries.
-% - exh, tupleslice, queryslicing, attrslicing, tuplequeryslicing
-% - 1 error: oldest query
-% - 2 errors: oldest query + 10th
-% - 3 errors: oldest + 10th + 20th
-% - dbsize: 1000
-% - uniform skew
-Show that exhaustive and exh+t,q,a are all incredibly slow and the optimizations help a bit.
-
-EXP 2
-Compare exh+optimizations, inc and shows that inc is way better.
-
-
-  \begin{figure}[h]
+  \begin{figure*}[t]
   \centering
-    \begin{subfigure}[t]{.48\columnwidth}
+    \vspace*{-.2in}
+    \begin{subfigure}[t]{.3\textwidth}
     \includegraphics[width = .95\columnwidth]{figures/scale_allalgs}
     \caption{.}
     \label{f:multiquery} 
     \end{subfigure}
-    \caption{MILP-based Approach and Extensions on Multi-Query. }
-  \end{figure}
+    \begin{subfigure}[t]{.3\textwidth}
+    \includegraphics[width = .95\columnwidth]{figures/incrementalcompare_time}
+    \caption{.}
+    \label{f:singlequeryinc_time} 
+    \end{subfigure}
+    \begin{subfigure}[t]{.3\textwidth}
+    \includegraphics[width = .95\columnwidth]{figures/placeholder}
+    \caption{.}
+    \label{f:qtype} 
+    \end{subfigure}
+    \\
+    \begin{subfigure}[t]{.3\textwidth}
+    \includegraphics[width = .95\columnwidth]{figures/scale_allalgs}
+    \caption{.}
+    \label{f:multiquery} 
+    \end{subfigure}
+    \begin{subfigure}[t]{.3\textwidth}
+    \includegraphics[width = .95\columnwidth]{figures/incrementalcompare_acc}
+    \caption{.}
+    \label{f:singlequeryinc_acc} 
+    \end{subfigure}
+    \begin{subfigure}[t]{.3\textwidth}
+    \includegraphics[width = .95\columnwidth]{figures/placeholder}
+    \caption{.}
+    \label{f:qtype} 
+    \end{subfigure}
+    \vspace*{-.1in}
+    \caption{Preliminary Experiments}
+  \end{figure*}
+
+
+\stitle{Multiple Corrupt Queries:}
+In this experiment, we compare the naive exhaustive algorithm with four types of algorithms
+$\sys_S$, where $S \in \{t, q, a, tqa\}$.  We use the default settings with $1000$ tuples and
+$50$ \texttt{update} queries.  We corrupt every tenth query starting from oldest query $q_0$,
+up to $q_{40}$.  For example, when we corrupt $3$ queries, we corrupt $q_{0,10,20}$.
+
+
+\stitle{Single Query Optimization:}
+In this experiment, we evaluate the efficacy of the incremental repair algorithm (Section~\ref{sec:inc})
+in the special case when only one query has been corrupted.  We compare the exhaustive 
+algorithm against $\sys_{inc}^{1st}$ and $\sys_{inc}^{all}$ using the default parameters.
+We also compare against $\sys_{t,inc}^{1st}$ to illustrate the value of the second MILP iteration in tuple slicing.
+Figure~\ref{f:singlequeryinc_time} highlights the scalability limitations of the exhaustive algorithm 
+even $25$ queries in this experiment.  In contrast, the incremental algorithms perform at nearly the same rate
+across the different query indexes.  Figure~\ref{f:singlequeryinc_acc} shows the value of tuple-slicing --
+both basic incremental algorithms have severely degraded precision measures due to their propensity to over-generalize
+-- however the introduction of the second MILP iteration significantly improves the precision.  
+In all algorithms, the recall is near $1$ because the complaint sets are complete and the solver is able to find 
+an assignment in nearly all cases.
+
 
 \stitle{Query Type Experiment:}
+Our final preliminary experiment evaluates the exhaustive, tuple-slicing algorithm 
+$\sys_{exh,t}$ on insert, delete, or update-only workloads.
+We increase the number of queries from $20$ to $100$ and corrupt the oldest query in the log.  
+The rest of the parameters use the default values.
+Figure~\ref{f:qtype} shows xxx.
 
-In this set of experiments, 
-Run insert and delete only workloads.
-Show that update queies are the really hard ones
 
 {\it Discussion: 
 End up picking $queryfix_{inc,t}$, $queryfix_{inc,t,q}$
 Justify single corrupt query
-
 }
 
 
 \subsection{Synthetic Experiments}
-The factors influence the complexity of the MILP-based approach fall 
-into four aspects: skewness, $s$; log size, $N_q$; database size $N_D$; and 
-query complexity $N_w$. In this section, we focus on 
-evaluate the proposed algorithm(s)
-by adjusting these four factors. 
+In the following set of synthetic experiments, we vary 
+the parametetrs skewness $s$, log size $N_q$, database size $N_D$, and
+query complexity $N_w$ one at a time in order  to tease apart the parameters that most affect our metrics.
+As described above, we focus query logs with a single corruption,
+and on a small set of representative algorithms \ewu{XXX}.
+
+
+  \begin{figure*}[h]
+    \centering
+    \begin{subfigure}[t]{.3\textwidth}
+    \includegraphics[width = .95\columnwidth]{figures/placeholder}
+    \caption{.}
+    \label{f:scale1} 
+    \end{subfigure}
+    \begin{subfigure}[t]{.3\textwidth}
+    \includegraphics[width = .95\columnwidth]{figures/placeholder}
+    \caption{.}
+    \label{f:scale2} 
+    \end{subfigure}
+    \begin{subfigure}[t]{.3\textwidth}
+    \includegraphics[width = .95\columnwidth]{figures/placeholder}
+    \caption{.}
+    \label{f:scale3} 
+    \end{subfigure}
+    \caption{cap}
+  \end{figure*}
 
 
 \stitle{Skew:}
@@ -283,17 +327,10 @@ space in the MILP problem.
 
 
 
+
 \stitle{Scalability - Log Size:}
 
-  \begin{figure}[h]
-    \centering
-    \begin{subfigure}[t]{.48\columnwidth}
-    \includegraphics[width = .95\columnwidth]{figures/placeholder}
-    \caption{.}
-    \label{f:multiquery} 
-    \end{subfigure}
-    \caption{MILP-based Approach and Extensions on Multi-Query. }
-  \end{figure}
+Figure~\ref{f:scale1} shows xxx.
 
 \stitle{Scalability - DB Size:}
 We adjust the initial database sizes from 100 to 100,000 and 
@@ -301,15 +338,7 @@ while maintain the same range $r$ in each query. As we can see,
 for the same corrupt query index, the MILP-based approaches require
 similar amount of time to derive the log repair. 
 
- \begin{figure}[h]
-    \centering
-    \begin{subfigure}[t]{.48\columnwidth}
-    \includegraphics[width = .95\columnwidth]{figures/placeholder}
-    \caption{.}
-    \label{f:multiquery} 
-    \end{subfigure}
-    \caption{Database size}
-  \end{figure}
+Figure~\ref{f:scale2} shows xxx.
 
 
 
@@ -318,15 +347,7 @@ In the end, we evaluate the MILP-based approaches by adjust
 the query complexity: number of predicates, $N_w$, in the 
 update query while maintain the range $r$ the same. 
 
-  \begin{figure}[h]
-    \centering
-    \begin{subfigure}[t]{.48\columnwidth}
-    \includegraphics[width = .95\columnwidth]{figures/placeholder}
-    \caption{.}
-    \label{f:falsenegative} 
-    \end{subfigure}
-    \caption{cap}
-  \end{figure}
+Figure~\ref{f:scale3} shows xxx.
 
 
 \stitle{Incomplete Complaint Sets:}
