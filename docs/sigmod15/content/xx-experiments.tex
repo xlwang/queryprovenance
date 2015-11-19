@@ -198,6 +198,21 @@ experiments that justify the rationale behind our selection.
 
 
 
+\begin{figure}[h]
+\centering
+  \begin{subfigure}[t]{\columnwidth}
+  \includegraphics[width = .95\columnwidth]{figures/tpcc_time}
+  \caption{Performance on TPC-C Benchmark}
+  \label{f:tpcc} 
+  \end{subfigure}
+  \begin{subfigure}[t]{\columnwidth}
+  \includegraphics[width = .95\columnwidth]{figures/auction_time}
+  \caption{Performance on AuctionMark Benchmark}
+  \label{f:auctionmark} 
+  \end{subfigure}
+  \caption{Benchmark Performance}
+\end{figure}
+
 \subsection{Benchmark}
 We evaluate the proposed algorithm on two benchmarks. Queries in the benchmark 
 workloads are PRIMARY KEY updates, which modifies one tuple at a time, and insert queries. 
@@ -214,22 +229,6 @@ in fixing errors in both TPC-C and AuctionMark benchmarks.
 
 \stitle{AuctionMark: }
 
-
-\begin{figure}[h]
-\centering
-  \begin{subfigure}[t]{\columnwidth}
-  \includegraphics[width = .95\columnwidth]{figures/tpcc_time}
-  \caption{Performance on TPC-C Benchmark}
-  \label{f:tpcc} 
-  \end{subfigure}
-  \begin{subfigure}[t]{\columnwidth}
-  \includegraphics[width = .95\columnwidth]{figures/auction_time}
-  \caption{Performance on AuctionMark Benchmark}
-  \label{f:auctionmark} 
-  \end{subfigure}
-  \caption{Benchmark Performance}
-
-\end{figure}
 
 
 
