@@ -1,32 +1,13 @@
 from pygg import *
 from wuutils import *
 
-#  opt_query_num (for query-based optimization): number of candidate queries, without optimization, this number should equals to the logsize; 
-#  opt_attr_num (for attr. based optimization): how many attributes included in constructing the cplex problem. 
-#  opt_approx: 
-#    0: cplex_stopearly_0_1 (cplex with attr opt.)
-#    1: cplex_stopearly_1_1 (cplex with query opt.)
-#    2: cplex_stopearly_1_1 (cplex with both opt.)
-#    3: cplex_stopearly_0_0 (cplex with none opt.)
-#    4: cplex_stopearly_1_1 (single attr.) 
 
-def plot(name, p, **kwargs):
-  p += scale_color_discrete()
-  #p += scale_x_continuous()
-  #p += facet_grid("name~logsize+rsize")
-  p += geom_point(alpha=1, size=1.5)
-  p += legend_bottom
-  if 'libs' not in kwargs:
-    kwargs['libs'] = []
-  kwargs['libs'].append("grid")
-  kwargs.update(dict(
-    width=8,
-    height=5
-  ))
-  ggsave(name, p, **kwargs)
-
-
-
+# compute a group by using groups
+# groups: list of pairs [ (group_by_expr, alias_name), ...]
+# where_str: string for the where clause
+#
+# I created a table names(sname, name) where sname is the solver value e.g., "cplex_allqueries", and name is the full name e.g., "All Queries"
+#
 def group_on(groups, where_str="1 = 1"):
   arr = []
   for p in groups:
@@ -62,7 +43,11 @@ data = group_on(['logsize'])
 p = ggplot('data', aes(x='logsize', y='total_time', group='name', fill="name", color='name', linetype='name'))
 #p += geom_point(size=2)
 p += geom_bar(stat=esc("identity"), position=esc("dodge"))
-p += legend_bottom
 p += scale_color_discrete()
-p += axis_labels("Query Log Size", "Total Time", "continuous", "continuous")
+
+# add axis labels x is continuous, y is log10 scale
+p += axis_labels("Query Log Size", "Total Time", "continuous", "log10")
+
+# make it pretty
+p += legend_bottom
 ggsave("qsize_time_badscale.png", p, data=data, libs=['grid'], width=6, height=4, scale=0.7)
