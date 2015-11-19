@@ -304,9 +304,10 @@ up to $q_{40}$.  For example, when we corrupt $3$ queries, we corrupt $q_{0,10,2
 We find that the number of corruptions greatly affects both the scalabality (Figure~\ref{f:multi_time}) 
 and the accuracy (Figure~\ref{f:multi_acc}) of the algorithms.  Specifically, as the number increases,
 the number of possible assignments of the MILP parameters increases exponentially and the solver often takes
-longer than our experimental time limits and returns an infeasibility error.  
-\ewu{This is a predominant reason why the accuracy degrades past $3$ corruptions.}
-
+longer than our experimental time limit of $1000$ seconds and returns an infeasibility error.  
+This is a predominant reason why the accuracy degrades past $3$ corruptions.  For example, 
+when $4$ queries are corrupted and we ignore the infeasible executions, the average execution time is $300$ seconds
+and the precision and recall are greater than $0.94$.  Unfortunately, with $5$ queries, all runs exceed the time limit.
 
 
 \stitle{Single Query Optimization:}
