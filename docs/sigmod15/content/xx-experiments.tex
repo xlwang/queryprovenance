@@ -43,7 +43,7 @@ For the subsequent experiments, we focus solely on \texttt{UPDATE}-only syntheti
 to understand how \sys responds to different query logs and databases.  
 Finally, we evaluate the efficacy on real-world databases transaction benchmarks,
 TPC-C XXX~\cite{tpcc} and AuctionMark~\cite{auctionmark}.
-All experiments were run on \ewu{X Core} 2.66 GHz  machines with 16GB RAM running \ewu{OS + Version}.
+All experiments were run on 12x2.66 GHz  machines with 16GB RAM running CentOS release 6.6.
 
 
 
@@ -362,38 +362,38 @@ $\sys_{ta,inc}^{1st}$ is denoted $ta,inc-1st$.
       \includegraphics[width = \columnwidth]{figures/logsize_time}
       \vspace*{-.1in}
       \caption{Query Log Size vs Time.}
-      \label{f:scale1} 
+      \label{f:logsize_time} 
     \end{subfigure}
     \begin{subfigure}[t]{.3\textwidth}
       \includegraphics[width = \columnwidth]{figures/dbsize_time}
       \vspace*{-.1in}
       \caption{Database Size vs Time.}
-      \label{f:scale2} 
+      \label{f:dbsize_time} 
     \end{subfigure}
     \begin{subfigure}[t]{.3\textwidth}
       \includegraphics[width = \columnwidth]{figures/where_time}
       \vspace*{-.1in}
       \caption{Query Complexity vs Time}
-      \label{f:scale3} 
+      \label{f:where_time} 
     \end{subfigure}
     \\
     \begin{subfigure}[t]{.3\textwidth}
       \includegraphics[width = .95\columnwidth]{figures/logsize_acc}
       \vspace*{-.1in}
       \caption{Query Log Size vs F1-score.}
-      \label{f:scale1} 
+      \label{f:logsize_acc} 
     \end{subfigure}
     \begin{subfigure}[t]{.3\textwidth}
       \includegraphics[width = .95\columnwidth]{figures/dbsize_acc}
       \vspace*{-.1in}
       \caption{Database Size vs F1-score. }
-      \label{f:scale2} 
+      \label{f:dbsize_acc} 
     \end{subfigure}
     \begin{subfigure}[t]{.3\textwidth}
       \includegraphics[width = .95\columnwidth]{figures/where_acc}
       \vspace*{-.1in}
       \caption{Query Complexity vs F1-score.}
-      \label{f:scale3} 
+      \label{f:where_acc} 
     \end{subfigure}
     \caption{cap}
   \end{figure*}
@@ -414,77 +414,118 @@ All algorithms exhibit near perfect F1-scores.
 
 
 \stitle{Scalability - DB Size:}
-We adjust the initial database sizes from 100 to 100,000 and 
-while maintain the same range $r$ in each query. As we can see, 
-for the same corrupt query index, the MILP-based approaches require
-similar amount of time to derive the log repair. 
+Figures~\ref{f:dbsize_time} and~\ref{f:dbsize_acc} vary the database size from $100$ to $100$k tuples while setting the other parameters to their default settings.
+For simplicity, we plot the performance and accuracy of corruptions at two query indexes: $50$ and $200$.
+The more recent corruption ($200$) is executed in nearly constant time as the database size increases, with a perfect F1-score.
+In contrast, the older corruption increases in cost as the database size increases.  One reason is because as the database size increases, the
+number of complaints also increases.  We have found that the performance of the solver in dependent on the number of complaints (which
+increases the size of the MILP problem).  This is verified by the fact that the cost of linearizing the query log increases linearly with the 
+database size, from $100$ to $200$ seconds, however the solver time varies in the "v" shape shown in Figure~\ref{f:dbsize_time}
+and dominates the cost.   Despite this, the F1-score remains high.
 
-Figure~\ref{f:scale2} shows xxx.
 
 
 
 \stitle{Scalability - Query Complexity:}
-In the end, we evaluate the MILP-based approaches by adjust 
-the query complexity: number of predicates, $N_w$, in the 
-update query while maintain the range $r$ the same. 
-
-Figure~\ref{f:scale3} shows xxx.
-
+Our final scalability experiment (Figures~\ref{f:where_time}, Figures~\ref{f:where_acc})
+varies the complexity of the update queries by increasing the number of predicates in the \texttt{WHERE} clause, 
+while keeping the overall selectivity constant.   We find that the performance improves as the number of predicates increases.
+This counter-intuitive result is due to the reduction in the complaint set size as the complexity increases.
 
 
 
 
-\stitle{Skew:} We generate query log at 4 different skewness levels from uniform to 
-super skewed with $s = 0, 1e-7, 0.5, 1$. As we can see as query log
-is more skewed, the execution time for solving same amount of queries 
-increase. This is also due to the fact that increasing skewness also
-increase the query dependency, which, in turn, increase the searching
-space in the MILP problem.
+\stitle{Skew:} We now study the effects of attribute skew on the algorithms.
+We vary the skew parameter from $0$ (uniform) to $1e-7, 0.5, 1$. When $s=1$, nearly every attribute is on $A_0$.
+Figure~\ref{f:skew_time} shows that the performance is weakly related to the skewness.  
+This result, in particular when $idx=50$, is misleading for a similar reason as the database size scalability experiments.
+Though the cost of linearizing the problem increases with the skew, the solver time behaves 
+unpredictably, and dominates the shape of the curve.  This effect is less noticable when $idx > 50$
+due to the smaller size of the linearized MILP problem.
+The F1-score for all settings remains near $1$.
+
+
+% 
+% Our hypothesis is that higher skew results in a larger number of relevant queries, thus limiting the effectiveness of query slicing.
+% In addition, recall that each query sets all tuples within the same range to the same value.  
+% Since increasing the skew makes it more likely that both the \texttt{SET} and \texttt{WHERE} clauses reference the same attributes,
+% it causes the tuples to cluster around the values, thus increasing the selectivity of the queries.
+% This results in a larger complaint set, which 
+% 
+% with high skew, each query is more likely to modify the same tuples, thus increasing the number of
+% 
+% We generate query log at 4 different skewness levels from uniform to 
+% super skewed with $s = 0, 1e-7, 0.5, 1$. As we can see as query log
+% is more skewed, the execution time for solving same amount of queries 
+% increase. This is also due to the fact that increasing skewness also
+% increase the query dependency, which, in turn, increase the searching
+% space in the MILP problem.
  
-  \begin{figure}[h]
+  \begin{figure*}[h]
     \centering
-    \begin{subfigure}[t]{.9\columnwidth}
+    \begin{subfigure}[t]{.23\textwidth}
     \includegraphics[width = \columnwidth]{figures/skew_time}
     \caption{Skew vs Time}
-    \label{f:multiquery} 
+    \label{f:skew_time} 
     \end{subfigure}
-    \begin{subfigure}[t]{.9\columnwidth}
+    \begin{subfigure}[t]{.23\textwidth}
     \includegraphics[width = \columnwidth]{figures/skew_acc}
     \caption{Skew vs F1-score}
-    \label{f:multiquery} 
+    \label{f:skew_acc} 
     \end{subfigure}
-    \caption{Log size. }
-  \end{figure}
+    \begin{subfigure}[t]{.23\textwidth}
+    \includegraphics[width = .9\columnwidth]{figures/noise_fn_time}
+    \caption{Time vs Incomplete Complaint Size}
+    \label{f:falsenegative_time} 
+    \end{subfigure}
+    \begin{subfigure}[t]{.23\textwidth}
+    \includegraphics[width = .9\columnwidth]{figures/noise_fn_acc}
+    \caption{F1-score vs Incomplete Complaint Size}
+    \label{f:falsenegative_acc} 
+    \end{subfigure}
+    \caption{Skew and False Negative experiments. }
+  \end{figure*}
 
 
 
 
 
 \stitle{Incomplete Complaint Sets:}
-In this set of experiments, we add false negative complaints to the input
-complaint set and evaluate our noise handling algorithms (Section~\ref{sec:noise}).
-To generate false negatives ($FN$), we select a random subset of the true complaint set.
+Our final experiment (Figures~\ref{f:falsenegative_time} and~\ref{f:falsenegative_acc}) evaluates the fase positive rate in incomplete complaint sets.
+We increase the rate from $0$, meaning a full complaint set, to $0.75$, where 
+$75\%$ of the full complaint set is missing.  
+We find that reduciing the size of the submitted complaint set naturally improves the repair performance,
+however the repair quality may suffer if the corruption occured in a very old query.
 
 
-  \begin{figure}[h!]
-    \centering
-    \begin{subfigure}[t]{\columnwidth}
-    \includegraphics[width = .9\columnwidth]{figures/noise_fn_time}
-    \caption{Time vs Incomplete Complaint Size}
-    \label{f:falsenegative_time} 
-    \end{subfigure}
-    \begin{subfigure}[t]{\columnwidth}
-    \includegraphics[width = .9\columnwidth]{figures/noise_fn_acc}
-    \caption{F1-score vs Incomplete Complaint Size}
-    \label{f:falsenegative_acc} 
-    \end{subfigure}
-    \caption{cap}
-  \end{figure}
+%   \begin{figure}[h!]
+%     \centering
+%     \begin{subfigure}[t]{\columnwidth}
+%     \includegraphics[width = .9\columnwidth]{figures/noise_fn_time}
+%     \caption{Time vs Incomplete Complaint Size}
+%     \label{f:falsenegative_time} 
+%     \end{subfigure}
+%     \begin{subfigure}[t]{\columnwidth}
+%     \includegraphics[width = .9\columnwidth]{figures/noise_fn_acc}
+%     \caption{F1-score vs Incomplete Complaint Size}
+%     \label{f:falsenegative_acc} 
+%     \end{subfigure}
+%     \label{f:falsenegative}
+%     \caption{Incomplete Complaint Experiments}
+%   \end{figure}
+% 
 
-Figure~\ref{f:falsenegative} varies $FN \in \{\}$.
+{\it Takeaways: we find that the performance of the repair algorithm heavily depends on the 
+number of complaints in the complaint set.  This is expected, since each complaint requires 
+an additional linearization of all relevant queries.  In addition, since CPLEX is a black-box
+solver, its performance can vary unpredictably -- though its performance weakly correlates to the 
+size of the MILP problem.  We also find that the quality of our repairs 
+is high when the corruption is between the most recent to the $100$th most recent query.  However,
+when the corruption is very old, it can be very difficult to identify the perfect fix -- 
+in particular because a more recent query may provide a partial, though over-generalized fix.}
 
-\stitle{Incremental Results}
-INcremental algorithm, incremental results
+% \stitle{Incremental Results}
+% INcremental algorithm, incremental results
 
 
 
