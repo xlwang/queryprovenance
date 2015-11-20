@@ -27,9 +27,9 @@
 
 In this section, we carefully study the performance and accuracy
 characteristics of the naive MILP-based repair algorithm, as well as 
-slicing-based optimizations that improve the latency of the system over the naive
-approach by over $Y\times$, an incremental algorithm for single query corruptions that
-further improves the latency over the naive approach by $>Y\times$, and 
+slicing-based optimizations that improve the latency of the system
+, an incremental algorithm for single query corruptions that
+further improves the latency, and 
 the multi-pass tuple-slicing algorithm that tolerates incomplete complaint sets with minimal loss in accuracy.
 Our goals in the evaluation is to understand these trade-offs in
 controlled synthetic scenarios, as well as study the effectiveness
@@ -43,7 +43,7 @@ and find that the latter query type is by far the most complicated and costly to
 For the subsequent experiments, we focus solely on \texttt{UPDATE}-only synthetic workloads 
 to understand how \sys responds to different query logs and databases.  
 Finally, we evaluate the efficacy on real-world databases transaction benchmarks,
-TPC-C XXX~\cite{tpcc} and AuctionMark~\cite{auctionmark}.
+TPC-C and AuctionMark.
 All experiments were run on 12x2.66 GHz  machines with 16GB RAM running CentOS release 6.6.
 
 
@@ -134,9 +134,6 @@ or the repair with the lowest objective function across the entire query log.
 We evaluate the algorithms along several metrics.  Performance is measured as wall clock
 time between submitting a query log and the system terminating after retrieving all relevant repairs 
 (e.g., the time to the first repairt for $\sys_{inc}^{1st}$, or the time to process the full log for $\sys{inc}^{all}$).  
-Experiment~\ref{???} evaluates the time to output {\it each repair} when running the 
-incremental variant across the entire query log.  
-
 We also measure the repair's precision (percentage of repaired tuples that were correctly fixed), 
 the recall (the percentage of the full complaint set that was repaired), 
 and the F1 measure (the harmonic mean of precision and recall).
@@ -173,7 +170,7 @@ the \texttt{WHERE} clauses form a conjunction.
 % The $set$ parameter controls whether the \texttt{UPDATE} queries set attributes to random constant values ({\it const}),  
 % or relative values ({\it rel}) by incrementing by a random, possibly negative, value.  
 In addition, the skew parameter $s$ determines the distribution attributes referenced in the \texttt{WHERE} and \texttt{SET} clauses.  
-Each attribute in a query is picked from either a uniform distribution when $s=0$ or a zipfian~\cite{zipf} distribution.
+Each attribute in a query is picked from either a uniform distribution when $s=0$ or a zipfian distribution.
 This allows our experiments to vary between a uniform distribution, where each attribute is
 equally likely to be picked, and a skewed distribution where nearly all attributes are the same. \\
 The \texttt{WHERE} clauses in \texttt{DELETE} queries are generated in an identical fashion, while
@@ -253,7 +250,7 @@ reduce the total number of constraints for almost every setting to less than $10
     \includegraphics[width = .99\columnwidth]{figures/multi_time}
     \vspace*{-.1in}
     \caption{Performance for multiple corruptions.}
-    \label{f:multiquery} 
+    \label{f:multi_time} 
     \end{subfigure}
     \begin{subfigure}[t]{.3\textwidth}
     \includegraphics[width = .99\columnwidth]{figures/incrementalcompare_time}
@@ -272,7 +269,7 @@ reduce the total number of constraints for almost every setting to less than $10
     \includegraphics[width = .99\columnwidth]{figures/multi_pr}
     \vspace*{-.1in}
     \caption{Accuracy for multiple corruptions.}
-    \label{f:multiquery} 
+    \label{f:multi_acc} 
     \end{subfigure}
     \begin{subfigure}[t]{.3\textwidth}
     \includegraphics[width = .99\columnwidth]{figures/incrementalcompare_acc}
@@ -479,12 +476,12 @@ The F1-score for all settings remains near $1$.
     \end{subfigure}
     \begin{subfigure}[t]{.23\textwidth}
     \includegraphics[width = .9\columnwidth]{figures/noise_fn_time}
-    \caption{Time vs False Negative \%}
+    \caption{Time vs False Negative}
     \label{f:falsenegative_time} 
     \end{subfigure}
     \begin{subfigure}[t]{.23\textwidth}
     \includegraphics[width = .9\columnwidth]{figures/noise_fn_acc}
-    \caption{F1-score vs False Negative \%}
+    \caption{F1-score vs False Negative}
     \label{f:falsenegative_acc} 
     \end{subfigure}
     \vspace*{-.1in}

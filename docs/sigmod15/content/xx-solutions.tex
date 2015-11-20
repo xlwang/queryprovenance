@@ -160,12 +160,12 @@ conditional function of $q_i$: $x_{q_i, t}=1$ if
 $\sigma_{q_i}(t)=\texttt{true}$ and $x_{q_i, t}=0$ otherwise. In a
 slight abuse of notation:
 % 
-% {\scriptsize
+{\scriptsize
 \begin{align}
 \label{eq:x}
 x_{q_i, t} = \sigma_{q_i}(t)
 \end{align}
-% }
+}
  
 
 Next, we introduce real-valued variables for the attributes of $t$.
@@ -180,12 +180,12 @@ been used in literature to model hypothetical data
 updates~\cite{tiresias}.
 
 Given a query $q_i$ and tuple $t$, we express the value of attribute $A_j$ in the updated tuple $t'$ as follows:
-% {\scriptsize
+ {\scriptsize
 \begin{align}
 \label{eq:linearization}
 t'.A_j = x_{q_i, t}\otimes \mu_{q_i}(t).A_j + (1-x_{q_i, t})\otimes t.A_j 
 \end{align} 
-% }
+ }
 In this expression, the $\otimes$ operation corresponds to regular
 multiplication, but we maintain the $\otimes$ notation to indicate
 that it is a semi-module multiplication by scalars. This expression
@@ -220,12 +220,12 @@ u.A_j &\geq \mu_{q_i}(t).A_j - (1-x_{q_i, t})M  \phantom{aa}
 The set of conditions on $u.A_j$ ensure that $u.A_j = \mu_{q_i}(t).A_j$ if $x_{q_i, t}=1$, and $0$ otherwise. Similarly, 
 the conditions on $v.A_j$ ensure that $v.A_j = t.A_j$ if $x_{q_i, t}=0$, and $0$ otherwise.  
 Now, Equation~\eqref{eq:linearization} becomes linear:
-% {\scriptsize
+ {\scriptsize
 \begin{align}
 \label{eq:tnew}
 t.A_j' = u.A_j + v.A_j
 \end{align}
-% }
+}
 
 
 \smallskip
@@ -233,12 +233,12 @@ t.A_j' = u.A_j + v.A_j
 \texttt{INSERT:}
 An insert query adds a new tuple $t_{new}$ to the database.  If the query were 
 corrupted, then the inserted values need repair. We use a binary variable $x$ to model whether the query is correct.  Each attribute of the newly inserted tuple ($t'.A_j$) may take one of two values: the value specified by the insertion query ($t_{new}.A_j$) if the query is correct ($x=1$), or an undetermined value ($u.A_j$) if the query is incorrect ($x=0$).  Thus, similar with Equation~\eqref{eq:linearization}, we write:
-% {\scriptsize
+ {\scriptsize
 \begin{eqnarray}
 \label{eq:insert}
 t'.A_j = x \otimes t_{new}.A_j + (1-x) \otimes v.A_j 
 \end{eqnarray}
-% }%
+ }%
 
 
 \smallskip
@@ -250,13 +250,13 @@ we encode a deleted tuple by setting its attributes to a value
 outside of the attribute domain $M^+$.  In this way, subsequent conditional functions
 on the attribute will return false, so it will not have an effect on subsequent queries encoded
 in the MILP problem:
-% {\scriptsize
+ {\scriptsize
 \begin{eqnarray}
 \label{eq:delete}
 t'.A_j &=& x_{q_i, t} \otimes M^+ + (1-x_{q_i, t}) \otimes t.A_j \\
 x_{q_i, t} &=& \sigma_{q_i}(t)\nonumber 
 \end{eqnarray}
-% }%
+ }%
 This expression is further linearized using the same method as Equation~\eqref{eq:uv}.
 
 \smallskip

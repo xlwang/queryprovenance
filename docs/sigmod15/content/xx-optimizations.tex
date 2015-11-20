@@ -9,7 +9,7 @@ in the query log.  In this approach, the number of constraints (as well as undet
 grows quadratically with respect to the database and the query log.
 Figure~\ref{fig:querysize_vs_time} shows a simple scalability experiment, where we generated increasingly 
 larger query logs for a database of $1000$ tuples, encoded the problem using $\naive$ (red bars), 
-and solved the problem using a MILP-solver (CPLEX~\cite{cplex} in our experiments).
+and solved the problem using a MILP-solver (CPLEX in our experiments).
 We find that the solver time increases exponentially as the number of encoded queries increases --
 at a log size of $80$, the solver failed to produce an answer within $1000$ seconds --
 due to the exponential increase in the number of possible states for the increasing number of undetermined variables.
@@ -336,7 +336,7 @@ causal read-write chain to the \emph{complaint attributes} must be linearized, w
 % set.  
 
 % Algorithm~\ref{alg:fullimpact} describes how $\mathcal{F}(q_i)$ can be computed:
-\vspace*{-.2in}
+\vspace*{-.1in}
 \begin{algorithm}[t]
 \scriptsize
 \caption{$FullImpact$ algorithm for finding $\mathcal{F}(q)$.}
@@ -347,7 +347,7 @@ causal read-write chain to the \emph{complaint attributes} must be linearized, w
 % \FOR {each $q_i$ in $q_n, ..., q_1$}
 \STATE $\mathcal{F}(q_i) \leftarrow \mathcal{I}(q_i)$
 \FOR {each $q_j$ in $q_{i+1}, ..., q_{n} \in \mathcal{Q}$}
-\IF {\red{$\mathcal{F}(q_i)\cap \mathcal{P}(q_j) \neq \emptyset$}}
+\IF {$\mathcal{F}(q_i)\cap \mathcal{P}(q_j) \neq \emptyset$}
 \STATE $\mathcal{F}(q_i) \leftarrow \mathcal{F}(q_i) \cup \mathcal{F}(q_j)$
 \ENDIF
 \ENDFOR
@@ -356,7 +356,7 @@ causal read-write chain to the \emph{complaint attributes} must be linearized, w
 \STATE Return $\mathcal{F}(q_i)$
 \end{algorithmic}
 \end{algorithm}
-\vspace*{-.2in}
+\vspace*{-.1in}
 
 By computing the full-impact of $q$, we can determine the extent that it affects $\mathcal{C}$
 based on its overlap with the complaint attributes.
@@ -422,11 +422,11 @@ and fixes the values for the parameters for the rest of the queries in $\mathcal
 \ENDFOR
 \end{algorithmic}
 \end{algorithm}
-\vspace*{-.2in}
+\vspace*{-.1in}
 
 
 
 \incremental prioritizes repairs for complaints that are due to more recent corruptions.
-We believe this is a natural property to expect in practice, and our experiments demonstrate \ewu{$10\times$}
+We believe this is a natural property to expect in practice, and our experiments demonstrate $10\times$
 more scalability compared to the naive exhaustive approach, in terms of number of queries in the query log, as the exhaustive algorithm simply fails beyond a certain log size.
 
