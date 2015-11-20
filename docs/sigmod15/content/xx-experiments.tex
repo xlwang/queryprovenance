@@ -461,51 +461,59 @@ The F1-score for all settings remains near $1$.
 % increase the query dependency, which, in turn, increase the searching
 % space in the MILP problem.
  
-  \begin{figure}[h]
+  \begin{figure*}[h]
     \centering
-    \begin{subfigure}[t]{.9\columnwidth}
+    \begin{subfigure}[t]{.23\textwidth}
     \includegraphics[width = \columnwidth]{figures/skew_time}
     \caption{Skew vs Time}
     \label{f:skew_time} 
     \end{subfigure}
-    \begin{subfigure}[t]{.9\columnwidth}
+    \begin{subfigure}[t]{.23\textwidth}
     \includegraphics[width = \columnwidth]{figures/skew_acc}
     \caption{Skew vs F1-score}
     \label{f:skew_acc} 
     \end{subfigure}
-    \caption{Skew experiments. }
-  \end{figure}
+    \begin{subfigure}[t]{.23\textwidth}
+    \includegraphics[width = .9\columnwidth]{figures/noise_fn_time}
+    \caption{Time vs Incomplete Complaint Size}
+    \label{f:falsenegative_time} 
+    \end{subfigure}
+    \begin{subfigure}[t]{.23\textwidth}
+    \includegraphics[width = .9\columnwidth]{figures/noise_fn_acc}
+    \caption{F1-score vs Incomplete Complaint Size}
+    \label{f:falsenegative_acc} 
+    \end{subfigure}
+    \caption{Skew and False Negative experiments. }
+  \end{figure*}
 
 
 
 
 
 \stitle{Incomplete Complaint Sets:}
-Our final experiment (Figure~\ref{f:falsenegative}) evaluates the fase positive rate in incomplete complaint sets.
+Our final experiment (Figures~\ref{f:falsenegative_time} and~\ref{f:falsenegative_acc}) evaluates the fase positive rate in incomplete complaint sets.
 We increase the rate from $0$, meaning a full complaint set, to $0.75$, where 
 $75\%$ of the full complaint set is missing.  
 We find that reduciing the size of the submitted complaint set naturally improves the repair performance,
 however the repair quality may suffer if the corruption occured in a very old query.
 
 
-  \begin{figure}[h!]
-    \centering
-    \begin{subfigure}[t]{\columnwidth}
-    \includegraphics[width = .9\columnwidth]{figures/noise_fn_time}
-    \caption{Time vs Incomplete Complaint Size}
-    \label{f:falsenegative_time} 
-    \end{subfigure}
-    \begin{subfigure}[t]{\columnwidth}
-    \includegraphics[width = .9\columnwidth]{figures/noise_fn_acc}
-    \caption{F1-score vs Incomplete Complaint Size}
-    \label{f:falsenegative_acc} 
-    \end{subfigure}
-    \label{f:falsenegative}
-    \caption{Incomplete Complaint Experiments}
-  \end{figure}
-
-Figure~\ref{f:falsenegative} varies $FN \in \{\}$.
-
+%   \begin{figure}[h!]
+%     \centering
+%     \begin{subfigure}[t]{\columnwidth}
+%     \includegraphics[width = .9\columnwidth]{figures/noise_fn_time}
+%     \caption{Time vs Incomplete Complaint Size}
+%     \label{f:falsenegative_time} 
+%     \end{subfigure}
+%     \begin{subfigure}[t]{\columnwidth}
+%     \includegraphics[width = .9\columnwidth]{figures/noise_fn_acc}
+%     \caption{F1-score vs Incomplete Complaint Size}
+%     \label{f:falsenegative_acc} 
+%     \end{subfigure}
+%     \label{f:falsenegative}
+%     \caption{Incomplete Complaint Experiments}
+%   \end{figure}
+% 
 
 {\it Takeaways: we find that the performance of the repair algorithm heavily depends on the 
 number of complaints in the complaint set.  This is expected, since each complaint requires 
