@@ -181,7 +181,7 @@ The \texttt{WHERE} clauses in \texttt{DELETE} queries are generated in an identi
 
 
 
-\stitle{TPC-C:} We use the data and query workload over the {\it ORDER} table in TPC-C~\cite{tpcc}.  
+\stitle{TPC-C:} We use the data and query workload over the {\it ORDER} table in TPC-C~\cite{difallah2013oltp,}.  
 We generated a database at scale 1 with one warehouse, and kept the queries that modify the
 {\it ORDER} table. The initial table contains 4570 tuples and we ultimately generated a log with
 1000 queries, where $530$ are \texttt{UPDATE}s and the rest are \texttt{INSERT}s.
@@ -189,7 +189,7 @@ We generated a database at scale 1 with one warehouse, and kept the queries that
 \stitle{AuctionMark:} Auctionmark workload simulates the 
 actual action market. We generate a database 
 with 8729 tuples and $1000$ queries, with $540$ \texttt{UPDATE}s and $110$ \texttt{INSERT}s.
-Both TPC-C and AuctionMark setups were generated using the OLTP-bench project~\cite{oltpbench,oltpbenchgit}.
+Both TPC-C and AuctionMark setups were generated using the OLTP-bench project~\cite{difallah2013oltp}.
 
 
 \stitle{Corrupting Queries:} We corrupt query $q_i$ by replacing it with a randomly
