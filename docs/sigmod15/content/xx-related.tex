@@ -3,6 +3,7 @@
 \section{Related Work}
 \label{s:related}
 
+% data cleaning
 \sys tackles the problem of diagnosis and repair in relational query
 histories (query logs). It does not aim to correct errors in the data
 directly, but rather to find the underlying reason for reported errors
@@ -24,6 +25,22 @@ modify this data. In fact the output of such methods can be used to
 augment the complaint sets used by \sys, which focuses on identifying
 errors in the queries that produced the data, rather than the data
 itself.
+
+%repairs
+An aspect of data cleaning focuses on providing repairs for the
+identified errors~\cite{ChuIP13}. Tools in this domain have targeted
+different methods and interactions for providing fixes, ranging from
+functional dependencies~\cite{Fan2008b, ChuIP13} and
+rules~\cite{Beskales2010, Cong2007} and functional
+dependencies~\cite{Fan2008b, ChuIP13}, to interactive methods that
+solicit user feedback~\cite{Yakout, Raman01}. As with the other data
+cleaning approaches, all these techniques again operate on the data
+directly. In contrast, \sys analyzes errors in the data to diagnose
+and repair errors in queries that operated on the data. Thus, \sys
+leverages the facts that some data errors are systemic, linked to
+erroneous updates. Diagnosing the cause of the errors, will achieve
+systematic fixes that will correct all relevant errors, even if they
+have not been explicitly identified.
 
 
 %things about diagnosis and explanations
