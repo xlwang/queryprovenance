@@ -16,12 +16,13 @@
 %  * fixing an individual/batch of queries
 %
 \section{Experiments}
+\label{sec:experiments}
 
-\ewu{Should say this somewhere: 
-Updates are often a small fractice of a query workload -- typically $10\%$~\cite{} in most benchmarks --
-thus in practice \sys can work for much larger workloads.  In the experiments, we filtered the workloads to 
-only look at modification queries, and specifically UPDATE queries which are hard.
-}
+% \ewu{Should say this somewhere: 
+% Updates are often a small fractice of a query workload -- typically $10\%$~\cite{} in most benchmarks --
+% thus in practice \sys can work for much larger workloads.  In the experiments, we filtered the workloads to 
+% only look at modification queries, and specifically UPDATE queries which are hard.
+% }
 
 
 In this section, we carefully study the performance and accuracy
@@ -156,7 +157,7 @@ picked from $V_d$ uniformly at random, along with a primary key $id$.
 We then generate a sequence of $N_q$ \texttt{UPDATE} queries~\footnote{\scriptsize We focus on
 \texttt{UPDATE} only query logs because they are the {\it predominant} cost 
 in a query log.  Experiment~\ref{sec:indelup} compares \texttt{INSERT}, \texttt{DELETE} and \texttt{UPDATE}
-only workloads to illustrate the differenc \ewu{Experiment could move to appendix}.} where 
+only workloads to illustrate the differenc.} where 
 \verb|?| is a randomly generated value and \verb|r| is the size of the range predicate: 
 {\scriptsize
 \begin{verbatim}
@@ -395,7 +396,7 @@ $\sys_{ta,inc}^{1st}$ is denoted $ta,inc-1st$.
       \caption{Query Complexity vs F1-score.}
       \label{f:where_acc} 
     \end{subfigure}
-    \caption{cap}
+    \caption{Scalability Experiments}
   \end{figure*}
 
 
