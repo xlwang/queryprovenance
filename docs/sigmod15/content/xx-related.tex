@@ -42,6 +42,26 @@ erroneous updates. Diagnosing the cause of the errors, will achieve
 systematic fixes that will correct all relevant errors, even if they
 have not been explicitly identified.
 
+%% Data auditor and Data XRay
+Closer to exploring systemic reasons and patterns for errors are
+techniques such as Data Auditor~\cite{Golab2008, GolabKKS10} and Data
+X-Ray~\cite{wang2015}. Both tools tools identify features, which can
+be selected from the tuple attributes, that best summarize or describe
+groups of tuples (or specifically errors). While these tools can
+generate feature sets or patterns of attributes that characterize
+errors, these are not linked to the queries, but are again
+characterizations over the data itself. Such techniques can be
+tremendously useful if the processes that generate or modify the data
+are unknown or black-box computations. In these cases, Data Auditor
+and Data X-Ray can provide high-level clues for potential problems in
+the data derivation process. However, both approaches are oblivious to
+the actual queries that operated on the data, and they do not provide
+particular fixes. Ontology-based why-not
+explanations~\cite{tenCate2015} is very similar to Data X-Ray, but is
+only relevant to absent tuples (deletions), and again does not
+consider the query history.
+
+
 
 %things about diagnosis and explanations
 
