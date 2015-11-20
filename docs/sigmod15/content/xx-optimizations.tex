@@ -20,7 +20,7 @@ this experiment illustrates the limitations of the na\"ive approach.
 
 \begin{figure}[t]
     \centering
-        \includegraphics[width=0.4\textwidth]{figures/qsize_time_badscale}
+        \includegraphics[width=0.35\textwidth]{figures/qsize_time_badscale}
     \caption{Log size vs. execution time on synthetic setup. }
     \label{fig:querysize_vs_time}
 \end{figure}
@@ -78,7 +78,7 @@ the true range predicate, and introduces new errors by affecting tuples not orig
 
 \begin{figure}[t]
     \centering
-    \includegraphics[width=0.4\textwidth]{figures/2nditerationgroups}
+    \includegraphics[width=0.35\textwidth]{figures/2nditerationgroups}
     \caption{Graphical depiction of the group 2 and group 3. }
     \label{fig:groups}
 \end{figure}
@@ -336,8 +336,9 @@ causal read-write chain to the \emph{complaint attributes} must be linearized, w
 % set.  
 
 % Algorithm~\ref{alg:fullimpact} describes how $\mathcal{F}(q_i)$ can be computed:
-
+\vspace*{-.2in}
 \begin{algorithm}[t]
+\scriptsize
 \caption{$FullImpact$ algorithm for finding $\mathcal{F}(q)$.}
 \label{alg:fullimpact}
 \begin{algorithmic}[2]
@@ -355,6 +356,7 @@ causal read-write chain to the \emph{complaint attributes} must be linearized, w
 \STATE Return $\mathcal{F}(q_i)$
 \end{algorithmic}
 \end{algorithm}
+\vspace*{-.2in}
 
 By computing the full-impact of $q$, we can determine the extent that it affects $\mathcal{C}$
 based on its overlap with the complaint attributes.
@@ -406,6 +408,7 @@ and fixes the values for the parameters for the rest of the queries in $\mathcal
 \begin{algorithm}[t]
 \caption{\incremental algorithm. 
 }
+\scriptsize
 \label{alg:incalg}
 \begin{algorithmic}[2]
 \REQUIRE {$Rel\mathcal{(Q)}, \mathcal{D}_j, \mathcal{D}_n, \mathcal{C}$}
@@ -419,10 +422,11 @@ and fixes the values for the parameters for the rest of the queries in $\mathcal
 \ENDFOR
 \end{algorithmic}
 \end{algorithm}
+\vspace*{-.2in}
 
 
 
 \incremental prioritizes repairs for complaints that are due to more recent corruptions.
-We believe this is a natural property to expect in practice, and our experiments demonstrate \ewu{$foo\times$}
-performance improvement on top of the slicing-based approaches.
+We believe this is a natural property to expect in practice, and our experiments demonstrate \ewu{$10\times$}
+more scalability compared to the naive exhaustive approach, in terms of number of queries in the query log, as the exhaustive algorithm simply fails beyond a certain log size.
 
