@@ -1,0 +1,4785 @@
+--
+-- PostgreSQL database dump
+--
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET client_encoding = 'LATIN9';
+SET standard_conforming_strings = on;
+SET check_function_bodies = false;
+SET client_min_messages = warning;
+
+SET search_path = public, pg_catalog;
+
+SET default_tablespace = '';
+
+SET default_with_oids = false;
+
+--
+-- Name: configs; Type: TABLE; Schema: public; Owner: xlwang; Tablespace: 
+--
+
+CREATE TABLE configs (
+    id integer NOT NULL,
+    sid integer,
+    pid integer,
+    num_try integer,
+    logsize integer,
+    db_size integer,
+    skewness real,
+    range real,
+    corrupt_qidx text,
+    num_compl integer,
+    set_type text,
+    dataset text,
+    wheresize integer
+);
+
+
+ALTER TABLE public.configs OWNER TO xlwang;
+
+--
+-- Name: configs_id_seq; Type: SEQUENCE; Schema: public; Owner: xlwang
+--
+
+CREATE SEQUENCE configs_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.configs_id_seq OWNER TO xlwang;
+
+--
+-- Name: configs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: xlwang
+--
+
+ALTER SEQUENCE configs_id_seq OWNED BY configs.id;
+
+
+--
+-- Name: exps; Type: TABLE; Schema: public; Owner: xlwang; Tablespace: 
+--
+
+CREATE TABLE exps (
+    exp_id integer NOT NULL,
+    sid integer,
+    pid integer,
+    f_p_rate real,
+    f_n_rate real,
+    solver text,
+    opt_queryslice integer,
+    opt_attrslice integer,
+    opt_query_num integer,
+    opt_attr_num integer,
+    opt_approx integer,
+    num_compl integer,
+    num_fixed_compl integer,
+    fixed_rate real,
+    noise_rate real,
+    dirty_query_idx text,
+    fixed_query_idx text,
+    preproc_time real,
+    solver_prep_cons_time real,
+    solver_add_cons_time real,
+    solver_solve_time real,
+    finish_time real,
+    avg_num_cons integer
+);
+
+
+ALTER TABLE public.exps OWNER TO xlwang;
+
+--
+-- Name: exps_exp_id_seq; Type: SEQUENCE; Schema: public; Owner: xlwang
+--
+
+CREATE SEQUENCE exps_exp_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.exps_exp_id_seq OWNER TO xlwang;
+
+--
+-- Name: exps_exp_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: xlwang
+--
+
+ALTER SEQUENCE exps_exp_id_seq OWNED BY exps.exp_id;
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: xlwang
+--
+
+ALTER TABLE ONLY configs ALTER COLUMN id SET DEFAULT nextval('configs_id_seq'::regclass);
+
+
+--
+-- Name: exp_id; Type: DEFAULT; Schema: public; Owner: xlwang
+--
+
+ALTER TABLE ONLY exps ALTER COLUMN exp_id SET DEFAULT nextval('exps_exp_id_seq'::regclass);
+
+
+--
+-- Data for Name: configs; Type: TABLE DATA; Schema: public; Owner: xlwang
+--
+
+COPY configs (id, sid, pid, num_try, logsize, db_size, skewness, range, corrupt_qidx, num_compl, set_type, dataset, wheresize) FROM stdin;
+195	1	194	1	100	1000	1	4	99	26	constant	synth	1
+196	1	195	1	100	1000	1	4	99	10	constant	synth	1
+197	1	196	1	100	1000	1	4	99	26	constant	synth	1
+198	1	197	1	100	1000	1	4	99	14	constant	synth	1
+199	1	198	1	100	1000	1	4	99	17	constant	synth	1
+200	1	199	1	100	1000	1	4	99	18	constant	synth	1
+201	1	200	1	100	1000	1	4	74	18	constant	synth	1
+202	1	201	1	100	1000	1	4	74	20	constant	synth	1
+203	1	202	1	100	1000	1	4	74	21	constant	synth	1
+204	1	203	1	100	1000	1	4	74	22	constant	synth	1
+205	1	204	1	100	1000	1	4	74	22	constant	synth	1
+206	1	205	1	100	1000	1	4	74	22	constant	synth	1
+207	1	206	1	100	1000	1	4	74	19	constant	synth	1
+208	1	207	1	100	1000	1	4	74	21	constant	synth	1
+209	1	208	1	100	1000	1	4	74	23	constant	synth	1
+210	1	209	1	100	1000	1	4	74	26	constant	synth	1
+211	1	210	1	100	1000	1	4	49	18	constant	synth	1
+212	1	211	1	100	1000	1	4	49	14	constant	synth	1
+213	1	212	1	100	1000	1	4	49	15	constant	synth	1
+214	1	213	1	100	1000	1	4	49	16	constant	synth	1
+215	1	214	1	100	1000	1	4	49	18	constant	synth	1
+216	1	215	1	100	1000	1	4	49	21	constant	synth	1
+217	1	216	1	100	1000	1	4	49	28	constant	synth	1
+218	1	217	1	100	1000	1	4	49	13	constant	synth	1
+219	1	218	1	100	1000	1	4	49	16	constant	synth	1
+220	1	219	1	100	1000	1	4	49	13	constant	synth	1
+221	1	220	1	500	1000	1	4	499	21	constant	synth	1
+222	1	221	1	500	1000	1	4	499	14	constant	synth	1
+223	1	222	1	500	1000	1	4	499	4	constant	synth	1
+224	1	223	1	500	1000	1	4	499	4	constant	synth	1
+225	1	224	1	500	1000	1	4	499	5	constant	synth	1
+226	1	225	1	500	1000	1	4	499	13	constant	synth	1
+227	1	226	1	500	1000	1	4	499	4	constant	synth	1
+228	1	227	1	500	1000	1	4	499	10	constant	synth	1
+229	1	228	1	500	1000	1	4	499	6	constant	synth	1
+230	1	229	1	500	1000	1	4	499	4	constant	synth	1
+231	1	230	1	500	1000	1	4	474	9	constant	synth	1
+232	1	231	1	500	1000	1	4	474	17	constant	synth	1
+233	1	232	1	500	1000	1	4	474	28	constant	synth	1
+234	1	233	1	500	1000	1	4	474	13	constant	synth	1
+235	1	234	1	500	1000	1	4	474	19	constant	synth	1
+236	1	235	1	500	1000	1	4	474	21	constant	synth	1
+237	1	236	1	500	1000	1	4	474	11	constant	synth	1
+238	1	237	1	500	1000	1	4	474	16	constant	synth	1
+239	1	238	1	500	1000	1	4	474	19	constant	synth	1
+240	1	239	1	500	1000	1	4	474	13	constant	synth	1
+241	1	240	1	500	1000	1	4	449	28	constant	synth	1
+242	1	241	1	500	1000	1	4	449	40	constant	synth	1
+243	1	242	1	500	1000	1	4	449	23	constant	synth	1
+244	1	243	1	500	1000	1	4	449	29	constant	synth	1
+245	1	244	1	500	1000	1	4	449	45	constant	synth	1
+246	1	245	1	500	1000	1	4	449	24	constant	synth	1
+247	1	246	1	500	1000	1	4	449	43	constant	synth	1
+248	1	247	1	500	1000	1	4	449	44	constant	synth	1
+249	1	248	1	500	1000	1	4	449	36	constant	synth	1
+250	1	249	1	500	1000	1	4	449	30	constant	synth	1
+251	1	250	1	500	1000	1	4	399	4	constant	synth	1
+252	1	251	1	500	1000	1	4	399	4	constant	synth	1
+253	1	252	1	500	1000	1	4	399	3	constant	synth	1
+254	1	253	1	500	1000	1	4	399	5	constant	synth	1
+255	1	254	1	500	1000	1	4	399	10	constant	synth	1
+256	1	255	1	500	1000	1	4	399	4	constant	synth	1
+257	1	256	1	500	1000	1	4	399	2	constant	synth	1
+258	1	257	1	500	1000	1	4	399	2	constant	synth	1
+259	1	258	1	500	1000	1	4	399	10	constant	synth	1
+260	1	259	1	500	1000	1	4	399	2	constant	synth	1
+261	1	260	1	500	1000	1	4	299	3	constant	synth	1
+339	1	338	1	1000	1000	1	4	749	25	constant	synth	1
+340	1	339	1	1000	1000	1	4	749	14	constant	synth	1
+343	2	342	1	50	1000	1	8	49	27	constant	synth	1
+344	2	343	1	50	1000	1	8	49	36	constant	synth	1
+345	2	344	1	50	1000	1	8	49	36	constant	synth	1
+346	2	345	1	50	1000	1	8	49	58	constant	synth	1
+347	2	346	1	50	1000	1	8	49	39	constant	synth	1
+348	2	347	1	50	1000	1	8	49	39	constant	synth	1
+349	2	348	1	50	1000	1	8	49	50	constant	synth	1
+350	2	349	1	50	1000	1	8	49	43	constant	synth	1
+351	2	350	1	50	1000	1	8	24	41	constant	synth	1
+352	2	351	1	50	1000	1	8	24	29	constant	synth	1
+353	2	352	1	50	1000	1	8	24	32	constant	synth	1
+354	2	353	1	50	1000	1	8	24	22	constant	synth	1
+355	2	354	1	50	1000	1	8	24	33	constant	synth	1
+356	2	355	1	50	1000	1	8	24	25	constant	synth	1
+357	2	356	1	50	1000	1	8	24	28	constant	synth	1
+358	2	357	1	50	1000	1	8	24	33	constant	synth	1
+359	2	358	1	50	1000	1	8	24	29	constant	synth	1
+360	2	359	1	50	1000	1	8	24	23	constant	synth	1
+361	2	360	1	100	1000	1	8	99	25	constant	synth	1
+362	2	361	1	100	1000	1	8	99	25	constant	synth	1
+363	2	362	1	100	1000	1	8	99	27	constant	synth	1
+530	3	529	1	50	1000	1	40	24	65	constant	synth	1
+531	3	530	1	100	1000	1	40	99	67	constant	synth	1
+532	3	531	1	100	1000	1	40	99	46	constant	synth	1
+533	3	532	1	100	1000	1	40	99	38	constant	synth	1
+534	3	533	1	100	1000	1	40	99	47	constant	synth	1
+535	3	534	1	100	1000	1	40	99	47	constant	synth	1
+681	4	680	1	50	1000	1	0.0500000007	49	112	constant	synth	1
+682	4	681	1	50	1000	1	0.0500000007	49	99	constant	synth	1
+683	4	682	1	50	1000	1	0.0500000007	49	103	constant	synth	1
+684	4	683	1	50	1000	1	0.0500000007	49	148	constant	synth	1
+685	4	684	1	50	1000	1	0.0500000007	49	102	constant	synth	1
+686	4	685	1	50	1000	1	0.0500000007	49	121	constant	synth	1
+687	4	686	1	50	1000	1	0.0500000007	49	198	constant	synth	1
+688	4	687	1	50	1000	1	0.0500000007	49	103	constant	synth	1
+689	4	688	1	50	1000	1	0.0500000007	49	146	constant	synth	1
+690	4	689	1	50	1000	1	0.0500000007	49	97	constant	synth	1
+691	4	690	1	50	1000	1	0.0500000007	24	107	constant	synth	1
+692	4	691	1	50	1000	1	0.0500000007	24	101	constant	synth	1
+693	4	692	1	50	1000	1	0.0500000007	24	101	constant	synth	1
+694	4	693	1	50	1000	1	0.0500000007	24	148	constant	synth	1
+695	4	694	1	50	1000	1	0.0500000007	24	110	constant	synth	1
+696	4	695	1	50	1000	1	0.0500000007	24	108	constant	synth	1
+697	4	696	1	50	1000	1	0.0500000007	24	195	constant	synth	1
+698	4	697	1	50	1000	1	0.0500000007	24	101	constant	synth	1
+699	4	698	1	50	1000	1	0.0500000007	24	114	constant	synth	1
+700	4	699	1	50	1000	1	0.0500000007	24	135	constant	synth	1
+701	4	700	1	100	1000	1	0.0500000007	99	104	constant	synth	1
+702	4	701	1	100	1000	1	0.0500000007	99	81	constant	synth	1
+703	4	702	1	100	1000	1	0.0500000007	99	106	constant	synth	1
+704	4	703	1	100	1000	1	0.0500000007	99	99	constant	synth	1
+705	4	704	1	100	1000	1	0.0500000007	99	102	constant	synth	1
+706	4	705	1	100	1000	1	0.0500000007	99	94	constant	synth	1
+707	4	706	1	100	1000	1	0.0500000007	99	93	constant	synth	1
+708	4	707	1	100	1000	1	0.0500000007	99	94	constant	synth	1
+709	4	708	1	100	1000	1	0.0500000007	99	88	constant	synth	1
+710	4	709	1	100	1000	1	0.0500000007	99	101	constant	synth	1
+711	4	710	1	100	1000	1	0.0500000007	74	161	constant	synth	1
+712	4	711	1	100	1000	1	0.0500000007	74	178	constant	synth	1
+713	4	712	1	100	1000	1	0.0500000007	74	187	constant	synth	1
+714	4	713	1	100	1000	1	0.0500000007	74	188	constant	synth	1
+715	4	714	1	100	1000	1	0.0500000007	74	230	constant	synth	1
+716	4	715	1	100	1000	1	0.0500000007	74	208	constant	synth	1
+717	4	716	1	100	1000	1	0.0500000007	74	205	constant	synth	1
+718	4	717	1	100	1000	1	0.0500000007	74	216	constant	synth	1
+820	4	819	1	1000	1000	1	0.0500000007	949	52	constant	synth	1
+65	0	64	1	500	1000	1	2	474	13	constant	synth	1
+66	0	65	1	500	1000	1	2	474	5	constant	synth	1
+67	0	66	1	500	1000	1	2	474	1	constant	synth	1
+68	0	67	1	500	1000	1	2	474	4	constant	synth	1
+69	0	68	1	500	1000	1	2	474	4	constant	synth	1
+70	0	69	1	500	1000	1	2	474	13	constant	synth	1
+71	0	70	2	500	1000	1	2	449	8	constant	synth	1
+72	0	71	1	500	1000	1	2	449	9	constant	synth	1
+73	0	72	1	500	1000	1	2	449	3	constant	synth	1
+74	0	73	1	500	1000	1	2	449	2	constant	synth	1
+75	0	74	2	500	1000	1	2	449	2	constant	synth	1
+76	0	75	1	500	1000	1	2	449	3	constant	synth	1
+77	0	76	2	500	1000	1	2	449	16	constant	synth	1
+78	0	77	2	500	1000	1	2	449	11	constant	synth	1
+79	0	78	1	500	1000	1	2	449	8	constant	synth	1
+80	0	79	1	500	1000	1	2	449	4	constant	synth	1
+81	0	80	1	500	1000	1	2	399	8	constant	synth	1
+82	0	81	1	500	1000	1	2	399	13	constant	synth	1
+83	0	82	1	500	1000	1	2	399	14	constant	synth	1
+84	0	83	1	500	1000	1	2	399	8	constant	synth	1
+139	0	138	1	1000	1000	1	2	949	9	constant	synth	1
+140	0	139	1	1000	1000	1	2	949	7	constant	synth	1
+141	0	140	1	1000	1000	1	2	899	8	constant	synth	1
+142	0	141	1	1000	1000	1	2	899	9	constant	synth	1
+143	0	142	1	1000	1000	1	2	899	14	constant	synth	1
+144	0	143	1	1000	1000	1	2	899	37	constant	synth	1
+145	0	144	1	1000	1000	1	2	899	11	constant	synth	1
+146	0	145	1	1000	1000	1	2	899	15	constant	synth	1
+147	0	146	1	1000	1000	1	2	899	7	constant	synth	1
+148	0	147	1	1000	1000	1	2	899	3	constant	synth	1
+149	0	148	1	1000	1000	1	2	899	3	constant	synth	1
+150	0	149	1	1000	1000	1	2	899	7	constant	synth	1
+151	0	150	1	1000	1000	1	2	799	6	constant	synth	1
+152	0	151	1	1000	1000	1	2	799	4	constant	synth	1
+153	0	152	1	1000	1000	1	2	799	10	constant	synth	1
+154	0	153	1	1000	1000	1	2	799	11	constant	synth	1
+155	0	154	1	1000	1000	1	2	799	9	constant	synth	1
+156	0	155	1	1000	1000	1	2	799	7	constant	synth	1
+157	0	156	1	1000	1000	1	2	799	8	constant	synth	1
+158	0	157	1	1000	1000	1	2	799	4	constant	synth	1
+159	0	158	1	1000	1000	1	2	799	4	constant	synth	1
+160	0	159	1	1000	1000	1	2	799	25	constant	synth	1
+161	0	160	1	1000	1000	1	2	749	4	constant	synth	1
+162	0	161	1	1000	1000	1	2	749	2	constant	synth	1
+163	0	162	1	1000	1000	1	2	749	10	constant	synth	1
+164	0	163	1	1000	1000	1	2	749	5	constant	synth	1
+165	0	164	1	1000	1000	1	2	749	5	constant	synth	1
+166	0	165	1	1000	1000	1	2	749	8	constant	synth	1
+167	0	166	1	1000	1000	1	2	749	13	constant	synth	1
+168	0	167	1	1000	1000	1	2	749	3	constant	synth	1
+169	0	168	1	1000	1000	1	2	749	4	constant	synth	1
+170	0	169	1	1000	1000	1	2	749	4	constant	synth	1
+341	2	340	1	50	1000	1	8	49	47	constant	synth	1
+342	2	341	1	50	1000	1	8	49	57	constant	synth	1
+436	2	435	1	500	1000	1	8	299	24	constant	synth	1
+437	2	436	1	500	1000	1	8	299	31	constant	synth	1
+438	2	437	1	500	1000	1	8	299	34	constant	synth	1
+439	2	438	1	500	1000	1	8	299	52	constant	synth	1
+440	2	439	1	500	1000	1	8	299	21	constant	synth	1
+441	2	440	1	500	1000	1	8	249	60	constant	synth	1
+442	2	441	1	500	1000	1	8	249	9	constant	synth	1
+443	2	442	1	500	1000	1	8	249	3	constant	synth	1
+444	2	443	1	500	1000	1	8	249	5	constant	synth	1
+262	1	261	1	500	1000	1	4	299	3	constant	synth	1
+263	1	262	1	500	1000	1	4	299	6	constant	synth	1
+264	1	263	1	500	1000	1	4	299	8	constant	synth	1
+265	1	264	1	500	1000	1	4	299	6	constant	synth	1
+266	1	265	1	500	1000	1	4	299	2	constant	synth	1
+267	1	266	1	500	1000	1	4	299	20	constant	synth	1
+268	1	267	1	500	1000	1	4	299	22	constant	synth	1
+269	1	268	1	500	1000	1	4	299	6	constant	synth	1
+270	1	269	1	500	1000	1	4	299	14	constant	synth	1
+271	1	270	1	500	1000	1	4	249	11	constant	synth	1
+272	1	271	1	500	1000	1	4	249	11	constant	synth	1
+273	1	272	1	500	1000	1	4	249	13	constant	synth	1
+274	1	273	1	500	1000	1	4	249	28	constant	synth	1
+275	1	274	1	500	1000	1	4	249	10	constant	synth	1
+276	1	275	1	500	1000	1	4	249	16	constant	synth	1
+277	1	276	1	500	1000	1	4	249	14	constant	synth	1
+278	1	277	1	500	1000	1	4	249	26	constant	synth	1
+279	1	278	1	500	1000	1	4	249	27	constant	synth	1
+280	1	279	1	500	1000	1	4	249	27	constant	synth	1
+281	1	280	1	1000	1000	1	4	999	13	constant	synth	1
+282	1	281	1	1000	1000	1	4	999	5	constant	synth	1
+283	1	282	1	1000	1000	1	4	999	15	constant	synth	1
+284	1	283	1	1000	1000	1	4	999	13	constant	synth	1
+285	1	284	1	1000	1000	1	4	999	13	constant	synth	1
+286	1	285	1	1000	1000	1	4	999	5	constant	synth	1
+287	1	286	1	1000	1000	1	4	999	5	constant	synth	1
+288	1	287	1	1000	1000	1	4	999	21	constant	synth	1
+289	1	288	1	1000	1000	1	4	999	9	constant	synth	1
+290	1	289	1	1000	1000	1	4	999	34	constant	synth	1
+291	1	290	1	1000	1000	1	4	974	18	constant	synth	1
+171	1	170	1	50	1000	1	4	49	24	constant	synth	1
+172	1	171	1	50	1000	1	4	49	17	constant	synth	1
+173	1	172	1	50	1000	1	4	49	15	constant	synth	1
+174	1	173	1	50	1000	1	4	49	19	constant	synth	1
+175	1	174	1	50	1000	1	4	49	13	constant	synth	1
+176	1	175	1	50	1000	1	4	49	13	constant	synth	1
+177	1	176	1	50	1000	1	4	49	19	constant	synth	1
+178	1	177	1	50	1000	1	4	49	14	constant	synth	1
+179	1	178	1	50	1000	1	4	49	18	constant	synth	1
+180	1	179	1	50	1000	1	4	49	13	constant	synth	1
+181	1	180	1	50	1000	1	4	24	21	constant	synth	1
+182	1	181	1	50	1000	1	4	24	19	constant	synth	1
+183	1	182	1	50	1000	1	4	24	18	constant	synth	1
+184	1	183	1	50	1000	1	4	24	30	constant	synth	1
+185	1	184	1	50	1000	1	4	24	22	constant	synth	1
+186	1	185	1	50	1000	1	4	24	16	constant	synth	1
+187	1	186	1	50	1000	1	4	24	20	constant	synth	1
+188	1	187	1	50	1000	1	4	24	17	constant	synth	1
+189	1	188	1	50	1000	1	4	24	18	constant	synth	1
+190	1	189	1	50	1000	1	4	24	21	constant	synth	1
+191	1	190	1	100	1000	1	4	99	18	constant	synth	1
+192	1	191	1	100	1000	1	4	99	25	constant	synth	1
+193	1	192	1	100	1000	1	4	99	19	constant	synth	1
+194	1	193	1	100	1000	1	4	99	22	constant	synth	1
+292	1	291	1	1000	1000	1	4	974	6	constant	synth	1
+293	1	292	1	1000	1000	1	4	974	13	constant	synth	1
+294	1	293	1	1000	1000	1	4	974	6	constant	synth	1
+295	1	294	1	1000	1000	1	4	974	18	constant	synth	1
+296	1	295	1	1000	1000	1	4	974	34	constant	synth	1
+297	1	296	1	1000	1000	1	4	974	11	constant	synth	1
+298	1	297	1	1000	1000	1	4	974	8	constant	synth	1
+299	1	298	1	1000	1000	1	4	974	6	constant	synth	1
+300	1	299	1	1000	1000	1	4	974	6	constant	synth	1
+301	1	300	1	1000	1000	1	4	949	51	constant	synth	1
+302	1	301	1	1000	1000	1	4	949	32	constant	synth	1
+303	1	302	1	1000	1000	1	4	949	32	constant	synth	1
+304	1	303	1	1000	1000	1	4	949	48	constant	synth	1
+305	1	304	1	1000	1000	1	4	949	35	constant	synth	1
+306	1	305	1	1000	1000	1	4	949	32	constant	synth	1
+307	1	306	1	1000	1000	1	4	949	32	constant	synth	1
+308	1	307	1	1000	1000	1	4	949	34	constant	synth	1
+309	1	308	1	1000	1000	1	4	949	32	constant	synth	1
+310	1	309	1	1000	1000	1	4	949	32	constant	synth	1
+311	1	310	1	1000	1000	1	4	899	34	constant	synth	1
+312	1	311	1	1000	1000	1	4	899	27	constant	synth	1
+313	1	312	1	1000	1000	1	4	899	17	constant	synth	1
+314	1	313	1	1000	1000	1	4	899	25	constant	synth	1
+315	1	314	1	1000	1000	1	4	899	24	constant	synth	1
+316	1	315	1	1000	1000	1	4	899	25	constant	synth	1
+317	1	316	1	1000	1000	1	4	899	15	constant	synth	1
+318	1	317	1	1000	1000	1	4	899	26	constant	synth	1
+319	1	318	1	1000	1000	1	4	899	14	constant	synth	1
+320	1	319	1	1000	1000	1	4	899	20	constant	synth	1
+321	1	320	1	1000	1000	1	4	799	7	constant	synth	1
+322	1	321	1	1000	1000	1	4	799	13	constant	synth	1
+323	1	322	1	1000	1000	1	4	799	17	constant	synth	1
+324	1	323	1	1000	1000	1	4	799	6	constant	synth	1
+325	1	324	1	1000	1000	1	4	799	13	constant	synth	1
+326	1	325	1	1000	1000	1	4	799	14	constant	synth	1
+327	1	326	1	1000	1000	1	4	799	7	constant	synth	1
+328	1	327	1	1000	1000	1	4	799	17	constant	synth	1
+329	1	328	1	1000	1000	1	4	799	12	constant	synth	1
+330	1	329	1	1000	1000	1	4	799	9	constant	synth	1
+331	1	330	1	1000	1000	1	4	749	16	constant	synth	1
+332	1	331	1	1000	1000	1	4	749	14	constant	synth	1
+333	1	332	1	1000	1000	1	4	749	32	constant	synth	1
+334	1	333	1	1000	1000	1	4	749	11	constant	synth	1
+335	1	334	1	1000	1000	1	4	749	12	constant	synth	1
+336	1	335	1	1000	1000	1	4	749	16	constant	synth	1
+337	1	336	1	1000	1000	1	4	749	15	constant	synth	1
+338	1	337	1	1000	1000	1	4	749	15	constant	synth	1
+364	2	363	1	100	1000	1	8	99	33	constant	synth	1
+365	2	364	1	100	1000	1	8	99	29	constant	synth	1
+366	2	365	1	100	1000	1	8	99	33	constant	synth	1
+367	2	366	1	100	1000	1	8	99	33	constant	synth	1
+368	2	367	1	100	1000	1	8	99	30	constant	synth	1
+369	2	368	1	100	1000	1	8	99	31	constant	synth	1
+370	2	369	1	100	1000	1	8	99	30	constant	synth	1
+371	2	370	1	100	1000	1	8	74	21	constant	synth	1
+372	2	371	1	100	1000	1	8	74	24	constant	synth	1
+373	2	372	1	100	1000	1	8	74	19	constant	synth	1
+374	2	373	1	100	1000	1	8	74	25	constant	synth	1
+375	2	374	1	100	1000	1	8	74	23	constant	synth	1
+376	2	375	1	100	1000	1	8	74	24	constant	synth	1
+377	2	376	1	100	1000	1	8	74	15	constant	synth	1
+378	2	377	1	100	1000	1	8	74	26	constant	synth	1
+379	2	378	1	100	1000	1	8	74	21	constant	synth	1
+380	2	379	1	100	1000	1	8	74	21	constant	synth	1
+381	2	380	1	100	1000	1	8	49	42	constant	synth	1
+382	2	381	1	100	1000	1	8	49	36	constant	synth	1
+383	2	382	1	100	1000	1	8	49	35	constant	synth	1
+384	2	383	1	100	1000	1	8	49	35	constant	synth	1
+385	2	384	1	100	1000	1	8	49	32	constant	synth	1
+386	2	385	1	100	1000	1	8	49	36	constant	synth	1
+387	2	386	1	100	1000	1	8	49	29	constant	synth	1
+388	2	387	1	100	1000	1	8	49	33	constant	synth	1
+389	2	388	1	100	1000	1	8	49	37	constant	synth	1
+390	2	389	1	100	1000	1	8	49	31	constant	synth	1
+391	2	390	1	500	1000	1	8	499	19	constant	synth	1
+392	2	391	1	500	1000	1	8	499	25	constant	synth	1
+393	2	392	1	500	1000	1	8	499	23	constant	synth	1
+394	2	393	1	500	1000	1	8	499	30	constant	synth	1
+395	2	394	1	500	1000	1	8	499	68	constant	synth	1
+396	2	395	1	500	1000	1	8	499	82	constant	synth	1
+397	2	396	1	500	1000	1	8	499	32	constant	synth	1
+398	2	397	1	500	1000	1	8	499	15	constant	synth	1
+399	2	398	1	500	1000	1	8	499	36	constant	synth	1
+400	2	399	1	500	1000	1	8	499	19	constant	synth	1
+401	2	400	1	500	1000	1	8	474	19	constant	synth	1
+402	2	401	1	500	1000	1	8	474	36	constant	synth	1
+403	2	402	1	500	1000	1	8	474	14	constant	synth	1
+404	2	403	1	500	1000	1	8	474	31	constant	synth	1
+405	2	404	1	500	1000	1	8	474	15	constant	synth	1
+406	2	405	1	500	1000	1	8	474	20	constant	synth	1
+407	2	406	1	500	1000	1	8	474	16	constant	synth	1
+408	2	407	1	500	1000	1	8	474	30	constant	synth	1
+409	2	408	1	500	1000	1	8	474	15	constant	synth	1
+410	2	409	1	500	1000	1	8	474	20	constant	synth	1
+411	2	410	1	500	1000	1	8	449	34	constant	synth	1
+412	2	411	1	500	1000	1	8	449	15	constant	synth	1
+413	2	412	1	500	1000	1	8	449	17	constant	synth	1
+414	2	413	1	500	1000	1	8	449	46	constant	synth	1
+415	2	414	1	500	1000	1	8	449	19	constant	synth	1
+416	2	415	1	500	1000	1	8	449	24	constant	synth	1
+417	2	416	1	500	1000	1	8	449	27	constant	synth	1
+418	2	417	1	500	1000	1	8	449	25	constant	synth	1
+419	2	418	1	500	1000	1	8	449	24	constant	synth	1
+420	2	419	1	500	1000	1	8	449	72	constant	synth	1
+421	2	420	1	500	1000	1	8	399	34	constant	synth	1
+422	2	421	1	500	1000	1	8	399	35	constant	synth	1
+423	2	422	1	500	1000	1	8	399	39	constant	synth	1
+424	2	423	1	500	1000	1	8	399	30	constant	synth	1
+425	2	424	1	500	1000	1	8	399	46	constant	synth	1
+426	2	425	1	500	1000	1	8	399	33	constant	synth	1
+427	2	426	1	500	1000	1	8	399	38	constant	synth	1
+428	2	427	1	500	1000	1	8	399	32	constant	synth	1
+429	2	428	1	500	1000	1	8	399	34	constant	synth	1
+430	2	429	1	500	1000	1	8	399	47	constant	synth	1
+431	2	430	1	500	1000	1	8	299	18	constant	synth	1
+432	2	431	1	500	1000	1	8	299	17	constant	synth	1
+433	2	432	1	500	1000	1	8	299	18	constant	synth	1
+434	2	433	1	500	1000	1	8	299	35	constant	synth	1
+435	2	434	1	500	1000	1	8	299	20	constant	synth	1
+458	2	457	1	1000	1000	1	8	999	5	constant	synth	1
+459	2	458	1	1000	1000	1	8	999	18	constant	synth	1
+460	2	459	1	1000	1000	1	8	999	18	constant	synth	1
+461	2	460	1	1000	1000	1	8	974	27	constant	synth	1
+462	2	461	1	1000	1000	1	8	974	24	constant	synth	1
+463	2	462	1	1000	1000	1	8	974	24	constant	synth	1
+464	2	463	1	1000	1000	1	8	974	26	constant	synth	1
+465	2	464	1	1000	1000	1	8	974	24	constant	synth	1
+466	2	465	1	1000	1000	1	8	974	23	constant	synth	1
+467	2	466	1	1000	1000	1	8	974	25	constant	synth	1
+468	2	467	1	1000	1000	1	8	974	26	constant	synth	1
+469	2	468	1	1000	1000	1	8	974	25	constant	synth	1
+470	2	469	1	1000	1000	1	8	974	24	constant	synth	1
+471	2	470	1	1000	1000	1	8	949	22	constant	synth	1
+472	2	471	1	1000	1000	1	8	949	29	constant	synth	1
+473	2	472	1	1000	1000	1	8	949	35	constant	synth	1
+474	2	473	1	1000	1000	1	8	949	62	constant	synth	1
+475	2	474	1	1000	1000	1	8	949	23	constant	synth	1
+476	2	475	1	1000	1000	1	8	949	23	constant	synth	1
+477	2	476	1	1000	1000	1	8	949	38	constant	synth	1
+478	2	477	1	1000	1000	1	8	949	27	constant	synth	1
+479	2	478	1	1000	1000	1	8	949	17	constant	synth	1
+480	2	479	1	1000	1000	1	8	949	60	constant	synth	1
+481	2	480	1	1000	1000	1	8	899	5	constant	synth	1
+482	2	481	1	1000	1000	1	8	899	14	constant	synth	1
+483	2	482	1	1000	1000	1	8	899	16	constant	synth	1
+484	2	483	1	1000	1000	1	8	899	18	constant	synth	1
+485	2	484	1	1000	1000	1	8	899	19	constant	synth	1
+486	2	485	1	1000	1000	1	8	899	20	constant	synth	1
+487	2	486	1	1000	1000	1	8	899	18	constant	synth	1
+488	2	487	1	1000	1000	1	8	899	25	constant	synth	1
+489	2	488	1	1000	1000	1	8	899	14	constant	synth	1
+490	2	489	1	1000	1000	1	8	899	16	constant	synth	1
+491	2	490	1	1000	1000	1	8	799	23	constant	synth	1
+492	2	491	1	1000	1000	1	8	799	33	constant	synth	1
+493	2	492	1	1000	1000	1	8	799	28	constant	synth	1
+494	2	493	1	1000	1000	1	8	799	30	constant	synth	1
+495	2	494	1	1000	1000	1	8	799	31	constant	synth	1
+496	2	495	1	1000	1000	1	8	799	24	constant	synth	1
+497	2	496	1	1000	1000	1	8	799	26	constant	synth	1
+498	2	497	1	1000	1000	1	8	799	29	constant	synth	1
+499	2	498	1	1000	1000	1	8	799	38	constant	synth	1
+500	2	499	1	1000	1000	1	8	799	29	constant	synth	1
+501	2	500	1	1000	1000	1	8	749	16	constant	synth	1
+502	2	501	1	1000	1000	1	8	749	15	constant	synth	1
+503	2	502	1	1000	1000	1	8	749	20	constant	synth	1
+504	2	503	1	1000	1000	1	8	749	6	constant	synth	1
+505	2	504	1	1000	1000	1	8	749	8	constant	synth	1
+506	2	505	1	1000	1000	1	8	749	4	constant	synth	1
+507	2	506	1	1000	1000	1	8	749	9	constant	synth	1
+508	2	507	1	1000	1000	1	8	749	17	constant	synth	1
+509	2	508	1	1000	1000	1	8	749	8	constant	synth	1
+510	2	509	1	1000	1000	1	8	749	6	constant	synth	1
+511	3	510	1	50	1000	1	40	49	97	constant	synth	1
+512	3	511	1	50	1000	1	40	49	97	constant	synth	1
+513	3	512	1	50	1000	1	40	49	78	constant	synth	1
+514	3	513	1	50	1000	1	40	49	111	constant	synth	1
+515	3	514	1	50	1000	1	40	49	53	constant	synth	1
+516	3	515	1	50	1000	1	40	49	75	constant	synth	1
+517	3	516	1	50	1000	1	40	49	86	constant	synth	1
+518	3	517	1	50	1000	1	40	49	24	constant	synth	1
+519	3	518	1	50	1000	1	40	49	72	constant	synth	1
+520	3	519	1	50	1000	1	40	49	70	constant	synth	1
+521	3	520	1	50	1000	1	40	24	58	constant	synth	1
+522	3	521	1	50	1000	1	40	24	65	constant	synth	1
+523	3	522	1	50	1000	1	40	24	53	constant	synth	1
+524	3	523	1	50	1000	1	40	24	65	constant	synth	1
+525	3	524	1	50	1000	1	40	24	69	constant	synth	1
+526	3	525	1	50	1000	1	40	24	49	constant	synth	1
+527	3	526	1	50	1000	1	40	24	41	constant	synth	1
+528	3	527	1	50	1000	1	40	24	49	constant	synth	1
+529	3	528	1	50	1000	1	40	24	46	constant	synth	1
+719	4	718	1	100	1000	1	0.0500000007	74	197	constant	synth	1
+720	4	719	1	100	1000	1	0.0500000007	74	250	constant	synth	1
+721	4	720	1	100	1000	1	0.0500000007	49	88	constant	synth	1
+722	4	721	1	100	1000	1	0.0500000007	49	87	constant	synth	1
+723	4	722	1	100	1000	1	0.0500000007	49	107	constant	synth	1
+724	4	723	1	100	1000	1	0.0500000007	49	81	constant	synth	1
+725	4	724	1	100	1000	1	0.0500000007	49	64	constant	synth	1
+726	4	725	1	100	1000	1	0.0500000007	49	89	constant	synth	1
+727	4	726	1	100	1000	1	0.0500000007	49	94	constant	synth	1
+728	4	727	1	100	1000	1	0.0500000007	49	94	constant	synth	1
+729	4	728	1	100	1000	1	0.0500000007	49	136	constant	synth	1
+730	4	729	1	100	1000	1	0.0500000007	49	90	constant	synth	1
+731	4	730	1	500	1000	1	0.0500000007	499	237	constant	synth	1
+732	4	731	1	500	1000	1	0.0500000007	499	9	constant	synth	1
+733	4	732	1	500	1000	1	0.0500000007	499	59	constant	synth	1
+734	4	733	1	500	1000	1	0.0500000007	499	66	constant	synth	1
+735	4	734	1	500	1000	1	0.0500000007	499	60	constant	synth	1
+736	4	735	1	500	1000	1	0.0500000007	499	116	constant	synth	1
+737	4	736	1	500	1000	1	0.0500000007	499	57	constant	synth	1
+738	4	737	1	500	1000	1	0.0500000007	499	67	constant	synth	1
+739	4	738	1	500	1000	1	0.0500000007	499	48	constant	synth	1
+740	4	739	1	500	1000	1	0.0500000007	499	125	constant	synth	1
+741	4	740	1	500	1000	1	0.0500000007	474	90	constant	synth	1
+742	4	741	1	500	1000	1	0.0500000007	474	334	constant	synth	1
+743	4	742	1	500	1000	1	0.0500000007	474	90	constant	synth	1
+744	4	743	1	500	1000	1	0.0500000007	474	161	constant	synth	1
+745	4	744	1	500	1000	1	0.0500000007	474	321	constant	synth	1
+746	4	745	1	500	1000	1	0.0500000007	474	90	constant	synth	1
+747	4	746	1	500	1000	1	0.0500000007	474	334	constant	synth	1
+748	4	747	1	500	1000	1	0.0500000007	474	223	constant	synth	1
+749	4	748	2	500	1000	1	0.0500000007	474	90	constant	synth	1
+750	4	749	1	500	1000	1	0.0500000007	474	187	constant	synth	1
+751	4	750	1	500	1000	1	0.0500000007	449	140	constant	synth	1
+752	4	751	1	500	1000	1	0.0500000007	449	173	constant	synth	1
+753	4	752	1	500	1000	1	0.0500000007	449	119	constant	synth	1
+754	4	753	1	500	1000	1	0.0500000007	449	177	constant	synth	1
+755	4	754	1	500	1000	1	0.0500000007	449	146	constant	synth	1
+756	4	755	1	500	1000	1	0.0500000007	449	94	constant	synth	1
+757	4	756	1	500	1000	1	0.0500000007	449	133	constant	synth	1
+758	4	757	1	500	1000	1	0.0500000007	449	133	constant	synth	1
+759	4	758	1	500	1000	1	0.0500000007	449	158	constant	synth	1
+760	4	759	1	500	1000	1	0.0500000007	449	216	constant	synth	1
+761	4	760	1	500	1000	1	0.0500000007	399	18	constant	synth	1
+762	4	761	1	500	1000	1	0.0500000007	399	45	constant	synth	1
+763	4	762	1	500	1000	1	0.0500000007	399	58	constant	synth	1
+764	4	763	1	500	1000	1	0.0500000007	399	38	constant	synth	1
+765	4	764	1	500	1000	1	0.0500000007	399	23	constant	synth	1
+766	4	765	1	500	1000	1	0.0500000007	399	66	constant	synth	1
+767	4	766	1	500	1000	1	0.0500000007	399	40	constant	synth	1
+768	4	767	1	500	1000	1	0.0500000007	399	40	constant	synth	1
+769	4	768	1	500	1000	1	0.0500000007	399	18	constant	synth	1
+770	4	769	1	500	1000	1	0.0500000007	399	42	constant	synth	1
+771	4	770	6	500	1000	1	0.0500000007	299	156	constant	synth	1
+772	4	771	3	500	1000	1	0.0500000007	299	22	constant	synth	1
+773	4	772	2	500	1000	1	0.0500000007	299	33	constant	synth	1
+774	4	773	1	500	1000	1	0.0500000007	299	48	constant	synth	1
+775	4	774	1	500	1000	1	0.0500000007	299	63	constant	synth	1
+776	4	775	1	500	1000	1	0.0500000007	299	8	constant	synth	1
+777	4	776	2	500	1000	1	0.0500000007	299	5	constant	synth	1
+778	4	777	2	500	1000	1	0.0500000007	299	33	constant	synth	1
+779	4	778	2	500	1000	1	0.0500000007	299	5	constant	synth	1
+780	4	779	5	500	1000	1	0.0500000007	299	400	constant	synth	1
+781	4	780	1	500	1000	1	0.0500000007	249	51	constant	synth	1
+782	4	781	1	500	1000	1	0.0500000007	249	59	constant	synth	1
+783	4	782	1	500	1000	1	0.0500000007	249	1	constant	synth	1
+784	4	783	1	500	1000	1	0.0500000007	249	82	constant	synth	1
+785	4	784	1	500	1000	1	0.0500000007	249	1	constant	synth	1
+786	4	785	1	500	1000	1	0.0500000007	249	64	constant	synth	1
+787	4	786	1	500	1000	1	0.0500000007	249	69	constant	synth	1
+788	4	787	1	500	1000	1	0.0500000007	249	55	constant	synth	1
+789	4	788	1	500	1000	1	0.0500000007	249	56	constant	synth	1
+790	4	789	1	500	1000	1	0.0500000007	249	50	constant	synth	1
+791	4	790	1	1000	1000	1	0.0500000007	999	89	constant	synth	1
+792	4	791	1	1000	1000	1	0.0500000007	999	25	constant	synth	1
+793	4	792	1	1000	1000	1	0.0500000007	999	76	constant	synth	1
+794	4	793	1	1000	1000	1	0.0500000007	999	134	constant	synth	1
+795	4	794	1	1000	1000	1	0.0500000007	999	160	constant	synth	1
+796	4	795	1	1000	1000	1	0.0500000007	999	51	constant	synth	1
+797	4	796	1	1000	1000	1	0.0500000007	999	90	constant	synth	1
+798	4	797	1	1000	1000	1	0.0500000007	999	71	constant	synth	1
+799	4	798	1	1000	1000	1	0.0500000007	999	21	constant	synth	1
+800	4	799	1	1000	1000	1	0.0500000007	999	75	constant	synth	1
+801	4	800	1	1000	1000	1	0.0500000007	974	29	constant	synth	1
+802	4	801	1	1000	1000	1	0.0500000007	974	153	constant	synth	1
+803	4	802	1	1000	1000	1	0.0500000007	974	14	constant	synth	1
+804	4	803	1	1000	1000	1	0.0500000007	974	61	constant	synth	1
+805	4	804	1	1000	1000	1	0.0500000007	974	103	constant	synth	1
+806	4	805	1	1000	1000	1	0.0500000007	974	14	constant	synth	1
+807	4	806	1	1000	1000	1	0.0500000007	974	36	constant	synth	1
+808	4	807	1	1000	1000	1	0.0500000007	974	30	constant	synth	1
+809	4	808	1	1000	1000	1	0.0500000007	974	15	constant	synth	1
+810	4	809	1	1000	1000	1	0.0500000007	974	16	constant	synth	1
+811	4	810	1	1000	1000	1	0.0500000007	949	55	constant	synth	1
+812	4	811	1	1000	1000	1	0.0500000007	949	42	constant	synth	1
+813	4	812	1	1000	1000	1	0.0500000007	949	49	constant	synth	1
+814	4	813	1	1000	1000	1	0.0500000007	949	51	constant	synth	1
+815	4	814	1	1000	1000	1	0.0500000007	949	50	constant	synth	1
+816	4	815	1	1000	1000	1	0.0500000007	949	51	constant	synth	1
+817	4	816	1	1000	1000	1	0.0500000007	949	49	constant	synth	1
+818	4	817	1	1000	1000	1	0.0500000007	949	103	constant	synth	1
+819	4	818	1	1000	1000	1	0.0500000007	949	93	constant	synth	1
+821	4	820	1	1000	1000	1	0.0500000007	899	2	constant	synth	1
+822	4	821	1	1000	1000	1	0.0500000007	899	2	constant	synth	1
+823	4	822	2	1000	1000	1	0.0500000007	899	2	constant	synth	1
+824	4	823	1	1000	1000	1	0.0500000007	899	4	constant	synth	1
+825	4	824	2	1000	1000	1	0.0500000007	899	13	constant	synth	1
+826	4	825	1	1000	1000	1	0.0500000007	899	9	constant	synth	1
+827	4	826	1	1000	1000	1	0.0500000007	899	9	constant	synth	1
+828	4	827	1	1000	1000	1	0.0500000007	899	2	constant	synth	1
+829	4	828	1	1000	1000	1	0.0500000007	899	5	constant	synth	1
+830	4	829	1	1000	1000	1	0.0500000007	899	76	constant	synth	1
+831	4	830	1	1000	1000	1	0.0500000007	799	194	constant	synth	1
+832	4	831	1	1000	1000	1	0.0500000007	799	30	constant	synth	1
+833	4	832	1	1000	1000	1	0.0500000007	799	72	constant	synth	1
+834	4	833	1	1000	1000	1	0.0500000007	799	95	constant	synth	1
+835	4	834	1	1000	1000	1	0.0500000007	799	131	constant	synth	1
+836	4	835	1	1000	1000	1	0.0500000007	799	36	constant	synth	1
+837	4	836	1	1000	1000	1	0.0500000007	799	82	constant	synth	1
+838	4	837	1	1000	1000	1	0.0500000007	799	94	constant	synth	1
+839	4	838	1	1000	1000	1	0.0500000007	799	36	constant	synth	1
+840	4	839	2	1000	1000	1	0.0500000007	799	33	constant	synth	1
+841	4	840	1	1000	1000	1	0.0500000007	749	26	constant	synth	1
+842	4	841	1	1000	1000	1	0.0500000007	749	12	constant	synth	1
+843	4	842	1	1000	1000	1	0.0500000007	749	17	constant	synth	1
+844	4	843	1	1000	1000	1	0.0500000007	749	2	constant	synth	1
+845	4	844	1	1000	1000	1	0.0500000007	749	151	constant	synth	1
+846	4	845	1	1000	1000	1	0.0500000007	749	177	constant	synth	1
+847	4	846	1	1000	1000	1	0.0500000007	749	20	constant	synth	1
+848	4	847	1	1000	1000	1	0.0500000007	749	2	constant	synth	1
+849	4	848	1	1000	1000	1	0.0500000007	749	2	constant	synth	1
+850	4	849	1	1000	1000	1	0.0500000007	749	3	constant	synth	1
+1	0	0	1	50	1000	1	2	49	10	constant	synth	1
+2	0	1	1	50	1000	1	2	49	12	constant	synth	1
+3	0	2	1	50	1000	1	2	49	6	constant	synth	1
+4	0	3	1	50	1000	1	2	49	16	constant	synth	1
+5	0	4	1	50	1000	1	2	49	8	constant	synth	1
+6	0	5	1	50	1000	1	2	49	8	constant	synth	1
+7	0	6	1	50	1000	1	2	49	12	constant	synth	1
+8	0	7	1	50	1000	1	2	49	9	constant	synth	1
+9	0	8	1	50	1000	1	2	49	10	constant	synth	1
+10	0	9	1	50	1000	1	2	49	6	constant	synth	1
+11	0	10	1	50	1000	1	2	24	3	constant	synth	1
+12	0	11	1	50	1000	1	2	24	7	constant	synth	1
+13	0	12	1	50	1000	1	2	24	6	constant	synth	1
+14	0	13	1	50	1000	1	2	24	5	constant	synth	1
+15	0	14	1	50	1000	1	2	24	7	constant	synth	1
+16	0	15	1	50	1000	1	2	24	4	constant	synth	1
+17	0	16	1	50	1000	1	2	24	4	constant	synth	1
+18	0	17	1	50	1000	1	2	24	4	constant	synth	1
+19	0	18	1	50	1000	1	2	24	2	constant	synth	1
+20	0	19	1	50	1000	1	2	24	8	constant	synth	1
+21	0	20	1	100	1000	1	2	99	8	constant	synth	1
+22	0	21	1	100	1000	1	2	99	9	constant	synth	1
+23	0	22	1	100	1000	1	2	99	8	constant	synth	1
+24	0	23	1	100	1000	1	2	99	5	constant	synth	1
+25	0	24	1	100	1000	1	2	99	9	constant	synth	1
+26	0	25	1	100	1000	1	2	99	8	constant	synth	1
+27	0	26	1	100	1000	1	2	99	9	constant	synth	1
+28	0	27	1	100	1000	1	2	99	7	constant	synth	1
+29	0	28	1	100	1000	1	2	99	12	constant	synth	1
+30	0	29	1	100	1000	1	2	99	10	constant	synth	1
+31	0	30	1	100	1000	1	2	74	11	constant	synth	1
+32	0	31	1	100	1000	1	2	74	11	constant	synth	1
+33	0	32	1	100	1000	1	2	74	11	constant	synth	1
+34	0	33	1	100	1000	1	2	74	11	constant	synth	1
+35	0	34	1	100	1000	1	2	74	7	constant	synth	1
+36	0	35	1	100	1000	1	2	74	8	constant	synth	1
+37	0	36	1	100	1000	1	2	74	10	constant	synth	1
+38	0	37	1	100	1000	1	2	74	13	constant	synth	1
+39	0	38	1	100	1000	1	2	74	8	constant	synth	1
+40	0	39	1	100	1000	1	2	74	14	constant	synth	1
+41	0	40	1	100	1000	1	2	49	9	constant	synth	1
+42	0	41	1	100	1000	1	2	49	10	constant	synth	1
+43	0	42	1	100	1000	1	2	49	11	constant	synth	1
+44	0	43	1	100	1000	1	2	49	7	constant	synth	1
+45	0	44	1	100	1000	1	2	49	13	constant	synth	1
+46	0	45	1	100	1000	1	2	49	8	constant	synth	1
+47	0	46	1	100	1000	1	2	49	12	constant	synth	1
+48	0	47	1	100	1000	1	2	49	9	constant	synth	1
+49	0	48	1	100	1000	1	2	49	12	constant	synth	1
+50	0	49	1	100	1000	1	2	49	12	constant	synth	1
+51	0	50	1	500	1000	1	2	499	12	constant	synth	1
+52	0	51	1	500	1000	1	2	499	15	constant	synth	1
+53	0	52	1	500	1000	1	2	499	24	constant	synth	1
+54	0	53	1	500	1000	1	2	499	11	constant	synth	1
+55	0	54	1	500	1000	1	2	499	31	constant	synth	1
+56	0	55	1	500	1000	1	2	499	13	constant	synth	1
+57	0	56	1	500	1000	1	2	499	9	constant	synth	1
+58	0	57	1	500	1000	1	2	499	9	constant	synth	1
+59	0	58	1	500	1000	1	2	499	9	constant	synth	1
+60	0	59	1	500	1000	1	2	499	14	constant	synth	1
+61	0	60	1	500	1000	1	2	474	7	constant	synth	1
+62	0	61	1	500	1000	1	2	474	2	constant	synth	1
+63	0	62	1	500	1000	1	2	474	7	constant	synth	1
+64	0	63	1	500	1000	1	2	474	5	constant	synth	1
+85	0	84	1	500	1000	1	2	399	10	constant	synth	1
+86	0	85	1	500	1000	1	2	399	13	constant	synth	1
+87	0	86	1	500	1000	1	2	399	11	constant	synth	1
+88	0	87	1	500	1000	1	2	399	9	constant	synth	1
+89	0	88	1	500	1000	1	2	399	13	constant	synth	1
+90	0	89	1	500	1000	1	2	399	11	constant	synth	1
+91	0	90	1	500	1000	1	2	299	7	constant	synth	1
+92	0	91	1	500	1000	1	2	299	8	constant	synth	1
+93	0	92	1	500	1000	1	2	299	9	constant	synth	1
+94	0	93	1	500	1000	1	2	299	3	constant	synth	1
+95	0	94	1	500	1000	1	2	299	12	constant	synth	1
+96	0	95	1	500	1000	1	2	299	3	constant	synth	1
+97	0	96	1	500	1000	1	2	299	6	constant	synth	1
+98	0	97	1	500	1000	1	2	299	4	constant	synth	1
+99	0	98	1	500	1000	1	2	299	4	constant	synth	1
+100	0	99	1	500	1000	1	2	299	6	constant	synth	1
+101	0	100	1	500	1000	1	2	249	4	constant	synth	1
+102	0	101	1	500	1000	1	2	249	7	constant	synth	1
+103	0	102	1	500	1000	1	2	249	6	constant	synth	1
+104	0	103	1	500	1000	1	2	249	8	constant	synth	1
+105	0	104	1	500	1000	1	2	249	5	constant	synth	1
+106	0	105	1	500	1000	1	2	249	12	constant	synth	1
+107	0	106	1	500	1000	1	2	249	4	constant	synth	1
+108	0	107	1	500	1000	1	2	249	9	constant	synth	1
+109	0	108	1	500	1000	1	2	249	9	constant	synth	1
+110	0	109	1	500	1000	1	2	249	4	constant	synth	1
+111	0	110	1	1000	1000	1	2	999	16	constant	synth	1
+112	0	111	1	1000	1000	1	2	999	7	constant	synth	1
+113	0	112	1	1000	1000	1	2	999	8	constant	synth	1
+114	0	113	1	1000	1000	1	2	999	8	constant	synth	1
+115	0	114	1	1000	1000	1	2	999	7	constant	synth	1
+116	0	115	1	1000	1000	1	2	999	21	constant	synth	1
+117	0	116	1	1000	1000	1	2	999	13	constant	synth	1
+118	0	117	1	1000	1000	1	2	999	10	constant	synth	1
+119	0	118	1	1000	1000	1	2	999	12	constant	synth	1
+120	0	119	1	1000	1000	1	2	999	12	constant	synth	1
+121	0	120	1	1000	1000	1	2	974	12	constant	synth	1
+122	0	121	1	1000	1000	1	2	974	8	constant	synth	1
+123	0	122	1	1000	1000	1	2	974	11	constant	synth	1
+124	0	123	1	1000	1000	1	2	974	9	constant	synth	1
+125	0	124	1	1000	1000	1	2	974	8	constant	synth	1
+126	0	125	1	1000	1000	1	2	974	8	constant	synth	1
+127	0	126	1	1000	1000	1	2	974	10	constant	synth	1
+128	0	127	1	1000	1000	1	2	974	8	constant	synth	1
+129	0	128	1	1000	1000	1	2	974	9	constant	synth	1
+130	0	129	1	1000	1000	1	2	974	6	constant	synth	1
+131	0	130	1	1000	1000	1	2	949	6	constant	synth	1
+132	0	131	1	1000	1000	1	2	949	9	constant	synth	1
+133	0	132	1	1000	1000	1	2	949	9	constant	synth	1
+134	0	133	1	1000	1000	1	2	949	10	constant	synth	1
+135	0	134	1	1000	1000	1	2	949	12	constant	synth	1
+136	0	135	1	1000	1000	1	2	949	14	constant	synth	1
+137	0	136	1	1000	1000	1	2	949	8	constant	synth	1
+138	0	137	1	1000	1000	1	2	949	10	constant	synth	1
+445	2	444	1	500	1000	1	8	249	12	constant	synth	1
+446	2	445	1	500	1000	1	8	249	77	constant	synth	1
+447	2	446	1	500	1000	1	8	249	25	constant	synth	1
+448	2	447	1	500	1000	1	8	249	6	constant	synth	1
+449	2	448	1	500	1000	1	8	249	2	constant	synth	1
+450	2	449	1	500	1000	1	8	249	4	constant	synth	1
+451	2	450	1	1000	1000	1	8	999	15	constant	synth	1
+452	2	451	1	1000	1000	1	8	999	12	constant	synth	1
+453	2	452	1	1000	1000	1	8	999	26	constant	synth	1
+454	2	453	1	1000	1000	1	8	999	5	constant	synth	1
+455	2	454	1	1000	1000	1	8	999	13	constant	synth	1
+456	2	455	1	1000	1000	1	8	999	26	constant	synth	1
+457	2	456	1	1000	1000	1	8	999	30	constant	synth	1
+536	3	535	1	100	1000	1	40	99	41	constant	synth	1
+537	3	536	1	100	1000	1	40	99	45	constant	synth	1
+538	3	537	1	100	1000	1	40	99	34	constant	synth	1
+539	3	538	1	100	1000	1	40	99	44	constant	synth	1
+540	3	539	1	100	1000	1	40	99	76	constant	synth	1
+541	3	540	1	100	1000	1	40	74	75	constant	synth	1
+542	3	541	1	100	1000	1	40	74	83	constant	synth	1
+543	3	542	1	100	1000	1	40	74	65	constant	synth	1
+544	3	543	1	100	1000	1	40	74	32	constant	synth	1
+545	3	544	1	100	1000	1	40	74	128	constant	synth	1
+546	3	545	1	100	1000	1	40	74	79	constant	synth	1
+547	3	546	1	100	1000	1	40	74	87	constant	synth	1
+548	3	547	1	100	1000	1	40	74	64	constant	synth	1
+549	3	548	1	100	1000	1	40	74	86	constant	synth	1
+550	3	549	1	100	1000	1	40	74	83	constant	synth	1
+551	3	550	1	100	1000	1	40	49	72	constant	synth	1
+552	3	551	1	100	1000	1	40	49	74	constant	synth	1
+553	3	552	1	100	1000	1	40	49	69	constant	synth	1
+554	3	553	1	100	1000	1	40	49	80	constant	synth	1
+555	3	554	1	100	1000	1	40	49	24	constant	synth	1
+556	3	555	1	100	1000	1	40	49	73	constant	synth	1
+557	3	556	1	100	1000	1	40	49	72	constant	synth	1
+558	3	557	1	100	1000	1	40	49	69	constant	synth	1
+559	3	558	1	100	1000	1	40	49	80	constant	synth	1
+560	3	559	1	100	1000	1	40	49	92	constant	synth	1
+561	3	560	1	500	1000	1	40	499	96	constant	synth	1
+562	3	561	1	500	1000	1	40	499	15	constant	synth	1
+563	3	562	1	500	1000	1	40	499	96	constant	synth	1
+564	3	563	1	500	1000	1	40	499	61	constant	synth	1
+565	3	564	1	500	1000	1	40	499	61	constant	synth	1
+566	3	565	1	500	1000	1	40	499	46	constant	synth	1
+567	3	566	1	500	1000	1	40	499	14	constant	synth	1
+568	3	567	1	500	1000	1	40	499	125	constant	synth	1
+569	3	568	1	500	1000	1	40	499	19	constant	synth	1
+570	3	569	1	500	1000	1	40	499	35	constant	synth	1
+571	3	570	1	500	1000	1	40	474	102	constant	synth	1
+572	3	571	1	500	1000	1	40	474	94	constant	synth	1
+573	3	572	1	500	1000	1	40	474	94	constant	synth	1
+574	3	573	1	500	1000	1	40	474	96	constant	synth	1
+575	3	574	1	500	1000	1	40	474	88	constant	synth	1
+576	3	575	1	500	1000	1	40	474	89	constant	synth	1
+577	3	576	1	500	1000	1	40	474	147	constant	synth	1
+578	3	577	1	500	1000	1	40	474	240	constant	synth	1
+579	3	578	1	500	1000	1	40	474	88	constant	synth	1
+580	3	579	1	500	1000	1	40	474	125	constant	synth	1
+581	3	580	1	500	1000	1	40	449	36	constant	synth	1
+582	3	581	1	500	1000	1	40	449	32	constant	synth	1
+583	3	582	1	500	1000	1	40	449	22	constant	synth	1
+584	3	583	1	500	1000	1	40	449	15	constant	synth	1
+585	3	584	1	500	1000	1	40	449	4	constant	synth	1
+586	3	585	1	500	1000	1	40	449	25	constant	synth	1
+587	3	586	1	500	1000	1	40	449	25	constant	synth	1
+588	3	587	1	500	1000	1	40	449	25	constant	synth	1
+589	3	588	1	500	1000	1	40	449	30	constant	synth	1
+590	3	589	1	500	1000	1	40	449	22	constant	synth	1
+591	3	590	1	500	1000	1	40	399	49	constant	synth	1
+592	3	591	1	500	1000	1	40	399	25	constant	synth	1
+593	3	592	1	500	1000	1	40	399	16	constant	synth	1
+594	3	593	1	500	1000	1	40	399	24	constant	synth	1
+595	3	594	1	500	1000	1	40	399	31	constant	synth	1
+596	3	595	1	500	1000	1	40	399	15	constant	synth	1
+597	3	596	1	500	1000	1	40	399	16	constant	synth	1
+598	3	597	1	500	1000	1	40	399	15	constant	synth	1
+599	3	598	1	500	1000	1	40	399	24	constant	synth	1
+600	3	599	1	500	1000	1	40	399	49	constant	synth	1
+601	3	600	1	500	1000	1	40	299	6	constant	synth	1
+602	3	601	1	500	1000	1	40	299	68	constant	synth	1
+603	3	602	1	500	1000	1	40	299	85	constant	synth	1
+604	3	603	1	500	1000	1	40	299	7	constant	synth	1
+605	3	604	1	500	1000	1	40	299	7	constant	synth	1
+606	3	605	1	500	1000	1	40	299	6	constant	synth	1
+607	3	606	1	500	1000	1	40	299	6	constant	synth	1
+608	3	607	1	500	1000	1	40	299	6	constant	synth	1
+609	3	608	1	500	1000	1	40	299	69	constant	synth	1
+610	3	609	1	500	1000	1	40	299	83	constant	synth	1
+611	3	610	1	500	1000	1	40	249	25	constant	synth	1
+612	3	611	1	500	1000	1	40	249	16	constant	synth	1
+613	3	612	1	500	1000	1	40	249	15	constant	synth	1
+614	3	613	1	500	1000	1	40	249	16	constant	synth	1
+615	3	614	1	500	1000	1	40	249	7	constant	synth	1
+616	3	615	1	500	1000	1	40	249	12	constant	synth	1
+617	3	616	1	500	1000	1	40	249	20	constant	synth	1
+618	3	617	1	500	1000	1	40	249	24	constant	synth	1
+619	3	618	1	500	1000	1	40	249	12	constant	synth	1
+620	3	619	1	500	1000	1	40	249	10	constant	synth	1
+621	3	620	1	1000	1000	1	40	999	90	constant	synth	1
+622	3	621	1	1000	1000	1	40	999	136	constant	synth	1
+623	3	622	1	1000	1000	1	40	999	113	constant	synth	1
+624	3	623	1	1000	1000	1	40	999	95	constant	synth	1
+625	3	624	1	1000	1000	1	40	999	281	constant	synth	1
+626	3	625	1	1000	1000	1	40	999	120	constant	synth	1
+627	3	626	1	1000	1000	1	40	999	91	constant	synth	1
+628	3	627	1	1000	1000	1	40	999	190	constant	synth	1
+629	3	628	1	1000	1000	1	40	999	90	constant	synth	1
+630	3	629	1	1000	1000	1	40	999	189	constant	synth	1
+631	3	630	1	1000	1000	1	40	974	31	constant	synth	1
+632	3	631	1	1000	1000	1	40	974	22	constant	synth	1
+633	3	632	1	1000	1000	1	40	974	19	constant	synth	1
+634	3	633	1	1000	1000	1	40	974	57	constant	synth	1
+635	3	634	1	1000	1000	1	40	974	62	constant	synth	1
+636	3	635	1	1000	1000	1	40	974	17	constant	synth	1
+637	3	636	1	1000	1000	1	40	974	23	constant	synth	1
+638	3	637	1	1000	1000	1	40	974	73	constant	synth	1
+639	3	638	1	1000	1000	1	40	974	107	constant	synth	1
+640	3	639	1	1000	1000	1	40	974	23	constant	synth	1
+641	3	640	1	1000	1000	1	40	949	31	constant	synth	1
+642	3	641	1	1000	1000	1	40	949	14	constant	synth	1
+643	3	642	1	1000	1000	1	40	949	17	constant	synth	1
+644	3	643	1	1000	1000	1	40	949	64	constant	synth	1
+645	3	644	1	1000	1000	1	40	949	12	constant	synth	1
+646	3	645	1	1000	1000	1	40	949	28	constant	synth	1
+647	3	646	1	1000	1000	1	40	949	31	constant	synth	1
+648	3	647	1	1000	1000	1	40	949	33	constant	synth	1
+649	3	648	1	1000	1000	1	40	949	21	constant	synth	1
+650	3	649	1	1000	1000	1	40	949	64	constant	synth	1
+651	3	650	1	1000	1000	1	40	899	44	constant	synth	1
+652	3	651	1	1000	1000	1	40	899	105	constant	synth	1
+653	3	652	1	1000	1000	1	40	899	75	constant	synth	1
+654	3	653	1	1000	1000	1	40	899	69	constant	synth	1
+655	3	654	1	1000	1000	1	40	899	45	constant	synth	1
+656	3	655	1	1000	1000	1	40	899	58	constant	synth	1
+657	3	656	1	1000	1000	1	40	899	51	constant	synth	1
+658	3	657	1	1000	1000	1	40	899	58	constant	synth	1
+659	3	658	1	1000	1000	1	40	899	53	constant	synth	1
+660	3	659	1	1000	1000	1	40	899	39	constant	synth	1
+661	3	660	1	1000	1000	1	40	799	111	constant	synth	1
+662	3	661	1	1000	1000	1	40	799	225	constant	synth	1
+663	3	662	1	1000	1000	1	40	799	51	constant	synth	1
+664	3	663	1	1000	1000	1	40	799	80	constant	synth	1
+665	3	664	1	1000	1000	1	40	799	135	constant	synth	1
+666	3	665	1	1000	1000	1	40	799	61	constant	synth	1
+667	3	666	1	1000	1000	1	40	799	82	constant	synth	1
+668	3	667	1	1000	1000	1	40	799	63	constant	synth	1
+669	3	668	1	1000	1000	1	40	799	75	constant	synth	1
+670	3	669	1	1000	1000	1	40	799	57	constant	synth	1
+671	3	670	1	1000	1000	1	40	749	5	constant	synth	1
+672	3	671	1	1000	1000	1	40	749	12	constant	synth	1
+673	3	672	1	1000	1000	1	40	749	46	constant	synth	1
+674	3	673	1	1000	1000	1	40	749	14	constant	synth	1
+675	3	674	1	1000	1000	1	40	749	13	constant	synth	1
+676	3	675	1	1000	1000	1	40	749	9	constant	synth	1
+677	3	676	1	1000	1000	1	40	749	8	constant	synth	1
+678	3	677	1	1000	1000	1	40	749	6	constant	synth	1
+679	3	678	1	1000	1000	1	40	749	73	constant	synth	1
+680	3	679	1	1000	1000	1	40	749	17	constant	synth	1
+\.
+
+
+--
+-- Name: configs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: xlwang
+--
+
+SELECT pg_catalog.setval('configs_id_seq', 850, true);
+
+
+--
+-- Data for Name: exps; Type: TABLE DATA; Schema: public; Owner: xlwang
+--
+
+COPY exps (exp_id, sid, pid, f_p_rate, f_n_rate, solver, opt_queryslice, opt_attrslice, opt_query_num, opt_attr_num, opt_approx, num_compl, num_fixed_compl, fixed_rate, noise_rate, dirty_query_idx, fixed_query_idx, preproc_time, solver_prep_cons_time, solver_add_cons_time, solver_solve_time, finish_time, avg_num_cons) FROM stdin;
+35	4	680	1	40	cplex	0	1	50	3	0	112	0	1	0	49	49	0.018437	0.0260979999	0.0197269991	0.0154680004	0.840753973	720
+36	4	680	1	40	cplex	1	0	43	11	1	112	0	1	0	49	49	0.00591900013	0.00809899997	0.0150239998	0.0159510002	0.658749998	1680
+37	4	680	1	40	cplex	1	1	43	3	2	112	0	1	0	49	49	0.00383000006	0.00316400011	0.00494500017	0.0119460002	0.619916975	720
+38	4	680	1	40	cplex	0	0	50	11	3	112	0	1	0	49	49	0.00146299996	0.00347000011	0.00754400017	0.014587	0.626860976	1680
+39	4	681	1	40	cplex	0	1	50	3	0	99	0	1	0	49	49	0.00129699998	0.00230300007	0.00428400002	0.0111419996	0.693947971	720
+40	4	681	1	40	cplex	1	0	43	11	1	99	0	1	0	49	49	0.00225599995	0.00317499996	0.00751799997	0.0147259999	0.711838007	1680
+41	4	681	1	40	cplex	1	1	43	3	2	99	0	1	0	49	49	0.001927	0.00222799997	0.00427799998	0.0107699996	0.706444025	720
+42	4	681	1	40	cplex	0	0	50	11	3	99	0	1	0	49	49	0.00127500005	0.00282899989	0.0072209998	0.0143449996	0.749351978	1680
+43	4	682	1	40	cplex	0	1	50	3	0	103	0	1	0	49	49	0.00131099997	0.00205100002	0.00407199981	0.0115419999	0.655137002	720
+44	4	682	1	40	cplex	1	0	43	11	1	103	0	1	0	49	49	0.00217400002	0.00308599998	0.0069889999	0.0140880002	0.607841015	1680
+45	4	682	1	40	cplex	1	1	43	3	2	103	0	1	0	49	49	0.00215500011	0.00193699996	0.00382500002	0.0109160002	0.613471985	720
+46	4	682	1	40	cplex	0	0	50	11	3	103	0	1	0	49	49	0.00142800005	0.00291600008	0.00696900021	0.0147320004	0.661391973	1680
+47	4	683	1	40	cplex	0	1	50	3	0	148	0	1	0	49	49	0.00129799999	0.00155799999	0.0037789999	0.0102190003	0.477248013	720
+48	4	683	1	40	cplex	1	0	43	11	1	148	0	1	0	49	49	0.00215999992	0.0027079999	0.00721699977	0.0150960004	0.542604983	1680
+49	4	683	1	40	cplex	1	1	43	3	2	148	0	1	0	49	49	0.00182699994	0.00133899995	0.003731	0.0105919996	0.480080992	720
+50	4	683	1	40	cplex	0	0	50	11	3	148	0	1	0	49	49	0.00127100002	0.00218600011	0.00693299994	0.0133170001	0.475820005	1680
+51	4	684	1	40	cplex	0	1	50	3	0	102	0	1	0	49	49	0.00128099998	0.00183099997	0.0037440001	0.0115059996	0.322079003	720
+52	4	684	1	40	cplex	1	0	43	11	1	102	0	1	0	49	49	0.00176000001	0.00213599997	0.00694399979	0.0140859997	0.276582986	1680
+53	4	684	1	40	cplex	1	1	43	3	2	102	0	1	0	49	49	0.00175399997	0.00133600004	0.00388500001	0.010849	0.264761001	720
+54	4	684	1	40	cplex	0	0	50	11	3	102	0	1	0	49	49	0.00120699999	0.00200299989	0.00682199979	0.0145009998	0.266436994	1680
+55	4	685	1	40	cplex	0	1	50	3	0	121	0	1	0	49	49	0.00140399998	0.00128099998	0.00370900007	0.0104919998	0.447012991	720
+56	4	685	1	40	cplex	1	0	43	11	1	121	0	1	0	49	49	0.00176400004	0.00196500006	0.00679400004	0.0148790004	0.440418005	1680
+57	4	685	1	40	cplex	1	1	43	3	2	121	0	1	0	49	49	0.00175299996	0.00155499997	0.00365999993	0.00988100003	0.437552005	720
+58	4	685	1	40	cplex	0	0	50	11	3	121	0	1	0	49	49	0.00120099995	0.00248700008	0.00687299995	0.0145579996	0.46182701	1680
+59	4	686	1	40	cplex	0	1	50	3	0	198	0	1	0	49	49	0.00123599998	0.00115699996	0.00370900007	0.0110879997	0.358619988	720
+60	4	686	1	40	cplex	1	0	43	11	1	198	0	1	0	49	49	0.001881	0.00198399997	0.00699200016	0.0148240002	0.37154001	1680
+61	4	686	1	40	cplex	1	1	43	3	2	198	0	1	0	49	49	0.00173799996	0.00117499998	0.00376500003	0.0111410003	0.357504994	720
+62	4	686	1	40	cplex	0	0	50	11	3	198	0	1	0	49	49	0.00123000005	0.00198499998	0.00694199977	0.0142430002	0.350279987	1680
+63	4	687	1	40	cplex	0	1	50	3	0	103	0	1	0	49	49	0.001269	0.00119500002	0.00377699989	0.0113059999	0.709176004	720
+64	4	687	1	40	cplex	1	0	43	11	1	103	0	1	0	49	49	0.00180099998	0.00202700007	0.00699699996	0.0144400001	0.702879012	1680
+65	4	687	1	40	cplex	1	1	43	3	2	103	0	1	0	49	49	0.00163199997	0.00121999998	0.00383600011	0.00975199975	0.730674982	720
+391	4	769	1	40	cplex	1	0	466	11	1	42	0	1	0	399	399	0.370840997	10.076417	21.9836254	35.4556618	0.306454003	54527
+392	4	769	1	40	cplex	1	1	466	10	2	42	0	1	0	399	399	0.355989009	9.45881844	21.6591434	34.7834015	0.313098013	53743
+393	4	769	1	40	cplex	0	0	500	11	3	42	0	1	0	399	399	0.674926996	11.4712591	25.8101521	37.9644318	0.311123997	41680
+394	4	770	1	40	cplex	0	1	500	10	0	156	0	1	0	299	299	1.05172801	44.5750046	99.1088715	228.513184	2.214252	80521
+395	4	770	1	40	cplex	1	0	466	11	1	156	0	1	0	299	299	0.710242987	44.9337311	97.1883545	223.30899	2.12312794	94978
+396	4	770	1	40	cplex	1	1	466	10	2	156	0	1	0	299	299	0.713854015	45.5728111	97.0802689	220.983337	2.12230206	94663
+397	4	770	1	40	cplex	0	0	500	11	3	156	0	1	0	299	299	0.956200004	44.9957657	99.9996948	229.551834	2.23391891	81680
+398	4	771	1	40	cplex	0	1	500	10	0	22	0	1	0	299	299	0.600665987	24.5565948	54.1573257	99.719223	0.693970025	44525
+66	4	687	1	40	cplex	0	0	50	11	3	103	0	1	0	49	49	0.00121799996	0.00199900009	0.00693699997	0.0151960002	1.09375405	1680
+67	4	688	1	40	cplex	0	1	50	3	0	146	0	1	0	49	49	0.00129799999	0.00116400002	0.00374500011	0.0100800004	0.388242006	720
+68	4	688	1	40	cplex	1	0	43	11	1	146	0	1	0	49	49	0.00145400001	0.00199000002	0.00696599996	0.014521	0.394327998	1680
+69	4	688	1	40	cplex	1	1	43	3	2	146	0	1	0	49	49	0.001529	0.00124200003	0.00377699989	0.0107800001	0.377739012	720
+70	4	688	1	40	cplex	0	0	50	11	3	146	0	1	0	49	49	0.00112999999	0.00198900001	0.00692800013	0.0135589996	0.393651992	1680
+71	4	689	1	40	cplex	0	1	50	3	0	97	0	1	0	49	49	0.00121300004	0.00115200004	0.00381399994	0.0104959998	0.599928021	720
+72	4	689	1	40	cplex	1	0	43	11	1	97	0	1	0	49	49	0.00154600001	0.00256199995	0.00732999993	0.0153120002	0.591632009	1680
+73	4	689	1	40	cplex	1	1	43	3	2	97	0	1	0	49	49	0.00141499995	0.00151900004	0.00371100008	0.0103000002	0.591777027	720
+74	4	689	1	40	cplex	0	0	50	11	3	97	0	1	0	49	49	0.00148800004	0.00246699993	0.00693099992	0.0147460001	0.610536993	1680
+75	4	690	1	40	cplex	0	1	50	7	0	107	0	1	0	24	24	0.0501599982	0.731481016	1.42067206	1.29005504	0.722694993	9190
+76	4	690	1	40	cplex	1	0	27	11	1	107	0	1	0	24	24	0.00919399969	0.484421998	0.868138015	0.855670989	0.712481976	18580
+77	4	690	1	40	cplex	1	1	27	9	2	107	0	1	0	24	24	0.0155060003	0.385885	0.812376022	0.797510982	0.712384999	17130
+78	4	690	1	40	cplex	0	0	50	11	3	107	0	1	0	24	24	0.0354259983	0.862923026	1.72225904	1.56414104	0.713276029	11680
+79	4	691	1	40	cplex	0	1	50	7	0	101	0	1	0	24	24	0.0356910005	0.941304028	1.35892403	1.28185296	0.421709001	9115
+80	4	691	1	40	cplex	1	0	29	11	1	101	0	1	0	24	24	0.0127870003	0.500078976	0.914304972	0.926383018	0.422158003	17857
+81	4	691	1	40	cplex	1	1	29	9	2	101	0	1	0	24	24	0.0178999994	0.350436002	0.813467979	0.850690007	0.502828002	16177
+82	4	691	1	40	cplex	0	0	50	11	3	101	0	1	0	24	24	0.0416469984	0.773554027	1.66866398	1.58077705	0.418332994	11680
+83	4	692	1	40	cplex	0	1	50	7	0	101	0	1	0	24	24	0.0364239998	0.645210981	1.35052395	1.28468204	1.10288799	9190
+84	4	692	1	40	cplex	1	0	27	11	1	101	0	1	0	24	24	0.012325	0.343313009	0.816415012	0.844843984	0.759410024	18580
+85	4	692	1	40	cplex	1	1	27	9	2	101	0	1	0	24	24	0.0152810002	0.357780993	0.790183008	0.789856017	0.867613971	17130
+86	4	692	1	40	cplex	0	0	50	11	3	101	0	1	0	24	24	0.02489	1.18027997	1.74666095	1.55003703	0.71576798	11680
+87	4	693	1	40	cplex	0	1	50	7	0	148	10	1	0.25	24	24	0.0504919998	0.686182976	1.46776903	1.346753	0.460379004	9444
+88	4	693	1	40	cplex	1	0	28	11	1	148	10	1	0.25	24	24	0.012174	0.36845699	0.880026996	0.916863024	0.516134977	17857
+89	4	693	1	40	cplex	1	1	28	9	2	148	10	1	0.25	24	24	0.0157810003	0.402817994	0.861594021	0.854646981	0.468465	16177
+90	4	693	1	40	cplex	0	0	50	11	3	148	10	1	0.25	24	24	0.0474260002	0.697799027	1.66981399	1.56896698	0.533423007	11680
+91	4	694	1	40	cplex	0	1	50	7	0	110	0	1	0	24	24	0.0492019989	0.652387977	1.406973	1.28679705	0.526408017	9115
+92	4	694	1	40	cplex	1	0	29	11	1	110	0	1	0	24	24	0.0129190003	0.427895993	0.956394017	0.912730992	0.529487014	17857
+93	4	694	1	40	cplex	1	1	29	9	2	110	0	1	0	24	24	0.00880600046	0.485110015	0.873124003	0.847890973	0.528578997	16177
+94	4	694	1	40	cplex	0	0	50	11	3	110	0	1	0	24	24	0.0472589992	0.723423004	1.69929099	1.58087397	0.966735005	11680
+95	4	695	1	40	cplex	0	1	50	7	0	108	0	1	0	24	24	0.0489969999	0.602515996	1.39529502	1.349792	0.922508001	9444
+96	4	695	1	40	cplex	1	0	28	11	1	108	0	1	0	24	24	0.0162400007	0.411509007	0.929687023	0.909231007	1.20453501	17857
+97	4	695	1	40	cplex	1	1	28	9	2	108	0	1	0	24	24	0.00837900024	0.409224004	0.841045976	0.85224402	0.596720994	16177
+98	4	695	1	40	cplex	0	0	50	11	3	108	0	1	0	24	24	0.0341049992	0.678568006	1.68602395	1.57579005	0.837872982	11680
+99	4	696	1	40	cplex	0	1	50	7	0	195	10	1	0.25	24	24	0.0370780006	0.579208016	1.37469995	1.321715	0.50998199	9190
+100	4	696	1	40	cplex	1	0	27	11	1	195	10	1	0.25	24	24	0.0146190003	0.399500996	0.896708012	0.899128973	0.492736012	18580
+101	4	696	1	40	cplex	1	1	27	9	2	195	10	1	0.25	24	24	0.00755500002	0.410495996	0.783455014	0.817625999	0.504984021	17130
+102	4	696	1	40	cplex	0	0	50	11	3	195	10	1	0.25	24	24	0.0468069986	0.766727984	1.76147401	1.57976997	0.513843	11680
+103	4	697	1	40	cplex	0	1	50	7	0	101	0	1	0	24	24	0.030483	0.712032974	1.402583	1.28063202	0.493167996	9115
+104	4	697	1	40	cplex	1	0	29	11	1	101	0	1	0	24	24	0.0163460001	0.433968008	0.970808983	0.913236976	0.478446007	17857
+105	4	697	1	40	cplex	1	1	29	9	2	101	0	1	0	24	24	0.0139920004	0.372732997	0.85177201	0.852054	0.507050991	16177
+106	4	697	1	40	cplex	0	0	50	11	3	101	0	1	0	24	24	0.0231660008	0.786022007	1.71192396	1.57158303	0.503130019	11680
+107	4	698	1	40	cplex	0	1	50	7	0	114	0	1	0	24	24	0.0351810008	0.670378029	1.49080503	1.33056104	1.23955095	9444
+108	4	698	1	40	cplex	1	0	28	11	1	114	0	1	0	24	24	0.0122739999	0.370638996	0.91120702	0.916275978	0.492839009	17857
+109	4	698	1	40	cplex	1	1	28	9	2	114	0	1	0	24	24	0.0127529996	0.353882998	0.845448017	0.846035004	0.504166007	16177
+110	4	698	1	40	cplex	0	0	50	11	3	114	0	1	0	24	24	0.0410510004	0.821968019	1.77235305	1.59211302	0.510827005	11680
+111	4	699	1	40	cplex	0	1	50	7	0	135	0	1	0	24	24	0.0351179987	0.623124003	1.45544195	1.33909905	0.473628998	9444
+112	4	699	1	40	cplex	1	0	28	11	1	135	0	1	0	24	24	0.0129760001	0.484265	0.941595972	0.92265898	0.478763998	17857
+113	4	699	1	40	cplex	1	1	28	9	2	135	0	1	0	24	24	0.0147500001	0.342031986	0.843806028	0.863945007	0.477279991	16177
+114	4	699	1	40	cplex	0	0	50	11	3	135	0	1	0	24	24	0.0332139991	0.777406991	1.89771104	1.59021795	0.471419007	11680
+115	4	700	1	40	cplex	0	1	100	3	0	104	0	1	0	99	99	0.00212000008	0.00116800005	0.00395799987	0.0103869997	0.660094976	720
+116	4	700	1	40	cplex	1	0	34	11	1	104	0	1	0	99	99	0.00248700008	0.00196800008	0.00751999998	0.0137149999	0.65278399	1680
+117	4	700	1	40	cplex	1	1	34	3	2	104	0	1	0	99	99	0.00305699999	0.00141000003	0.00396399992	0.01028	0.649747014	720
+118	4	700	1	40	cplex	0	0	100	11	3	104	0	1	0	99	99	0.00284600002	0.00247499999	0.00772499992	0.0145380003	0.666073024	1680
+119	4	701	1	40	cplex	0	1	100	3	0	81	0	1	0	99	99	0.00284099998	0.00146099995	0.00395399984	0.00978699978	0.884274006	720
+120	4	701	1	40	cplex	1	0	34	11	1	81	0	1	0	99	99	0.00249100011	0.00191300001	0.00758499978	0.0141970003	0.733699024	1680
+121	4	701	1	40	cplex	1	1	34	3	2	81	0	1	0	99	99	0.00240799994	0.00115400006	0.0039570001	0.00926799979	0.747835994	720
+122	4	701	1	40	cplex	0	0	100	11	3	81	0	1	0	99	99	0.00206799991	0.00192399998	0.00756799988	0.0134100001	0.735991001	1680
+123	4	702	1	40	cplex	0	1	100	3	0	106	0	1	0	99	99	0.00237599993	0.00138999999	0.00403199997	0.0103839999	0.396607012	720
+124	4	702	1	40	cplex	1	0	34	11	1	106	0	1	0	99	99	0.0030400001	0.00243699993	0.00763199991	0.0139950002	0.509123981	1680
+125	4	702	1	40	cplex	1	1	34	3	2	106	0	1	0	99	99	0.00295000011	0.00133700005	0.00397600001	0.00984199997	0.389474005	720
+126	4	702	1	40	cplex	0	0	100	11	3	106	0	1	0	99	99	0.00203999993	0.00192499999	0.00755200023	0.0133539997	0.377557009	1680
+127	4	703	1	40	cplex	0	1	100	3	0	99	0	1	0	99	99	0.00216699997	0.001391	0.00406799978	0.010001	0.4102	720
+128	4	703	1	40	cplex	1	0	34	11	1	99	0	1	0	99	99	0.00272600004	0.00243000011	0.00774399983	0.0130230002	0.408740997	1680
+129	4	703	1	40	cplex	1	1	34	3	2	99	0	1	0	99	99	0.0024629999	0.00117299997	0.00401399983	0.00965999998	0.392170012	720
+130	4	703	1	40	cplex	0	0	100	11	3	99	0	1	0	99	99	0.002141	0.00193899998	0.00763599994	0.013998	0.393864006	1680
+131	4	704	1	40	cplex	0	1	100	3	0	102	0	1	0	99	99	0.00215100008	0.00115699996	0.00402700016	0.0107789999	0.720642984	720
+132	4	704	1	40	cplex	1	0	34	11	1	102	0	1	0	99	99	0.00248500006	0.00195800001	0.00770399999	0.0154640004	0.723550022	1680
+133	4	704	1	40	cplex	1	1	34	3	2	102	0	1	0	99	99	0.00312600005	0.001391	0.00399000011	0.0102239996	0.843725026	720
+134	4	704	1	40	cplex	0	0	100	11	3	102	0	1	0	99	99	0.00268899999	0.00237099989	0.00769999996	0.0146310003	0.796203017	1680
+135	4	705	1	40	cplex	0	1	100	3	0	94	0	1	0	99	99	0.00223800004	0.00128199998	0.00402100012	0.0106450003	0.591785014	720
+136	4	705	1	40	cplex	1	0	34	11	1	94	0	1	0	99	99	0.00254600006	0.00195099995	0.0076489998	0.0131470002	0.596476018	1680
+137	4	705	1	40	cplex	1	1	34	3	2	94	0	1	0	99	99	0.00240799994	0.00116700004	0.00400200021	0.0104560005	0.590619981	720
+138	4	705	1	40	cplex	0	0	100	11	3	94	0	1	0	99	99	0.00213799998	0.00199100003	0.00772699993	0.0134359999	0.589932024	1680
+139	4	706	1	40	cplex	0	1	100	3	0	93	0	1	0	99	99	0.00217800005	0.00119700003	0.00476599997	0.0104630003	0.368519992	720
+140	4	706	1	40	cplex	1	0	34	11	1	93	0	1	0	99	99	0.00298000011	0.00246999995	0.00760699995	0.0134460004	0.365152001	1680
+141	4	706	1	40	cplex	1	1	34	3	2	93	0	1	0	99	99	0.00305499998	0.00144899997	0.00398400007	0.0108040003	0.360848993	720
+142	4	706	1	40	cplex	0	0	100	11	3	93	0	1	0	99	99	0.00145500002	0.00209599989	0.00764600001	0.0148299998	0.36551699	1680
+143	4	707	1	40	cplex	0	1	100	3	0	94	0	1	0	99	99	0.00225299993	0.00118799997	0.00396799995	0.0108599998	0.594347	720
+144	4	707	1	40	cplex	1	0	34	11	1	94	0	1	0	99	99	0.00249499991	0.00196300005	0.00761900004	0.0139149996	0.599978983	1680
+145	4	707	1	40	cplex	1	1	34	3	2	94	0	1	0	99	99	0.002415	0.00116700004	0.00397500023	0.0104790004	0.605660021	720
+146	4	707	1	40	cplex	0	0	100	11	3	94	0	1	0	99	99	0.00257300003	0.00238900003	0.00758400001	0.0133079998	0.592193007	1680
+147	4	708	1	40	cplex	0	1	100	3	0	88	0	1	0	99	99	0.00270200009	0.00146499998	0.00398099981	0.0106349997	0.679346025	720
+148	4	708	1	40	cplex	1	0	34	11	1	88	0	1	0	99	99	0.0029529999	0.00245500007	0.0076100002	0.013456	0.685461998	1680
+149	4	708	1	40	cplex	1	1	34	3	2	88	0	1	0	99	99	0.00306800008	0.00144400005	0.00398699986	0.0102610001	0.679368019	720
+150	4	708	1	40	cplex	0	0	100	11	3	88	0	1	0	99	99	0.00267000007	0.083844997	0.0108089997	0.0143240001	0.676883996	1680
+151	4	709	1	40	cplex	0	1	100	3	0	101	0	1	0	99	99	0.00214500003	0.001193	0.00395900011	0.0116149997	0.251944005	720
+152	4	709	1	40	cplex	1	0	34	11	1	101	0	1	0	99	99	0.00239200005	0.00193000003	0.0075960001	0.0135850003	0.262432009	1680
+153	4	709	1	40	cplex	1	1	34	3	2	101	0	1	0	99	99	0.00242400006	0.00116700004	0.00403300021	0.0100840004	0.252799004	720
+154	4	709	1	40	cplex	0	0	100	11	3	101	0	1	0	99	99	0.001987	0.00193599996	0.00760000013	0.0147470003	0.247343004	1680
+155	4	710	1	40	cplex	0	1	100	7	0	161	0	1	0	74	74	0.0611339994	0.600022972	1.37298	1.29162598	0.352025002	8581
+156	4	710	1	40	cplex	1	0	79	11	1	161	0	1	0	74	74	0.0171739999	0.280313998	0.72191298	0.63489902	0.354553014	17565
+157	4	710	1	40	cplex	1	1	79	8	2	161	0	1	0	74	74	0.0233679991	0.290235996	0.638508022	0.648375988	0.345378995	14485
+158	4	710	1	40	cplex	0	0	100	11	3	161	0	1	0	74	74	0.0601119995	0.766285002	1.84248602	1.51933503	0.376951009	11680
+159	4	711	1	40	cplex	0	1	100	7	0	178	22	0.925000012	0.474999994	74	74	0.0605800003	0.554230988	1.327492	1.20246005	1.07981098	8581
+160	4	711	1	40	cplex	1	0	79	11	1	178	22	0.925000012	0.474999994	74	74	0.0165049993	0.283861995	0.721800983	0.629188001	1.29001105	17565
+161	4	711	1	40	cplex	1	1	79	8	2	178	22	0.925000012	0.474999994	74	74	0.0169050004	0.263132006	0.616078019	0.602981985	1.05090201	14485
+162	4	711	1	40	cplex	0	0	100	11	3	178	22	0.925000012	0.474999994	74	74	0.0621129982	0.851360023	1.79480505	1.50348699	0.789134026	11680
+163	4	712	1	40	cplex	0	1	100	7	0	187	6	1	0.150000006	74	74	0.0857219994	0.642587006	1.42278397	1.36663103	0.562545002	8726
+164	4	712	1	40	cplex	1	0	79	11	1	187	6	1	0.150000006	74	74	0.0169929992	0.279064	0.717581987	0.636124015	0.564960003	17565
+165	4	712	1	40	cplex	1	1	79	8	2	187	6	1	0.150000006	74	74	0.0229199994	0.281098992	0.633328974	0.736782014	0.559194028	14485
+166	4	712	1	40	cplex	0	0	100	11	3	187	6	1	0.150000006	74	74	0.0601259992	0.685850978	1.77897799	1.518718	0.562794983	11680
+167	4	713	1	40	cplex	0	1	100	7	0	188	6	1	0.150000006	74	74	0.0764610022	1.38303304	1.39334798	1.23301899	0.573992014	8726
+168	4	713	1	40	cplex	1	0	79	11	1	188	6	1	0.150000006	74	74	0.0191319995	0.310790986	0.750304997	0.633134007	0.567574978	17565
+169	4	713	1	40	cplex	1	1	79	8	2	188	6	1	0.150000006	74	74	0.0234900005	0.315548986	0.631873012	0.616654992	0.548337996	14485
+170	4	713	1	40	cplex	0	0	100	11	3	188	6	1	0.150000006	74	74	0.0824450031	0.832942009	1.85043895	1.51294506	0.55429697	11680
+171	4	714	1	40	cplex	0	1	100	7	0	230	6	1	0.150000006	74	74	0.0631140023	0.574750006	1.35180795	1.18972504	0.70726198	8581
+172	4	714	1	40	cplex	1	0	79	11	1	230	6	1	0.150000006	74	74	0.0164439995	0.284372985	0.725332022	0.630675972	0.662047982	17565
+173	4	714	1	40	cplex	1	1	79	8	2	230	6	1	0.150000006	74	74	0.0168069992	0.261442989	0.619096994	0.596922994	0.683170021	14485
+174	4	714	1	40	cplex	0	0	100	11	3	230	6	1	0.150000006	74	74	0.0596599989	0.815241992	1.82811296	1.49781299	0.787030995	11680
+175	4	715	1	40	cplex	0	1	100	7	0	208	6	1	0.150000006	74	74	0.0615100004	0.634106994	1.41741598	1.28461599	0.560168982	8726
+176	4	715	1	40	cplex	1	0	79	11	1	208	6	1	0.150000006	74	74	0.019909	0.280847996	0.723025024	0.634159982	0.557788014	17565
+177	4	715	1	40	cplex	1	1	79	8	2	208	6	1	0.150000006	74	74	0.01688	0.258608013	0.618092	0.60876298	0.568419993	14485
+178	4	715	1	40	cplex	0	0	100	11	3	208	6	1	0.150000006	74	74	0.0541110002	0.781701982	1.78776205	1.51492405	0.551420987	11680
+179	4	716	1	40	cplex	0	1	100	7	0	205	6	1	0.150000006	74	74	0.0860949978	0.638221979	1.40283704	1.27862298	0.56605202	8581
+180	4	716	1	40	cplex	1	0	79	11	1	205	6	1	0.150000006	74	74	0.0197630003	0.312848002	0.766120017	0.638176978	0.576296985	17565
+181	4	716	1	40	cplex	1	1	79	8	2	205	6	1	0.150000006	74	74	0.0167229995	0.256049007	0.621300995	0.672923028	0.591731012	14485
+182	4	716	1	40	cplex	0	0	100	11	3	205	6	1	0.150000006	74	74	0.0630899966	0.802675009	1.93390906	1.53580701	0.590506971	11680
+183	4	717	1	40	cplex	0	1	100	7	0	216	22	0.949999988	0.5	74	74	0.062680997	0.649704993	1.36212397	1.19715905	0.723160028	8581
+184	4	717	1	40	cplex	1	0	79	11	1	216	22	0.949999988	0.5	74	74	0.0208950005	0.332572997	0.777287006	0.630328	0.708715975	17565
+185	4	717	1	40	cplex	1	1	79	8	2	216	22	0.949999988	0.5	74	74	0.0134370001	0.250348002	0.604791999	0.606675029	0.712375998	14485
+186	4	717	1	40	cplex	0	0	100	11	3	216	22	0.949999988	0.5	74	74	0.0484240018	0.711400986	1.78286803	1.50049305	0.699598014	11680
+187	4	718	1	40	cplex	0	1	100	7	0	197	17	0.975000024	0.400000006	74	74	0.078391999	0.605830014	1.42896998	1.21754599	0.773415983	8581
+188	4	718	1	40	cplex	1	0	79	11	1	197	17	0.975000024	0.400000006	74	74	0.0232800003	0.362019986	0.774065971	0.636004984	0.827279985	17565
+189	4	718	1	40	cplex	1	1	79	8	2	197	17	0.975000024	0.400000006	74	74	0.0165560003	0.25612399	0.626411021	0.658563972	0.675229013	14485
+190	4	718	1	40	cplex	0	0	100	11	3	197	17	0.975000024	0.400000006	74	74	0.0481219999	0.801389992	1.88840306	1.51921499	1.02408695	11680
+191	4	719	1	40	cplex	0	1	100	7	0	250	22	0.975000024	0.524999976	74	74	0.0578499995	0.63499999	1.39312196	1.19167697	0.664376974	8581
+192	4	719	1	40	cplex	1	0	79	11	1	250	22	0.975000024	0.524999976	74	74	0.023116	0.336396009	0.793613017	0.637121022	0.660466015	17565
+193	4	719	1	40	cplex	1	1	79	8	2	250	22	0.975000024	0.524999976	74	74	0.0209929999	0.251067013	0.624271989	0.643595994	0.663641989	14485
+194	4	719	1	40	cplex	0	0	100	11	3	250	22	0.975000024	0.524999976	74	74	0.0702600032	0.711822987	1.82450497	1.49963295	0.678273976	11680
+195	4	720	1	40	cplex	0	1	100	8	0	88	0	1	0	49	49	0.0902459994	2.59547496	6.14851284	5.93787003	0.617438018	19404
+196	4	720	1	40	cplex	1	0	76	11	1	88	0	1	0	49	49	0.0457350016	2.11886311	5.021626	5.08603001	0.613840997	29976
+197	4	720	1	40	cplex	1	1	76	10	2	88	0	1	0	49	49	0.0528220013	1.95868301	4.78295517	4.79306412	0.605234981	28348
+198	4	720	1	40	cplex	0	0	100	11	3	88	0	1	0	49	49	0.0685190037	2.77083302	6.78985786	6.58126497	0.665252984	21680
+199	4	721	1	40	cplex	0	1	100	9	0	87	0	1	0	49	49	0.106668003	2.64498496	6.0822382	5.8060112	0.589570999	19443
+200	4	721	1	40	cplex	1	0	76	11	1	87	0	1	0	49	49	0.0372809991	2.01341605	5.92762709	4.88312197	0.580950022	29976
+201	4	721	1	40	cplex	1	1	76	10	2	87	0	1	0	49	49	0.0550029986	1.961918	4.71134615	4.58580017	0.597600996	28348
+202	4	721	1	40	cplex	0	0	100	11	3	87	0	1	0	49	49	0.0903630033	2.75243402	6.86269712	6.31356478	0.605202019	21680
+203	4	722	1	40	cplex	0	1	100	9	0	107	0	1	0	49	49	0.0886079967	2.64355397	6.20275688	5.74758911	0.422053993	19876
+204	4	722	1	40	cplex	1	0	60	11	1	107	0	1	0	49	49	0.0284759998	1.21104896	2.86882997	2.93925309	0.409586012	33508
+205	4	722	1	40	cplex	1	1	60	10	2	107	0	1	0	49	49	0.0319009982	1.18255401	2.74201989	2.7877419	0.420789003	31671
+206	4	722	1	40	cplex	0	0	100	11	3	107	0	1	0	49	49	0.100883	2.79644608	6.83660698	6.16478395	0.416334987	21680
+207	4	723	1	40	cplex	0	1	100	8	0	81	0	1	0	49	49	0.0886489972	2.70039392	6.10198116	6.01631021	0.626285017	19404
+208	4	723	1	40	cplex	1	0	76	11	1	81	0	1	0	49	49	0.0527350008	2.23634911	5.17972422	5.1733098	0.622469008	29976
+209	4	723	1	40	cplex	1	1	76	10	2	81	0	1	0	49	49	0.0542269982	2.04733992	5.03229618	4.90939188	0.618054986	28348
+210	4	723	1	40	cplex	0	0	100	11	3	81	0	1	0	49	49	0.0703329965	2.83606005	6.70403814	6.46192789	0.611521006	21680
+211	4	724	1	40	cplex	0	1	100	9	0	64	0	1	0	49	49	0.110872	2.68633294	6.13487816	5.74490595	0.290553987	19443
+212	4	724	1	40	cplex	1	0	76	11	1	64	0	1	0	49	49	0.0503709987	3.04399204	4.93579006	4.76418018	0.262039989	29976
+213	4	724	1	40	cplex	1	1	76	10	2	64	0	1	0	49	49	0.0387040004	2.04988289	4.72141123	4.53648186	0.243039995	28348
+214	4	724	1	40	cplex	0	0	100	11	3	64	0	1	0	49	49	0.0904410034	2.80664611	6.849967	6.21305895	0.258567005	21680
+215	4	725	1	40	cplex	0	1	100	9	0	89	0	1	0	49	49	0.0868709981	2.82632399	6.49782324	5.79138279	0.595749974	19443
+216	4	725	1	40	cplex	1	0	76	11	1	89	0	1	0	49	49	0.0385099985	2.1660049	5.20709705	4.89416218	0.586531997	29976
+217	4	725	1	40	cplex	1	1	76	10	2	89	0	1	0	49	49	0.0698229969	2.13507605	5.02726984	4.64347696	0.57920599	28348
+218	4	725	1	40	cplex	0	0	100	11	3	89	0	1	0	49	49	0.0684430003	2.95322704	7.11051893	6.24803591	0.582500994	21680
+219	4	726	1	40	cplex	0	1	100	9	0	94	0	1	0	49	49	0.147394001	2.75501704	6.49441004	5.83006191	0.602434993	19876
+220	4	726	1	40	cplex	1	0	60	11	1	94	0	1	0	49	49	0.0174659993	1.21436298	2.89477491	2.95553303	0.585820973	33508
+221	4	726	1	40	cplex	1	1	60	10	2	94	0	1	0	49	49	0.0185020007	1.108518	2.82681608	2.82603598	0.597625017	31671
+222	4	726	1	40	cplex	0	0	100	11	3	94	0	1	0	49	49	0.0714500025	2.86363196	6.78151798	6.13606691	0.703570008	21680
+223	4	727	1	40	cplex	0	1	100	9	0	94	0	1	0	49	49	0.109435998	2.80028892	6.44555616	5.85794592	0.587619007	19443
+224	4	727	1	40	cplex	1	0	76	11	1	94	0	1	0	49	49	0.0598720014	2.28244495	5.23727083	4.84666204	0.570976019	29976
+225	4	727	1	40	cplex	1	1	76	10	2	94	0	1	0	49	49	0.0372209996	3.33994198	4.95264482	4.58703089	0.588648975	28348
+226	4	727	1	40	cplex	0	0	100	11	3	94	0	1	0	49	49	0.116462998	2.96616793	7.07984114	6.28971004	0.580881	21680
+227	4	728	1	40	cplex	0	1	100	9	0	136	0	1	0	49	49	0.094130002	2.82896996	6.59107113	5.86575079	0.452163011	19876
+228	4	728	1	40	cplex	1	0	60	11	1	136	0	1	0	49	49	0.0321400017	1.26918399	3.03788209	2.99729204	0.445118994	33508
+229	4	728	1	40	cplex	1	1	60	10	2	136	0	1	0	49	49	0.0263989996	1.245682	2.8754499	2.87039495	0.456185013	31671
+230	4	728	1	40	cplex	0	0	100	11	3	136	0	1	0	49	49	0.0769720003	2.923558	7.0064311	6.24009514	0.462963015	21680
+231	4	729	1	40	cplex	0	1	100	9	0	90	0	1	0	49	49	0.0876249969	2.59628606	6.25223589	5.75155497	0.597285986	19443
+232	4	729	1	40	cplex	1	0	76	11	1	90	0	1	0	49	49	0.0383969992	2.11670709	5.14225483	4.81659698	0.585564971	29976
+233	4	729	1	40	cplex	1	1	76	10	2	90	0	1	0	49	49	0.0481519997	2.06302691	4.84563589	4.5744648	0.706229985	28348
+234	4	729	1	40	cplex	0	0	100	11	3	90	0	1	0	49	49	0.111598	2.8423171	6.89017582	6.24855185	0.600053012	21680
+235	4	730	1	40	cplex	0	1	500	3	0	237	14	1	0.349999994	499	499	0.0107530002	0.00151099998	0.00408599991	0.0105400002	0.702120006	720
+236	4	730	1	40	cplex	1	0	484	11	1	237	14	1	0.349999994	499	499	0.017027	0.00199400005	0.00772899995	0.0137919998	0.55775398	1680
+237	4	730	1	40	cplex	1	1	484	3	2	237	14	1	0.349999994	499	499	0.0188820008	0.00123699999	0.00403399998	0.00988500006	0.578947008	720
+238	4	730	1	40	cplex	0	0	500	11	3	237	14	1	0.349999994	499	499	0.0111530004	0.0023980001	0.00773000019	0.0138039999	0.651903987	1680
+239	4	731	1	40	cplex	0	1	500	3	0	9	0	1	0	499	499	0.00325000007	0.000390000001	0.00111499999	0.00771400006	0.220533997	162
+240	4	731	1	40	cplex	1	0	484	11	1	9	0	1	0	499	499	0.0113610001	0.000593999983	0.00202200003	0.00789800007	0.224280998	378
+241	4	731	1	40	cplex	1	1	484	3	2	9	0	1	0	499	499	0.0112469997	0.000383000006	0.00113400002	0.00791000016	0.228285998	162
+242	4	731	1	40	cplex	0	0	500	11	3	9	0	1	0	499	499	0.003149	0.000599000021	0.00200899993	0.00846900046	0.222071007	378
+243	4	732	1	40	cplex	0	1	500	3	0	59	1	1	0.0250000004	499	499	0.0108439997	0.00150400004	0.00425900007	0.0121539999	0.855741978	720
+244	4	732	1	40	cplex	1	0	484	11	1	59	1	1	0.0250000004	499	499	0.0208689999	0.00247800001	0.00777600007	0.0128309997	1.07436299	1680
+245	4	732	1	40	cplex	1	1	484	3	2	59	1	1	0.0250000004	499	499	0.0169939995	0.00131800002	0.00410099979	0.0115470001	0.850651979	720
+246	4	732	1	40	cplex	0	0	500	11	3	59	1	1	0.0250000004	499	499	0.0100790001	0.00199500006	0.00774700008	0.0136150001	0.842284024	1680
+247	4	733	1	40	cplex	0	1	500	3	0	66	1	1	0.0250000004	499	499	0.0113310004	0.00150599994	0.00423499988	0.0110510001	0.653038979	720
+248	4	733	1	40	cplex	1	0	484	11	1	66	1	1	0.0250000004	499	499	0.0168619994	0.00199600006	0.00798400026	0.0148409996	0.647660017	1680
+249	4	733	1	40	cplex	1	1	484	3	2	66	1	1	0.0250000004	499	499	0.0169079993	0.00123199995	0.00415300019	0.0110680005	0.660965025	720
+250	4	733	1	40	cplex	0	0	500	11	3	66	1	1	0.0250000004	499	499	0.0129779996	0.00244800001	0.00795600004	0.0144509999	0.649138987	1680
+251	4	734	1	40	cplex	0	1	500	3	0	60	1	1	0.0250000004	499	499	0.01296	0.00151800003	0.00418600021	0.0105370004	0.692991972	720
+252	4	734	1	40	cplex	1	0	484	11	1	60	1	1	0.0250000004	499	499	0.0186289996	0.00242600008	0.00788800046	0.0147240004	0.688965976	1680
+253	4	734	1	40	cplex	1	1	484	3	2	60	1	1	0.0250000004	499	499	0.0166490003	0.00121999998	0.00414399989	0.0111339996	0.682165027	720
+254	4	734	1	40	cplex	0	0	500	11	3	60	1	1	0.0250000004	499	499	0.00870500039	0.00199200003	0.00794799998	0.014583	0.684001029	1680
+255	4	735	1	40	cplex	0	1	500	3	0	116	4	1	0.100000001	499	499	0.0128450003	0.00152100006	0.00422400003	0.0113030002	0.282665998	720
+256	4	735	1	40	cplex	1	0	484	11	1	116	4	1	0.100000001	499	499	0.0169300009	0.00202400004	0.00799500011	0.0145150004	0.41407001	1680
+257	4	735	1	40	cplex	1	1	484	3	2	116	4	1	0.100000001	499	499	0.0203789994	0.00120900001	0.00416699983	0.0103169996	0.267774999	720
+258	4	735	1	40	cplex	0	0	500	11	3	116	4	1	0.100000001	499	499	0.0125139998	0.00240499992	0.00796299987	0.0150239998	0.291408002	1680
+259	4	736	1	40	cplex	0	1	500	3	0	57	1	1	0.0250000004	499	499	0.00887299981	0.00122900004	0.00419300003	0.0114860004	0.816293001	720
+260	4	736	1	40	cplex	1	0	484	11	1	57	1	1	0.0250000004	499	499	0.0185700003	0.00200999994	0.00793700013	0.0135399997	0.800750017	1680
+261	4	736	1	40	cplex	1	1	484	3	2	57	1	1	0.0250000004	499	499	0.016934	0.00124000001	0.00415700022	0.0115830004	0.929548025	720
+262	4	736	1	40	cplex	0	0	500	11	3	57	1	1	0.0250000004	499	499	0.012836	0.00247099996	0.00796000008	0.013673	0.818799973	1680
+263	4	737	1	40	cplex	0	1	500	3	0	67	1	1	0.0250000004	499	499	0.0129279997	0.00150300004	0.00418800022	0.0113730002	0.64951098	720
+264	4	737	1	40	cplex	1	0	484	11	1	67	1	1	0.0250000004	499	499	0.0188139994	0.00246199989	0.00794600043	0.0146850003	0.654102027	1680
+265	4	737	1	40	cplex	1	1	484	3	2	67	1	1	0.0250000004	499	499	0.0169009995	0.00124500005	0.0041629998	0.0109740002	0.646522999	720
+266	4	737	1	40	cplex	0	0	500	11	3	67	1	1	0.0250000004	499	499	0.00981799979	0.00200699992	0.00799299963	0.0148059996	0.652157009	1680
+267	4	738	1	40	cplex	0	1	500	3	0	48	1	1	0.0250000004	499	499	0.0126499999	0.00150999997	0.00417400012	0.0111450003	0.809022009	720
+268	4	738	1	40	cplex	1	0	484	11	1	48	1	1	0.0250000004	499	499	0.020668	0.00246899994	0.00792799983	0.0142900003	0.813552022	1680
+269	4	738	1	40	cplex	1	1	484	3	2	48	1	1	0.0250000004	499	499	0.0190319996	0.00143599999	0.00415300019	0.0108719999	0.810754001	720
+270	4	738	1	40	cplex	0	0	500	11	3	48	1	1	0.0250000004	499	499	0.0126090003	0.00247900002	0.00797499996	0.0135690002	0.793290019	1680
+271	4	739	1	40	cplex	0	1	500	3	0	125	4	1	0.100000001	499	499	0.0126499999	0.001437	0.00424299994	0.0118979998	0.447531998	720
+272	4	739	1	40	cplex	1	0	484	11	1	125	4	1	0.100000001	499	499	0.0197659992	0.00228499994	0.00800499972	0.014347	0.463445991	1680
+273	4	739	1	40	cplex	1	1	484	3	2	125	4	1	0.100000001	499	499	0.0204479992	0.00148800004	0.00417099986	0.0111959996	0.453563988	720
+274	4	739	1	40	cplex	0	0	500	11	3	125	4	1	0.100000001	499	499	0.0127400002	0.00246199989	0.00794100016	0.0149250003	0.444124997	1680
+275	4	740	1	40	cplex	0	1	500	6	0	90	2	1	0.0500000007	474	474	0.218013003	0.543305993	1.40196502	0.989057004	0.564212024	7389
+276	4	740	1	40	cplex	1	0	469	11	1	90	2	1	0.0500000007	474	474	0.0656490028	0.205642998	0.487369001	0.403055012	0.561209023	18480
+277	4	740	1	40	cplex	1	1	469	7	2	90	2	1	0.0500000007	474	474	0.0613790005	0.143758997	0.352025986	0.304520011	0.555458009	13920
+278	4	740	1	40	cplex	0	0	500	11	3	90	2	1	0.0500000007	474	474	0.151507005	0.87450999	1.96432495	1.47788799	0.557060003	11680
+279	4	741	1	40	cplex	0	1	500	6	0	334	183	1	4.57499981	474	474	0.147242993	0.550457001	1.39356804	0.993309975	0.40723899	7389
+280	4	741	1	40	cplex	1	0	469	11	1	334	183	1	4.57499981	474	474	0.0486980006	0.176076993	0.455522001	0.392601013	0.400146991	18480
+281	4	741	1	40	cplex	1	1	469	7	2	334	183	1	4.57499981	474	474	0.0591709986	0.168632999	0.377644986	0.298970997	0.414956987	13920
+282	4	741	1	40	cplex	0	0	500	11	3	334	183	1	4.57499981	474	474	0.213870004	0.790651023	1.867419	1.44402099	0.405483007	11680
+283	4	742	1	40	cplex	0	1	500	6	0	90	2	1	0.0500000007	474	474	0.146530002	0.713838995	1.31863594	1.00233197	0.619677007	7389
+284	4	742	1	40	cplex	1	0	469	11	1	90	2	1	0.0500000007	474	474	0.0594139993	0.192598	0.478163004	0.405245006	0.588404	18480
+285	4	742	1	40	cplex	1	1	469	7	2	90	2	1	0.0500000007	474	474	0.0282400008	0.166133001	0.37340799	0.307413012	0.595880985	13920
+286	4	742	1	40	cplex	0	0	500	11	3	90	2	1	0.0500000007	474	474	0.386061013	0.772415996	1.94553399	1.48268998	3.06174111	11680
+287	4	743	1	40	cplex	0	1	500	6	0	161	2	1	0.0500000007	474	474	0.273887008	0.564468026	1.34153998	1.05998194	0.819552004	7996
+288	4	743	1	40	cplex	1	0	469	11	1	161	2	1	0.0500000007	474	474	0.0665810034	0.207201004	0.491746008	0.394241989	0.47487101	18480
+289	4	743	1	40	cplex	1	1	469	7	2	161	2	1	0.0500000007	474	474	0.0606870018	0.160196006	0.366912007	0.304957986	0.475032002	13920
+290	4	743	1	40	cplex	0	0	500	11	3	161	2	1	0.0500000007	474	474	0.317694992	0.793739974	1.94384003	1.46266103	0.468629003	11680
+291	4	744	1	40	cplex	0	1	500	6	0	321	196	1	4.9000001	474	474	0.199311003	0.724641979	1.28538895	0.987726986	0.399002999	7389
+292	4	744	1	40	cplex	1	0	469	11	1	321	196	1	4.9000001	474	474	0.0652879998	0.198901996	0.482196003	0.393283993	0.396247	18480
+293	4	744	1	40	cplex	1	1	469	7	2	321	196	1	4.9000001	474	474	0.0485839993	0.143258005	0.355444998	0.298664987	0.399044007	13920
+294	4	744	1	40	cplex	0	0	500	11	3	321	196	1	4.9000001	474	474	0.121526003	0.897888005	1.96597803	1.44422805	0.399048001	11680
+295	4	745	1	40	cplex	0	1	500	6	0	90	2	1	0.0500000007	474	474	0.270390987	0.491804987	1.22273302	1.00813794	0.57881099	7389
+296	4	745	1	40	cplex	1	0	469	11	1	90	2	1	0.0500000007	474	474	0.0535929985	0.201786995	0.480073988	0.405368	0.770205021	18480
+297	4	745	1	40	cplex	1	1	469	7	2	90	2	1	0.0500000007	474	474	0.0477799997	0.151014999	0.35728699	0.310205996	0.574334979	13920
+298	4	745	1	40	cplex	0	0	500	11	3	90	2	1	0.0500000007	474	474	0.215517998	0.794484019	1.85474896	1.48438299	0.567368984	11680
+299	4	746	1	40	cplex	0	1	500	6	0	334	183	1	4.57499981	474	474	0.256882012	0.582903981	1.31044197	0.995325983	0.408915013	7389
+300	4	746	1	40	cplex	1	0	469	11	1	334	183	1	4.57499981	474	474	0.0671650022	0.196606994	0.479458988	0.395594001	0.402316004	18480
+301	4	746	1	40	cplex	1	1	469	7	2	334	183	1	4.57499981	474	474	0.0477989987	0.146396995	0.359871	0.303752005	0.395103008	13920
+302	4	746	1	40	cplex	0	0	500	11	3	334	183	1	4.57499981	474	474	0.357641011	0.840519011	2.01110196	1.488222	0.409314007	11680
+303	4	747	1	40	cplex	0	1	500	6	0	223	2	1	0.0500000007	474	474	0.394562989	0.611258984	1.38815105	1.066769	0.395007998	7996
+304	4	747	1	40	cplex	1	0	469	11	1	223	2	1	0.0500000007	474	474	0.0571869984	0.186316997	0.472247005	0.391851991	0.399073005	18480
+305	4	747	1	40	cplex	1	1	469	7	2	223	2	1	0.0500000007	474	474	0.0561849996	0.140614003	0.354573995	0.308400005	0.49455601	13920
+306	4	747	1	40	cplex	0	0	500	11	3	223	2	1	0.0500000007	474	474	0.394423008	0.804700017	1.96178401	1.46558297	0.399836004	11680
+307	4	748	1	40	cplex	0	1	500	6	0	90	2	1	0.0500000007	474	474	0.396708995	0.581314981	1.310462	1.024086	0.552062988	7389
+308	4	748	1	40	cplex	1	0	469	11	1	90	2	1	0.0500000007	474	474	0.0545729995	0.176440999	0.460801989	0.412579	0.693446994	18480
+309	4	748	1	40	cplex	1	1	469	7	2	90	2	1	0.0500000007	474	474	0.0664990023	0.157980993	0.36581701	0.308708996	0.719650984	13920
+310	4	748	1	40	cplex	0	0	500	11	3	90	2	1	0.0500000007	474	474	0.206935003	0.856360972	1.95433795	1.49261701	0.565212011	11680
+311	4	749	1	40	cplex	0	1	500	6	0	187	2	1	0.0500000007	474	474	0.211848006	0.614813983	1.38058603	1.05802	0.439215004	7996
+312	4	749	1	40	cplex	1	0	469	11	1	187	2	1	0.0500000007	474	474	0.058042001	0.185121	0.468427002	0.393911988	0.452845991	18480
+313	4	749	1	40	cplex	1	1	469	7	2	187	2	1	0.0500000007	474	474	0.0355160013	0.260439992	0.375553995	0.305839986	0.455143005	13920
+314	4	749	1	40	cplex	0	0	500	11	3	187	2	1	0.0500000007	474	474	0.385302991	0.771990001	1.91250002	1.46563101	0.497604012	11680
+315	4	750	1	40	cplex	0	1	500	7	0	140	0	1	0	449	449	0.414133996	2.5555141	5.66641283	5.04774809	0.743700981	16951
+316	4	750	1	40	cplex	1	0	468	11	1	140	0	1	0	449	449	0.141825005	1.55132401	3.80250502	3.587538	0.703324974	31237
+317	4	750	1	40	cplex	1	1	468	9	2	140	0	1	0	449	449	0.184028998	1.51503897	3.53919601	3.4593761	0.657482982	29338
+318	4	750	1	40	cplex	0	0	500	11	3	140	0	1	0	449	449	0.379884988	2.78629804	6.97914982	6.024858	0.653146029	21680
+319	4	751	1	40	cplex	0	1	500	7	0	173	9	1	0.224999994	449	449	0.465487987	2.39313102	5.52913809	6.45705509	0.617622972	16951
+320	4	751	1	40	cplex	1	0	468	11	1	173	9	1	0.224999994	449	449	0.206863999	1.523013	3.77262592	3.66221094	0.618999004	31237
+321	4	751	1	40	cplex	1	1	468	9	2	173	9	1	0.224999994	449	449	0.175454006	1.48421001	3.61470699	3.50447011	0.603541017	29338
+322	4	751	1	40	cplex	0	0	500	11	3	173	9	1	0.224999994	449	449	0.401513994	2.76791811	7.02799082	6.1342001	0.649652004	21680
+323	4	752	1	40	cplex	0	1	500	7	0	119	0	1	0	449	449	0.475654989	2.48522902	5.88269615	5.54726219	0.424365014	17811
+324	4	752	1	40	cplex	1	0	468	11	1	119	0	1	0	449	449	0.166310996	1.54811895	3.77327108	3.78063607	0.442306995	31237
+325	4	752	1	40	cplex	1	1	468	9	2	119	0	1	0	449	449	0.132457003	1.53635597	3.63036394	3.74754095	0.423474997	29338
+326	4	752	1	40	cplex	0	0	500	11	3	119	0	1	0	449	449	0.386209011	2.86254811	7.0201149	6.29296207	0.39883399	21680
+327	4	753	1	40	cplex	0	1	500	7	0	177	11	1	0.275000006	449	449	0.385580987	2.42907405	5.58708715	5.14256811	0.702166021	16951
+328	4	753	1	40	cplex	1	0	468	11	1	177	11	1	0.275000006	449	449	0.187653005	1.56202602	3.75978589	3.76814604	0.599659026	31237
+329	4	753	1	40	cplex	1	1	468	9	2	177	11	1	0.275000006	449	449	0.167455003	1.54789102	3.5867691	3.61264396	0.610225022	29338
+330	4	753	1	40	cplex	0	0	500	11	3	177	11	1	0.275000006	449	449	0.311650008	2.7983861	7.02634382	6.38692093	0.691082001	21680
+331	4	754	1	40	cplex	0	1	500	8	0	146	9	1	0.224999994	449	449	0.608581007	2.68348193	6.10050011	5.41112089	0.538103998	18226
+332	4	754	1	40	cplex	1	0	468	11	1	146	9	1	0.224999994	449	449	0.173800007	1.60905397	3.88278604	3.72776389	0.531723976	31237
+333	4	754	1	40	cplex	1	1	468	9	2	146	9	1	0.224999994	449	449	0.129394993	1.62548494	3.69333291	3.57199502	0.622420013	29338
+334	4	754	1	40	cplex	0	0	500	11	3	146	9	1	0.224999994	449	449	0.579918981	4.51905203	7.12517881	6.28305721	0.559354007	21680
+335	4	755	1	40	cplex	0	1	500	7	0	94	0	1	0	449	449	0.427354008	2.35903907	5.5928278	5.49890709	0.636727989	16951
+336	4	755	1	40	cplex	1	0	468	11	1	94	0	1	0	449	449	0.212111995	1.491243	3.87704802	3.95917606	0.664728999	31237
+337	4	755	1	40	cplex	1	1	468	9	2	94	0	1	0	449	449	0.226469994	1.57893205	3.57458901	3.97628188	0.653420985	29338
+338	4	755	1	40	cplex	0	0	500	11	3	94	0	1	0	449	449	0.486184001	3.00092196	7.16250086	6.37137318	0.651717007	21680
+339	4	756	1	40	cplex	0	1	500	7	0	133	0	1	0	449	449	0.377270997	2.37775803	5.61108017	5.52719688	0.675772011	16951
+340	4	756	1	40	cplex	1	0	468	11	1	133	0	1	0	449	449	0.207733005	1.55115604	3.82612705	3.94051194	0.685929	31237
+341	4	756	1	40	cplex	1	1	468	9	2	133	0	1	0	449	449	0.168703005	1.45773494	3.65713692	3.89889097	0.761521995	29338
+342	4	756	1	40	cplex	0	0	500	11	3	133	0	1	0	449	449	0.455716997	2.89664197	7.07089376	6.55216885	0.692607999	21680
+343	4	757	1	40	cplex	0	1	500	7	0	133	0	1	0	449	449	0.437272996	2.6214869	5.69109201	5.1852212	1.10236597	16951
+344	4	757	1	40	cplex	1	0	468	11	1	133	0	1	0	449	449	0.166287005	1.56487298	3.83236694	3.65336609	0.699252009	31237
+345	4	757	1	40	cplex	1	1	468	9	2	133	0	1	0	449	449	0.171306998	1.49714696	3.61340094	3.55726194	0.896695018	29338
+346	4	757	1	40	cplex	0	0	500	11	3	133	0	1	0	449	449	0.415668011	4.47462893	7.05703783	6.20334005	0.827984989	21680
+347	4	758	1	40	cplex	0	1	500	7	0	158	9	1	0.224999994	449	449	0.671316981	2.54844594	5.84657383	5.24110317	0.636020005	16951
+348	4	758	1	40	cplex	1	0	468	11	1	158	9	1	0.224999994	449	449	0.247603998	1.61350405	3.91893101	3.71474004	0.612019002	31237
+349	4	758	1	40	cplex	1	1	468	9	2	158	9	1	0.224999994	449	449	0.251076013	1.58197296	3.70689607	3.61157799	0.600917995	29338
+350	4	758	1	40	cplex	0	0	500	11	3	158	9	1	0.224999994	449	449	0.297872007	3.00590706	7.36158085	6.26609182	0.624826014	21680
+351	4	759	1	40	cplex	0	1	500	9	0	216	11	1	0.275000006	449	449	0.457435995	2.77199507	6.93386316	6.03056192	0.422221988	20371
+352	4	759	1	40	cplex	1	0	466	11	1	216	11	1	0.275000006	449	449	0.132041007	1.42684197	3.65244198	3.67729402	0.430869013	32315
+353	4	759	1	40	cplex	1	1	466	10	2	216	11	1	0.275000006	449	449	0.156459004	1.47198606	3.47092104	3.44703293	0.477254987	30788
+354	4	759	1	40	cplex	0	0	500	11	3	216	11	1	0.275000006	449	449	0.39199999	2.88174105	7.2817688	6.39101601	0.459214985	21680
+355	4	760	1	40	cplex	0	1	500	9	0	18	0	1	0	399	399	0.393097997	4.96239519	11.8319559	19.849596	0.752331972	17953
+356	4	760	1	40	cplex	1	0	466	11	1	18	0	1	0	399	399	0.217366993	4.4677372	10.7498093	18.4570694	0.733308017	24537
+357	4	760	1	40	cplex	1	1	466	10	2	18	0	1	0	399	399	0.186259001	4.50465488	10.650816	18.0655403	0.759418011	24184
+358	4	760	1	40	cplex	0	0	500	11	3	18	0	1	0	399	399	0.480094999	5.24242496	12.5066309	19.9688396	0.749427021	18756
+359	4	761	1	40	cplex	0	1	500	9	0	45	0	1	0	399	399	0.672366023	11.2121859	27.0242996	51.5912514	0.391180009	40143
+360	4	761	1	40	cplex	1	0	466	11	1	45	0	1	0	399	399	0.353937	11.7021914	24.3977184	49.5859032	0.370752007	54527
+361	4	761	1	40	cplex	1	1	466	10	2	45	0	1	0	399	399	0.389155	9.46686459	24.0962944	48.8355217	0.391858995	53743
+362	4	761	1	40	cplex	0	0	500	11	3	45	0	1	0	399	399	0.633446991	11.258379	27.9485874	52.5472565	0.353100002	41680
+363	4	762	1	40	cplex	0	1	500	10	0	58	102	1	2.54999995	399	399	0.609206021	11.2798662	27.1470184	45.0027962	0.543475986	40537
+364	4	762	1	40	cplex	1	0	466	11	1	58	102	1	2.54999995	399	399	0.326018006	10.0033426	24.2814026	42.9080048	0.620249987	54527
+365	4	762	1	40	cplex	1	1	466	10	2	58	102	1	2.54999995	399	399	0.343127012	10.0338717	24.0900879	42.5833015	0.517336011	53743
+366	4	762	1	40	cplex	0	0	500	11	3	58	102	1	2.54999995	399	399	0.870878994	11.5187016	27.7462196	45.8928413	0.519342005	41680
+367	4	763	1	40	cplex	0	1	500	10	0	38	1	1	0.0263160001	399	399	0.54174298	12.1942863	25.8687954	34.4561958	0.558171988	38551
+368	4	763	1	40	cplex	1	0	466	11	1	38	1	1	0.0263160001	399	399	0.294676006	9.49166107	23.1108532	33.5542107	0.565873981	51801
+369	4	763	1	40	cplex	1	1	466	10	2	38	1	1	0.0263160001	399	399	0.382548988	8.98295021	22.8962231	32.9983711	0.528891027	51056
+370	4	763	1	40	cplex	0	0	500	11	3	38	1	1	0.0263160001	399	399	0.621672988	10.8198042	26.7595177	35.1232224	0.535788	39596
+371	4	764	1	40	cplex	0	1	500	10	0	23	0	1	0	399	399	0.499464005	6.66896486	15.6118441	19.8600311	0.672625005	23308
+372	4	764	1	40	cplex	1	0	466	11	1	23	0	1	0	399	399	0.175485	6.27159119	13.9893293	17.4794827	0.653226972	31353
+373	4	764	1	40	cplex	1	1	466	10	2	23	0	1	0	399	399	0.326920986	5.57027912	13.5741863	17.5213165	0.69915098	30902
+374	4	765	1	40	cplex	0	1	500	10	0	66	1	1	0.0250000004	399	399	0.530161977	11.9259958	24.1442146	36.7511711	0.525840998	40836
+375	4	765	1	40	cplex	1	0	466	11	1	66	1	1	0.0250000004	399	399	0.311783999	9.44271088	21.0190792	33.8480148	0.516452014	54527
+376	4	765	1	40	cplex	1	1	466	10	2	66	1	1	0.0250000004	399	399	0.346370012	9.63958073	21.2093296	33.8204346	0.517526984	53743
+377	4	765	1	40	cplex	0	0	500	11	3	66	1	1	0.0250000004	399	399	0.641848028	10.9013891	24.9236641	36.6205063	0.513679981	41680
+378	4	766	1	40	cplex	0	1	500	9	0	40	0	1	0	399	399	0.733017027	10.4287167	23.8890877	47.2122002	0.671157002	39895
+379	4	766	1	40	cplex	1	0	466	11	1	40	0	1	0	399	399	0.392607987	9.16387177	21.3133259	44.6065483	0.454923987	54527
+380	4	766	1	40	cplex	1	1	466	10	2	40	0	1	0	399	399	0.325352013	9.65524578	21.6148014	44.2033844	0.481590003	53743
+381	4	766	1	40	cplex	0	0	500	11	3	40	0	1	0	399	399	0.49702701	11.4955282	24.9796524	48.1845131	0.503772974	41680
+382	4	767	1	40	cplex	0	1	500	9	0	40	0	1	0	399	399	0.516695023	11.3935356	24.1320934	47.4703255	0.764105976	39895
+383	4	767	1	40	cplex	1	0	466	11	1	40	0	1	0	399	399	0.295255989	9.90347958	21.9672871	44.8915138	0.457625985	54527
+384	4	767	1	40	cplex	1	1	466	10	2	40	0	1	0	399	399	0.278712004	9.76777744	21.5346661	45.2334366	0.743947029	53743
+385	4	767	1	40	cplex	0	0	500	11	3	40	0	1	0	399	399	0.466017008	10.6634378	25.0367584	49.087326	0.56150502	41680
+386	4	768	1	40	cplex	0	1	500	9	0	18	0	1	0	399	399	0.351410002	5.18837118	10.4402113	18.7892036	0.486979008	17953
+387	4	768	1	40	cplex	1	0	466	11	1	18	0	1	0	399	399	0.175576001	4.328228	9.49409485	18.6560516	0.487659991	24537
+388	4	768	1	40	cplex	1	1	466	10	2	18	0	1	0	399	399	0.212157995	4.29222488	9.38952637	18.0525227	0.521238029	24184
+389	4	768	1	40	cplex	0	0	500	11	3	18	0	1	0	399	399	0.283421993	4.735394	11.1252213	19.9844341	0.481837004	18756
+390	4	769	1	40	cplex	0	1	500	10	0	42	0	1	0	399	399	0.602132976	11.6847267	25.1841679	37.9183655	0.312254012	40672
+399	4	771	1	40	cplex	1	0	466	11	1	22	0	1	0	299	299	0.482845992	24.2769279	53.1095467	98.8734512	0.251572996	52238
+400	4	771	1	40	cplex	1	1	466	10	2	22	0	1	0	299	299	0.475878	23.765379	52.7046776	98.9473343	0.215362996	52065
+401	4	771	1	40	cplex	0	0	500	11	3	22	0	1	0	299	299	0.589833975	25.8082676	55.6669464	101.513191	0.198746994	44924
+402	4	772	1	40	cplex	0	1	500	10	0	33	0	1	0	299	299	0.893242002	37.5820312	81.838562	175.621918	0.261451989	66764
+403	4	772	1	40	cplex	1	0	466	11	1	33	0	1	0	299	299	0.662138999	36.7595558	79.7612305	175.453659	0.292512	78357
+404	4	772	1	40	cplex	1	1	466	10	2	33	0	1	0	299	299	0.681782007	35.4888611	79.3289261	175.837723	0.255293995	78097
+405	4	772	1	40	cplex	0	0	500	11	3	33	0	1	0	299	299	1.66129804	35.8530922	81.5864258	178.957642	0.250355005	67386
+406	4	773	1	40	cplex	0	1	500	10	0	48	0	1	0	299	299	0.978778005	44.2208214	100.082207	221.463028	0.274223	81140
+407	4	773	1	40	cplex	1	0	466	11	1	48	0	1	0	299	299	0.760725021	45.1760483	99.6891785	220.763199	0.262827992	94978
+408	4	773	1	40	cplex	1	1	466	10	2	48	0	1	0	299	299	0.707282007	43.2864342	97.6576157	217.613754	0.231961995	94663
+409	4	773	1	40	cplex	0	0	500	11	3	48	0	1	0	299	299	0.857509017	44.1501541	100.997154	223.585648	0.248655006	81680
+410	4	774	1	40	cplex	0	1	500	10	0	63	0	1	0	299	299	0.954249978	45.4206467	101.826485	223.219742	0.333967	80842
+411	4	774	1	40	cplex	1	0	466	11	1	63	0	1	0	299	299	0.791595995	46.3673058	100.620621	221.790863	0.763890982	94978
+412	4	774	1	40	cplex	1	1	466	10	2	63	0	1	0	299	299	0.761682987	42.9056511	96.5925369	218.226669	0.838648021	94663
+413	4	774	1	40	cplex	0	0	500	11	3	63	0	1	0	299	299	0.935845971	46.1428452	102.864098	223.258469	0.643351972	81680
+414	4	775	1	40	cplex	0	1	500	10	0	8	0	1	0	299	299	0.355055004	8.60772896	19.4969635	30.3861694	0.191526994	16168
+415	4	775	1	40	cplex	1	0	466	11	1	8	0	1	0	299	299	0.259211004	8.80615044	19.6780853	30.2529507	0.222273007	18995
+416	4	775	1	40	cplex	1	1	466	10	2	8	0	1	0	299	299	0.296232998	8.69363117	19.3459606	30.0880566	0.199791998	18932
+417	4	775	1	40	cplex	0	0	500	11	3	8	0	1	0	299	299	0.301826	9.964674	19.5826092	31.0894852	0.200719997	16336
+418	4	776	1	40	cplex	0	1	500	10	0	5	0	1	0	299	299	0.313757002	6.01263809	13.1198254	19.1146183	0.223925993	10059
+419	4	776	1	40	cplex	1	0	469	11	1	5	0	1	0	299	299	0.178924993	5.66922188	12.5514879	19.0638313	0.250743002	11706
+420	4	776	1	40	cplex	1	1	469	10	2	5	0	1	0	299	299	0.211067006	5.48182487	12.1818304	18.3671818	0.228726	11648
+421	4	776	1	40	cplex	0	0	500	11	3	5	0	1	0	299	299	0.207769006	5.94853687	13.0613108	19.0996876	0.246465996	10210
+422	4	777	1	40	cplex	0	1	500	10	0	33	0	1	0	299	299	0.781507015	38.2332687	83.9414062	177.221771	0.244386002	66764
+423	4	777	1	40	cplex	1	0	466	11	1	33	0	1	0	299	299	0.580664992	37.3599167	81.7463989	176.665161	0.268512994	78357
+424	4	777	1	40	cplex	1	1	466	10	2	33	0	1	0	299	299	0.621383011	34.6601677	79.8667984	171.142487	1.33624399	78097
+425	4	777	1	40	cplex	0	0	500	11	3	33	0	1	0	299	299	0.893916011	37.7402687	86.9033279	178.932037	0.261186987	67386
+426	4	778	1	40	cplex	0	1	500	10	0	5	0	1	0	299	299	0.273692012	5.69615412	12.6738024	18.7253742	0.252849996	10059
+427	4	778	1	40	cplex	1	0	469	11	1	5	0	1	0	299	299	0.220832005	5.53119516	12.6566381	18.328886	0.252424985	11706
+428	4	778	1	40	cplex	1	1	469	10	2	5	0	1	0	299	299	0.228218004	5.5535202	12.6286011	18.2400074	0.25317201	11648
+429	4	778	1	40	cplex	0	0	500	11	3	5	0	1	0	299	299	0.242612004	5.67304182	12.6636944	18.7869148	0.243068993	10210
+430	4	779	1	40	cplex	0	1	500	10	0	400	0	1	0	299	299	0.973369002	45.6092644	103.989807	221.624771	1.79400206	80833
+431	4	779	1	40	cplex	1	0	466	11	1	400	0	1	0	299	299	0.770635009	43.9876633	99.9095383	219.050461	1.66680896	94978
+432	4	779	1	40	cplex	1	1	466	10	2	400	0	1	0	299	299	0.812556982	43.8899956	100.685593	220.685318	1.65618205	94663
+433	4	779	1	40	cplex	0	0	500	11	3	400	0	1	0	299	299	0.981010973	47.1048355	105.26725	222.616425	1.66005898	81680
+434	4	780	1	40	cplex	0	1	500	10	0	51	0	1	0	249	249	1.20986104	73.0664978	166.644608	599.629211	0.937745988	101618
+435	4	780	1	40	cplex	1	0	421	11	1	51	0	1	0	249	249	0.746201992	65.9981918	151.109955	588.193909	0.928986013	133149
+436	4	780	1	40	cplex	1	1	421	11	2	51	0	1	0	249	249	0.794573009	64.7388916	151.786621	585.581726	0.958335996	133149
+437	4	780	1	40	cplex	0	0	500	11	3	51	0	1	0	249	249	1.26277006	71.7124023	167.864929	601.638611	0.912984014	101680
+438	4	781	1	40	cplex	0	1	500	11	0	59	1	1	0.0250000004	249	249	1.08088303	74.4467773	170.8759	497.969055	0.265818	101680
+439	4	781	1	40	cplex	1	0	421	11	1	59	1	1	0.0250000004	249	249	0.718906999	65.2993317	150.080353	480.908691	0.27817899	133149
+440	4	781	1	40	cplex	1	1	421	11	2	59	1	1	0.0250000004	249	249	0.781368971	65.238884	150.266876	484.597565	0.268559009	133149
+441	4	781	1	40	cplex	0	0	500	11	3	59	1	1	0.0250000004	249	249	1.09948802	72.1739426	172.115967	496.382812	0.25622201	101680
+446	4	783	1	40	cplex	0	1	500	10	0	82	2	1	0.0500000007	249	249	1.36908197	73.7216949	171.596359	892.889648	0.998181999	101308
+451	4	785	1	40	cplex	0	1	500	11	0	64	2	1	0.0500000007	249	249	1.08564699	64.0329437	144.682709	490.798737	0.307350993	101680
+452	4	785	1	40	cplex	1	0	421	11	1	64	2	1	0.0500000007	249	249	0.717338979	59.6442719	132.924591	475.006409	0.255463988	133149
+453	4	785	1	40	cplex	1	1	421	11	2	64	2	1	0.0500000007	249	249	0.773477972	65.3482971	137.295654	475.301483	0.266063005	133149
+454	4	785	1	40	cplex	0	0	500	11	3	64	2	1	0.0500000007	249	249	1.20666206	67.67556	148.189407	489.308472	0.265311003	101680
+455	4	786	1	40	cplex	0	1	500	10	0	69	1	1	0.0250000004	249	249	1.11014295	69.8277588	148.721405	450.86377	0.448532999	101618
+456	4	786	1	40	cplex	1	0	421	11	1	69	1	1	0.0250000004	249	249	0.739589989	62.8966179	133.351028	429.266174	0.510644019	133149
+457	4	786	1	40	cplex	1	1	421	11	2	69	1	1	0.0250000004	249	249	0.740090013	60.2275238	131.982727	424.575592	0.442510009	133149
+458	4	786	1	40	cplex	0	0	500	11	3	69	1	1	0.0250000004	249	249	1.24019802	74.3590469	152.46225	445.29364	0.452737004	101680
+459	4	787	1	40	cplex	0	1	500	11	0	55	0	1	0	249	249	1.21036601	70.9114914	149.233658	570.868042	0.934257984	101680
+460	4	787	1	40	cplex	1	0	421	11	1	55	0	1	0	249	249	0.69571197	65.6558304	136.059753	555.8974	0.949689984	133149
+461	4	787	1	40	cplex	1	1	421	11	2	55	0	1	0	249	249	0.74009198	64.3310242	134.8936	558.686829	0.947037995	133149
+462	4	787	1	40	cplex	0	0	500	11	3	55	0	1	0	249	249	1.11863005	67.0635986	146.326355	572.245667	0.957808018	101680
+463	4	788	1	40	cplex	0	1	500	11	0	56	0	1	0	249	249	1.13989699	72.5142593	153.307739	571.52124	0.968584001	101680
+464	4	788	1	40	cplex	1	0	421	11	1	56	0	1	0	249	249	0.72667098	65.5072327	136.261047	559.038147	0.946834981	133149
+465	4	788	1	40	cplex	1	1	421	11	2	56	0	1	0	249	249	0.721065998	63.9902534	136.828796	555.45105	0.925957024	133149
+466	4	788	1	40	cplex	0	0	500	11	3	56	0	1	0	249	249	1.19970202	68.9048157	149.931061	572.735046	0.96231401	101680
+467	4	789	1	40	cplex	0	1	500	10	0	50	1	1	0.0250000004	249	249	1.303931	73.5129776	152.624435	392.598022	0.900416017	101618
+468	4	789	1	40	cplex	1	0	421	11	1	50	1	1	0.0250000004	249	249	0.670902014	67.0053635	138.223236	369.53598	1.01591694	133149
+469	4	789	1	40	cplex	1	1	421	11	2	50	1	1	0.0250000004	249	249	0.849978983	66.1388092	138.402313	376.036713	0.905793011	133149
+470	4	789	1	40	cplex	0	0	500	11	3	50	1	1	0.0250000004	249	249	1.13955402	72.625473	153.12117	389.979523	0.877608001	101680
+471	4	790	1	40	cplex	0	1	1000	3	0	89	0	1	0	999	999	0.0177580006	0.00125099998	0.00402399991	0.0100680003	0.51592201	720
+472	4	790	1	40	cplex	1	0	987	11	1	89	0	1	0	999	999	0.0543119982	0.00209599989	0.00755799981	0.0141519997	0.504176021	1680
+473	4	790	1	40	cplex	1	1	987	3	2	89	0	1	0	999	999	0.0579620004	0.001406	0.0040409998	0.0102939997	0.689634979	720
+474	4	790	1	40	cplex	0	0	1000	11	3	89	0	1	0	999	999	0.0181610007	0.00204299996	0.00760499993	0.0134429997	0.496670991	1680
+475	4	791	1	40	cplex	0	1	1000	3	0	25	0	1	0	999	999	0.0134399999	0.000957000011	0.00252999994	0.00824599992	1.13979805	450
+476	4	791	1	40	cplex	1	0	987	11	1	25	0	1	0	999	999	0.0509050004	0.00162800006	0.00485699996	0.00977800041	0.853416026	1050
+477	4	791	1	40	cplex	1	1	987	3	2	25	0	1	0	999	999	0.0463940017	0.00100699998	0.00253599999	0.00836099964	0.908007979	450
+478	4	791	1	40	cplex	0	0	1000	11	3	25	0	1	0	999	999	0.0118530001	0.00155799999	0.00482399995	0.0115069998	0.878081024	1050
+479	4	792	1	40	cplex	0	1	1000	3	0	76	0	1	0	999	999	0.0131480005	0.00123000005	0.00403100019	0.0102279996	0.871923983	720
+480	4	792	1	40	cplex	1	0	987	11	1	76	0	1	0	999	999	0.0519080013	0.00206000009	0.00759000005	0.0140829999	0.872357011	1680
+481	4	792	1	40	cplex	1	1	987	3	2	76	0	1	0	999	999	0.0549999997	0.00131900003	0.00401199982	0.00961900037	0.873835981	720
+482	4	792	1	40	cplex	0	0	1000	11	3	76	0	1	0	999	999	0.0231149998	0.002477	0.00760200014	0.0137029998	0.958127022	1680
+483	4	793	1	40	cplex	0	1	1000	3	0	134	0	1	0	999	999	0.0228209998	0.00150300004	0.0040099998	0.010919	0.953338027	720
+484	4	793	1	40	cplex	1	0	987	11	1	134	0	1	0	999	999	0.0520340018	0.00215200009	0.00757599995	0.0133260004	0.743601024	1680
+485	4	793	1	40	cplex	1	1	987	3	2	134	0	1	0	999	999	0.0510400012	0.00122099998	0.00395100005	0.0102150002	0.751546979	720
+486	4	793	1	40	cplex	0	0	1000	11	3	134	0	1	0	999	999	0.0204329994	0.00202600006	0.00759400008	0.0141279995	0.740647018	1680
+487	4	794	1	40	cplex	0	1	1000	3	0	160	6	1	0.150000006	999	999	0.0253449995	0.001544	0.00400700001	0.0109989997	0.746810973	720
+488	4	794	1	40	cplex	1	0	987	11	1	160	6	1	0.150000006	999	999	0.058561001	0.00251600007	0.00754299993	0.0136240004	0.689851999	1680
+489	4	794	1	40	cplex	1	1	987	3	2	160	6	1	0.150000006	999	999	0.0557579994	0.00149900001	0.00397300022	0.0109529998	0.642163992	720
+490	4	794	1	40	cplex	0	0	1000	11	3	160	6	1	0.150000006	999	999	0.0199909993	0.00205500005	0.00746200001	0.0138069997	0.888836026	1680
+491	4	795	1	40	cplex	0	1	1000	3	0	51	0	1	0	999	999	0.0220580008	0.00145800004	0.00401500007	0.0104609998	1.11224604	720
+492	4	795	1	40	cplex	1	0	987	11	1	51	0	1	0	999	999	0.0508739986	0.00199500006	0.00753000006	0.0134509997	0.912337005	1680
+493	4	795	1	40	cplex	1	1	987	3	2	51	0	1	0	999	999	0.0514659993	0.00125800003	0.00404299982	0.00997000001	0.920436978	720
+494	4	795	1	40	cplex	0	0	1000	11	3	51	0	1	0	999	999	0.018197	0.00250199996	0.00764499977	0.0132569997	0.930431008	1680
+495	4	796	1	40	cplex	0	1	1000	3	0	90	0	1	0	999	999	0.0228739996	0.00126100006	0.00404499983	0.0111699998	0.512938976	720
+496	4	796	1	40	cplex	1	0	987	11	1	90	0	1	0	999	999	0.053470999	0.00227899989	0.00756199984	0.01437	0.673358977	1680
+497	4	796	1	40	cplex	1	1	987	3	2	90	0	1	0	999	999	0.058600001	0.00156899996	0.00402500015	0.0100140003	0.499751002	720
+498	4	796	1	40	cplex	0	0	1000	11	3	90	0	1	0	999	999	0.0253660008	0.00252399989	0.00759400008	0.0140169999	0.506702006	1680
+499	4	797	1	40	cplex	0	1	1000	3	0	71	0	1	0	999	999	0.0175059997	0.00121799996	0.00403199997	0.0106589999	0.29271999	720
+500	4	797	1	40	cplex	1	0	987	11	1	71	0	1	0	999	999	0.0554400012	0.0021269999	0.00762399985	0.0141709996	0.279839009	1680
+501	4	797	1	40	cplex	1	1	987	3	2	71	0	1	0	999	999	0.0534050018	0.00122199999	0.00407599984	0.00991499983	0.278934985	720
+502	4	797	1	40	cplex	0	0	1000	11	3	71	0	1	0	999	999	0.0178789999	0.00205600006	0.00761599978	0.0142130004	0.264934003	1680
+503	4	798	1	40	cplex	0	1	1000	3	0	21	0	1	0	999	999	0.0133499997	0.000905000023	0.00225499994	0.00858000014	0.409213006	378
+504	4	798	1	40	cplex	1	0	987	11	1	21	0	1	0	999	999	0.0488049984	0.00136800006	0.00416099979	0.00921699964	0.416961998	882
+505	4	798	1	40	cplex	1	1	987	3	2	21	0	1	0	999	999	0.0508649983	0.000736000016	0.00361000001	0.0084920004	0.413096011	378
+506	4	798	1	40	cplex	0	0	1000	11	3	21	0	1	0	999	999	0.0117659997	0.00140299997	0.00410200004	0.00925999973	0.409025013	882
+507	4	799	1	40	cplex	0	1	1000	3	0	75	0	1	0	999	999	0.0179699995	0.00122700003	0.00404699985	0.0112640001	0.881776989	720
+508	4	799	1	40	cplex	1	0	987	11	1	75	0	1	0	999	999	0.0543739982	0.00235299999	0.00760499993	0.0139159998	0.980361998	1680
+509	4	799	1	40	cplex	1	1	987	3	2	75	0	1	0	999	999	0.0596649982	0.00159799994	0.00410899986	0.0112929996	0.909796	720
+510	4	799	1	40	cplex	0	0	1000	11	3	75	0	1	0	999	999	0.0255190004	0.00259299995	0.00795000046	0.0140140001	0.910624027	1680
+511	4	800	1	40	cplex	0	1	1000	6	0	29	0	1	0	974	974	0.188751996	0.44224	0.956044972	0.936778009	1.00977397	5911
+512	4	800	1	40	cplex	1	0	972	11	1	29	0	1	0	974	974	0.0910660028	0.113830999	0.250672996	0.231707007	1.00497401	13784
+513	4	800	1	40	cplex	1	1	972	5	2	29	0	1	0	974	974	0.0524230003	0.0533830002	0.119094998	0.176890999	0.991046011	6351
+514	4	800	1	40	cplex	0	0	1000	11	3	29	0	1	0	974	974	0.449638993	0.635802984	1.30514705	1.08920097	1.01638401	8468
+515	4	801	1	40	cplex	0	1	1000	6	0	153	0	1	0	974	974	0.408825994	1.549312	1.26874995	1.14264405	0.392134011	8153
+516	4	801	1	40	cplex	1	0	972	11	1	153	0	1	0	974	974	0.0701799989	0.136255994	0.391326994	0.327443004	0.386052012	19013
+517	4	801	1	40	cplex	1	1	972	5	2	153	0	1	0	974	974	0.0901789963	0.0684600025	0.160448	0.325112998	0.40387699	8760
+518	4	801	1	40	cplex	0	0	1000	11	3	153	0	1	0	974	974	0.437615991	0.727671981	1.75406504	1.45894396	0.389470011	11680
+519	4	802	1	40	cplex	0	1	1000	6	0	14	0	1	0	974	974	0.174219996	0.39684999	0.435898989	0.418036997	1.06821001	2670
+520	4	802	1	40	cplex	1	0	972	11	1	14	0	1	0	974	974	0.0557660013	0.0459240004	0.113654003	0.116425	1.05330896	6654
+521	4	802	1	40	cplex	1	1	972	5	2	14	0	1	0	974	974	0.0551079996	0.0247799996	0.0571869984	0.0877010003	1.08763695	3066
+522	4	802	1	40	cplex	0	0	1000	11	3	14	0	1	0	974	974	0.185875997	0.262407005	0.621264994	0.583110988	1.06978202	4088
+523	4	803	1	40	cplex	0	1	1000	6	0	61	0	1	0	974	974	0.641763985	0.509800971	1.20669103	1.05116498	0.80252099	7630
+524	4	803	1	40	cplex	1	0	972	11	1	61	0	1	0	974	974	0.092478998	0.138997003	0.341219008	0.306991994	0.796712995	19013
+525	4	803	1	40	cplex	1	1	972	5	2	61	0	1	0	974	974	0.0876569971	0.0691490024	0.162572995	0.219497994	0.803793013	8760
+526	4	803	1	40	cplex	0	0	1000	11	3	61	0	1	0	974	974	0.648393989	0.849128008	1.81690502	1.46662903	0.83001399	11680
+527	4	804	1	40	cplex	0	1	1000	6	0	103	0	1	0	974	974	0.255010009	0.621125996	1.34511995	2.39068103	0.589864016	8153
+528	4	804	1	40	cplex	1	0	972	11	1	103	0	1	0	974	974	0.0986720026	0.134304002	0.335386008	0.352090001	0.526036024	19013
+529	4	804	1	40	cplex	1	1	972	5	2	103	0	1	0	974	974	0.0995069966	0.0798650011	0.172469005	0.314139992	0.517727017	8760
+530	4	804	1	40	cplex	0	0	1000	11	3	103	0	1	0	974	974	0.409386992	0.845273018	1.78420603	1.68723702	0.859501004	11680
+531	4	805	1	40	cplex	0	1	1000	6	0	14	0	1	0	974	974	0.261276007	0.211162999	0.447338015	0.421126992	1.07043803	2670
+532	4	805	1	40	cplex	1	0	972	11	1	14	0	1	0	974	974	0.0607599989	0.048388999	0.117893003	0.123430997	1.06529903	6654
+533	4	805	1	40	cplex	1	1	972	5	2	14	0	1	0	974	974	0.0579500012	0.0257569999	0.0589659996	0.0854460001	1.06235802	3066
+534	4	805	1	40	cplex	0	0	1000	11	3	14	0	1	0	974	974	0.184606999	0.242385998	0.609089971	0.593948007	1.220523	4088
+535	4	806	1	40	cplex	0	1	1000	6	0	36	0	1	0	974	974	0.478280008	0.767431974	1.17344999	0.986024022	0.913130999	6867
+536	4	806	1	40	cplex	1	0	972	11	1	36	0	1	0	974	974	0.103262998	0.140694007	0.320802987	0.283636004	0.881748021	17112
+537	4	806	1	40	cplex	1	1	972	5	2	36	0	1	0	974	974	0.0933630019	0.0654850006	0.150328994	0.209426001	0.899926007	7884
+538	4	806	1	40	cplex	0	0	1000	11	3	36	0	1	0	974	974	0.314438999	0.77214402	1.64013302	1.34269595	0.903476	10512
+539	4	807	1	40	cplex	0	1	1000	6	0	30	0	1	0	974	974	0.352755994	0.392019987	0.958023012	0.882528007	1.11223996	6115
+540	4	807	1	40	cplex	1	0	972	11	1	30	0	1	0	974	974	0.0771000013	0.0981540009	0.248726994	0.242097005	0.98368597	14260
+541	4	807	1	40	cplex	1	1	972	5	2	30	0	1	0	974	974	0.075586997	0.0532750003	0.124958999	0.183596	0.992655993	6570
+542	4	807	1	40	cplex	0	0	1000	11	3	30	0	1	0	974	974	0.451002985	1.62683499	1.38717699	1.13881695	0.995733976	8760
+543	4	808	1	40	cplex	0	1	1000	6	0	15	0	1	0	974	974	0.259959996	0.210887	0.470883995	0.446572006	0.219861001	2861
+544	4	808	1	40	cplex	1	0	972	11	1	15	0	1	0	974	974	0.0649639964	0.0586449988	0.135904998	0.128919005	0.204465002	7130
+545	4	808	1	40	cplex	1	1	972	5	2	15	0	1	0	974	974	0.0628229976	0.0320440009	0.0694440007	0.0993549973	0.208380997	3285
+546	4	808	1	40	cplex	0	0	1000	11	3	15	0	1	0	974	974	0.190686002	0.436338007	0.68799597	0.616838992	0.220175996	4380
+547	4	809	1	40	cplex	0	1	1000	6	0	16	0	1	0	974	974	0.265192002	0.223955005	0.519182026	0.492327988	1.08054602	3052
+548	4	809	1	40	cplex	1	0	972	11	1	16	0	1	0	974	974	0.0681509972	0.0633129999	0.143503994	0.132816002	1.21552098	7605
+549	4	809	1	40	cplex	1	1	972	5	2	16	0	1	0	974	974	0.0581989996	0.0293230005	0.0673049986	0.0988309979	1.06143904	3504
+550	4	809	1	40	cplex	0	0	1000	11	3	16	0	1	0	974	974	0.205852002	0.280627012	0.713329971	0.644900024	1.07037795	4672
+551	4	810	1	40	cplex	0	1	1000	8	0	55	0	1	0	949	949	0.745280981	2.71056509	6.0046792	5.05995989	0.784242988	18932
+552	4	810	1	40	cplex	1	0	962	11	1	55	0	1	0	949	949	0.213277996	1.45349503	3.47358203	3.12140203	0.880599976	34980
+553	4	810	1	40	cplex	1	1	962	10	2	55	0	1	0	949	949	0.320946008	1.45779002	3.35976291	3.05359793	0.768801987	34020
+554	4	810	1	40	cplex	0	0	1000	11	3	55	0	1	0	949	949	0.705672979	2.87600493	6.98881388	5.66224909	0.763970971	21680
+555	4	811	1	40	cplex	0	1	1000	8	0	42	0	1	0	949	949	0.974259019	3.74327588	5.99080801	5.10419083	0.246726006	18932
+556	4	811	1	40	cplex	1	0	962	11	1	42	0	1	0	949	949	0.336681008	1.446751	3.44851208	3.2012651	0.239664003	34980
+557	4	811	1	40	cplex	1	1	962	10	2	42	0	1	0	949	949	0.212220997	1.44222403	3.40745902	3.17856407	0.240798995	34020
+558	4	811	1	40	cplex	0	0	1000	11	3	42	0	1	0	949	949	0.865557015	2.8850019	6.9210701	5.69485521	0.242021993	21680
+559	4	812	1	40	cplex	0	1	1000	8	0	49	0	1	0	949	949	0.489632994	2.95733309	6.14754391	5.11683798	0.260955989	18932
+560	4	812	1	40	cplex	1	0	962	11	1	49	0	1	0	949	949	0.29330501	1.52749002	3.50500607	3.21230698	0.264418006	34980
+561	4	812	1	40	cplex	1	1	962	10	2	49	0	1	0	949	949	0.182411	1.40986097	3.57684708	3.15555	1.43918598	34020
+562	4	812	1	40	cplex	0	0	1000	11	3	49	0	1	0	949	949	0.971688986	2.90767694	6.89398718	5.63568306	0.252476007	21680
+563	4	813	1	40	cplex	0	1	1000	8	0	51	0	1	0	949	949	0.968549013	2.50790501	6.21051502	4.98554087	0.794836998	18932
+564	4	813	1	40	cplex	1	0	962	11	1	51	0	1	0	949	949	0.359091014	1.45844197	3.50783396	3.10236907	0.791782022	34980
+565	4	813	1	40	cplex	1	1	962	10	2	51	0	1	0	949	949	0.246571004	1.46227801	3.4451251	3.04525208	0.789427996	34020
+566	4	813	1	40	cplex	0	0	1000	11	3	51	0	1	0	949	949	0.535350978	2.89023399	6.86193609	5.57183599	0.784021974	21680
+567	4	814	1	40	cplex	0	1	1000	8	0	50	0	1	0	949	949	0.767036974	4.04900312	6.29707003	5.16303015	0.808331013	19393
+568	4	814	1	40	cplex	1	0	961	11	1	50	0	1	0	949	949	0.238291994	1.36065304	3.25503111	2.93409991	0.82782799	34746
+569	4	814	1	40	cplex	1	1	961	10	2	50	0	1	0	949	949	0.193809003	1.34694803	3.2393949	2.90522003	0.801446021	34010
+570	4	814	1	40	cplex	0	0	1000	11	3	50	0	1	0	949	949	0.825188994	2.81314111	6.97002077	5.55483723	0.789686024	21680
+571	4	815	1	40	cplex	0	1	1000	8	0	51	0	1	0	949	949	0.592500985	2.84949708	6.1374979	5.0697298	0.827877998	18932
+572	4	815	1	40	cplex	1	0	962	11	1	51	0	1	0	949	949	0.184600994	1.47456801	3.54596305	3.18302989	0.934633017	34980
+573	4	815	1	40	cplex	1	1	962	10	2	51	0	1	0	949	949	0.308266997	3.02318692	3.46439791	3.13092494	0.857098997	34020
+574	4	815	1	40	cplex	0	0	1000	11	3	51	0	1	0	949	949	0.890735984	2.87484694	6.95354795	5.661304	0.828976989	21680
+575	4	816	1	40	cplex	0	1	1000	8	0	49	1	1	0.0250000004	949	949	0.856945992	2.63280296	6.39806414	5.33743477	0.411137015	18932
+576	4	816	1	40	cplex	1	0	962	11	1	49	1	1	0.0250000004	949	949	0.250061005	1.43130195	3.59935188	3.22118306	0.471403003	34980
+577	4	816	1	40	cplex	1	1	962	10	2	49	1	1	0.0250000004	949	949	0.278856009	1.46302605	3.46444106	3.17726493	0.266218007	34020
+578	4	816	1	40	cplex	0	0	1000	11	3	49	1	1	0.0250000004	949	949	0.573719025	2.86670804	6.91634989	5.6596508	0.406410992	21680
+579	4	817	1	40	cplex	0	1	1000	8	0	103	1	1	0.0250000004	949	949	0.528253019	4.16229486	6.32249498	5.12425613	0.557192028	18932
+580	4	817	1	40	cplex	1	0	962	11	1	103	1	1	0.0250000004	949	949	0.413646996	1.54621506	3.72740006	3.29434109	0.58841902	34980
+581	4	817	1	40	cplex	1	1	962	10	2	103	1	1	0.0250000004	949	949	0.350039005	1.42530894	3.51386499	3.16287804	0.551388025	34020
+582	4	817	1	40	cplex	0	0	1000	11	3	103	1	1	0.0250000004	949	949	0.449937999	2.77918291	6.85834217	5.57728195	0.540930986	21680
+583	4	818	1	40	cplex	0	1	1000	8	0	93	1	1	0.0250000004	949	949	0.538075984	2.99170899	6.33814621	5.16963816	0.73229599	18932
+584	4	818	1	40	cplex	1	0	962	11	1	93	1	1	0.0250000004	949	949	0.270018995	1.48545802	3.58102202	3.19084311	0.763943017	34980
+585	4	818	1	40	cplex	1	1	962	10	2	93	1	1	0.0250000004	949	949	0.290627986	1.47478998	3.50533009	3.15630102	0.78668499	34020
+586	4	818	1	40	cplex	0	0	1000	11	3	93	1	1	0.0250000004	949	949	0.741225004	4.24620724	7.01659679	5.69537592	0.694629014	21680
+587	4	819	1	40	cplex	0	1	1000	8	0	52	0	1	0	949	949	0.778290987	2.78055596	6.17024803	4.99410009	0.84502703	18932
+588	4	819	1	40	cplex	1	0	962	11	1	52	0	1	0	949	949	0.253989011	1.42796099	3.57078695	3.12297702	0.874646008	34980
+589	4	819	1	40	cplex	1	1	962	10	2	52	0	1	0	949	949	0.280541003	1.412848	3.53246593	3.10102201	0.846171021	34020
+590	4	819	1	40	cplex	0	0	1000	11	3	52	0	1	0	949	949	0.838582993	2.81993008	7.00568724	5.60183287	0.815523982	21680
+591	4	820	1	40	cplex	0	1	1000	9	0	2	0	1	0	899	910	0.180198997	0.45619601	0.951925993	1.67878306	0.205218002	1725
+592	4	820	1	40	cplex	1	0	978	11	1	2	0	1	0	899	910	0.165518001	0.418267012	0.888863981	1.45040298	0.215630993	2160
+593	4	820	1	40	cplex	1	1	978	10	2	2	0	1	0	899	910	0.192425996	0.474501997	0.876312971	1.50411201	0.213	2087
+594	4	820	1	40	cplex	0	0	1000	11	3	2	0	1	0	899	910	0.172962993	0.464121014	0.998052001	1.74346805	0.209546998	1864
+595	4	821	1	40	cplex	0	1	1000	9	0	2	0	1	0	899	910	0.125992	0.573940992	0.956503987	1.43981802	0.229799002	1725
+596	4	821	1	40	cplex	1	0	978	11	1	2	0	1	0	899	910	0.162571996	0.396616012	0.867196023	1.29903197	0.235467002	2160
+597	4	821	1	40	cplex	1	1	978	10	2	2	0	1	0	899	910	0.176459	0.429026991	0.874831021	1.28751302	0.208315998	2087
+598	4	821	1	40	cplex	0	0	1000	11	3	2	0	1	0	899	910	0.198506996	0.443232	0.977816999	1.64173102	0.230193004	1864
+599	4	822	1	40	cplex	0	1	1000	9	0	2	0	1	0	899	910	0.180876002	0.443619013	0.938288987	1.63976097	0.197339997	1725
+600	4	822	1	40	cplex	1	0	978	11	1	2	0	1	0	899	910	0.222446993	0.456333995	0.908339024	1.52879095	0.211798996	2160
+601	4	822	1	40	cplex	1	1	978	10	2	2	0	1	0	899	910	0.191094995	0.39565599	0.845263004	1.39798498	0.238134995	2087
+602	4	822	1	40	cplex	0	0	1000	11	3	2	0	1	0	899	910	0.134946004	0.54272598	1.02750504	1.71403098	0.209303007	1864
+603	4	823	1	40	cplex	0	1	1000	9	0	4	0	1	0	899	899	0.316534996	1.23767304	2.52785611	3.78449202	1.38097	3972
+604	4	823	1	40	cplex	1	0	969	11	1	4	0	1	0	899	899	0.242642	0.991820991	2.31937408	3.47801399	1.34859204	5161
+605	4	823	1	40	cplex	1	1	969	10	2	4	0	1	0	899	899	0.243775994	1.03967297	2.24340606	3.31466889	1.76144302	5089
+606	4	823	1	40	cplex	0	0	1000	11	3	4	0	1	0	899	899	0.313771009	1.10606897	2.56664109	3.79941201	1.61173701	4168
+607	4	824	1	40	cplex	0	1	1000	9	0	13	0	1	0	899	899	0.494509995	3.81478906	8.30046558	13.0356855	1.24284995	12910
+608	4	824	1	40	cplex	1	0	969	11	1	13	0	1	0	899	899	0.273658007	3.260463	7.43769503	12.6402559	1.25578201	16773
+609	4	824	1	40	cplex	1	1	969	10	2	13	0	1	0	899	899	0.494605005	3.23505902	7.33881617	11.7244225	1.23666298	16542
+610	4	824	1	40	cplex	0	0	1000	11	3	13	0	1	0	899	899	0.487897009	3.67171001	8.55620193	13.4887304	1.23247004	13546
+611	4	825	1	40	cplex	0	1	1000	9	0	9	1	0.888889015	0	899	899	0.512758017	2.5194819	5.72402	7.56754923	1.30969095	9099
+612	4	825	1	40	cplex	1	0	932	11	1	9	1	0.888889015	0	899	899	0.206752002	1.46253204	3.33528399	5.29291105	1.37523401	14860
+613	4	825	1	40	cplex	1	1	932	11	2	9	1	0.888889015	0	899	899	0.211448997	1.409114	3.2351501	5.22432184	1.30931401	14860
+614	4	825	1	40	cplex	0	0	1000	11	3	9	1	0.888889015	0	899	899	0.397484004	2.60746908	5.94320011	7.50457287	1.34038305	9378
+615	4	826	1	40	cplex	0	1	1000	9	0	9	1	0.888889015	0	899	899	0.320883989	2.47017407	5.76939297	7.48399591	1.36084998	9099
+616	4	826	1	40	cplex	1	0	932	11	1	9	1	0.888889015	0	899	899	0.191319004	1.42112303	3.27036405	5.21581888	1.31290901	14860
+617	4	826	1	40	cplex	1	1	932	11	2	9	1	0.888889015	0	899	899	0.185678005	1.478513	3.27306795	5.23198414	1.37221706	14860
+618	4	826	1	40	cplex	0	0	1000	11	3	9	1	0.888889015	0	899	899	0.425186992	4.10870695	5.87571383	7.57629681	1.29025495	9378
+619	4	827	1	40	cplex	0	1	1000	9	0	2	0	1	0	899	910	0.172097996	0.551622987	0.948203027	2.06768203	0.200303003	1725
+620	4	827	1	40	cplex	1	0	978	11	1	2	0	1	0	899	910	0.157998994	0.425361007	0.874019027	1.43651199	0.219442993	2160
+621	4	827	1	40	cplex	1	1	978	10	2	2	0	1	0	899	910	0.167980999	0.416373014	0.845115006	1.71385896	0.226922005	2087
+622	4	827	1	40	cplex	0	0	1000	11	3	2	0	1	0	899	910	0.166255996	0.489023	0.997449994	2.02415204	0.195444003	1864
+623	4	828	1	40	cplex	0	1	1000	9	0	5	0	1	0	899	899	0.257036	1.49016798	3.2016139	4.45506382	0.463883996	4965
+624	4	828	1	40	cplex	1	0	969	11	1	5	0	1	0	899	899	0.281147987	1.23744297	2.88435411	4.12188816	0.487565994	6451
+625	4	828	1	40	cplex	1	1	969	10	2	5	0	1	0	899	899	0.292786986	1.23844695	2.86873102	4.06250286	0.50453198	6362
+626	4	828	1	40	cplex	0	0	1000	11	3	5	0	1	0	899	899	0.386445999	1.42838204	3.32470798	4.60055208	0.493485987	5210
+627	4	829	1	40	cplex	0	1	1000	9	0	76	0	1	0	899	899	0.850453973	11.2828407	26.5278015	42.6968231	0.427305013	40237
+628	4	829	1	40	cplex	1	0	961	11	1	76	0	1	0	899	899	0.682642996	9.45215511	22.438303	38.9838219	0.411619991	55563
+629	4	829	1	40	cplex	1	1	961	10	2	76	0	1	0	899	899	0.766421974	9.16929436	22.1547356	40.6243858	0.394075006	55054
+630	4	829	1	40	cplex	0	0	1000	11	3	76	0	1	0	899	899	0.844511986	11.1196623	27.3437157	43.2169113	0.410398006	41680
+631	4	830	1	40	cplex	0	1	1000	10	0	194	43	0.725000024	0.800000012	799	799	2.3494761	43.8365974	106.830086	225.648315	3.00564694	81500
+632	4	830	1	40	cplex	1	0	932	11	1	194	43	0.725000024	0.800000012	799	799	1.17361999	49.6546288	95.5469284	215.507767	2.57922196	107731
+633	4	830	1	40	cplex	1	1	932	11	2	194	43	0.725000024	0.800000012	799	799	1.13794994	38.4861603	94.375946	207.759613	2.35125399	107731
+634	4	830	1	40	cplex	0	0	1000	11	3	194	43	0.725000024	0.800000012	799	799	1.74476194	44.6753387	107.443825	218.163193	2.47083712	81680
+635	4	831	1	40	cplex	0	1	1000	11	0	30	0	1	0	799	799	1.37206101	48.7397118	80.3889847	171.563858	0.500497997	61260
+636	4	831	1	40	cplex	1	0	932	11	1	30	0	1	0	799	799	0.935894012	29.3313732	69.4786606	152.655167	0.238465995	80798
+637	4	831	1	40	cplex	1	1	932	11	2	30	0	1	0	799	799	0.966493011	29.4954987	69.3028793	152.936691	0.225751996	80798
+638	4	831	1	40	cplex	0	0	1000	11	3	30	0	1	0	799	799	1.36939704	33.1416092	80.4367676	160.000183	0.253286004	61260
+639	4	782	1	40	cplex	0	1	500	10	0	51	0	1	0	249	249	1.28422594	68.6239395	146.98999	596.392883	0.965905011	101618
+640	4	782	1	40	cplex	1	0	421	11	1	51	0	1	0	249	249	0.720026016	62.451107	133.038391	582.918091	0.935168982	133149
+641	4	782	1	40	cplex	1	1	421	11	2	51	0	1	0	249	249	0.771601021	63.5145836	133.757767	580.958984	0.941268981	133149
+642	4	782	1	40	cplex	0	0	500	11	3	51	0	1	0	249	249	1.21600497	69.1036377	147.795944	600.552185	0.926167011	101680
+643	4	784	1	40	cplex	0	1	500	10	0	51	0	1	0	249	249	1.31598604	69.1572189	147.677338	604.774109	0.932419002	101618
+644	4	784	1	40	cplex	1	0	421	11	1	51	0	1	0	249	249	0.692623973	62.7394524	133.585831	576.678711	0.915948987	133149
+645	4	784	1	40	cplex	1	1	421	11	2	51	0	1	0	249	249	0.720876992	64.815979	134.880463	576.43866	0.940869987	133149
+646	4	784	1	40	cplex	0	0	500	11	3	51	0	1	0	249	249	1.02131701	68.5437622	146.735153	595.386963	0.918597996	101680
+647	4	832	1	40	cplex	0	1	1000	11	0	72	233	0.774999976	5.5999999	799	799	1.69777405	44.2639732	93.665535	207.91449	2.03417206	81680
+648	4	832	1	40	cplex	1	0	932	11	1	72	233	0.774999976	5.5999999	799	799	1.11487699	38.4146194	81.0454025	193.71405	1.95373297	107731
+649	4	832	1	40	cplex	1	1	932	11	2	72	233	0.774999976	5.5999999	799	799	1.10743296	38.5952835	83.3271332	198.020538	2.13078094	107731
+650	4	832	1	40	cplex	0	0	1000	11	3	72	233	0.774999976	5.5999999	799	799	1.62743402	45.9078064	97.0811844	204.919296	1.96050406	81680
+651	4	833	1	40	cplex	0	1	1000	11	0	72	233	0.774999976	5.5999999	799	799	1.89041603	44.4139862	97.2829895	208.873932	1.91227102	81680
+652	4	833	1	40	cplex	1	0	932	11	1	72	233	0.774999976	5.5999999	799	799	1.16784298	39.9724808	84.6377335	195.35733	2.50317597	107731
+653	4	833	1	40	cplex	1	1	932	11	2	72	233	0.774999976	5.5999999	799	799	1.20243001	39.692852	84.7986526	196.848587	2.05036712	107731
+654	4	833	1	40	cplex	0	0	1000	11	3	72	233	0.774999976	5.5999999	799	799	1.69482505	44.0552864	97.0632858	207.087265	2.15699792	81680
+655	4	834	1	40	cplex	0	1	1000	10	0	131	217	0.925000012	5.3499999	799	799	1.63191295	44.8924866	97.1148453	226.037338	2.64209104	81410
+656	4	834	1	40	cplex	1	0	932	11	1	131	217	0.925000012	5.3499999	799	799	1.04758894	38.9580345	84.7896194	213.352814	2.10167193	107731
+657	4	834	1	40	cplex	1	1	932	11	2	131	217	0.925000012	5.3499999	799	799	1.11564398	39.819397	86.5672226	208.212051	2.00933194	107731
+658	4	834	1	40	cplex	0	0	1000	11	3	131	217	0.925000012	5.3499999	799	799	1.69882298	46.1122246	98.6121826	223.842575	2.24320292	81680
+659	4	835	1	40	cplex	0	1	1000	11	0	36	0	1	0	799	799	1.69901299	41.0322533	85.9022141	174.515152	0.213901997	73512
+660	4	835	1	40	cplex	1	0	932	11	1	36	0	1	0	799	799	1.03719199	36.9680252	76.3085861	164.677872	0.237601995	96958
+661	4	835	1	40	cplex	1	1	932	11	2	36	0	1	0	799	799	0.963138998	36.3929024	77.0495911	166.183304	0.217880994	96958
+662	4	835	1	40	cplex	0	0	1000	11	3	36	0	1	0	799	799	1.74531806	40.2262497	86.9372025	176.550949	0.217765003	73512
+663	4	836	1	40	cplex	0	1	1000	11	0	82	0	1	0	799	799	1.85885799	46.7702904	97.7805634	201.29808	0.293933004	81680
+664	4	836	1	40	cplex	1	0	932	11	1	82	0	1	0	799	799	1.16927803	39.2033234	85.9199142	192.396637	0.304592997	107731
+665	4	836	1	40	cplex	1	1	932	11	2	82	0	1	0	799	799	1.08741796	39.6325226	86.0070267	192.197479	0.300574005	107731
+666	4	836	1	40	cplex	0	0	1000	11	3	82	0	1	0	799	799	1.75769198	46.0338173	98.9060287	203.806107	0.283217013	81680
+667	4	837	1	40	cplex	0	1	1000	11	0	94	0	1	0	799	799	1.90860796	46.080368	98.6165314	204.403305	0.265325993	81680
+668	4	837	1	40	cplex	1	0	932	11	1	94	0	1	0	799	799	1.03739703	40.1769257	87.6309204	192.368881	0.270922005	107731
+669	4	837	1	40	cplex	1	1	932	11	2	94	0	1	0	799	799	1.05204797	40.6394539	86.1375504	194.111435	0.404884994	107731
+670	4	837	1	40	cplex	0	0	1000	11	3	94	0	1	0	799	799	1.82284999	44.8133202	99.0972977	204.474335	0.291765004	81680
+671	4	838	1	40	cplex	0	1	1000	11	0	36	246	0.611110985	6.44444418	799	799	2.47990894	41.2572708	88.0348129	176.949722	1.79520702	73512
+672	4	838	1	40	cplex	1	0	932	11	1	36	246	0.611110985	6.44444418	799	799	0.902818024	35.5588722	76.1685944	164.225739	1.748981	96958
+673	4	838	1	40	cplex	1	1	932	11	2	36	246	0.611110985	6.44444418	799	799	0.894472003	35.9945717	75.8670731	164.632095	1.94398403	96958
+674	4	838	1	40	cplex	0	0	1000	11	3	36	246	0.611110985	6.44444418	799	799	1.47443902	42.0224762	88.5754166	179.037262	2.04349995	73512
+675	4	839	1	40	cplex	0	1	1000	11	0	33	1	1	0.0303029995	799	799	1.58722699	39.5082321	81.0126801	161.696426	1.16504705	67386
+676	4	839	1	40	cplex	1	0	932	11	1	33	1	1	0.0303029995	799	799	1.00276899	32.3278198	70.3434677	149.447266	1.12604702	88878
+677	4	839	1	40	cplex	1	1	932	11	2	33	1	1	0.0303029995	799	799	0.900969982	32.7745132	70.7229385	150.068436	1.09037697	88878
+678	4	839	1	40	cplex	0	0	1000	11	3	33	1	1	0.0303029995	799	799	1.54092395	38.0869064	82.6127853	161.332703	1.09871399	67386
+679	4	840	1	40	cplex	0	1	1000	10	0	26	0	1	0	749	749	1.96016002	48.2220421	100.348572	479.590424	0.418130994	65808
+680	4	840	1	40	cplex	1	0	961	11	1	26	0	1	0	749	749	1.11491096	46.9329147	98.4404907	476.459625	0.407705009	75905
+681	4	840	1	40	cplex	1	1	961	10	2	26	0	1	0	749	749	1.160815	46.2065697	96.915451	473.944	0.484522998	75809
+682	4	840	1	40	cplex	0	0	1000	11	3	26	0	1	0	749	749	1.54909599	46.3883629	100.992828	478.686401	0.433470994	66092
+683	4	841	1	40	cplex	0	1	1000	10	0	12	0	1	0	749	749	0.811734021	21.8085346	46.9696465	85.5046463	0.984731972	30416
+684	4	841	1	40	cplex	1	0	961	11	1	12	0	1	0	749	749	0.776771009	19.6688881	44.7784882	84.4867477	1.00385201	35033
+685	4	841	1	40	cplex	1	1	961	10	2	12	0	1	0	749	749	0.777477026	20.7747059	44.6248131	83.8323517	0.99664402	34988
+686	4	841	1	40	cplex	0	0	1000	11	3	12	0	1	0	749	749	0.825025022	21.3723984	46.6533394	85.3000412	1.00162196	30504
+687	4	842	1	40	cplex	0	1	1000	10	0	17	0	1	0	749	749	1.24401498	31.3895683	66.298851	213.259384	0.911266029	43028
+688	4	842	1	40	cplex	1	0	961	11	1	17	0	1	0	749	749	0.857300997	28.9890556	65.1468124	211.962646	0.938369989	49630
+689	4	842	1	40	cplex	1	1	961	10	2	17	0	1	0	749	749	0.857028008	30.6966248	65.5632706	211.534012	0.935694993	49567
+690	4	842	1	40	cplex	0	0	1000	11	3	17	0	1	0	749	749	1.20645595	29.4822369	67.2066116	212.076065	0.975579977	43214
+691	4	843	1	40	cplex	0	1	1000	5	0	2	40	1	20	749	977	0.0409669988	0.0278900005	0.0519590005	0.137769997	0.547447979	344
+692	4	843	1	40	cplex	1	0	969	11	1	2	40	1	20	749	977	0.0460480005	0.0109059997	0.0203820001	0.0413770005	0.768718004	904
+693	4	843	1	40	cplex	1	1	969	9	2	2	40	1	20	749	977	0.0451150015	0.00937599968	0.0183659997	0.0422490016	0.538065016	782
+694	4	843	1	40	cplex	0	0	1000	11	3	2	40	1	20	749	977	0.0557999983	0.0344480015	0.0688719973	0.145414993	0.556240022	524
+695	4	844	1	40	cplex	0	1	1000	10	0	151	0	1	0	749	749	2.46964002	72.2350464	163.204391	1033.27124	0.838225007	101243
+696	4	844	1	40	cplex	1	0	961	11	1	151	0	1	0	749	749	1.54849696	72.9858093	160.20723	1035.73315	0.785517991	116778
+697	4	844	1	40	cplex	1	1	961	10	2	151	0	1	0	749	749	1.773597	69.6816483	160.573654	1037.41589	0.77125901	116629
+698	4	844	1	40	cplex	0	0	1000	11	3	151	0	1	0	749	749	1.93292105	74.8908691	164.622925	1048.49988	0.765775979	101680
+699	4	845	1	40	cplex	0	1	1000	10	0	177	0	1	0	749	749	2.28088093	70.6828537	164.93573	552.446472	0.659124017	101607
+700	4	845	1	40	cplex	1	0	932	11	1	177	0	1	0	749	749	1.51391399	68.6456909	153.502396	540.354919	0.648424983	128045
+701	4	845	1	40	cplex	1	1	932	11	2	177	0	1	0	749	749	1.38554895	65.6434784	153.387405	541.837524	0.689846992	128045
+702	4	845	1	40	cplex	0	0	1000	11	3	177	0	1	0	749	749	1.81815004	72.9922714	167.462555	558.853638	0.655932009	101680
+703	4	846	1	40	cplex	0	1	1000	10	0	20	0	1	0	749	749	1.11605895	37.617363	83.9043961	215.877365	1.00802696	50693
+704	4	846	1	40	cplex	1	0	961	11	1	20	0	1	0	749	749	0.906275988	34.6180801	81.852356	212.569351	0.95115298	58389
+705	4	846	1	40	cplex	1	1	961	10	2	20	0	1	0	749	749	1.11582398	35.4843063	80.975502	214.121429	1.00104904	58314
+706	4	846	1	40	cplex	0	0	1000	11	3	20	0	1	0	749	749	1.14981103	35.4605293	82.9211197	215.72728	1.018646	50840
+707	4	847	1	40	cplex	0	1	1000	5	0	2	40	1	20	749	977	0.0428379998	0.0279360004	0.0520589985	0.155245006	0.552901983	344
+708	4	847	1	40	cplex	1	0	969	11	1	2	40	1	20	749	977	0.0462169982	0.0101439999	0.0207710005	0.0449399985	0.562084019	904
+709	4	847	1	40	cplex	1	1	969	9	2	2	40	1	20	749	977	0.0435889997	0.00943799969	0.018437	0.044174999	0.553658009	782
+710	4	847	1	40	cplex	0	0	1000	11	3	2	40	1	20	749	977	0.0372590013	0.194232002	0.073086001	0.161842003	0.565083027	524
+711	4	848	1	40	cplex	0	1	1000	5	0	2	40	1	20	749	977	0.0500559993	0.0256220009	0.0509670004	0.146779999	0.550270021	344
+712	4	848	1	40	cplex	1	0	969	11	1	2	40	1	20	749	977	0.043864999	0.00994800031	0.020885	0.0440369993	0.552851975	904
+713	4	848	1	40	cplex	1	1	969	9	2	2	40	1	20	749	977	0.0458029993	0.00984899979	0.0187640004	0.0432120003	0.554090023	782
+714	4	848	1	40	cplex	0	0	1000	11	3	2	40	1	20	749	977	0.0307679996	0.0382790007	0.231745005	0.161688	0.558592975	524
+715	4	849	1	40	cplex	0	1	1000	10	0	3	0	1	0	749	749	0.537939012	5.58311892	12.4526644	41.6782265	0.973583996	7560
+716	4	849	1	40	cplex	1	0	969	11	1	3	0	1	0	749	749	0.37995401	5.25942421	11.8773546	41.103363	0.948493004	8497
+717	4	849	1	40	cplex	1	1	969	10	2	3	0	1	0	749	749	0.480782002	5.37939501	12.0994387	40.9806328	0.959025979	8480
+718	4	849	1	40	cplex	0	0	1000	11	3	3	0	1	0	749	749	0.361602992	5.46012211	12.2645988	41.6792145	1.01180398	7626
+63	3	510	1	40	cplex	0	1	50	3	0	97	0	1	0	49	49	0.0193949994	0.0257460009	0.0197780002	0.0134410001	0.888870001	720
+64	3	510	1	40	cplex	1	0	43	11	1	97	0	1	0	49	49	0.00547900004	0.00825999957	0.0303349998	0.0156830009	0.69748199	1680
+65	3	510	1	40	cplex	1	1	43	3	2	97	0	1	0	49	49	0.00365399988	0.0033499999	0.00530100008	0.00954999961	0.697125971	720
+66	3	510	1	40	cplex	0	0	50	11	3	97	0	1	0	49	49	0.00118000002	0.00331400009	0.00817999989	0.0122950003	0.693634987	1680
+67	3	511	1	40	cplex	0	1	50	3	0	97	0	1	0	49	49	0.00139899994	0.00254900008	0.00473699998	0.0093080001	0.624821007	720
+68	3	511	1	40	cplex	1	0	43	11	1	97	0	1	0	49	49	0.00222399994	0.00367900007	0.00825999957	0.0145570002	0.641660988	1680
+69	3	511	1	40	cplex	1	1	43	3	2	97	0	1	0	49	49	0.00210599997	0.00224400009	0.00467600022	0.0104909996	0.644370019	720
+70	3	511	1	40	cplex	0	0	50	11	3	97	0	1	0	49	49	0.00156	0.0036259999	0.0082390001	0.0128800003	0.608564973	1680
+71	3	512	1	40	cplex	0	1	50	3	0	78	0	1	0	49	49	0.00142099999	0.0019749999	0.00414999994	0.00967200007	0.41723299	720
+72	3	512	1	40	cplex	1	0	43	11	1	78	0	1	0	49	49	0.00212000008	0.00255999994	0.00800099969	0.012507	0.431798995	1680
+73	3	512	1	40	cplex	1	1	43	3	2	78	0	1	0	49	49	0.00195299997	0.00187799998	0.00412999978	0.00990399998	0.451243997	720
+74	3	512	1	40	cplex	0	0	50	11	3	78	0	1	0	49	49	0.00137199997	0.00296399998	0.00775100011	0.0122570004	0.409687996	1680
+75	3	513	1	40	cplex	0	1	50	3	0	111	0	1	0	49	49	0.00121100002	0.00175000005	0.00427999999	0.00938700046	0.658694983	720
+76	3	513	1	40	cplex	1	0	43	11	1	111	0	1	0	49	49	0.00189499999	0.00224600011	0.00775199989	0.013398	0.598941982	1680
+77	3	513	1	40	cplex	1	1	43	3	2	111	0	1	0	49	49	0.00207299995	0.00171600003	0.0041720001	0.00880200043	0.613294005	720
+78	3	513	1	40	cplex	0	0	50	11	3	111	0	1	0	49	49	0.00146499998	0.00268399995	0.00772499992	0.012538	0.678382993	1680
+79	3	514	1	40	cplex	0	1	50	3	0	53	0	1	0	49	49	0.00116800005	0.00165800005	0.00447200006	0.00920299999	0.292374015	720
+80	3	514	1	40	cplex	1	0	43	11	1	53	0	1	0	49	49	0.00220500003	0.00265899999	0.00774399983	0.013123	0.341149986	1680
+81	3	514	1	40	cplex	1	1	43	3	2	53	0	1	0	49	49	0.00183600001	0.00173300004	0.00415599998	0.00956000015	0.31754899	720
+82	3	514	1	40	cplex	0	0	50	11	3	53	0	1	0	49	49	0.0013	0.00281900004	0.00771600008	0.0126870004	0.294607997	1680
+83	3	515	1	40	cplex	0	1	50	3	0	75	0	1	0	49	49	0.00115599995	0.00176500005	0.00415300019	0.0104989996	0.385203987	720
+84	3	515	1	40	cplex	1	0	43	11	1	75	0	1	0	49	49	0.00168800005	0.00256699999	0.00806200039	0.0120029999	0.452401996	1680
+85	3	515	1	40	cplex	1	1	43	3	2	75	0	1	0	49	49	0.00175499998	0.001239	0.00404499983	0.00934599992	0.360354006	720
+86	3	515	1	40	cplex	0	0	50	11	3	75	0	1	0	49	49	0.00128099998	0.0021579999	0.00756399985	0.0122039998	0.368422002	1680
+87	3	516	1	40	cplex	0	1	50	3	0	86	0	1	0	49	49	0.001192	0.00121699995	0.00407500006	0.0100330003	0.641035974	720
+88	3	516	1	40	cplex	1	0	43	11	1	86	0	1	0	49	49	0.00175199995	0.00209100009	0.0076270001	0.0125930002	0.630741	1680
+89	3	516	1	40	cplex	1	1	43	3	2	86	0	1	0	49	49	0.00175299996	0.00121599995	0.00408300012	0.00928200036	0.657932997	720
+90	3	516	1	40	cplex	0	0	50	11	3	86	0	1	0	49	49	0.00117399998	0.00243699993	0.00767799979	0.0124199996	0.728474021	1680
+91	3	517	1	40	cplex	0	1	50	3	0	24	0	1	0	49	49	0.000904000015	0.000738999981	0.00259499997	0.00757799996	0.219051003	432
+92	3	517	1	40	cplex	1	0	43	11	1	24	0	1	0	49	49	0.00143099995	0.001529	0.00478499988	0.00873500016	0.238042995	1008
+93	3	517	1	40	cplex	1	1	43	3	2	24	0	1	0	49	49	0.00114900002	0.000761999981	0.0025820001	0.00791900046	0.230614007	432
+94	3	517	1	40	cplex	0	0	50	11	3	24	0	1	0	49	49	0.000829000026	0.00124100002	0.004801	0.010094	0.240952998	1008
+95	3	518	1	40	cplex	0	1	50	3	0	72	0	1	0	49	49	0.00137499999	0.00142600003	0.00411200011	0.0100729996	0.851666987	720
+96	3	518	1	40	cplex	1	0	43	11	1	72	0	1	0	49	49	0.00203699991	0.00276300008	0.00775500014	0.0132910004	0.841014028	1680
+97	3	518	1	40	cplex	1	1	43	3	2	72	0	1	0	49	49	0.00159400003	0.00177600002	0.00412499998	0.0093080001	1.11654997	720
+98	3	518	1	40	cplex	0	0	50	11	3	72	0	1	0	49	49	0.00110700005	0.00204499997	0.00767099997	0.0126839997	0.821780026	1680
+99	3	519	1	40	cplex	0	1	50	3	0	70	0	1	0	49	49	0.00114800001	0.00116500002	0.00415700022	0.00969900005	0.311316013	720
+100	3	519	1	40	cplex	1	0	43	11	1	70	0	1	0	49	49	0.00136500003	0.00199400005	0.00767599978	0.0142099997	0.269760996	1680
+101	3	519	1	40	cplex	1	1	43	3	2	70	0	1	0	49	49	0.00154900004	0.00144300004	0.004158	0.00968400016	0.273167998	720
+102	3	519	1	40	cplex	0	0	50	11	3	70	0	1	0	49	49	0.00124500005	0.002416	0.0077490001	0.0138450004	0.308625996	1680
+103	3	520	1	40	cplex	0	1	50	7	0	58	0	1	0	24	24	0.0418919995	0.727262974	1.47397804	1.166412	0.694239974	8947
+104	3	520	1	40	cplex	1	0	19	11	1	58	0	1	0	24	24	0.00381299993	0.145913005	0.346630007	0.331068993	0.705498993	19280
+105	3	520	1	40	cplex	1	1	19	10	2	58	0	1	0	24	24	0.0048179999	0.154331997	0.325762004	0.39467001	0.698303998	17986
+106	3	520	1	40	cplex	0	0	50	11	3	58	0	1	0	24	24	0.0326259993	0.746415019	1.82685602	1.460958	0.680359006	11680
+107	3	521	1	40	cplex	0	1	50	7	0	65	0	1	0	24	24	0.0293790009	0.933776975	1.51459002	1.19661105	0.696219981	9196
+108	3	521	1	40	cplex	1	0	19	11	1	65	0	1	0	24	24	0.00419100001	0.140341997	0.346156001	0.320246011	0.689733982	19280
+109	3	521	1	40	cplex	1	1	19	10	2	65	0	1	0	24	24	0.00458699977	0.148295999	0.337267011	0.30449	0.681931973	17986
+110	3	521	1	40	cplex	0	0	50	11	3	65	0	1	0	24	24	0.0352489986	0.938247025	1.88760996	1.46937895	0.658581972	11680
+111	3	522	1	40	cplex	0	1	50	7	0	53	0	1	0	24	24	0.0345810018	0.672812998	1.51807702	1.23437297	0.897303998	9473
+112	3	522	1	40	cplex	1	0	19	11	1	53	0	1	0	24	24	0.00445799995	0.158729002	0.367410004	0.315420985	0.787645996	19280
+113	3	522	1	40	cplex	1	1	19	10	2	53	0	1	0	24	24	0.00468700007	0.136818007	0.326653987	0.300770015	0.813485026	17986
+114	3	522	1	40	cplex	0	0	50	11	3	53	0	1	0	24	24	0.0303830002	1.21270001	1.84494102	1.47125196	0.81951803	11680
+115	3	523	1	40	cplex	0	1	50	7	0	65	0	1	0	24	24	0.0449570008	0.687582016	1.48442602	1.16399896	0.662994027	8947
+116	3	523	1	40	cplex	1	0	19	11	1	65	0	1	0	24	24	0.00466899993	0.149667993	0.356920004	0.318457991	0.668519974	19280
+117	3	523	1	40	cplex	1	1	19	10	2	65	0	1	0	24	24	0.00444799988	0.137494996	0.329824001	0.305312991	0.672116995	17986
+118	3	523	1	40	cplex	0	0	50	11	3	65	0	1	0	24	24	0.0410979986	0.845740974	1.83084095	1.46933198	0.668196976	11680
+119	3	524	1	40	cplex	0	1	50	7	0	69	0	1	0	24	24	0.034407001	0.684288979	1.52786696	1.19970596	0.758230984	9196
+120	3	524	1	40	cplex	1	0	19	11	1	69	0	1	0	24	24	0.00371400011	0.135927007	0.344262987	0.310882002	0.855190992	19280
+121	3	524	1	40	cplex	1	1	19	10	2	69	0	1	0	24	24	0.0042849998	0.137674004	0.331185013	0.297508001	0.752609015	17986
+122	3	524	1	40	cplex	0	0	50	11	3	69	0	1	0	24	24	0.0419609994	0.786827028	1.88344097	1.47016501	1.07231796	11680
+123	3	525	1	40	cplex	0	1	50	7	0	49	0	1	0	24	24	0.0375390016	0.666984975	1.50484598	1.21492004	0.711691976	9196
+124	3	525	1	40	cplex	1	0	19	11	1	49	0	1	0	24	24	0.00365000009	0.162950993	0.371540993	0.32297501	0.699369013	19280
+125	3	525	1	40	cplex	1	1	19	10	2	49	0	1	0	24	24	0.00391199999	0.132907003	0.32929799	0.308701009	0.747474015	17986
+126	3	525	1	40	cplex	0	0	50	11	3	49	0	1	0	24	24	0.0350450017	0.789637029	1.87536395	1.47407305	0.706560016	11680
+127	3	526	1	40	cplex	0	1	50	7	0	41	0	1	0	24	24	0.0358310007	0.744311988	1.48167098	1.20175898	0.742676973	9196
+128	3	526	1	40	cplex	1	0	19	11	1	41	0	1	0	24	24	0.00457999995	0.164709002	0.377211004	0.320196003	0.759905994	19280
+129	3	526	1	40	cplex	1	1	19	10	2	41	0	1	0	24	24	0.0047960002	0.150309995	0.349379003	0.301786005	0.809698999	17986
+130	3	526	1	40	cplex	0	0	50	11	3	41	0	1	0	24	24	0.0314919986	0.767760992	1.85896397	1.45681298	0.75533098	11680
+131	3	527	1	40	cplex	0	1	50	7	0	49	0	1	0	24	24	0.040217001	0.716306984	1.44480002	1.16477704	0.712007999	8947
+132	3	527	1	40	cplex	1	0	19	11	1	49	0	1	0	24	24	0.00367300003	0.157799006	0.368975013	0.308939993	0.720061004	19280
+133	3	527	1	40	cplex	1	1	19	10	2	49	0	1	0	24	24	0.00488500018	0.150500998	0.343477994	0.295349985	0.782409012	17986
+134	3	527	1	40	cplex	0	0	50	11	3	49	0	1	0	24	24	0.02984	1.16271698	1.95000398	1.48371601	0.744135976	11680
+135	3	528	1	40	cplex	0	1	50	7	0	46	0	1	0	24	24	0.0427629985	0.663178027	1.51001501	1.22240496	0.868622005	9244
+136	3	528	1	40	cplex	1	0	19	11	1	46	0	1	0	24	24	0.00458300021	0.140102997	0.351648003	0.315595001	0.863395989	19280
+137	3	528	1	40	cplex	1	1	19	10	2	46	0	1	0	24	24	0.00445999997	0.151517004	0.346653014	0.297865003	0.871451974	17986
+138	3	528	1	40	cplex	0	0	50	11	3	46	0	1	0	24	24	0.0405769981	0.848340988	1.86764395	1.45968902	0.874177992	11680
+139	3	529	1	40	cplex	0	1	50	7	0	65	0	1	0	24	24	0.0332590006	0.688090026	1.54422605	1.19229901	0.657060981	9196
+140	3	529	1	40	cplex	1	0	19	11	1	65	0	1	0	24	24	0.0036820001	0.138622001	0.352456003	0.316428006	0.761146009	19280
+141	3	529	1	40	cplex	1	1	19	10	2	65	0	1	0	24	24	0.00428299978	0.137787998	0.336050004	0.301885992	0.667237997	17986
+142	3	529	1	40	cplex	0	0	50	11	3	65	0	1	0	24	24	0.041974999	0.79261899	1.90489197	1.464136	0.751848996	11680
+143	3	530	1	40	cplex	0	1	100	2	0	67	0	1	0	99	99	0.00213699997	0.00105099997	0.00374699989	0.0100180004	0.843365014	600
+144	3	530	1	40	cplex	1	0	86	11	1	67	0	1	0	99	99	0.00239900011	0.00196600007	0.00812599994	0.0128389997	0.836741984	1680
+145	3	530	1	40	cplex	1	1	86	2	2	67	0	1	0	99	99	0.00285600009	0.00129699998	0.0037779999	0.00854299963	0.854324996	600
+146	3	530	1	40	cplex	0	0	100	11	3	67	0	1	0	99	99	0.00233000005	0.00238900003	0.00811600033	0.0128279999	0.835896015	1680
+147	3	531	1	40	cplex	0	1	100	2	0	46	0	1	0	99	99	0.00244099996	0.00127799995	0.00376500003	0.010543	0.306537986	600
+148	3	531	1	40	cplex	1	0	86	11	1	46	0	1	0	99	99	0.00268799998	0.002446	0.00816900004	0.013766	0.318075001	1680
+149	3	531	1	40	cplex	1	1	86	2	2	46	0	1	0	99	99	0.0024029999	0.00105600001	0.003761	0.00985800009	0.319076002	600
+150	3	531	1	40	cplex	0	0	100	11	3	46	0	1	0	99	99	0.00192800001	0.00205900008	0.00817999989	0.0145640001	0.316460013	1680
+151	3	532	1	40	cplex	0	1	100	2	0	38	0	1	0	99	99	0.00228899997	0.00122700003	0.00354199996	0.0106020002	0.824949026	570
+152	3	532	1	40	cplex	1	0	86	11	1	38	0	1	0	99	99	0.00260000001	0.00215000007	0.00778299989	0.0119540002	0.808524013	1596
+153	3	532	1	40	cplex	1	1	86	2	2	38	0	1	0	99	99	0.00231899996	0.00100599998	0.00351099996	0.00960799959	0.805379987	570
+154	3	532	1	40	cplex	0	0	100	11	3	38	0	1	0	99	99	0.00223600003	0.00232299999	0.00778200012	0.0121919997	0.813315988	1596
+155	3	533	1	40	cplex	0	1	100	2	0	47	0	1	0	99	99	0.002507	0.00132499996	0.00375499995	0.00915400032	0.874013007	600
+156	3	533	1	40	cplex	1	0	86	11	1	47	0	1	0	99	99	0.00290199998	0.00246199989	0.00813900027	0.0133720003	0.873840988	1680
+157	3	533	1	40	cplex	1	1	86	2	2	47	0	1	0	99	99	0.00286399992	0.00131099997	0.00375599996	0.010365	0.886205971	600
+158	3	533	1	40	cplex	0	0	100	11	3	47	0	1	0	99	99	0.00239000004	0.00196000002	0.00812300015	0.0124310004	0.866038978	1680
+159	3	534	1	40	cplex	0	1	100	2	0	47	3	0.949999988	0.0250000004	99	99	0.00198900001	0.00105800002	0.00376600004	0.00999599975	1.30286205	600
+160	3	534	1	40	cplex	1	0	86	11	1	47	3	0.949999988	0.0250000004	99	99	0.00256499997	0.00235099997	0.008134	0.0143640004	1.08747697	1680
+161	3	534	1	40	cplex	1	1	86	2	2	47	3	0.949999988	0.0250000004	99	99	0.00264400011	0.001086	0.0042369999	0.0103529999	1.47026598	600
+162	3	534	1	40	cplex	0	0	100	11	3	47	3	0.949999988	0.0250000004	99	99	0.00191600004	0.00196300005	0.00848899968	0.0139549999	1.12508798	1680
+163	3	535	1	40	cplex	0	1	100	2	0	41	0	1	0	99	99	0.00210499996	0.00110300002	0.00384099991	0.008715	0.353329003	600
+164	3	535	1	40	cplex	1	0	86	11	1	41	0	1	0	99	99	0.00248900009	0.00240000011	0.00817000028	0.0130359996	0.33928299	1680
+165	3	535	1	40	cplex	1	1	86	2	2	41	0	1	0	99	99	0.00256399997	0.00129399996	0.00376600004	0.00995699968	0.337265015	600
+166	3	535	1	40	cplex	0	0	100	11	3	41	0	1	0	99	99	0.00228899997	0.00242400006	0.0081679998	0.0126179997	0.357529998	1680
+167	3	536	1	40	cplex	0	1	100	2	0	45	0	1	0	99	99	0.002324	0.00130799995	0.00377699989	0.0100720003	0.883064985	600
+168	3	536	1	40	cplex	1	0	86	11	1	45	0	1	0	99	99	0.00264400011	0.00242400006	0.00814499985	0.0123699997	0.887869	1680
+169	3	536	1	40	cplex	1	1	86	2	2	45	0	1	0	99	99	0.00293900003	0.00135300006	0.00389400008	0.00954400003	0.894321978	600
+170	3	536	1	40	cplex	0	0	100	11	3	45	0	1	0	99	99	0.00182999996	0.00194900006	0.00826899987	0.0133450003	0.897583008	1680
+171	3	537	1	40	cplex	0	1	100	2	0	34	0	1	0	99	99	0.00163099996	0.000893999997	0.00319899991	0.0096540004	0.809711993	510
+172	3	537	1	40	cplex	1	0	86	11	1	34	0	1	0	99	99	0.00206000009	0.00167499995	0.00698400009	0.0111499997	0.931105971	1428
+173	3	537	1	40	cplex	1	1	86	2	2	34	0	1	0	99	99	0.00210199994	0.000878999999	0.00314799999	0.00822899956	0.810128987	510
+174	3	537	1	40	cplex	0	0	100	11	3	34	0	1	0	99	99	0.00186700001	0.00192199997	0.00700900005	0.0113359997	0.814997971	1428
+175	3	538	1	40	cplex	0	1	100	2	0	44	0	1	0	99	99	0.00184499996	0.00104400003	0.00373500003	0.0101349996	0.346666008	600
+176	3	538	1	40	cplex	1	0	86	11	1	44	0	1	0	99	99	0.00226199999	0.00192299997	0.0081249997	0.0131949997	0.344368994	1680
+177	3	538	1	40	cplex	1	1	86	2	2	44	0	1	0	99	99	0.00245400006	0.00104	0.00381599995	0.00979099981	0.353617013	600
+178	3	538	1	40	cplex	0	0	100	11	3	44	0	1	0	99	99	0.00224400009	0.00195399998	0.00814499985	0.0140089998	0.344473988	1680
+179	3	539	1	40	cplex	0	1	100	2	0	76	0	1	0	99	99	0.00228999997	0.00131600001	0.0038050001	0.0100400001	0.732334018	600
+180	3	539	1	40	cplex	1	0	86	11	1	76	0	1	0	99	99	0.00274599995	0.00201900001	0.00810100045	0.0128450003	0.739372015	1680
+181	3	539	1	40	cplex	1	1	86	2	2	76	0	1	0	99	99	0.00273999991	0.00132000004	0.00375799998	0.00943300035	0.736087978	600
+182	3	539	1	40	cplex	0	0	100	11	3	76	0	1	0	99	99	0.002263	0.00240999996	0.00815599971	0.0134439999	0.739036024	1680
+183	3	540	1	40	cplex	0	1	100	6	0	75	0	1	0	74	74	0.0418250002	0.751075983	1.408692	1.23137999	0.270698994	8384
+184	3	540	1	40	cplex	1	0	85	11	1	75	0	1	0	74	74	0.0467780009	0.637624025	1.54338503	1.26086795	0.260964006	14580
+185	3	540	1	40	cplex	1	1	85	7	2	75	0	1	0	74	74	0.0412670001	0.607415974	1.21112204	1.06115401	0.257643014	11657
+186	3	540	1	40	cplex	0	0	100	11	3	75	0	1	0	74	74	0.0640840009	0.789952993	1.98583102	1.59295297	0.281709999	11680
+187	3	541	1	40	cplex	0	1	100	6	0	83	0	1	0	74	74	0.0479479991	0.710402012	1.48896897	1.28018296	0.345137	8801
+188	3	541	1	40	cplex	1	0	76	11	1	83	0	1	0	74	74	0.0233430006	0.380486012	0.919286013	0.799224973	0.334493995	17280
+189	3	541	1	40	cplex	1	1	76	8	2	83	0	1	0	74	74	0.014095	0.732509971	0.769647002	0.727801979	0.355756998	14980
+190	3	541	1	40	cplex	0	0	100	11	3	83	0	1	0	74	74	0.0643419996	0.779636979	1.96463096	1.55806398	0.376284003	11680
+191	3	542	1	40	cplex	0	1	100	6	0	65	0	1	0	74	74	0.0671719983	0.668738008	1.48194897	1.19953597	0.761308014	8384
+192	3	542	1	40	cplex	1	0	85	11	1	65	0	1	0	74	74	0.0323899984	0.659244001	1.48476696	1.21876705	0.748269022	14580
+193	3	542	1	40	cplex	1	1	85	7	2	65	0	1	0	74	74	0.0407259986	0.559090972	1.27095604	1.03441596	0.770893991	11657
+194	3	542	1	40	cplex	0	0	100	11	3	65	0	1	0	74	74	0.0474070013	0.878656983	2.03868389	1.56802404	0.766592979	11680
+195	3	543	1	40	cplex	0	1	100	6	0	32	0	1	0	74	74	0.0512689985	0.507066011	1.18726301	1.097242	0.255416989	6707
+196	3	543	1	40	cplex	1	0	85	11	1	32	0	1	0	74	74	0.0336510018	0.466663986	1.192626	1.02909994	0.278705001	11664
+197	3	543	1	40	cplex	1	1	85	7	2	32	0	1	0	74	74	0.0392009988	0.466949999	1.03078198	0.851669014	0.261016995	9326
+198	3	543	1	40	cplex	0	0	100	11	3	32	0	1	0	74	74	0.0360269994	0.667369008	1.54162002	1.30469096	0.257420003	9344
+199	3	544	1	40	cplex	0	1	100	6	0	128	0	1	0	74	74	0.075782001	0.660093009	1.49588096	1.185956	0.607726991	8384
+200	3	544	1	40	cplex	1	0	85	11	1	128	0	1	0	74	74	0.0229439996	0.663088977	1.49432099	1.20481002	0.600206971	14580
+201	3	544	1	40	cplex	1	1	85	7	2	128	0	1	0	74	74	0.0445129983	0.567507982	1.27157795	1.01218498	0.604645014	11657
+202	3	544	1	40	cplex	0	0	100	11	3	128	0	1	0	74	74	0.0350139998	0.761825979	2.00485992	1.50918496	0.607271016	11680
+203	3	545	1	40	cplex	0	1	100	6	0	79	0	1	0	74	74	0.0556109995	0.621156991	1.95266604	1.22351897	0.33970201	8384
+204	3	545	1	40	cplex	1	0	85	11	1	79	0	1	0	74	74	0.0392449982	0.603534997	1.52069902	1.248631	0.349272013	14580
+205	3	545	1	40	cplex	1	1	85	7	2	79	0	1	0	74	74	0.0375379995	0.526404023	1.24229395	1.04999101	0.37222299	11657
+206	3	545	1	40	cplex	0	0	100	11	3	79	0	1	0	74	74	0.075168997	0.783366978	1.98613799	1.60259295	0.344604999	11680
+207	3	546	1	40	cplex	0	1	100	6	0	87	0	1	0	74	74	0.0679960027	0.697486997	1.43303299	1.21988499	0.308376014	8384
+208	3	546	1	40	cplex	1	0	85	11	1	87	0	1	0	74	74	0.0427829996	0.639582992	1.51209295	1.24875796	0.305130005	14580
+209	3	546	1	40	cplex	1	1	85	7	2	87	0	1	0	74	74	0.0359879993	0.527840972	1.247684	1.04851794	0.348141015	11657
+210	3	546	1	40	cplex	0	0	100	11	3	87	0	1	0	74	74	0.0752660036	0.824504972	1.96581697	1.57338202	0.299833	11680
+211	3	547	1	40	cplex	0	1	100	6	0	64	0	1	0	74	74	0.0551710017	0.664717019	1.44390202	1.18900704	0.745580971	8384
+212	3	547	1	40	cplex	1	0	85	11	1	64	0	1	0	74	74	0.0342659988	0.615885019	1.52605796	1.21438098	0.75663197	14580
+213	3	547	1	40	cplex	1	1	85	7	2	64	0	1	0	74	74	0.0454999991	0.569827974	1.23161805	1.03369296	0.74861902	11657
+214	3	547	1	40	cplex	0	0	100	11	3	64	0	1	0	74	74	0.0547689982	0.789168	1.971892	1.53895497	0.750075996	11680
+215	3	548	1	40	cplex	0	1	100	6	0	86	0	1	0	74	74	0.0392899998	0.720866978	1.49453998	1.26545703	0.351577997	8801
+216	3	548	1	40	cplex	1	0	76	11	1	86	0	1	0	74	74	0.0102899997	0.430314988	0.905166984	0.809331	0.317461997	17280
+217	3	548	1	40	cplex	1	1	76	8	2	86	0	1	0	74	74	0.0237329993	0.363519013	0.825559974	0.736001015	0.844016016	14980
+218	3	548	1	40	cplex	0	0	100	11	3	86	0	1	0	74	74	0.0547709987	0.815566003	2.01415992	1.59752703	0.329472005	11680
+219	3	549	1	40	cplex	0	1	100	6	0	83	0	1	0	74	74	0.0628499985	0.619762003	1.45916796	1.18774402	0.758166015	8384
+220	3	549	1	40	cplex	1	0	85	11	1	83	0	1	0	74	74	0.0343930013	0.623915017	1.50313497	1.20728099	1.06664896	14580
+221	3	549	1	40	cplex	1	1	85	7	2	83	0	1	0	74	74	0.0462419987	0.561695993	1.27384102	1.02126896	0.53986901	11657
+222	3	549	1	40	cplex	0	0	100	11	3	83	0	1	0	74	74	0.0329359993	0.80963701	1.93539906	1.52148294	0.823305011	11680
+223	3	550	1	40	cplex	0	1	100	8	0	72	0	1	0	49	49	0.0865679979	2.6326201	6.36522579	5.46858978	0.810634971	18608
+224	3	550	1	40	cplex	1	0	62	11	1	72	0	1	0	49	49	0.0204780009	1.24197602	3.0758419	3.23993611	0.79757899	35587
+225	3	550	1	40	cplex	1	1	62	10	2	72	0	1	0	49	49	0.0156079996	1.30229795	3.09566998	3.29634309	0.806029022	35427
+226	3	550	1	40	cplex	0	0	100	11	3	72	0	1	0	49	49	0.109030999	3.00003099	7.39067888	6.43888807	0.797688007	21680
+227	3	551	1	40	cplex	0	1	100	8	0	74	0	1	0	49	49	0.128337994	2.68955493	6.39175797	5.56150389	0.243594006	18608
+228	3	551	1	40	cplex	1	0	62	11	1	74	0	1	0	49	49	0.015532	1.27713597	3.07695794	3.26132894	0.238030002	35587
+229	3	551	1	40	cplex	1	1	62	10	2	74	0	1	0	49	49	0.0175260007	1.27085805	3.09170389	3.29398108	0.256157011	35427
+230	3	551	1	40	cplex	0	0	100	11	3	74	0	1	0	49	49	0.112260997	2.9899559	7.4076972	6.48840618	0.267466009	21680
+231	3	552	1	40	cplex	0	1	100	8	0	69	0	1	0	49	49	0.102201998	4.71662903	6.44738197	4.94555187	0.834559023	18608
+232	3	552	1	40	cplex	1	0	62	11	1	69	0	1	0	49	49	0.0143050002	1.39763999	3.10647511	2.67233706	0.87619698	35587
+233	3	552	1	40	cplex	1	1	62	10	2	69	0	1	0	49	49	0.0347510017	1.26695096	3.14713907	2.70569897	0.886350989	35427
+234	3	552	1	40	cplex	0	0	100	11	3	69	0	1	0	49	49	0.104200996	3.0841701	7.43289995	5.97383499	0.836436987	21680
+235	3	553	1	40	cplex	0	1	100	8	0	80	0	1	0	49	49	0.116419002	2.66308999	6.5675869	5.5694809	0.645641983	18608
+236	3	553	1	40	cplex	1	0	62	11	1	80	0	1	0	49	49	0.0315140001	1.22927797	3.18666101	3.23636103	0.66722399	35587
+237	3	553	1	40	cplex	1	1	62	10	2	80	0	1	0	49	49	0.0341619998	1.23373199	3.17184901	3.21261811	0.652716994	35427
+238	3	553	1	40	cplex	0	0	100	11	3	80	0	1	0	49	49	0.105336003	3.0232439	7.72271776	6.42423391	0.690551996	21680
+239	3	554	1	40	cplex	0	1	100	8	0	24	0	1	0	49	49	0.0895010009	1.61944497	3.89778805	2.96868491	0.238373995	11154
+240	3	554	1	40	cplex	1	0	62	11	1	24	0	1	0	49	49	0.0245559998	0.731782973	1.86465096	1.57381403	0.223528996	21352
+241	3	554	1	40	cplex	1	1	62	10	2	24	0	1	0	49	49	0.0131350001	0.820057988	1.89901602	1.56102896	0.244185999	21256
+242	3	554	1	40	cplex	0	0	100	11	3	24	0	1	0	49	49	0.063519001	1.76751995	4.61198902	3.56429195	0.210245997	13008
+243	3	555	1	40	cplex	0	1	100	8	0	73	0	1	0	49	49	0.122798003	2.70532608	6.70276499	5.7275238	0.339334995	18608
+244	3	555	1	40	cplex	1	0	62	11	1	73	0	1	0	49	49	0.0378630012	1.22913897	3.18524599	3.37487888	0.272013992	35587
+245	3	555	1	40	cplex	1	1	62	10	2	73	0	1	0	49	49	0.0175119992	1.30832803	3.19460201	3.3379209	0.263916999	35427
+246	3	555	1	40	cplex	0	0	100	11	3	73	0	1	0	49	49	0.0692809969	4.16821384	7.59463787	6.44710922	0.461107999	21680
+247	3	556	1	40	cplex	0	1	100	8	0	72	0	1	0	49	49	0.104465	2.8153491	6.90266991	5.97973013	0.772230029	19311
+248	3	556	1	40	cplex	1	0	62	11	1	72	0	1	0	49	49	0.0385640003	1.28450096	3.19714594	3.28243494	0.787387013	35587
+249	3	556	1	40	cplex	1	1	62	10	2	72	0	1	0	49	49	0.0367639996	1.29255605	3.16983294	3.24858689	0.769068003	35427
+250	3	556	1	40	cplex	0	0	100	11	3	72	0	1	0	49	49	0.0801709965	3.01663804	7.70809412	6.36240387	0.771040022	21680
+251	3	557	1	40	cplex	0	1	100	8	0	69	0	1	0	49	49	0.0694859996	2.79488897	6.60190201	4.99938297	0.951747	18608
+252	3	557	1	40	cplex	1	0	62	11	1	69	0	1	0	49	49	0.0374410003	1.20638394	3.16659403	2.78835297	0.811945021	35587
+253	3	557	1	40	cplex	1	1	62	10	2	69	0	1	0	49	49	0.0396110006	1.28186798	3.1488049	2.66770697	0.841000021	35427
+254	3	557	1	40	cplex	0	0	100	11	3	69	0	1	0	49	49	0.0907009989	3.73088408	7.49629498	5.67397118	0.827409983	21680
+255	3	558	1	40	cplex	0	1	100	8	0	80	0	1	0	49	49	0.0808280036	2.87422609	6.71353102	5.65353203	0.626199007	18608
+256	3	558	1	40	cplex	1	0	62	11	1	80	0	1	0	49	49	0.0200609993	1.28653502	3.21338391	3.28473496	0.626258016	35587
+257	3	558	1	40	cplex	1	1	62	10	2	80	0	1	0	49	49	0.0202649999	1.37484801	3.19120502	3.27198505	0.810069025	35427
+258	3	558	1	40	cplex	0	0	100	11	3	80	0	1	0	49	49	0.122713998	2.97523999	7.58208799	6.30027008	0.642687023	21680
+259	3	559	1	40	cplex	0	1	100	8	0	92	0	1	0	49	49	0.123346999	2.72306895	6.74991608	5.76625299	0.682313979	19021
+260	3	559	1	40	cplex	1	0	62	11	1	92	0	1	0	49	49	0.0292010009	1.23707902	3.19344997	3.31051207	0.618331015	35587
+261	3	559	1	40	cplex	1	1	62	10	2	92	0	1	0	49	49	0.0326710008	1.238415	3.18807292	3.29998708	0.705573022	35427
+262	3	559	1	40	cplex	0	0	100	11	3	92	0	1	0	49	49	0.106688	2.98372507	7.58755589	6.40877104	0.644770026	21680
+263	3	560	1	40	cplex	0	1	500	3	0	96	0	1	0	499	499	0.00853999984	0.00142999995	0.00453400007	0.0154680004	0.843165994	720
+264	3	560	1	40	cplex	1	0	494	11	1	96	0	1	0	499	499	0.0163930003	0.00199600006	0.00870199967	0.0145749999	1.00725806	1680
+265	3	560	1	40	cplex	1	1	494	3	2	96	0	1	0	499	499	0.0175069999	0.00140800001	0.0045210002	0.012073	0.863543987	720
+266	3	560	1	40	cplex	0	0	500	11	3	96	0	1	0	499	499	0.00987599976	0.0019749999	0.0086319996	0.0178970005	0.874867022	1680
+267	3	561	1	40	cplex	0	1	500	3	0	15	0	1	0	499	499	0.00334200007	0.000493000029	0.00184100005	0.0122750001	0.932111979	270
+268	3	561	1	40	cplex	1	0	494	11	1	15	0	1	0	499	499	0.0120090004	0.000791000028	0.00338899996	0.00777600007	0.936864972	630
+269	3	561	1	40	cplex	1	1	494	3	2	15	0	1	0	499	499	0.0119209997	0.000487999991	0.00181499997	0.00865899958	0.931989014	270
+270	3	561	1	40	cplex	0	0	500	11	3	15	0	1	0	499	499	0.00331899989	0.000936999975	0.00343100005	0.00938700046	0.931860983	630
+271	3	562	1	40	cplex	0	1	500	3	0	96	0	1	0	499	499	0.0107720001	0.00133899995	0.00450700009	0.011194	0.869557023	720
+272	3	562	1	40	cplex	1	0	494	11	1	96	0	1	0	499	499	0.0166059993	0.00199800008	0.00865899958	0.0132889999	0.852798998	1680
+273	3	562	1	40	cplex	1	1	494	3	2	96	0	1	0	499	499	0.0168459993	0.00146199996	0.00455299998	0.0110099996	0.86055398	720
+274	3	562	1	40	cplex	0	0	500	11	3	96	0	1	0	499	499	0.00951000024	0.00244399998	0.0086310003	0.0147970002	1.005885	1680
+275	3	563	1	40	cplex	0	1	500	3	0	61	0	1	0	499	499	0.00868800003	0.00119500002	0.00453899987	0.0104250005	0.867164016	720
+276	3	563	1	40	cplex	1	0	494	11	1	61	0	1	0	499	499	0.0164160002	0.00200699992	0.00859399978	0.0129270004	0.877924979	1680
+277	3	563	1	40	cplex	1	1	494	3	2	61	0	1	0	499	499	0.0163410008	0.00119500002	0.00448099989	0.0114019997	0.861666977	720
+278	3	563	1	40	cplex	0	0	500	11	3	61	0	1	0	499	499	0.0103369998	0.00231299992	0.0086310003	0.0136259999	0.86084801	1680
+279	3	564	1	40	cplex	0	1	500	3	0	61	0	1	0	499	499	0.00931099989	0.00124999997	0.00452899979	0.0180329997	0.832471013	720
+280	3	564	1	40	cplex	1	0	494	11	1	61	0	1	0	499	499	0.0180329997	0.00247099996	0.00863000005	0.0135509996	0.808515012	1680
+281	3	564	1	40	cplex	1	1	494	3	2	61	0	1	0	499	499	0.0188950002	0.00146299996	0.0045429999	0.0107739996	0.813565016	720
+282	3	564	1	40	cplex	0	0	500	11	3	61	0	1	0	499	499	0.00865499955	0.00198499998	0.00856900029	0.0172649994	0.800275028	1680
+283	3	565	1	40	cplex	0	1	500	3	0	46	0	1	0	499	499	0.00993300043	0.00119500002	0.00442600017	0.0121790003	0.804877996	720
+284	3	565	1	40	cplex	1	0	494	11	1	46	0	1	0	499	499	0.0170549992	0.00204399996	0.00875400007	0.0195310004	0.828579009	1680
+285	3	565	1	40	cplex	1	1	494	3	2	46	0	1	0	499	499	0.0164759997	0.00129499997	0.00469799992	0.0211520009	0.825999975	720
+286	3	565	1	40	cplex	0	0	500	11	3	46	0	1	0	499	499	0.0100109996	0.00242200005	0.00851999968	0.0205279998	0.817939997	1680
+287	3	566	1	40	cplex	0	1	500	3	0	14	0	1	0	499	499	0.00412099995	0.000543000002	0.00191700005	0.0065390002	1.05332899	252
+288	3	566	1	40	cplex	1	0	494	11	1	14	0	1	0	499	499	0.0125709996	0.000744000019	0.00313499989	0.00803900044	1.04967797	588
+289	3	566	1	40	cplex	1	1	494	3	2	14	0	1	0	499	499	0.0126780001	0.000548999989	0.00171600003	0.00730600022	1.04684103	252
+290	3	566	1	40	cplex	0	0	500	11	3	14	0	1	0	499	499	0.0029790001	0.000737999973	0.00319599989	0.00639500003	1.03390706	588
+291	3	567	1	40	cplex	0	1	500	3	0	125	10	1	0.25	499	499	0.00592199992	0.00141999999	0.00448499992	0.0108139999	0.808999002	720
+292	3	567	1	40	cplex	1	0	494	11	1	125	10	1	0.25	499	499	0.0168810003	0.00199300004	0.00858500041	0.0133760003	0.800114989	1680
+293	3	567	1	40	cplex	1	1	494	3	2	125	10	1	0.25	499	499	0.0192690007	0.00145400001	0.00452699978	0.0105600003	0.812949002	720
+294	3	567	1	40	cplex	0	0	500	11	3	125	10	1	0.25	499	499	0.00955799967	0.00196800008	0.00858299993	0.0131160002	0.807331026	1680
+295	3	568	1	40	cplex	0	1	500	3	0	19	0	1	0	499	499	0.00395300006	0.000589000003	0.00223800004	0.0241369996	0.983617008	342
+296	3	568	1	40	cplex	1	0	494	11	1	19	0	1	0	499	499	0.0134530002	0.000992999994	0.00421399996	0.00841099955	0.955165029	798
+297	3	568	1	40	cplex	1	1	494	3	2	19	0	1	0	499	499	0.0125449998	0.000604000001	0.0022450001	0.0229020007	0.963254988	342
+298	3	568	1	40	cplex	0	0	500	11	3	19	0	1	0	499	499	0.00432999991	0.00101899996	0.00430499995	0.0076179998	0.991899014	798
+299	3	569	1	40	cplex	0	1	500	3	0	35	0	1	0	499	499	0.00906100031	0.00122800004	0.00398600008	0.0101859998	0.885101974	630
+300	3	569	1	40	cplex	1	0	494	11	1	35	0	1	0	499	499	0.0162279997	0.00181699998	0.00755200023	0.0124859996	0.881766975	1470
+301	3	569	1	40	cplex	1	1	494	3	2	35	0	1	0	499	499	0.0155680003	0.00105600001	0.00396999996	0.00999100041	0.876756012	630
+302	3	569	1	40	cplex	0	0	500	11	3	35	0	1	0	499	499	0.0068049999	0.00175900001	0.00753400009	0.0128049999	0.873305023	1470
+303	3	570	1	40	cplex	0	1	500	6	0	102	2	1	0.0500000007	474	474	0.300298005	0.605126977	1.45688999	1.36540902	0.299412012	7981
+304	3	570	1	40	cplex	1	0	470	11	1	102	2	1	0.0500000007	474	474	0.0418870002	0.156072006	0.413186997	0.326281011	0.293769002	15080
+305	3	570	1	40	cplex	1	1	470	5	2	102	2	1	0.0500000007	474	474	0.046418	0.0969469994	0.246895	0.361494988	0.282440007	8750
+306	3	570	1	40	cplex	0	0	500	11	3	102	2	1	0.0500000007	474	474	0.183060005	0.877147973	2.06022406	1.50202501	0.28748399	11680
+307	3	571	1	40	cplex	0	1	500	6	0	94	0	1	0	474	474	0.242856994	0.819252014	1.44940805	1.45425403	1.34130096	7981
+308	3	571	1	40	cplex	1	0	470	11	1	94	0	1	0	474	474	0.0555210002	0.150036007	0.401481986	0.332396001	0.823332012	15080
+309	3	571	1	40	cplex	1	1	470	5	2	94	0	1	0	474	474	0.0546559989	0.112088002	0.259142995	0.785225987	0.837736011	8750
+310	3	571	1	40	cplex	0	0	500	11	3	94	0	1	0	474	474	0.286913991	0.819835007	2.0993681	1.45697296	1.07323599	11680
+311	3	572	1	40	cplex	0	1	500	6	0	94	0	1	0	474	474	0.268361002	0.562561989	1.42282498	1.49177599	0.816789985	7981
+312	3	572	1	40	cplex	1	0	470	11	1	94	0	1	0	474	474	0.0505769998	0.156209007	0.407784998	0.340633988	0.832315028	15080
+313	3	572	1	40	cplex	1	1	470	5	2	94	0	1	0	474	474	0.0588739999	0.110604003	0.258432001	0.635730982	0.974659979	8750
+314	3	572	1	40	cplex	0	0	500	11	3	94	0	1	0	474	474	0.228994995	0.939575016	2.06418395	1.50941896	0.851216972	11680
+315	3	573	1	40	cplex	0	1	500	6	0	96	2	1	0.0500000007	474	474	0.31982699	0.729695976	1.45314503	1.77861202	0.630553007	7981
+316	3	573	1	40	cplex	1	0	470	11	1	96	2	1	0.0500000007	474	474	0.058766	0.172444001	0.422924012	0.313511997	0.629051983	15080
+317	3	573	1	40	cplex	1	1	470	5	2	96	2	1	0.0500000007	474	474	0.0591950007	0.106504999	0.253547013	1.39370596	0.670027018	8750
+318	3	573	1	40	cplex	0	0	500	11	3	96	2	1	0.0500000007	474	474	0.296342999	0.75960201	2.04897404	1.42018795	0.696784019	11680
+319	3	574	1	40	cplex	0	1	500	6	0	88	0	1	0	474	474	0.244700998	0.645089984	1.49701095	1.32001996	0.845489025	7981
+320	3	574	1	40	cplex	1	0	470	11	1	88	0	1	0	474	474	0.0481089987	0.145649001	0.397628993	0.338284999	0.837843001	15080
+321	3	574	1	40	cplex	1	1	470	5	2	88	0	1	0	474	474	0.0541310012	0.114370003	0.259645998	0.373905003	0.827757001	8750
+322	3	574	1	40	cplex	0	0	500	11	3	88	0	1	0	474	474	0.175098002	0.78945899	2.05163193	1.50730097	0.845035017	11680
+323	3	575	1	40	cplex	0	1	500	6	0	89	2	1	0.0500000007	474	474	0.177731007	0.695980012	1.42817903	1.52236795	0.662109971	7981
+324	3	575	1	40	cplex	1	0	470	11	1	89	2	1	0.0500000007	474	474	0.0586289987	0.158620998	0.419566005	0.321382999	0.659006	15080
+325	3	575	1	40	cplex	1	1	470	5	2	89	2	1	0.0500000007	474	474	0.0422279984	0.101741999	0.247275993	0.490370989	0.658867002	8750
+326	3	575	1	40	cplex	0	0	500	11	3	89	2	1	0.0500000007	474	474	0.122575	0.777101994	2.24408793	1.42419302	0.66050601	11680
+327	3	576	1	40	cplex	0	1	500	6	0	147	3	1	0.075000003	474	474	0.33454901	0.57328999	1.41848004	1.32197702	0.778761983	7981
+328	3	576	1	40	cplex	1	0	470	11	1	147	3	1	0.075000003	474	474	0.0510729998	0.156940997	0.408748001	0.314604014	0.715708017	15080
+329	3	576	1	40	cplex	1	1	470	5	2	147	3	1	0.075000003	474	474	0.0452309996	0.108158998	0.254462004	0.404174	0.721826017	8750
+330	3	576	1	40	cplex	0	0	500	11	3	147	3	1	0.075000003	474	474	0.232433006	0.785447001	2.01539803	1.46754801	0.725053012	11680
+331	3	577	1	40	cplex	0	1	500	6	0	240	339	1	8.47500038	474	474	0.204950005	0.785145998	1.45719099	1.24685204	0.462639987	7981
+332	3	577	1	40	cplex	1	0	470	11	1	240	339	1	8.47500038	474	474	0.0509600006	0.213701993	0.426773995	0.321796	0.457468003	15080
+333	3	577	1	40	cplex	1	1	470	5	2	240	339	1	8.47500038	474	474	0.0556019992	0.113096997	0.262629986	0.38527301	0.464655995	8750
+334	3	577	1	40	cplex	0	0	500	11	3	240	339	1	8.47500038	474	474	0.215210006	0.965279996	2.05911994	1.41016603	0.461104989	11680
+335	3	578	1	40	cplex	0	1	500	6	0	88	2	1	0.0500000007	474	474	0.294129997	0.787801981	1.45045996	1.31801605	0.677232027	7981
+336	3	578	1	40	cplex	1	0	470	11	1	88	2	1	0.0500000007	474	474	0.0433689989	0.156610996	0.411060989	0.336845994	0.681074023	15080
+337	3	579	1	40	cplex	0	1	500	6	0	125	2	1	0.0500000007	474	474	0.156408995	1.14051604	1.55953097	1.24580705	0.353417993	7981
+338	3	579	1	40	cplex	1	0	470	11	1	125	2	1	0.0500000007	474	474	0.0453779995	0.174197003	0.377575994	0.329118997	0.382909	15080
+339	3	579	1	40	cplex	1	1	470	5	2	125	2	1	0.0500000007	474	474	0.0509940013	0.139330998	0.231142998	0.390002996	0.330915004	8750
+340	3	579	1	40	cplex	0	0	500	11	3	125	2	1	0.0500000007	474	474	0.115985997	0.974978983	1.88931894	1.50800502	0.324016005	11680
+341	3	580	1	40	cplex	0	1	500	9	0	36	0	1	0	449	449	0.319296002	2.57779408	5.77755499	6.30699301	0.776037991	17820
+342	3	580	1	40	cplex	1	0	466	11	1	36	0	1	0	449	449	0.0882939994	1.31456196	3.02356291	3.99268103	0.785589993	28702
+343	3	580	1	40	cplex	1	1	466	11	2	36	0	1	0	449	449	0.118424997	1.51115298	3.07485294	4.02979898	0.791024983	28702
+344	3	580	1	40	cplex	0	0	500	11	3	36	0	1	0	449	449	0.356664985	2.4496541	6.13681507	6.62341785	0.77797699	19512
+345	3	581	1	40	cplex	0	1	500	9	0	32	0	1	0	449	449	0.307983994	2.35096097	5.01876497	5.30151081	0.485536009	15836
+346	3	581	1	40	cplex	1	0	453	11	1	32	0	1	0	449	449	0.0735829994	0.698683977	1.64209104	2.5412631	0.483642995	29859
+347	3	581	1	40	cplex	1	1	453	11	2	32	0	1	0	449	449	0.0723579973	0.642508984	1.66495204	2.58769798	0.568929017	29859
+348	3	581	1	40	cplex	0	0	500	11	3	32	0	1	0	449	449	0.332013011	2.13003302	5.54186583	5.65930796	0.477301002	17344
+349	3	582	1	40	cplex	0	1	500	9	0	22	0	1	0	449	449	0.240008995	1.79612601	3.51950312	3.88632202	0.959801018	10995
+350	3	582	1	40	cplex	1	0	466	11	1	22	0	1	0	449	449	0.0601500012	0.740823984	1.99006498	2.37444592	1.29384804	17540
+351	3	582	1	40	cplex	1	1	466	11	2	22	0	1	0	449	449	0.0918579996	0.71083498	1.86508298	2.39572001	1.34553599	17540
+352	3	582	1	40	cplex	0	0	500	11	3	22	0	1	0	449	449	0.174949005	1.50195396	3.758461	3.98588204	1.031322	11924
+353	3	583	1	40	cplex	0	1	500	8	0	15	0	1	0	449	449	0.243399993	1.08230102	2.46789408	2.88419795	0.961197019	7279
+354	3	583	1	40	cplex	1	0	466	11	1	15	0	1	0	449	449	0.0837080032	0.585327983	1.34119296	1.71707702	0.957768977	11959
+355	3	583	1	40	cplex	1	1	466	11	2	15	0	1	0	449	449	0.0651559979	0.527850986	1.28603601	1.702268	0.928049028	11959
+356	3	583	1	40	cplex	0	0	500	11	3	15	0	1	0	449	449	0.223123997	1.12300801	2.6756959	2.92928791	0.977414012	8130
+357	3	584	1	40	cplex	0	1	500	8	0	4	0	1	0	449	449	0.0960230008	0.254325986	0.590520024	0.899357975	0.221284002	1872
+358	3	584	1	40	cplex	1	0	466	11	1	4	0	1	0	449	449	0.0333359987	0.250741005	0.354930013	0.514038026	0.252561003	3189
+359	3	584	1	40	cplex	1	1	466	11	2	4	0	1	0	449	449	0.0397260003	0.157147005	0.364205003	0.504316986	0.221138	3189
+360	3	584	1	40	cplex	0	0	500	11	3	4	0	1	0	449	449	0.0618260019	0.353657991	0.704015017	0.974231005	0.247413993	2168
+361	3	585	1	40	cplex	0	1	500	8	0	25	0	1	0	449	449	0.201324001	1.79476094	4.14267015	4.38957787	0.893499017	12131
+362	3	585	1	40	cplex	1	0	466	11	1	25	0	1	0	449	449	0.120546997	0.94413197	2.29536009	2.74541712	0.922872007	19932
+363	3	585	1	40	cplex	1	1	466	11	2	25	0	1	0	449	449	0.132973999	0.990333974	2.282583	2.76930594	1.16889	19932
+364	3	585	1	40	cplex	0	0	500	11	3	25	0	1	0	449	449	0.27828899	1.91203499	4.52682495	4.60281277	0.923355997	13550
+365	3	586	1	40	cplex	0	1	500	9	0	25	0	1	0	449	449	0.274679989	1.82097006	4.20098305	4.3783989	0.829979002	12375
+366	3	586	1	40	cplex	1	0	466	11	1	25	0	1	0	449	449	0.0642039999	0.943150997	2.21555495	2.73025298	0.853954017	19932
+367	3	586	1	40	cplex	1	1	466	11	2	25	0	1	0	449	449	0.110769004	0.919185996	2.23719907	2.72218394	0.873724997	19932
+368	3	586	1	40	cplex	0	0	500	11	3	25	0	1	0	449	449	0.250348985	1.93327904	4.49755287	4.53981876	0.825188994	13550
+369	3	587	1	40	cplex	0	1	500	9	0	25	0	1	0	449	449	0.210271999	2.15769911	4.21335793	4.27263403	0.269800991	12372
+370	3	587	1	40	cplex	1	0	453	11	1	25	0	1	0	449	449	0.062624	0.566255987	1.37064898	1.95888305	0.242416993	23327
+371	3	587	1	40	cplex	1	1	453	11	2	25	0	1	0	449	449	0.0385349989	0.603717983	1.38493705	1.95975101	0.232547998	23327
+372	3	587	1	40	cplex	0	0	500	11	3	25	0	1	0	449	449	0.217665002	1.86469603	4.53470707	4.41065216	0.240436003	13550
+373	3	588	1	40	cplex	0	1	500	9	0	30	0	1	0	449	449	0.264521003	2.19537997	5.14940405	4.96419621	0.810428977	15138
+374	3	588	1	40	cplex	1	0	453	11	1	30	0	1	0	449	449	0.052765999	0.696527004	1.65073597	2.67828107	0.759880006	27993
+375	3	588	1	40	cplex	1	1	453	11	2	30	0	1	0	449	449	0.0650150031	0.690739989	1.64166903	2.36591697	0.759117007	27993
+376	3	588	1	40	cplex	0	0	500	11	3	30	0	1	0	449	449	0.203985006	2.24310994	5.3264308	5.23609591	0.761274993	16260
+377	3	589	1	40	cplex	0	1	500	9	0	22	0	1	0	449	449	0.195586994	1.65239203	3.74186301	3.86766291	1.42366099	10995
+378	3	589	1	40	cplex	1	0	466	11	1	22	0	1	0	449	449	0.0754669979	0.841139019	1.97038102	2.38217807	0.967831016	17540
+379	3	589	1	40	cplex	1	1	466	11	2	22	0	1	0	449	449	0.0866710022	0.828764975	1.96152103	2.36286092	0.993093014	17540
+380	3	589	1	40	cplex	0	0	500	11	3	22	0	1	0	449	449	0.188834995	1.644225	4.34194517	4.03477001	1.22913003	11924
+381	3	590	1	40	cplex	0	1	500	9	0	49	0	1	0	399	399	0.545708001	10.9724665	27.5868378	42.5442276	0.386209995	40534
+382	3	590	1	40	cplex	1	0	466	11	1	49	0	1	0	399	399	0.26760599	10.2350988	23.4882317	39.299778	0.39309001	54420
+383	3	590	1	40	cplex	1	1	466	11	2	49	0	1	0	399	399	0.32544601	9.91459274	23.9717083	39.8387108	0.372669011	54420
+384	3	590	1	40	cplex	0	0	500	11	3	49	0	1	0	399	399	0.416227013	11.9100142	28.1223831	42.4471626	0.388121992	41680
+385	3	591	1	40	cplex	0	1	500	10	0	25	0	1	0	399	399	0.287494004	7.29949617	17.0003948	24.2148056	0.932622015	25471
+386	3	591	1	40	cplex	1	0	466	11	1	25	0	1	0	399	399	0.216968	6.2026329	15.1360455	22.8458138	0.941794991	34012
+387	3	591	1	40	cplex	1	1	466	11	2	25	0	1	0	399	399	0.210712999	6.75523901	15.0927134	22.7555866	0.944287002	34012
+388	3	591	1	40	cplex	0	0	500	11	3	25	0	1	0	399	399	0.288249999	7.27191305	17.719511	24.5738564	0.93602401	26050
+389	3	592	1	40	cplex	0	1	500	9	0	16	0	1	0	399	399	0.301806986	4.71809292	10.9732628	14.9022274	0.963586986	16075
+390	3	592	1	40	cplex	1	0	466	11	1	16	0	1	0	399	399	0.156377003	4.05256414	9.6869154	13.9309568	0.967900991	21768
+391	3	592	1	40	cplex	1	1	466	11	2	16	0	1	0	399	399	0.147910997	4.08677006	9.77084446	13.9953566	0.959856987	21768
+392	3	592	1	40	cplex	0	0	500	11	3	16	0	1	0	399	399	0.224586993	5.16852283	11.1169624	15.0708914	0.96608901	16672
+393	3	593	1	40	cplex	0	1	500	10	0	24	0	1	0	399	399	0.31408	7.10952282	17.1307583	24.5206699	1.05678201	24707
+394	3	593	1	40	cplex	1	0	466	11	1	24	0	1	0	399	399	0.233233005	6.28059912	14.8758039	22.5238457	0.932487011	32652
+395	3	593	1	40	cplex	1	1	466	11	2	24	0	1	0	399	399	0.253807008	6.20257616	14.9778299	23.0648384	0.937852979	32652
+396	3	593	1	40	cplex	0	0	500	11	3	24	0	1	0	399	399	0.389144987	7.29407692	17.0420399	24.3784542	0.945978999	25008
+397	3	594	1	40	cplex	0	1	500	9	0	31	0	1	0	399	399	0.408901989	8.67903805	21.4188671	32.44944	0.238812	31300
+398	3	594	1	40	cplex	1	0	466	11	1	31	0	1	0	399	399	0.248677	7.62549686	19.1010075	30.1887398	0.235014006	42175
+399	3	594	1	40	cplex	1	1	466	11	2	31	0	1	0	399	399	0.226547003	7.69391108	19.0945549	30.7475471	0.205264002	42175
+400	3	594	1	40	cplex	0	0	500	11	3	31	0	1	0	399	399	0.365168005	8.84179115	22.0755997	32.6911736	0.227265999	32302
+401	3	595	1	40	cplex	0	1	500	10	0	15	0	1	0	399	399	0.271495014	4.363029	11.0923748	14.569376	0.240957007	15274
+402	3	595	1	40	cplex	1	0	466	11	1	15	0	1	0	399	399	0.174026996	3.68333602	9.18902969	13.5903072	0.245032996	20407
+403	3	595	1	40	cplex	1	1	466	11	2	15	0	1	0	399	399	0.179608002	3.66494489	9.18076229	13.8346519	0.25652501	20407
+404	3	595	1	40	cplex	0	0	500	11	3	15	0	1	0	399	399	0.232409	4.24247217	10.5985632	15.1262703	0.243627995	15630
+405	3	596	1	40	cplex	0	1	500	9	0	16	0	1	0	399	399	0.247872993	4.42095804	11.0385208	12.7738638	0.980076015	16109
+406	3	596	1	40	cplex	1	0	466	11	1	16	0	1	0	399	399	0.158907995	3.98892689	9.84818745	11.7760429	0.963775992	21768
+407	3	596	1	40	cplex	1	1	466	11	2	16	0	1	0	399	399	0.194399998	4.39236307	9.89342403	11.7388697	0.972656012	21768
+408	3	596	1	40	cplex	0	0	500	11	3	16	0	1	0	399	399	0.302489012	4.46109915	11.3531265	12.9380236	0.972317994	16672
+409	3	597	1	40	cplex	0	1	500	9	0	15	0	1	0	399	399	0.285099	4.08596897	10.3507032	13.7801819	0.955641985	15185
+410	3	597	1	40	cplex	1	0	466	11	1	15	0	1	0	399	399	0.143436998	3.61876798	9.27877235	12.8972378	0.947148025	20407
+411	3	597	1	40	cplex	1	1	466	11	2	15	0	1	0	399	399	0.164519995	3.81984591	9.50480366	12.9606438	0.977773011	20407
+412	3	597	1	40	cplex	0	0	500	11	3	15	0	1	0	399	399	0.236504003	4.44506216	10.9561262	14.1150599	0.980678022	15630
+413	3	598	1	40	cplex	0	1	500	10	0	24	0	1	0	399	399	0.340837002	7.62940121	17.2977123	24.1523457	0.933902979	24707
+414	3	598	1	40	cplex	1	0	466	11	1	24	0	1	0	399	399	0.232402995	5.74691105	15.1247206	23.2919579	0.929741979	32652
+415	3	598	1	40	cplex	1	1	466	11	2	24	0	1	0	399	399	0.243394002	5.73653984	15.1441383	22.8415108	0.918972015	32652
+416	3	598	1	40	cplex	0	0	500	11	3	24	0	1	0	399	399	0.365942001	7.59469604	17.4189148	24.3815403	0.917077005	25008
+417	3	599	1	40	cplex	0	1	500	10	0	49	0	1	0	399	399	0.45144099	11.5553827	28.8620167	41.6973572	0.880905986	40731
+418	3	599	1	40	cplex	1	0	466	11	1	49	0	1	0	399	399	0.335245997	10.2984247	25.5734482	38.4400406	0.882045984	54420
+419	3	599	1	40	cplex	1	1	466	11	2	49	0	1	0	399	399	0.301382005	11.2087297	25.6250153	38.9797554	0.894724011	54420
+420	3	599	1	40	cplex	0	0	500	11	3	49	0	1	0	399	399	0.609708011	12.1713438	29.602459	41.3171463	0.890685976	41680
+425	3	601	1	40	cplex	0	1	500	10	0	68	2	1	0.0500000007	299	299	0.905722022	47.4325943	116.891701	225.810318	0.897086024	81525
+426	3	601	1	40	cplex	1	0	453	11	1	68	2	1	0.0500000007	299	299	0.780396998	56.5192108	153.634033	276.260468	0.888065994	98557
+427	3	601	1	40	cplex	1	1	453	11	2	68	2	1	0.0500000007	299	299	0.746643007	44.0133247	107.19194	219.422699	0.85680002	98557
+428	3	601	1	40	cplex	0	0	500	11	3	68	2	1	0.0500000007	299	299	0.844605029	47.8210487	116.636398	227.7146	0.880958974	81680
+429	3	602	1	40	cplex	0	1	500	10	0	85	193	0.975000024	4.80000019	299	299	1.11146998	47.0737839	118.60424	230.950867	2.15257406	81525
+430	3	602	1	40	cplex	1	0	453	11	1	85	193	0.975000024	4.80000019	299	299	0.623889029	45.2382278	106.894547	216.643204	2.1246891	98557
+431	3	602	1	40	cplex	1	1	453	11	2	85	193	0.975000024	4.80000019	299	299	0.650168002	44.4506874	107.882858	220.381561	2.20769596	98557
+432	3	602	1	40	cplex	0	0	500	11	3	85	193	0.975000024	4.80000019	299	299	0.937447011	47.9135208	117.170929	227.820282	2.36742496	81680
+433	3	603	1	40	cplex	0	1	500	10	0	7	62	0.142857	8	299	299	0.308535993	8.25682068	20.1228085	27.5739326	2.00184894	14204
+434	3	603	1	40	cplex	1	0	453	11	1	7	62	0.142857	8	299	299	0.209776998	7.68517685	18.5843029	26.0797882	1.897874	17247
+435	3	603	1	40	cplex	1	1	453	11	2	7	62	0.142857	8	299	299	0.243035004	7.70935917	18.444849	26.1344624	1.94805002	17247
+436	3	603	1	40	cplex	0	0	500	11	3	7	62	0.142857	8	299	299	0.246770993	8.40282059	19.8451653	27.7340508	1.80649996	14294
+441	3	605	1	40	cplex	0	1	500	10	0	6	0	1	0	299	299	0.314974993	7.10077715	17.3877602	23.6295834	0.902049005	12175
+442	3	605	1	40	cplex	1	0	453	11	1	6	0	1	0	299	299	0.175518006	6.7018342	15.9498901	22.4692841	0.89497	14783
+443	3	605	1	40	cplex	1	1	453	11	2	6	0	1	0	299	299	0.242556006	6.67872381	15.8044376	22.1457615	0.879894972	14783
+444	3	605	1	40	cplex	0	0	500	11	3	6	0	1	0	299	299	0.27194801	6.88461208	17.0652943	23.8452644	0.882637024	12252
+445	3	606	1	40	cplex	0	1	500	10	0	6	0	1	0	299	299	0.281756014	7.14962196	17.3662262	24.0809841	0.893055975	12175
+446	3	606	1	40	cplex	1	0	453	11	1	6	0	1	0	299	299	0.172995999	6.6308198	15.9173117	22.5748158	0.885946989	14783
+447	3	606	1	40	cplex	1	1	453	11	2	6	0	1	0	299	299	0.213845998	6.53227711	16.0545483	22.6844254	0.875926018	14783
+448	3	606	1	40	cplex	0	0	500	11	3	6	0	1	0	299	299	0.257290006	7.68138123	16.8884983	23.6189938	0.864754021	12252
+449	3	607	1	40	cplex	0	1	500	10	0	6	0	1	0	299	299	0.282765001	7.18461514	17.0879421	23.5413132	1.00152194	12175
+450	3	607	1	40	cplex	1	0	453	11	1	6	0	1	0	299	299	0.166580006	6.88467121	15.8907461	22.5001926	1.039554	14783
+451	3	607	1	40	cplex	1	1	453	11	2	6	0	1	0	299	299	0.208652005	6.7765379	16.2687607	22.8368244	0.988380015	14783
+452	3	607	1	40	cplex	0	0	500	11	3	6	0	1	0	299	299	0.279897004	6.96493816	17.1201973	23.7306805	0.997695982	12252
+453	3	608	1	40	cplex	0	1	500	10	0	69	2	1	0.0500000007	299	299	0.840429008	47.4247665	118.22673	224.589417	0.858235002	81525
+454	3	608	1	40	cplex	1	0	453	11	1	69	2	1	0.0500000007	299	299	0.620037019	42.8055916	108.473701	217.259003	0.88309598	98557
+455	3	608	1	40	cplex	1	1	453	11	2	69	2	1	0.0500000007	299	299	0.683200002	45.607254	108.521843	216.877655	0.870428026	98557
+456	3	608	1	40	cplex	0	0	500	11	3	69	2	1	0.0500000007	299	299	0.836179018	47.0457306	118.653305	228.287689	0.892961979	81680
+457	3	609	1	40	cplex	0	1	500	10	0	83	5	1	0.125	299	299	0.899861991	46.6590996	119.461311	228.12114	0.456932008	81349
+458	3	609	1	40	cplex	1	0	453	11	1	83	5	1	0.125	299	299	0.65179503	45.130558	108.699966	220.705963	0.406973004	98557
+459	3	609	1	40	cplex	1	1	453	11	2	83	5	1	0.125	299	299	0.710092008	44.6275787	109.418678	219.850922	0.533011973	98557
+460	3	609	1	40	cplex	0	0	500	11	3	83	5	1	0.125	299	299	0.869597971	46.9927826	119.325806	228.969666	0.451575011	81680
+465	3	610	1	40	cplex	0	1	500	10	0	25	0	1	0	249	249	0.732339025	44.1918373	101.441788	237.667511	0.285712004	63472
+466	3	610	1	40	cplex	1	0	453	11	1	25	0	1	0	249	249	0.530963004	43.9374886	97.5674057	234.268341	0.304491997	74393
+467	3	610	1	40	cplex	1	1	453	11	2	25	0	1	0	249	249	0.606691003	45.0475159	98.9051132	234.870956	0.290208995	74393
+468	3	610	1	40	cplex	0	0	500	11	3	25	0	1	0	249	249	0.767256021	45.8277168	102.506554	237.610352	0.301459998	63550
+469	3	611	1	40	cplex	0	1	500	10	0	16	0	1	0	249	249	0.557115018	29.441412	65.6731415	202.895447	0.279419988	40566
+470	3	611	1	40	cplex	1	0	453	11	1	16	0	1	0	249	249	0.682578981	28.1774578	62.0716591	200.625931	0.280846	47611
+471	3	611	1	40	cplex	1	1	453	11	2	16	0	1	0	249	249	0.453583002	27.3070049	62.5636177	199.822433	0.259144008	47611
+472	3	611	1	40	cplex	0	0	500	11	3	16	0	1	0	249	249	0.521753013	29.5562439	65.6694717	202.918304	0.312254012	40672
+473	3	612	1	40	cplex	0	1	500	10	0	15	0	1	0	249	249	0.563453972	27.1736698	61.2833748	123.21373	0.461391002	38030
+474	3	612	1	40	cplex	1	0	453	11	1	15	0	1	0	249	249	0.395787001	26.9680786	58.6003609	119.957497	0.487358004	44635
+475	3	612	1	40	cplex	1	1	453	11	2	15	0	1	0	249	249	0.494046003	25.0239887	58.5663757	119.675751	0.451056987	44635
+476	3	612	1	40	cplex	0	0	500	11	3	15	0	1	0	249	249	0.488166004	28.6525955	62.2072334	122.777023	0.451063007	38130
+477	3	613	1	40	cplex	0	1	500	10	0	16	0	1	0	249	249	0.608783007	29.2735786	65.6030655	132.03981	0.256428987	40566
+478	3	613	1	40	cplex	1	0	453	11	1	16	0	1	0	249	249	0.410605997	28.3170605	63.1069756	128.443954	0.237996995	47611
+479	3	613	1	40	cplex	1	1	453	11	2	16	0	1	0	249	249	0.489466995	29.3249664	62.9270706	128.280396	0.242437005	47611
+480	3	613	1	40	cplex	0	0	500	11	3	16	0	1	0	249	249	0.579959989	29.8340702	66.5773468	131.283524	0.218992993	40672
+481	3	614	1	40	cplex	0	1	500	10	0	7	0	1	0	249	249	0.433613002	12.8688164	28.9243011	88.7298965	0.246068999	17747
+482	3	614	1	40	cplex	1	0	453	11	1	7	0	1	0	249	249	0.26920101	12.5667553	27.3080196	88.7121277	0.245346993	20830
+483	3	614	1	40	cplex	1	1	453	11	2	7	0	1	0	249	249	0.300915986	12.567646	27.2762165	88.0789566	0.210108995	20830
+484	3	614	1	40	cplex	0	0	500	11	3	7	0	1	0	249	249	0.313019991	13.1287975	28.8348808	90.5666428	0.241634995	17794
+485	3	615	1	40	cplex	0	1	500	10	0	12	0	1	0	249	249	0.480428994	22.8480549	49.5949821	112.222389	0.244656995	30424
+486	3	615	1	40	cplex	1	0	453	11	1	12	0	1	0	249	249	0.368236989	21.4060745	47.7465515	108.457367	0.263812989	35708
+487	3	615	1	40	cplex	1	1	453	11	2	12	0	1	0	249	249	0.391494989	20.8636208	47.5718536	108.712128	0.25494501	35708
+488	3	615	1	40	cplex	0	0	500	11	3	12	0	1	0	249	249	0.531468987	21.0998154	49.4758759	111.609787	0.246208996	30504
+489	3	616	1	40	cplex	0	1	500	10	0	20	6	0.699999988	0	249	249	0.705578983	36.8752251	84.5614471	172.195877	1.47519898	50778
+490	3	616	1	40	cplex	1	0	453	11	1	20	6	0.699999988	0	249	249	0.463479996	34.7514076	79.316391	167.761688	1.47643602	59514
+491	3	616	1	40	cplex	1	1	453	11	2	20	6	0.699999988	0	249	249	0.56112498	34.2852936	79.6667404	169.060211	1.49443197	59514
+492	3	616	1	40	cplex	0	0	500	11	3	20	6	0.699999988	0	249	249	0.601312995	36.4277267	84.5782852	175.289444	1.48670495	50840
+493	3	617	1	40	cplex	0	1	500	11	0	24	6	0.75	0	249	249	0.708056986	44.21492	102.327385	203.840881	1.50465405	61008
+494	3	617	1	40	cplex	1	0	453	11	1	24	6	0.75	0	249	249	0.48211199	42.0083199	96.1348343	201.573517	1.49686003	71417
+495	3	617	1	40	cplex	1	1	453	11	2	24	6	0.75	0	249	249	0.609360993	42.6009064	96.4814682	197.981934	1.49437797	71417
+496	3	617	1	40	cplex	0	0	500	11	3	24	6	0.75	0	249	249	0.823614001	44.7583122	102.340538	207.384064	1.49821806	61008
+497	3	618	1	40	cplex	0	1	500	10	0	12	0	1	0	249	249	0.474447995	21.7582626	50.5859642	154.763657	0.239317998	30424
+498	3	618	1	40	cplex	1	0	453	11	1	12	0	1	0	249	249	0.341068	22.1374969	48.6739731	152.948288	0.258596003	35708
+499	3	618	1	40	cplex	1	1	453	11	2	12	0	1	0	249	249	0.395402014	20.3784695	48.5126572	152.353714	0.258772999	35708
+500	3	618	1	40	cplex	0	0	500	11	3	12	0	1	0	249	249	0.423103005	22.6107063	50.7011757	156.00856	0.244892001	30504
+501	3	619	1	40	cplex	0	1	500	10	0	10	0	1	0	249	249	0.551503003	18.8921337	42.6404037	131.409698	0.869193971	25353
+502	3	619	1	40	cplex	1	0	453	11	1	10	0	1	0	249	249	0.307415009	18.4305782	40.8749275	130.717773	0.851092994	29757
+503	3	619	1	40	cplex	1	1	453	11	2	10	0	1	0	249	249	0.393534988	17.1079712	41.2505646	127.947617	0.876689017	29757
+504	3	619	1	40	cplex	0	0	500	11	3	10	0	1	0	249	249	0.368411005	18.6992817	42.8124619	132.772781	0.884063005	25420
+505	3	620	1	40	cplex	0	1	1000	3	0	90	5	1	0.125	999	999	0.0131200003	0.00153999997	0.00461299997	0.0109430002	0.356180012	720
+506	3	620	1	40	cplex	1	0	979	11	1	90	5	1	0.125	999	999	0.0513029993	0.00210199994	0.0088320002	0.0136810001	0.302825004	1680
+507	3	620	1	40	cplex	1	1	979	3	2	90	5	1	0.125	999	999	0.0553559996	0.00133999996	0.00450900011	0.0114000002	0.328155011	720
+508	3	620	1	40	cplex	0	0	1000	11	3	90	5	1	0.125	999	999	0.0149180004	0.00211	0.00878699962	0.0150140002	0.362296999	1680
+509	3	621	1	40	cplex	0	1	1000	3	0	136	5	1	0.125	999	999	0.0190229993	0.00153999997	0.00452500023	0.0102049997	0.889518976	720
+510	3	621	1	40	cplex	1	0	979	11	1	136	5	1	0.125	999	999	0.0432329997	0.00209100009	0.00877599977	0.0152179999	1.13694203	1680
+511	3	621	1	40	cplex	1	1	979	3	2	136	5	1	0.125	999	999	0.0493809991	0.00127000001	0.00457500014	0.0112269996	1.32902706	720
+512	3	621	1	40	cplex	0	0	1000	11	3	136	5	1	0.125	999	999	0.0150009999	0.00208300003	0.00880399998	0.0145570002	0.949684024	1680
+513	3	622	1	40	cplex	0	1	1000	3	0	113	5	1	0.125	999	999	0.0178059991	0.00155499997	0.00454899995	0.010857	0.301297992	720
+514	3	622	1	40	cplex	1	0	979	11	1	113	5	1	0.125	999	999	0.0552130006	0.00258499989	0.00948499981	0.0154130002	0.297069013	1680
+515	3	622	1	40	cplex	1	1	979	3	2	113	5	1	0.125	999	999	0.0480929986	0.00129599997	0.0045380001	0.0106790001	0.964188993	720
+516	3	622	1	40	cplex	0	0	1000	11	3	113	5	1	0.125	999	999	0.016384	0.00207799999	0.00875299983	0.0157789998	0.301362991	1680
+517	3	623	1	40	cplex	0	1	1000	3	0	95	6	1	0.150000006	999	999	0.0140690003	0.00141499995	0.00457599992	0.0113350004	0.775126994	720
+518	3	623	1	40	cplex	1	0	979	11	1	95	6	1	0.150000006	999	999	0.0506349988	0.00213899999	0.00878299959	0.0150180003	0.774062991	1680
+519	3	623	1	40	cplex	1	1	979	3	2	95	6	1	0.150000006	999	999	0.0536019988	0.00156400003	0.00456300005	0.0112939999	0.851550996	720
+520	3	623	1	40	cplex	0	0	1000	11	3	95	6	1	0.150000006	999	999	0.0190990008	0.00251400005	0.00871900003	0.0155859999	0.808669984	1680
+521	3	624	1	40	cplex	0	1	1000	3	0	281	0	1	0	999	999	0.0156650003	0.001559	0.00452399999	0.0104560005	0.469747007	720
+522	3	624	1	40	cplex	1	0	979	11	1	281	0	1	0	999	999	0.0539119989	0.00255399989	0.00878500007	0.0147550004	0.46063301	1680
+523	3	624	1	40	cplex	1	1	979	3	2	281	0	1	0	999	999	0.0435050018	0.00126399996	0.00451799994	0.0123990001	0.487843007	720
+524	3	624	1	40	cplex	0	0	1000	11	3	281	0	1	0	999	999	0.0184569992	0.00209100009	0.00881300028	0.01468	0.475178003	1680
+525	3	625	1	40	cplex	0	1	1000	3	0	120	5	1	0.125	999	999	0.0180890001	0.001269	0.00450500008	0.0123450002	0.555001974	720
+526	3	625	1	40	cplex	1	0	979	11	1	120	5	1	0.125	999	999	0.0484360009	0.00209899992	0.00875599962	0.0146789998	0.615527987	1680
+527	3	625	1	40	cplex	1	1	979	3	2	120	5	1	0.125	999	999	0.050632	0.00154199998	0.00451399991	0.0111290002	0.593764007	720
+528	3	625	1	40	cplex	0	0	1000	11	3	120	5	1	0.125	999	999	0.0205680002	0.00255200011	0.00868900027	0.0148980003	1.33849502	1680
+529	3	626	1	40	cplex	0	1	1000	3	0	91	5	1	0.125	999	999	0.0166539997	0.00158699998	0.00450700009	0.0123330001	0.307078004	720
+530	3	626	1	40	cplex	1	0	979	11	1	91	5	1	0.125	999	999	0.0498999991	0.00208900007	0.00873900019	0.0158929992	0.301156014	1680
+531	3	626	1	40	cplex	1	1	979	3	2	91	5	1	0.125	999	999	0.0486960001	0.00126399996	0.0045210002	0.0122269997	0.305341005	720
+532	3	626	1	40	cplex	0	0	1000	11	3	91	5	1	0.125	999	999	0.0205090009	0.00261899992	0.00874700025	0.0162090007	0.384489	1680
+533	3	627	1	40	cplex	0	1	1000	3	0	190	0	1	0	999	999	0.0127349999	0.00154199998	0.0045380001	0.0119310003	0.476049989	720
+534	3	627	1	40	cplex	1	0	979	11	1	190	0	1	0	999	999	0.0538089983	0.00264000008	0.00881700031	0.0154990004	0.569850028	1680
+535	3	627	1	40	cplex	1	1	979	3	2	190	0	1	0	999	999	0.0476160012	0.00127899996	0.00451700017	0.0113770002	0.471736997	720
+536	3	627	1	40	cplex	0	0	1000	11	3	190	0	1	0	999	999	0.0207649991	0.00268799998	0.0087580001	0.0156789999	0.497141987	1680
+537	3	628	1	40	cplex	0	1	1000	3	0	90	5	1	0.125	999	999	0.0188740008	0.00155499997	0.0045909998	0.0116560003	1.10242999	720
+538	3	628	1	40	cplex	1	0	979	11	1	90	5	1	0.125	999	999	0.0520329997	0.00243199989	0.0088109998	0.0145969996	1.176	1680
+539	3	628	1	40	cplex	1	1	979	3	2	90	5	1	0.125	999	999	0.0430940017	0.00125900004	0.00451300014	0.0106220003	1.01328599	720
+540	3	628	1	40	cplex	0	0	1000	11	3	90	5	1	0.125	999	999	0.0205589999	0.00255799992	0.00876499992	0.0150499996	1.31118703	1680
+541	3	629	1	40	cplex	0	1	1000	3	0	189	0	1	0	999	999	0.00952600036	0.00130899996	0.00450799987	0.014765	0.446583986	720
+542	3	629	1	40	cplex	1	0	979	11	1	189	0	1	0	999	999	0.0504299998	0.00210699998	0.00868100021	0.0146310003	0.430133998	1680
+543	3	629	1	40	cplex	1	1	979	3	2	189	0	1	0	999	999	0.0477109998	0.00128500001	0.004526	0.0120660001	0.434983999	720
+544	3	629	1	40	cplex	0	0	1000	11	3	189	0	1	0	999	999	0.0206879992	0.002568	0.00870199967	0.0153139997	0.463142008	1680
+545	3	630	1	40	cplex	0	1	1000	5	0	31	0	1	0	974	974	0.377232999	0.444294989	1.06661904	1.06135905	0.92552501	6000
+546	3	630	1	40	cplex	1	0	993	11	1	31	0	1	0	974	974	0.319761008	0.636808991	1.37463999	1.26166499	0.942277014	9775
+547	3	630	1	40	cplex	1	1	993	5	2	31	0	1	0	974	974	0.308728009	0.409743994	0.993562996	1.00318801	0.958028972	6820
+548	3	630	1	40	cplex	0	0	1000	11	3	31	0	1	0	974	974	0.211413994	0.646876991	1.57562995	1.41789496	0.94985801	9052
+549	3	631	1	40	cplex	0	1	1000	5	0	22	0	1	0	974	974	0.192433	0.321862012	0.775072992	0.780637026	0.704577029	4258
+550	3	631	1	40	cplex	1	0	993	11	1	22	0	1	0	974	974	0.280683011	0.41269201	1.01373506	0.899384022	0.739296019	6937
+551	3	631	1	40	cplex	1	1	993	5	2	22	0	1	0	974	974	0.257346004	0.301434994	0.713674009	0.694764972	0.721671999	4840
+552	3	631	1	40	cplex	0	0	1000	11	3	22	0	1	0	974	974	0.322564006	0.476797014	1.16111696	1.04234099	0.741338015	6424
+553	3	632	1	40	cplex	0	1	1000	5	0	19	0	1	0	974	974	0.272823989	0.264730006	0.64971602	0.688935995	1.05559397	3677
+554	3	632	1	40	cplex	1	0	993	11	1	19	0	1	0	974	974	0.126698002	0.471531004	0.85145998	0.767144024	1.05111206	5991
+555	3	632	1	40	cplex	1	1	993	5	2	19	0	1	0	974	974	0.255699009	0.243897006	0.596322	0.59543997	1.03757596	4180
+556	3	632	1	40	cplex	0	0	1000	11	3	19	0	1	0	974	974	0.124820001	0.423545003	0.972163975	0.899738014	1.04811704	5548
+557	3	633	1	40	cplex	0	1	1000	6	0	57	0	1	0	974	974	0.484979004	0.611009002	1.47559798	1.25921595	0.837889016	8158
+558	3	633	1	40	cplex	1	0	982	11	1	57	0	1	0	974	974	0.204088002	0.44374299	1.13647902	0.983816028	0.850373983	16480
+559	3	633	1	40	cplex	1	1	982	7	2	57	0	1	0	974	974	0.161980003	1.025545	0.899415016	0.845156014	0.859239995	12996
+560	3	633	1	40	cplex	0	0	1000	11	3	57	0	1	0	974	974	0.490837008	0.769728005	2.04525995	1.66361105	0.815105975	11680
+561	3	634	1	40	cplex	0	1	1000	6	0	62	0	1	0	974	974	0.496684998	0.748079002	1.47507799	1.26004195	0.686474025	8158
+562	3	634	1	40	cplex	1	0	982	11	1	62	0	1	0	974	974	0.224988997	0.436488003	1.14548898	0.995025992	0.735170007	16480
+563	3	634	1	40	cplex	1	1	982	7	2	62	0	1	0	974	974	0.201123998	0.392933011	0.930983007	0.846553981	0.666217983	12996
+564	3	634	1	40	cplex	0	0	1000	11	3	62	0	1	0	974	974	0.275563002	0.793296993	2.09781289	1.65677702	0.710994005	11680
+565	3	635	1	40	cplex	0	1	1000	3	0	17	646	1	38	974	994	0.0611459985	0.0146559998	0.029972	0.0655829981	0.420138001	745
+566	3	635	1	40	cplex	1	0	993	11	1	17	646	1	38	974	994	0.0661870018	0.0150370002	0.0431060009	0.0590390004	0.42423901	1734
+567	3	635	1	40	cplex	1	1	993	3	2	17	646	1	38	974	994	0.0619839989	0.00948300026	0.0224099997	0.0483129993	1.23989105	837
+568	3	635	1	40	cplex	0	0	1000	11	3	17	646	1	38	974	994	0.0484329984	0.0215760004	0.0589939989	0.0780770034	0.409222007	1564
+569	3	636	1	40	cplex	0	1	1000	5	0	23	0	1	0	974	974	0.185811996	0.494408995	0.836661994	0.944290996	0.240594	4452
+570	3	636	1	40	cplex	1	0	993	11	1	23	0	1	0	974	974	0.304131001	0.393007994	1.05654502	1.06704795	0.216974005	7252
+571	3	636	1	40	cplex	1	1	993	5	2	23	0	1	0	974	974	0.189686999	0.31041199	0.763063014	0.847660005	0.255589992	5060
+572	3	636	1	40	cplex	0	0	1000	11	3	23	0	1	0	974	974	0.345097989	0.509428024	1.18021297	1.19516098	0.247364998	6716
+573	3	637	1	40	cplex	0	1	1000	5	0	73	0	1	0	974	974	0.289097011	0.759518981	1.40499401	1.33763099	0.812934995	7743
+574	3	637	1	40	cplex	1	0	993	11	1	73	0	1	0	974	974	0.335308999	0.689917028	2.63148093	1.60309398	0.828184009	12613
+575	3	637	1	40	cplex	1	1	993	5	2	73	0	1	0	974	974	0.467543989	0.684937	1.34192097	1.23624206	0.830380023	8800
+576	3	637	1	40	cplex	0	0	1000	11	3	73	0	1	0	974	974	0.406810999	0.899043977	2.10293007	1.79010403	0.811547995	11680
+577	3	638	1	40	cplex	0	1	1000	6	0	107	0	1	0	974	974	0.37903899	0.937565029	1.48382998	1.23599601	0.805257976	8158
+578	3	638	1	40	cplex	1	0	982	11	1	107	0	1	0	974	974	0.248545006	0.45085001	1.15871096	1.01014102	0.821272016	16480
+579	3	638	1	40	cplex	1	1	982	7	2	107	0	1	0	974	974	0.213731006	0.350008011	0.88698101	0.807224989	0.804464996	12996
+580	3	638	1	40	cplex	0	0	1000	11	3	107	0	1	0	974	974	0.408785999	0.810898006	2.05506992	1.60628402	0.796501994	11680
+581	3	639	1	40	cplex	0	1	1000	5	0	23	0	1	0	974	974	0.217908993	0.35335499	0.836070001	0.796661973	0.978559971	4452
+582	3	639	1	40	cplex	1	0	993	11	1	23	0	1	0	974	974	0.228846997	0.356453001	1.00403297	0.916378021	1.016716	7252
+583	3	639	1	40	cplex	1	1	993	5	2	23	0	1	0	974	974	0.236075997	0.324562997	0.765515983	0.700541973	1.00512302	5060
+584	3	639	1	40	cplex	0	0	1000	11	3	23	0	1	0	974	974	0.247622997	0.425814986	1.18442202	1.09523296	1.00983095	6716
+585	3	640	1	40	cplex	0	1	1000	7	0	31	1	1	0.0322580002	949	949	0.444442004	2.17382503	4.9043951	5.4131732	0.938077986	13788
+586	3	640	1	40	cplex	1	0	973	11	1	31	1	1	0.0322580002	949	949	0.34039399	1.52938998	3.91224909	4.45821619	0.888750017	23854
+587	3	640	1	40	cplex	1	1	973	9	2	31	1	1	0.0322580002	949	949	0.224950999	1.43658197	3.56547594	4.11309004	1.55937696	21373
+588	3	640	1	40	cplex	0	0	1000	11	3	31	1	1	0.0322580002	949	949	0.542993009	2.23217511	5.77770615	5.89309978	0.85017997	16802
+589	3	641	1	40	cplex	0	1	1000	7	0	14	0	1	0	949	949	0.252086014	1.01642501	2.22592497	3.37301898	0.230943993	6227
+590	3	641	1	40	cplex	1	0	973	11	1	14	0	1	0	949	949	0.181378007	0.70184797	1.76647305	2.79645205	0.258058995	10773
+591	3	641	1	40	cplex	1	1	973	9	2	14	0	1	0	949	949	0.222611994	0.69196099	1.62643003	2.66879106	0.250290006	9652
+592	3	641	1	40	cplex	0	0	1000	11	3	14	0	1	0	949	949	0.336205006	1.00894403	2.61953712	3.63211703	0.204379007	7588
+593	3	642	1	40	cplex	0	1	1000	7	0	17	0	1	0	949	949	0.424457014	1.14747	2.72759295	2.93322206	0.235434994	7561
+594	3	642	1	40	cplex	1	0	973	11	1	17	0	1	0	949	949	0.243643001	0.877919972	2.16612506	2.40412807	0.230552003	13081
+595	3	642	1	40	cplex	1	1	973	9	2	17	0	1	0	949	949	0.210198	0.857358992	1.96719301	2.23406506	0.231364995	11720
+596	3	642	1	40	cplex	0	0	1000	11	3	17	0	1	0	949	949	0.345196009	1.26017702	3.21143603	3.31621695	0.239038005	9214
+597	3	643	1	40	cplex	0	1	1000	8	0	64	0	1	0	949	949	0.474025995	3.05172992	7.6534481	5.71257877	0.910209	18534
+598	3	643	1	40	cplex	1	0	943	11	1	64	0	1	0	949	949	0.112277001	0.504584014	1.29218805	1.74126697	1.68712401	36720
+599	3	643	1	40	cplex	1	1	943	9	2	64	0	1	0	949	949	0.135750994	0.467119992	1.17925298	1.66012001	0.919757009	33736
+600	3	643	1	40	cplex	0	0	1000	11	3	64	0	1	0	949	949	0.478184998	3.01984692	7.55032301	6.40340519	1.12258601	21680
+601	3	644	1	40	cplex	0	1	1000	7	0	12	597	1	49.75	949	953	0.313791007	0.931034982	1.61753094	2.4499011	0.449180007	4910
+602	3	644	1	40	cplex	1	0	973	11	1	12	597	1	49.75	949	953	0.180022001	0.496609002	1.28339601	2.05957389	0.436704993	8824
+603	3	644	1	40	cplex	1	1	973	9	2	12	597	1	49.75	949	953	0.106582001	0.603636026	1.17625904	2.04976296	0.435811996	7797
+604	3	644	1	40	cplex	0	0	1000	11	3	12	597	1	49.75	949	953	0.248548999	1.61605597	1.99722099	2.75409508	0.42227599	6024
+605	3	645	1	40	cplex	0	1	1000	7	0	28	0	1	0	949	949	0.611797988	1.89382803	4.54427719	4.9123559	0.221930996	12454
+606	3	645	1	40	cplex	1	0	973	11	1	28	0	1	0	949	949	0.339724988	1.42996502	3.56902194	4.13857222	0.211744994	21546
+607	3	645	1	40	cplex	1	1	973	9	2	28	0	1	0	949	949	0.338685989	1.35835004	3.29856801	3.85382295	0.264984012	19304
+608	3	645	1	40	cplex	0	0	1000	11	3	28	0	1	0	949	949	0.576947987	2.09177899	5.37928009	5.62513208	0.255347997	15176
+609	3	646	1	40	cplex	0	1	1000	7	0	31	0	1	0	949	949	0.655137002	2.12416291	5.08986282	5.24039793	0.569467008	13788
+610	3	646	1	40	cplex	1	0	973	11	1	31	0	1	0	949	949	0.341769993	2.35911608	3.97939301	4.30946398	0.440616012	23854
+611	3	646	1	40	cplex	1	1	973	9	2	31	0	1	0	949	949	0.270846993	1.49965096	3.63861799	4.00363111	0.432909995	21373
+612	3	646	1	40	cplex	0	0	1000	11	3	31	0	1	0	949	949	0.439112991	2.30241299	5.86956406	5.85323286	0.442802995	16802
+613	3	647	1	40	cplex	0	1	1000	7	0	33	1	1	0.0303029995	949	949	0.529304028	2.25788689	5.46115303	5.67301702	0.879395008	14678
+614	3	647	1	40	cplex	1	0	973	11	1	33	1	1	0.0303029995	949	949	0.205889001	2.51527405	4.23387003	4.72599506	0.85817498	25393
+615	3	647	1	40	cplex	1	1	973	9	2	33	1	1	0.0303029995	949	949	0.264425009	1.700369	3.89256692	4.38173389	0.854974985	22752
+616	3	647	1	40	cplex	0	0	1000	11	3	33	1	1	0.0303029995	949	949	0.446772009	2.50533009	6.28587818	6.40420723	0.864576995	17886
+617	3	648	1	40	cplex	0	1	1000	8	0	21	0	1	0	949	949	0.558012009	1.832932	3.49665093	3.04463792	0.281551987	9730
+618	3	648	1	40	cplex	1	0	943	11	1	21	0	1	0	949	949	0.0846289992	0.234459996	0.665287971	0.979373991	0.271156013	19278
+619	3	648	1	40	cplex	1	1	943	9	2	21	0	1	0	949	949	0.0778530017	0.223994002	0.610798001	0.927246988	0.837311983	17711
+620	3	648	1	40	cplex	0	0	1000	11	3	21	0	1	0	949	949	0.481350988	1.50688195	4.00993776	3.36812305	0.232477993	11382
+621	3	649	1	40	cplex	0	1	1000	8	0	64	0	1	0	949	949	0.59672302	3.52113509	6.76162195	5.90961218	1.143255	18534
+622	3	649	1	40	cplex	1	0	943	11	1	64	0	1	0	949	949	0.128692001	0.525103986	1.32493806	1.73269296	0.950752974	36720
+623	3	649	1	40	cplex	1	1	943	9	2	64	0	1	0	949	949	0.114279002	0.461043	1.18028605	1.69531405	1.26882195	33736
+624	3	649	1	40	cplex	0	0	1000	11	3	64	0	1	0	949	949	0.553490996	2.97472095	7.71448278	6.34930801	1.20413303	21680
+625	3	650	1	40	cplex	0	1	1000	9	0	44	182	1	4.55000019	899	899	0.797863007	11.9326019	27.9243927	37.0550613	1.97017205	38911
+626	3	650	1	40	cplex	1	0	984	11	1	44	182	1	4.55000019	899	899	0.785067976	11.6885338	28.7473602	37.4476013	2.31625795	47195
+627	3	650	1	40	cplex	1	1	984	9	2	44	182	1	4.55000019	899	899	0.853344977	10.8795977	27.262598	36.7920723	2.04987001	45262
+628	3	650	1	40	cplex	0	0	1000	11	3	44	182	1	4.55000019	899	899	1.16697204	12.0752354	29.8027229	38.0990219	2.09044409	41680
+629	3	651	1	40	cplex	0	1	1000	9	0	105	5	1	0.125	899	899	1.16600299	13.2245541	28.6684418	35.1111908	0.612383008	39855
+630	3	651	1	40	cplex	1	0	911	11	1	105	5	1	0.125	899	899	0.198657006	2.58008695	6.35423708	10.7110043	0.339022994	67772
+631	3	651	1	40	cplex	1	1	911	11	2	105	5	1	0.125	899	899	0.187728003	2.591717	6.3425622	10.6149693	0.304830015	67772
+632	3	651	1	40	cplex	0	0	1000	11	3	105	5	1	0.125	899	899	1.03986502	11.6500597	30.3962116	36.3377457	0.354990989	41680
+633	3	652	1	40	cplex	0	1	1000	9	0	75	308	1	7.69999981	899	899	0.939202011	11.4495611	24.991991	35.1398277	2.66115308	39718
+634	3	652	1	40	cplex	1	0	966	11	1	75	308	1	7.69999981	899	899	0.796720028	10.9537067	23.4591045	33.0307655	2.35689592	54062
+635	3	652	1	40	cplex	1	1	966	10	2	75	308	1	7.69999981	899	899	0.723168015	10.5792294	22.9335289	32.6780586	2.4341321	52796
+636	3	652	1	40	cplex	0	0	1000	11	3	75	308	1	7.69999981	899	899	0.815768003	10.9977913	25.8820534	36.0199356	2.82206297	41680
+637	3	653	1	40	cplex	0	1	1000	9	0	69	0	1	0	899	899	0.871134996	10.8936634	24.397438	36.2450142	0.482315004	39068
+638	3	653	1	40	cplex	1	0	976	11	1	69	0	1	0	899	899	0.650582016	10.9075089	24.0003586	35.6191025	0.48715499	50615
+639	3	653	1	40	cplex	1	1	976	10	2	69	0	1	0	899	899	0.745818973	10.4502907	23.6460228	34.8797073	0.484423995	48991
+640	3	653	1	40	cplex	0	0	1000	11	3	69	0	1	0	899	899	0.966902971	11.547698	26.4741726	37.5452003	0.487224013	41680
+641	3	654	1	40	cplex	0	1	1000	9	0	45	0	1	0	899	899	0.88104701	11.595767	24.5394783	35.285965	0.92513001	38911
+642	3	654	1	40	cplex	1	0	984	11	1	45	0	1	0	899	899	0.825008988	10.763833	24.9234734	36.0037117	0.891435027	47195
+643	3	654	1	40	cplex	1	1	984	9	2	45	0	1	0	899	899	0.795719028	10.8668356	23.9070778	34.8538818	0.930038989	45262
+644	3	654	1	40	cplex	0	0	1000	11	3	45	0	1	0	899	899	0.800779998	12.1904907	27.1550751	36.852684	0.902154982	41680
+645	3	655	1	40	cplex	0	1	1000	9	0	58	0	1	0	899	899	0.894859016	13.0236101	25.5022926	35.7637596	0.373288006	38911
+646	3	655	1	40	cplex	1	0	984	11	1	58	0	1	0	899	899	1.08481205	11.5954647	25.9486618	36.2900658	0.379427999	47195
+647	3	655	1	40	cplex	1	1	984	9	2	58	0	1	0	899	899	0.838176012	11.7479973	24.9260178	35.3563232	0.370801002	45262
+648	3	655	1	40	cplex	0	0	1000	11	3	58	0	1	0	899	899	0.810393989	12.806385	27.534481	36.8176918	0.397195011	41680
+649	3	656	1	40	cplex	0	1	1000	9	0	51	334	0.125	7.4749999	899	899	0.715632975	12.3406754	25.4568481	35.6851463	1.75991595	38911
+650	3	656	1	40	cplex	1	0	984	11	1	51	334	0.125	7.4749999	899	899	0.849304974	11.4356356	25.2577457	35.4634743	1.77195299	47195
+651	3	656	1	40	cplex	1	1	984	9	2	51	334	0.125	7.4749999	899	899	0.725000024	10.7950697	24.3545666	34.9865837	1.77224505	45262
+652	3	656	1	40	cplex	0	0	1000	11	3	51	334	0.125	7.4749999	899	899	1.02658403	11.8737345	26.4012299	36.113308	1.78673303	41680
+653	3	657	1	40	cplex	0	1	1000	9	0	58	0	1	0	899	899	1.49076104	12.1320248	26.3981838	36.0931396	0.39715299	38911
+654	3	657	1	40	cplex	1	0	984	11	1	58	0	1	0	899	899	0.717875004	12.2151632	26.137146	35.8453941	0.375910997	47195
+655	3	657	1	40	cplex	1	1	984	9	2	58	0	1	0	899	899	0.809548974	12.0874033	25.4998817	34.7342529	0.383367002	45262
+656	3	657	1	40	cplex	0	0	1000	11	3	58	0	1	0	899	899	0.78125298	11.7867184	27.3157978	37.2461739	0.387520999	41680
+657	3	658	1	40	cplex	0	1	1000	9	0	53	78	0.075000003	1.02499998	899	899	1.81773496	11.7670412	26.0906506	35.6133232	1.717623	38911
+658	3	658	1	40	cplex	1	0	984	11	1	53	78	0.075000003	1.02499998	899	899	0.711656988	12.2036219	26.5589409	36.1005745	1.692662	47195
+659	3	658	1	40	cplex	1	1	984	9	2	53	78	0.075000003	1.02499998	899	899	0.956476986	12.3572636	25.1844425	34.9090614	1.73801601	45262
+660	3	658	1	40	cplex	0	0	1000	11	3	53	78	0.075000003	1.02499998	899	899	0.971138	12.0739021	27.7530746	36.5507278	1.767223	41680
+661	3	659	1	40	cplex	0	1	1000	9	0	39	0	1	0	899	899	1.11650002	11.5824757	25.9282036	35.5710258	0.258381009	37938
+662	3	659	1	40	cplex	1	0	984	11	1	39	0	1	0	899	899	0.768335998	12.0221844	25.9767914	35.4508095	0.361696988	46015
+663	3	659	1	40	cplex	1	1	984	9	2	39	0	1	0	899	899	1.04965103	10.8732357	24.7336102	34.7080269	0.262721002	44130
+664	3	659	1	40	cplex	0	0	1000	11	3	39	0	1	0	899	899	0.851997972	12.6734829	26.8542919	36.2147789	0.286700994	40638
+665	3	660	1	40	cplex	0	1	1000	11	0	111	3	1	0.075000003	799	799	1.59763098	50.0164833	109.601318	256.814972	0.453581989	81680
+666	3	660	1	40	cplex	1	0	907	11	1	111	3	1	0.075000003	799	799	0.859017015	37.9007721	85.4833374	236.333817	0.447553009	118317
+667	3	660	1	40	cplex	1	1	907	11	2	111	3	1	0.075000003	799	799	0.836736977	39.4488907	86.268959	233.088623	0.442162007	118317
+668	3	660	1	40	cplex	0	0	1000	11	3	111	3	1	0.075000003	799	799	1.78859401	50.6325912	109.438492	255.722992	0.457327992	81680
+669	3	661	1	40	cplex	0	1	1000	11	0	225	44	1	1.10000002	799	799	1.70493495	49.1419907	108.326935	283.181854	0.470643997	81680
+670	3	661	1	40	cplex	1	0	907	11	1	225	44	1	1.10000002	799	799	0.868776023	37.7243156	85.1287766	256.272766	1.243487	118317
+671	3	661	1	40	cplex	1	1	907	11	2	225	44	1	1.10000002	799	799	0.854403973	38.0039139	86.9457779	256.126587	0.495413989	118317
+672	3	661	1	40	cplex	0	0	1000	11	3	225	44	1	1.10000002	799	799	1.63049304	50.2321739	112.486832	281.16272	0.491183013	81680
+673	3	662	1	40	cplex	0	1	1000	10	0	51	4	0.949999988	0.0500000007	799	819	1.49511504	40.8600082	90.7931137	209.809708	0.948795974	73510
+674	3	662	1	40	cplex	1	0	932	11	1	51	4	0.949999988	0.0500000007	799	819	0.900846004	36.7985077	77.4586105	198.051849	0.897202015	100441
+675	3	662	1	40	cplex	1	1	932	11	2	51	4	0.949999988	0.0500000007	799	819	0.895811021	34.4950027	77.7140656	200.25621	0.912966013	100441
+676	3	662	1	40	cplex	0	0	1000	11	3	51	4	0.949999988	0.0500000007	799	819	2.52571797	39.1425781	90.2561417	211.837921	0.904344022	73680
+677	3	663	1	40	cplex	0	1	1000	11	0	80	0	1	0	799	799	1.63576996	49.2236328	113.58284	256.199127	0.303359002	81680
+678	3	663	1	40	cplex	1	0	907	11	1	80	0	1	0	799	799	0.760663986	41.1751518	87.8695679	227.866364	0.29183501	118317
+679	3	663	1	40	cplex	1	1	907	11	2	80	0	1	0	799	799	1.66582894	37.9863014	88.7443314	230.64003	1.13958204	118317
+680	3	663	1	40	cplex	0	0	1000	11	3	80	0	1	0	799	799	1.87579095	49.6948586	113.60685	251.927597	0.307027996	81680
+681	3	664	1	40	cplex	0	1	1000	10	0	135	3	1	0.075000003	799	799	1.81542397	48.9590073	112.588104	248.227768	0.550000012	81195
+682	3	664	1	40	cplex	1	0	907	11	1	135	3	1	0.075000003	799	799	0.926667988	40.156044	89.1359024	225.863937	0.649580002	118317
+683	3	664	1	40	cplex	1	1	907	11	2	135	3	1	0.075000003	799	799	0.917869985	38.6230736	88.1515579	222.040207	0.570728004	118317
+684	3	664	1	40	cplex	0	0	1000	11	3	135	3	1	0.075000003	799	799	1.72559297	49.7948952	114.588669	247.513107	0.598729014	81680
+685	3	665	1	40	cplex	0	1	1000	10	0	61	0	1	0	799	799	1.65366006	49.3590469	114.450233	261.175171	1.06049895	81527
+686	3	665	1	40	cplex	1	0	932	11	1	61	0	1	0	799	799	1.11846995	42.6798172	101.025246	250.052887	0.882375002	108507
+687	3	665	1	40	cplex	1	1	932	11	2	61	0	1	0	799	799	1.03732002	45.4778748	101.029259	244.218216	0.953392982	108507
+688	3	665	1	40	cplex	0	0	1000	11	3	61	0	1	0	799	799	1.72569597	50.1656227	115.171638	259.968018	0.879718006	81680
+689	3	600	1	40	cplex	0	1	500	10	0	68	2	1	0.0500000007	299	299	0.933793008	44.2186661	102.90889	223.130051	0.902436018	81525
+690	3	600	1	40	cplex	1	0	453	11	1	68	2	1	0.0500000007	299	299	0.635710001	43.0369987	98.189064	217.639923	0.844079018	98557
+691	3	600	1	40	cplex	1	1	453	11	2	68	2	1	0.0500000007	299	299	0.68838799	43.0338402	96.0694122	214.505142	0.862330973	98557
+692	3	600	1	40	cplex	0	0	500	11	3	68	2	1	0.0500000007	299	299	0.934234023	46.2944031	105.16951	226.734055	0.865826011	81680
+693	3	604	1	40	cplex	0	1	500	10	0	68	2	1	0.0500000007	299	299	0.79193902	45.5617256	104.505356	221.853806	0.875295997	81525
+694	3	604	1	40	cplex	1	0	453	11	1	68	2	1	0.0500000007	299	299	0.637297988	41.8244095	96.9646988	215.179306	0.875025988	98557
+695	3	604	1	40	cplex	1	1	453	11	2	68	2	1	0.0500000007	299	299	0.682654023	42.7487297	96.9237061	216.655701	0.873825014	98557
+696	3	604	1	40	cplex	0	0	500	11	3	68	2	1	0.0500000007	299	299	0.92710501	45.9821358	104.948349	224.370026	0.847190976	81680
+697	3	666	1	40	cplex	0	1	1000	11	0	82	3	1	0.075000003	799	799	1.55380905	45.5094986	106.070045	253.154922	0.389964998	81680
+698	3	666	1	40	cplex	1	0	907	11	1	82	3	1	0.075000003	799	799	0.889406979	36.1332817	82.4884644	229.443008	0.291395009	118317
+699	3	666	1	40	cplex	1	1	907	11	2	82	3	1	0.075000003	799	799	0.913487971	36.4711418	82.8366165	230.227859	0.279835999	118317
+700	3	666	1	40	cplex	0	0	1000	11	3	82	3	1	0.075000003	799	799	1.85339105	47.7139664	107.855659	255.612427	0.28993699	81680
+701	3	667	1	40	cplex	0	1	1000	10	0	63	0	1	0	799	799	1.63230801	48.1495399	105.54216	277.415771	0.761645973	81615
+702	3	667	1	40	cplex	1	0	907	11	1	63	0	1	0	799	799	0.802439988	37.7669411	82.0908432	255.682007	0.785310984	118317
+703	3	667	1	40	cplex	1	1	907	11	2	63	0	1	0	799	799	0.834052026	37.6527901	82.45858	255.393631	0.767386973	118317
+704	3	667	1	40	cplex	0	0	1000	11	3	63	0	1	0	799	799	1.57004201	47.8206367	105.432693	279.359375	0.782688022	81680
+705	3	668	1	40	cplex	0	1	1000	10	0	75	3	1	0.075000003	799	799	1.72499502	46.9418106	106.045929	339.163055	0.837592006	81517
+706	3	668	1	40	cplex	1	0	911	11	1	75	3	1	0.075000003	799	799	0.881056011	36.5194588	82.9418182	316.048798	0.843303025	116130
+707	3	668	1	40	cplex	1	1	911	11	2	75	3	1	0.075000003	799	799	0.889865994	37.3830948	84.6543503	313.309692	0.845812976	116130
+708	3	668	1	40	cplex	0	0	1000	11	3	75	3	1	0.075000003	799	799	1.68123305	46.2668877	106.769615	339.187347	0.823758006	81680
+709	3	669	1	40	cplex	0	1	1000	10	0	57	0	1	0	799	799	1.63378096	46.4793739	106.094887	288.485443	0.327914	81592
+710	3	669	1	40	cplex	1	0	911	11	1	57	0	1	0	799	799	0.856854022	37.585865	85.5909042	262.948334	0.336778015	116130
+711	3	669	1	40	cplex	1	1	911	11	2	57	0	1	0	799	799	0.905005991	37.6239052	84.1978073	263.445374	0.342595011	116130
+712	3	669	1	40	cplex	0	0	1000	11	3	57	0	1	0	799	799	1.56556499	46.9435234	107.539879	287.389069	0.345275015	81680
+713	3	670	1	40	cplex	0	1	1000	10	0	5	0	1	0	749	749	0.566528976	9.02908325	20.3842888	31.726738	0.405817002	12626
+714	3	670	1	40	cplex	1	0	907	11	1	5	0	1	0	749	749	0.290971994	7.60128021	17.5690327	28.7182102	0.431733996	17311
+715	3	670	1	40	cplex	1	1	907	11	2	5	0	1	0	749	749	0.359337002	7.75114679	17.5705185	28.6876736	0.430550009	17311
+716	3	670	1	40	cplex	0	0	1000	11	3	5	0	1	0	749	749	0.454697996	9.46973133	20.6899433	31.6585121	0.442295015	12710
+717	3	671	1	40	cplex	0	1	1000	10	0	12	0	1	0	749	749	0.867061019	21.5411434	48.5683517	78.9888992	0.273754001	30304
+718	3	671	1	40	cplex	1	0	907	11	1	12	0	1	0	749	749	0.518006027	17.9183598	41.6953659	73.2223969	0.266916007	41548
+719	3	671	1	40	cplex	1	1	907	11	2	12	0	1	0	749	749	0.521939993	18.7293873	42.518528	73.1332169	0.275424987	41548
+720	3	671	1	40	cplex	0	0	1000	11	3	12	0	1	0	749	749	1.72851706	20.2202835	48.4195404	79.2301559	0.255371004	30504
+721	3	672	1	40	cplex	0	1	1000	10	0	46	1	1	0.0250000004	749	749	1.93251598	74.4784927	168.164276	389.882751	0.402258009	101628
+722	3	672	1	40	cplex	1	0	907	11	1	46	1	1	0.0250000004	749	749	1.25191295	61.5078545	146.653351	365.087921	0.326465994	138495
+723	3	672	1	40	cplex	1	1	907	11	2	46	1	1	0.0250000004	749	749	1.25783503	64.9292068	146.003143	367.543884	0.390785009	138495
+724	3	672	1	40	cplex	0	0	1000	11	3	46	1	1	0.0250000004	749	749	2.22183394	72.0393906	169.978958	391.521606	0.333732992	101680
+725	3	673	1	40	cplex	0	1	1000	10	0	14	0	1	0	749	749	1.01334095	24.4868813	59.4979019	92.5147247	0.653330028	35491
+726	3	673	1	40	cplex	1	0	907	11	1	14	0	1	0	749	749	0.554121971	21.0782547	49.3737373	84.9967422	0.632894993	48473
+727	3	673	1	40	cplex	1	1	907	11	2	14	0	1	0	749	749	0.579208016	21.6407681	50.1656494	86.8106384	0.700590014	48473
+728	3	673	1	40	cplex	0	0	1000	11	3	14	0	1	0	749	749	0.975677013	26.2708511	58.6836815	94.3497314	0.632405996	35588
+729	3	674	1	40	cplex	0	1	1000	10	0	13	0	1	0	749	749	0.929587007	22.4517403	54.4549332	86.1888351	0.632045984	32956
+730	3	674	1	40	cplex	1	0	907	11	1	13	0	1	0	749	749	0.48862499	19.8826904	46.4293137	79.1151505	0.646898985	45010
+731	3	674	1	40	cplex	1	1	907	11	2	13	0	1	0	749	749	0.558960974	20.418457	47.5671997	79.7953186	0.656126022	45010
+732	3	674	1	40	cplex	0	0	1000	11	3	13	0	1	0	749	749	0.98882401	23.6009216	54.9555244	86.9879227	0.649183989	33046
+733	3	675	1	40	cplex	0	1	1000	10	0	9	0	1	0	749	749	0.627454996	16.2000942	37.5206184	58.9244194	1.03027904	22728
+734	3	675	1	40	cplex	1	0	907	11	1	9	0	1	0	749	749	0.468104005	13.6670456	32.3360825	55.0186806	0.960650027	31161
+735	3	675	1	40	cplex	1	1	907	11	2	9	0	1	0	749	749	0.453350991	13.1444778	32.1933365	54.7772255	0.963442981	31161
+736	3	675	1	40	cplex	0	0	1000	11	3	9	0	1	0	749	749	0.574799001	15.8927336	37.4993134	60.0188713	0.954204977	22878
+737	3	676	1	40	cplex	0	1	1000	10	0	8	0	1	0	749	749	0.673888028	14.8552628	33.6264648	51.3774986	0.422105014	20227
+738	3	676	1	40	cplex	1	0	907	11	1	8	0	1	0	749	749	0.358437985	12.6168861	29.1265373	46.7226295	0.439723998	27699
+739	3	676	1	40	cplex	1	1	907	11	2	8	0	1	0	749	749	0.457075	12.4515877	29.2335472	46.4316635	0.500256002	27699
+740	3	676	1	40	cplex	0	0	1000	11	3	8	0	1	0	749	749	0.654150009	14.454277	34.6934738	50.9344673	0.474103987	20336
+741	3	677	1	40	cplex	0	1	1000	10	0	6	0	1	0	749	749	0.565894008	11.0930033	25.8190994	39.5908203	0.945671022	15152
+742	3	677	1	40	cplex	1	0	907	11	1	6	0	1	0	749	749	0.321617007	9.65594769	22.3523254	36.9382668	0.97933197	20774
+743	3	677	1	40	cplex	1	1	907	11	2	6	0	1	0	749	749	0.369933009	9.69450855	22.2344322	36.7923851	0.94392401	20774
+744	3	677	1	40	cplex	0	0	1000	11	3	6	0	1	0	749	749	1.57149303	11.2508116	26.2431622	39.7008858	0.979678988	15252
+746	3	678	1	40	cplex	0	1	1000	10	0	73	64	1	1.60000002	749	749	2.12132812	70.5585632	155.819748	388.080994	0.962758005	101015
+747	3	678	1	40	cplex	1	0	907	11	1	73	64	1	1.60000002	749	749	1.20814395	61.6021385	135.822906	364.249939	0.432013005	138495
+748	3	678	1	40	cplex	1	1	907	11	2	73	64	1	1.60000002	749	749	1.23374903	62.9110298	135.835983	364.250366	0.420648992	138495
+749	3	678	1	40	cplex	0	0	1000	11	3	73	64	1	1.60000002	749	749	2.10203004	72.6562347	158.374252	390.270782	0.417183012	101680
+750	3	679	1	40	cplex	0	1	1000	10	0	17	0	1	0	749	749	0.954437017	31.4575653	66.1962814	128.376678	0.872229993	43096
+751	3	679	1	40	cplex	1	0	907	11	1	17	0	1	0	749	749	0.665627003	26.4634838	57.6647453	118.352989	0.865010023	58860
+752	3	679	1	40	cplex	1	1	907	11	2	17	0	1	0	749	749	0.712073982	26.933424	57.2571754	117.999641	1.00539994	58860
+753	3	679	1	40	cplex	0	0	1000	11	3	17	0	1	0	749	749	1.20800102	31.1911812	67.0399399	128.17308	0.884277999	43214
+1	0	0	1	40	cplex	0	1	50	2	0	10	0	1	0	49	49	0.0131409997	0.015718	0.00731700007	0.00842100009	1.26817405	150
+2	0	0	1	40	cplex	1	0	41	11	1	10	0	1	0	49	49	0.00378999999	0.0028880001	0.00435400009	0.0073210001	1.09431696	420
+3	0	0	1	40	cplex	1	1	41	2	2	10	0	1	0	49	49	0.00278500002	0.000928999973	0.00139500003	0.00596399978	1.04407704	150
+4	0	0	1	40	cplex	0	0	50	11	3	10	0	1	0	49	49	0.00127200002	0.00121699995	0.00211400003	0.00786199979	1.05527496	420
+5	0	0	1	40	cplex	1	1	41	1	4	10	0	1	0	49	49	0.00317799998	0.00144499994	0.00165300001	0.0134049999	1.05804396	85
+6	0	1	1	40	cplex	0	1	50	2	0	12	0	1	0	49	49	0.001162	0.00080400001	0.00135999999	0.00696599996	1.02647698	180
+7	0	1	1	40	cplex	1	0	41	11	1	12	0	1	0	49	49	0.00150000001	0.00122700003	0.00253499998	0.00774100004	0.973499	504
+8	0	1	1	40	cplex	1	1	41	2	2	12	0	1	0	49	49	0.00149900001	0.00111900002	0.00135100004	0.00668000011	1.02923203	180
+9	0	1	1	40	cplex	0	0	50	11	3	12	0	1	0	49	49	0.000742000004	0.00107899995	0.00238800002	0.00841300003	0.980103016	504
+10	0	1	1	40	cplex	1	1	41	1	4	12	0	1	0	49	49	0.00132599997	0.000737000024	0.00163199997	0.0157939997	1.014907	102
+11	0	2	1	40	cplex	0	1	50	2	0	6	0	1	0	49	49	0.000635000004	0.000319000013	0.000707999978	0.00454000011	0.497851014	90
+12	0	2	1	40	cplex	1	0	41	11	1	6	0	1	0	49	49	0.00117299997	0.000546000025	0.00134900003	0.00750599988	0.50326401	252
+13	0	2	1	40	cplex	1	1	41	2	2	6	0	1	0	49	49	0.00188	0.000232999999	0.000851000019	0.00596399978	0.543473005	90
+14	0	2	1	40	cplex	0	0	50	11	3	6	0	1	0	49	49	0.000928000023	0.000648999994	0.00240699993	0.00853199977	0.500761986	252
+15	0	2	1	40	cplex	1	1	41	1	4	6	0	1	0	49	49	0.00114800001	0.000403999991	0.000914999982	0.0127029996	0.489295006	51
+16	0	3	1	40	cplex	0	1	50	2	0	16	0	1	0	49	49	0.000740999996	0.000875000027	0.00158200006	0.00688799983	0.741151989	240
+17	0	3	1	40	cplex	1	0	41	11	1	16	0	1	0	49	49	0.00132100005	0.00115100003	0.00303900009	0.00900099985	0.743312001	672
+18	0	3	1	40	cplex	1	1	41	2	2	16	0	1	0	49	49	0.00132100005	0.000548999989	0.001575	0.00813900027	0.757402003	240
+19	0	3	1	40	cplex	0	0	50	11	3	16	0	1	0	49	49	0.000762999989	0.00125199999	0.0030749999	0.00796100032	0.773132026	672
+20	0	3	1	40	cplex	1	1	41	1	4	16	0	1	0	49	49	0.00172199996	0.000708999985	0.00201499998	0.0173279997	0.778567016	136
+21	0	4	1	40	cplex	0	1	50	2	0	8	0	1	0	49	49	0.00111199997	0.000812000013	0.0022799999	0.00811399985	0.465833992	120
+22	0	4	1	40	cplex	1	0	41	11	1	8	0	1	0	49	49	0.00112100004	0.000516999979	0.00168099999	0.00735400012	0.433072001	336
+23	0	4	1	40	cplex	1	1	41	2	2	8	0	1	0	49	49	0.000969999994	0.000345000008	0.000893999997	0.00581	0.447407991	120
+24	0	4	1	40	cplex	0	0	50	11	3	8	0	1	0	49	49	0.000957000011	0.000719000003	0.00295399991	0.00786000025	0.463970989	336
+25	0	4	1	40	cplex	1	1	41	1	4	8	0	1	0	49	49	0.00144300004	0.000549999997	0.00111099996	0.0129030002	0.505528986	68
+26	0	5	1	40	cplex	0	1	50	2	0	8	0	1	0	49	49	0.00102500001	0.000475999987	0.00151099998	0.00622100011	0.994753003	120
+27	0	5	1	40	cplex	1	0	41	11	1	8	0	1	0	49	49	0.00138999999	0.000689000008	0.00290399999	0.00733899977	0.989138007	336
+28	0	5	1	40	cplex	1	1	41	2	2	8	0	1	0	49	49	0.00136700005	0.000427999999	0.00148099998	0.00544400001	0.999342978	120
+29	0	5	1	40	cplex	0	0	50	11	3	8	0	1	0	49	49	0.000745999976	0.000433000008	0.00167899998	0.00757100014	0.997116983	336
+30	0	5	1	40	cplex	1	1	41	1	4	8	0	1	0	49	49	0.000893999997	0.000349000009	0.00106599997	0.0127290003	1.01029098	68
+31	0	6	1	40	cplex	0	1	50	2	0	12	0	1	0	49	49	0.000696000003	0.000658000004	0.00120299996	0.0079330001	1.05787098	180
+32	0	6	1	40	cplex	1	0	41	11	1	12	0	1	0	49	49	0.00145600003	0.00110899995	0.00258899992	0.00784400012	0.987599015	504
+33	0	6	1	40	cplex	1	1	41	2	2	12	0	1	0	49	49	0.000939999998	0.00039999999	0.001177	0.00821399968	0.966055989	180
+34	0	6	1	40	cplex	0	0	50	11	3	12	0	1	0	49	49	0.000684999977	0.000599000021	0.00239500008	0.00802099984	0.962503016	504
+35	0	6	1	40	cplex	1	1	41	1	4	12	0	1	0	49	49	0.000890999974	0.000561000023	0.00154600001	0.0147789996	0.967535973	102
+36	0	7	1	40	cplex	0	1	50	2	0	9	0	1	0	49	49	0.000643000007	0.00026999999	0.000953999988	0.00681099994	0.895183027	135
+37	0	7	1	40	cplex	1	0	41	11	1	9	0	1	0	49	49	0.00080899999	0.000456999987	0.00187200005	0.00756500009	0.892563999	378
+38	0	7	1	40	cplex	1	1	41	2	2	9	0	1	0	49	49	0.00136999995	0.000410000008	0.00164999999	0.0067929998	1.365206	135
+39	0	7	1	40	cplex	0	0	50	11	3	9	0	1	0	49	49	0.000902	0.000541999994	0.00186600001	0.00773700001	0.889981985	378
+40	0	7	1	40	cplex	1	1	41	1	4	9	0	1	0	49	49	0.00131800002	0.000545000017	0.00161899999	0.0133530004	0.871583998	76
+41	0	8	1	40	cplex	0	1	50	2	0	10	0	1	0	49	49	0.000635000004	0.000338999991	0.00113999995	0.00723600015	0.233482003	150
+42	0	8	1	40	cplex	1	0	41	11	1	10	0	1	0	49	49	0.00130300003	0.000775000022	0.00360399997	0.00847200025	0.260830998	420
+43	0	8	1	40	cplex	1	1	41	2	2	10	0	1	0	49	49	0.00134700001	0.000451	0.00175399997	0.0066829999	0.293146014	150
+44	0	8	1	40	cplex	0	0	50	11	3	10	0	1	0	49	49	0.000900999992	0.00078100001	0.00208000001	0.00726700015	0.259526998	420
+45	0	8	1	40	cplex	1	1	41	1	4	10	0	1	0	49	49	0.00131199998	0.000529000012	0.00188500003	0.0140739996	0.246635005	85
+46	0	9	1	40	cplex	0	1	50	2	0	6	0	1	0	49	49	0.000574000005	0.000228999997	0.000921999977	0.00679800007	0.916622996	90
+47	0	9	1	40	cplex	1	0	41	11	1	6	0	1	0	49	49	0.00116999994	0.000559000007	0.00234499993	0.00790899992	0.919932008	252
+48	0	9	1	40	cplex	1	1	41	2	2	6	0	1	0	49	49	0.000859000022	0.000203999996	0.000705000013	0.00551299984	0.910812974	90
+49	0	9	1	40	cplex	0	0	50	11	3	6	0	1	0	49	49	0.000814000028	0.00054400001	0.00232199999	0.00682300003	0.917304993	252
+50	0	9	1	40	cplex	1	1	41	1	4	6	0	1	0	49	49	0.00125099998	0.000440000003	0.00135200005	0.0120900003	1.011307	51
+51	0	10	1	40	cplex	0	1	50	5	0	3	0	1	0	24	24	0.0139459996	0.0518510006	0.0953589976	0.207466006	0.225870997	598
+52	0	10	1	40	cplex	1	0	41	11	1	3	0	1	0	24	24	0.00889899954	0.0486869998	0.101790003	0.188133001	0.207562998	1003
+53	0	10	1	40	cplex	1	1	41	6	2	3	0	1	0	24	24	0.0109909996	0.0444150008	0.0827030018	0.172763005	0.209481999	745
+54	0	10	1	40	cplex	0	0	50	11	3	3	0	1	0	24	24	0.0121229999	0.0649079978	0.122014001	0.289934993	0.218462005	876
+55	0	10	1	40	cplex	1	1	41	1	4	3	0	1	0	24	24	0.0115289995	0.0164599996	0.0244600009	0.203783005	0.221438006	110
+56	0	11	1	40	cplex	0	1	50	5	0	7	0	1	0	24	24	0.0150340004	0.113007002	0.202086002	0.326487988	0.257477999	1397
+57	0	11	1	40	cplex	1	0	41	11	1	7	0	1	0	24	24	0.0114519997	0.109489001	0.236695006	0.334603995	0.212583005	2342
+58	0	11	1	40	cplex	1	1	41	6	2	7	0	1	0	24	24	0.0133959996	0.0906419978	0.185989007	0.289148003	0.218456998	1739
+59	0	11	1	40	cplex	0	0	50	11	3	7	0	1	0	24	24	0.0142430002	0.172869995	0.295343995	0.396611989	0.218571007	2044
+60	0	11	1	40	cplex	1	1	41	1	4	7	7	0	0	24		0.0143449996	0.0499709994	0.0837740004	0.801054001	0.0987000018	273
+61	0	12	1	40	cplex	0	1	50	5	0	6	0	1	0	24	24	0.0132060004	0.131909996	0.182430997	0.283371001	0.214373007	1197
+62	0	12	1	40	cplex	1	0	41	11	1	6	0	1	0	24	24	0.0112669999	0.0956080034	0.205534995	0.291539997	0.224580005	2007
+63	0	12	1	40	cplex	1	1	41	6	2	6	0	1	0	24	24	0.010768	0.0773489997	0.159612	0.247529	0.203174993	1490
+64	0	12	1	40	cplex	0	0	50	11	3	6	0	1	0	24	24	0.0138769997	0.114444003	0.241074994	0.352398008	0.205189005	1752
+65	0	12	1	40	cplex	1	1	41	1	4	6	0	1	0	24	24	0.0118890004	0.0265379995	0.0440739989	0.441273004	0.248279005	220
+66	0	13	1	40	cplex	0	1	50	5	0	5	0	1	0	24	24	0.0126259997	0.0745609999	0.148148	0.419306993	0.209205002	1009
+67	0	13	1	40	cplex	1	0	38	11	1	5	0	1	0	24	24	0.00806799997	0.0811429992	0.165258005	0.364645988	0.206990004	1878
+68	0	13	1	40	cplex	1	1	38	6	2	5	0	1	0	24	24	0.00983100012	0.0723370016	0.133337006	0.576548994	0.233556002	1436
+69	0	13	1	40	cplex	0	0	50	11	3	5	0	1	0	24	24	0.0129310004	0.0986969993	0.208745003	0.424239993	0.218066007	1460
+70	0	13	1	40	cplex	1	1	38	1	4	5	0	1	0	24	24	0.00755799981	0.0172029994	0.0289290007	0.157000005	0.223362997	207
+71	0	14	1	40	cplex	0	1	50	5	0	7	0	1	0	24	24	0.0134939998	0.111607	0.220331997	0.366917014	0.214827001	1397
+72	0	14	1	40	cplex	1	0	41	11	1	7	0	1	0	24	24	0.011279	0.116673	0.246260002	0.447284997	0.235138997	2342
+73	0	14	1	40	cplex	1	1	41	6	2	7	0	1	0	24	24	0.0103049995	0.0954720005	0.190239996	0.278333992	0.229677007	1739
+74	0	14	1	40	cplex	0	0	50	11	3	7	0	1	0	24	24	0.0154799996	0.134645	0.293529987	0.401852012	0.228502005	2044
+75	0	14	1	40	cplex	1	1	41	1	4	7	0	1	0	24	24	0.0107490001	0.0282349996	0.0468120016	0.265603989	0.270972997	256
+76	0	15	1	40	cplex	0	1	50	5	0	4	0	1	0	24	24	0.0124960002	0.0607080013	0.118575998	0.249226004	0.188103005	798
+77	0	15	1	40	cplex	1	0	41	11	1	4	0	1	0	24	24	0.00883900002	0.0616879985	0.135371	0.236433998	0.190830007	1338
+78	0	15	1	40	cplex	1	1	41	6	2	4	0	1	0	24	24	0.0104379999	0.0556670018	0.102757998	0.204006001	0.214426994	993
+79	0	15	1	40	cplex	0	0	50	11	3	4	0	1	0	24	24	0.0122389998	0.0842870027	0.160827994	0.336973011	0.196989	1168
+80	0	15	1	40	cplex	1	1	41	1	4	4	0	1	0	24	24	0.0087980004	0.0170910005	0.0290280003	0.30261001	0.185776994	146
+81	0	16	1	40	cplex	0	1	50	5	0	4	0	1	0	24	24	0.0104860002	0.0567429997	0.116213001	0.227890998	0.199705005	798
+82	0	16	1	40	cplex	1	0	41	11	1	4	0	1	0	24	24	0.00893399958	0.0645399988	0.138477996	0.222951993	0.191305995	1338
+83	0	16	1	40	cplex	1	1	41	6	2	4	0	1	0	24	24	0.00981900003	0.0604630001	0.106996	0.197012007	0.204043999	993
+84	0	16	1	40	cplex	0	0	50	11	3	4	0	1	0	24	24	0.011682	0.0746779963	0.161478996	0.262452006	0.188378006	1168
+85	0	16	1	40	cplex	1	1	41	1	4	4	4	0	0	24		0.0100109996	0.0321349986	0.0530150011	0.606136978	0.0911040008	156
+86	0	17	1	40	cplex	0	1	50	5	0	4	0	1	0	24	24	0.0123849995	0.0625500008	0.116345003	0.237786993	0.225268006	798
+87	0	17	1	40	cplex	1	0	41	11	1	4	0	1	0	24	24	0.00844199955	0.0646089986	0.133591995	0.250984013	0.216068	1338
+88	0	17	1	40	cplex	1	1	41	6	2	4	0	1	0	24	24	0.00921699964	0.0529999994	0.105269	0.199205995	0.217123002	993
+89	0	17	1	40	cplex	0	0	50	11	3	4	0	1	0	24	24	0.011496	0.0809070021	0.163060993	0.280050993	0.177110001	1168
+90	0	17	1	40	cplex	1	1	41	1	4	4	0	1	0	24	24	0.00909399986	0.0179839991	0.0300680008	0.248386994	0.222530007	146
+91	0	18	1	40	cplex	0	1	50	5	0	2	0	1	0	24	24	0.00953199994	0.0331370011	0.0626770034	0.189749002	0.200380996	399
+92	0	18	1	40	cplex	1	0	41	11	1	2	0	1	0	24	24	0.00741099985	0.034740001	0.0709590018	0.237418994	0.208954006	669
+93	0	18	1	40	cplex	1	1	41	6	2	2	0	1	0	24	24	0.00831700023	0.0328250006	0.0584810004	0.154745996	0.199430004	496
+94	0	18	1	40	cplex	0	0	50	11	3	2	0	1	0	24	24	0.0102319997	0.043974001	0.0863469988	0.209911004	0.199247003	584
+95	0	18	1	40	cplex	1	1	41	1	4	2	2	0	0	24		0.00894400012	0.0168719999	0.0266299993	0.418397993	0.0924659967	78
+96	0	19	1	40	cplex	0	1	50	5	0	8	0	1	0	24	24	0.0167289991	0.125909999	0.246910006	0.360828996	0.197710007	1596
+97	0	19	1	40	cplex	1	0	41	11	1	8	0	1	0	24	24	0.00917799957	0.42879501	0.286114991	0.363343	0.204098001	2677
+98	0	19	1	40	cplex	1	1	41	6	2	8	0	1	0	24	24	0.0129770003	0.117876001	0.230068997	0.298157007	0.193333	1987
+99	0	19	1	40	cplex	0	0	50	11	3	8	0	1	0	24	24	0.0133910002	0.154391006	0.336919993	0.428427994	0.204895005	2336
+100	0	19	1	40	cplex	1	1	41	1	4	8	0	1	0	24	24	0.0117650004	0.0294569992	0.0536900014	0.295807004	0.203266993	293
+101	0	20	1	40	cplex	0	1	100	2	0	8	0	1	0	99	99	0.000783999974	0.000250000012	0.000861999986	0.00758300023	1.00001204	120
+102	0	20	1	40	cplex	1	0	96	11	1	8	0	1	0	99	99	0.00162	0.000492000021	0.00170000002	0.00794600043	0.978857994	336
+103	0	20	1	40	cplex	1	1	96	2	2	8	0	1	0	99	99	0.00117399998	0.000304999994	0.000855999999	0.00715399999	0.961462975	120
+104	0	20	1	40	cplex	0	0	100	11	3	8	0	1	0	99	99	0.00070199999	0.000510999991	0.00171400001	0.00807099976	0.947202981	336
+105	0	20	1	40	cplex	1	1	96	1	4	8	0	1	0	99	99	0.00118400005	0.000411999994	0.00106299995	0.014033	0.984582007	68
+106	0	21	1	40	cplex	0	1	100	2	0	9	0	1	0	99	99	0.000857000006	0.000268000003	0.000937999983	0.00690500019	0.952387989	135
+107	0	21	1	40	cplex	1	0	96	11	1	9	0	1	0	99	99	0.00110500003	0.000445999991	0.00188	0.00807099976	0.945987999	378
+108	0	21	1	40	cplex	1	1	96	2	2	9	0	1	0	99	99	0.00116700004	0.000300999993	0.000942000013	0.00717600016	0.943415999	135
+109	0	21	1	40	cplex	0	0	100	11	3	9	0	1	0	99	99	0.000722000026	0.000548999989	0.00193200004	0.00817400031	0.935962975	378
+110	0	21	1	40	cplex	1	1	96	1	4	9	0	1	0	99	99	0.00119900005	0.000469999999	0.00118200004	0.0151230004	0.939009011	76
+111	0	22	1	40	cplex	0	1	100	2	0	8	0	1	0	99	99	0.000702999998	0.000269000011	0.000882999972	0.00546499994	0.385693014	120
+112	0	22	1	40	cplex	1	0	96	11	1	8	0	1	0	99	99	0.00130400003	0.000307999988	0.00199700007	0.00749799982	0.393431008	336
+113	0	22	1	40	cplex	1	1	96	2	2	8	0	1	0	99	99	0.00109499996	0.000241000002	0.000850000011	0.00667400006	0.514928997	120
+114	0	22	1	40	cplex	0	0	100	11	3	8	0	1	0	99	99	0.000640999991	0.000483999989	0.00173599995	0.00819600001	0.392250001	336
+115	0	22	1	40	cplex	1	1	96	1	4	8	0	1	0	99	99	0.00105900003	0.000338999991	0.00109300006	0.0140009997	0.398398012	68
+116	0	23	1	40	cplex	0	1	100	2	0	5	0	1	0	99	99	0.000584999972	0.000197999994	0.000607999973	0.0071370001	0.270750999	75
+117	0	23	1	40	cplex	1	0	96	11	1	5	0	1	0	99	99	0.00158899999	0.000316999998	0.00117299997	0.00737799983	0.270646989	210
+118	0	23	1	40	cplex	1	1	96	2	2	5	0	1	0	99	99	0.000986999949	0.000190000006	0.000575000013	0.00513599999	0.265145004	75
+119	0	23	1	40	cplex	0	0	100	11	3	5	0	1	0	99	99	0.000831999991	0.000434999994	0.001177	0.00750999991	0.263359994	210
+120	0	23	1	40	cplex	1	1	96	1	4	5	0	1	0	99	99	0.00167400006	0.000352000003	0.000738999981	0.0134549998	0.258965999	42
+121	0	24	1	40	cplex	0	1	100	2	0	9	0	1	0	99	99	0.000723999983	0.000265999988	0.000958000019	0.00763399992	0.933706999	135
+122	0	24	1	40	cplex	1	0	96	11	1	9	0	1	0	99	99	0.00122400001	0.000452000007	0.00196500006	0.00796199962	0.936905026	378
+123	0	24	1	40	cplex	1	1	96	2	2	9	0	1	0	99	99	0.00109399995	0.000300999993	0.000939999998	0.00699099991	1.04306495	135
+124	0	24	1	40	cplex	0	0	100	11	3	9	0	1	0	99	99	0.000690000015	0.000546000025	0.00189800002	0.00841400027	0.954008996	378
+125	0	24	1	40	cplex	1	1	96	1	4	9	0	1	0	99	99	0.001132	0.000452000007	0.00118599995	0.0149809998	0.941137016	76
+126	0	25	1	40	cplex	0	1	100	2	0	8	0	1	0	99	99	0.000666000007	0.000311000011	0.000852000026	0.00707399985	0.90773797	120
+127	0	25	1	40	cplex	1	0	96	11	1	8	0	1	0	99	99	0.00110899995	0.000488999998	0.00172299996	0.00760499993	0.900860012	336
+128	0	25	1	40	cplex	1	1	96	2	2	8	0	1	0	99	99	0.00109699997	0.000300000014	0.000843000016	0.00642299978	0.899159014	120
+129	0	25	1	40	cplex	0	0	100	11	3	8	0	1	0	99	99	0.000638000027	0.000492000021	0.00170699996	0.00780500006	0.890091002	336
+130	0	25	1	40	cplex	1	1	96	1	4	8	0	1	0	99	99	0.00150400004	0.000419999997	0.00106899999	0.0140620004	0.900466979	68
+131	0	26	1	40	cplex	0	1	100	2	0	9	0	1	0	99	99	0.000675000018	0.000319999992	0.000945999986	0.00699000014	0.952108026	135
+132	0	26	1	40	cplex	1	0	96	11	1	9	0	1	0	99	99	0.00115300005	0.000441000011	0.001881	0.00753200008	1.38305604	378
+133	0	26	1	40	cplex	1	1	96	2	2	9	0	1	0	99	99	0.00110300002	0.000299000007	0.000949000008	0.00720900018	0.967916012	135
+134	0	26	1	40	cplex	0	0	100	11	3	9	0	1	0	99	99	0.000623999978	0.000554999977	0.00188600004	0.00791400019	0.957794011	378
+135	0	26	1	40	cplex	1	1	96	1	4	9	0	1	0	99	99	0.00109100004	0.000460999989	0.00121200003	0.0139239999	0.966948986	76
+136	0	27	1	40	cplex	0	1	100	2	0	7	0	1	0	99	99	0.000612000003	0.000211999999	0.000748999999	0.00616199989	0.911863029	105
+137	0	27	1	40	cplex	1	0	96	11	1	7	0	1	0	99	99	0.00106699998	0.000436000002	0.00150799996	0.0069980002	0.920274019	294
+138	0	27	1	40	cplex	1	1	96	2	2	7	0	1	0	99	99	0.00102500001	0.000255999999	0.000748999999	0.00710200006	0.921136022	105
+139	0	27	1	40	cplex	0	0	100	11	3	7	0	1	0	99	99	0.000563999987	0.000349000009	0.00151800003	0.00767200021	0.911912978	294
+140	0	27	1	40	cplex	1	1	96	1	4	7	0	1	0	99	99	0.00106499996	0.000323999993	0.000984000042	0.0143710002	0.90269202	59
+141	0	28	1	40	cplex	0	1	100	2	0	12	0	1	0	99	99	0.000803000003	0.000346999994	0.00118599995	0.00810400024	0.304416001	180
+142	0	28	1	40	cplex	1	0	96	11	1	12	0	1	0	99	99	0.001208	0.000564999995	0.00248900009	0.00780599983	0.210555002	504
+143	0	28	1	40	cplex	1	1	96	2	2	12	0	1	0	99	99	0.00124899996	0.000432000001	0.00123299996	0.00815699995	0.200534001	180
+144	0	28	1	40	cplex	0	0	100	11	3	12	0	1	0	99	99	0.000750000007	0.000592000026	0.00253399997	0.00886599999	0.20634	504
+145	0	28	1	40	cplex	1	1	96	1	4	12	0	1	0	99	99	0.00128800003	0.000556999992	0.00152699999	0.0161940008	0.195085004	102
+146	0	29	1	40	cplex	0	1	100	2	0	10	0	1	0	99	99	0.000745999976	0.00035300001	0.00104	0.0075389999	0.941673994	150
+147	0	29	1	40	cplex	1	0	96	11	1	10	0	1	0	99	99	0.00116600003	0.000602999993	0.002079	0.00758899981	0.938692987	420
+148	0	29	1	40	cplex	1	1	96	2	2	10	0	1	0	99	99	0.00116500002	0.000375000003	0.00101600005	0.00589499995	0.929048002	150
+149	0	29	1	40	cplex	0	0	100	11	3	10	0	1	0	99	99	0.00068300002	0.000647999987	0.00205100002	0.00734099979	0.925122976	420
+150	0	29	1	40	cplex	1	1	96	1	4	10	0	1	0	99	99	0.00118599995	0.000482000003	0.00125900004	0.0132449996	0.940051973	85
+151	0	30	1	40	cplex	0	1	100	5	0	11	0	1	0	74	74	0.0269910004	0.267607987	0.322813004	0.377227008	0.312418997	2114
+152	0	30	1	40	cplex	1	0	90	11	1	11	0	1	0	74	74	0.0239659995	0.192469001	0.429711998	0.441902012	0.307029992	3458
+153	0	30	1	40	cplex	1	1	90	5	2	11	0	1	0	74	74	0.0240119994	0.158840999	0.316569	0.351803005	0.28786701	2459
+154	0	30	1	40	cplex	0	0	100	11	3	11	0	1	0	74	74	0.0257029999	0.207880005	0.477319986	0.505234003	0.297845989	3212
+155	0	30	1	40	cplex	1	1	90	1	4	11	0	1	0	74	74	0.0178769995	0.0654440001	0.106253996	0.781049013	0.288879007	544
+156	0	31	1	40	cplex	0	1	100	5	0	11	0	1	0	74	74	0.0209960006	0.230886996	0.33276999	0.402312011	0.524423003	2114
+157	0	31	1	40	cplex	1	0	90	11	1	11	0	1	0	74	74	0.0238119997	0.186940998	0.421930999	0.440802991	0.521798015	3458
+158	0	31	1	40	cplex	1	1	90	5	2	11	0	1	0	74	74	0.0243640002	0.152642995	0.31210199	0.351675987	0.51701802	2459
+159	0	31	1	40	cplex	0	0	100	11	3	11	0	1	0	74	74	0.0282170009	0.206137002	0.479645014	0.509640992	0.514298975	3212
+160	0	31	1	40	cplex	1	1	90	1	4	11	0	1	0	74	74	0.0227499995	0.0635220036	0.109196	0.797246993	0.605215013	544
+161	0	32	1	40	cplex	0	1	100	5	0	11	4	1	0.363635987	74	74	0.0234040003	0.167459995	0.337094992	0.368039012	0.917065978	2114
+162	0	32	1	40	cplex	1	0	90	11	1	11	4	1	0.363635987	74	74	0.0230579991	0.190225005	0.426283985	0.427866995	0.915521979	3458
+163	0	32	1	40	cplex	1	1	90	5	2	11	4	1	0.363635987	74	74	0.0190609992	0.150490999	0.312364012	0.342523992	0.892670989	2459
+164	0	32	1	40	cplex	0	0	100	11	3	11	4	1	0.363635987	74	74	0.0262429994	0.631774008	0.472761005	0.501742005	0.91415602	3212
+165	0	32	1	40	cplex	1	1	90	1	4	11	11	0	0	74		0.0262209997	0.0899320021	0.152305007	1.12218595	0.0835279971	653
+166	0	33	1	40	cplex	0	1	100	5	0	11	4	1	0.363635987	74	74	0.0256779995	0.166428998	0.339877009	0.390605003	0.92453301	2114
+167	0	33	1	40	cplex	1	0	90	11	1	11	4	1	0.363635987	74	74	0.0240180008	0.195795	0.430983007	0.434937	0.911062002	3458
+168	0	33	1	40	cplex	1	1	90	5	2	11	4	1	0.363635987	74	74	0.0207279995	0.152768999	0.316522986	0.338483989	0.911634028	2459
+169	0	33	1	40	cplex	0	0	100	11	3	11	4	1	0.363635987	74	74	0.0283589996	0.210190997	0.48199901	0.497725993	0.920305014	3212
+170	0	33	1	40	cplex	1	1	90	1	4	11	4	1	0.363635987	74	74	0.0224270001	0.0635320023	0.105397001	0.741864026	0.910332024	544
+171	0	34	1	40	cplex	0	1	100	5	0	7	0	1	0	74	74	0.0176219996	0.103139997	0.21232	0.349236995	0.376881003	1345
+172	0	34	1	40	cplex	1	0	90	11	1	7	0	1	0	74	74	0.0183080006	0.121747002	0.267365992	0.338084012	0.38755399	2200
+173	0	34	1	40	cplex	1	1	90	5	2	7	0	1	0	74	74	0.0151540004	0.0995849967	0.199300006	0.325275004	0.388877004	1565
+174	0	34	1	40	cplex	0	0	100	11	3	7	0	1	0	74	74	0.0171130002	0.134581	0.302989006	0.387998015	0.374823987	2044
+175	0	34	1	40	cplex	1	1	90	1	4	7	7	0	0	74		0.0212810002	0.0872799978	0.148535997	1.73570704	0.28956601	431
+176	0	35	1	40	cplex	0	1	100	5	0	8	0	1	0	74	74	0.0238310006	0.122217998	0.242454007	0.302726001	0.34128499	1538
+177	0	35	1	40	cplex	1	0	90	11	1	8	0	1	0	74	74	0.019537	0.129620999	0.296433985	0.338876992	0.326025009	2515
+178	0	35	1	40	cplex	1	1	90	5	2	8	0	1	0	74	74	0.0158879999	0.103537999	0.222328007	0.271887004	0.325013995	1788
+179	0	35	1	40	cplex	0	0	100	11	3	8	0	1	0	74	74	0.0178069994	0.18795	0.339038998	0.403609008	0.341228992	2336
+180	0	35	1	40	cplex	1	1	90	1	4	8	0	1	0	74	74	0.0183329992	0.0490639992	0.0778089985	0.550078988	0.312269002	396
+181	0	36	1	40	cplex	0	1	100	5	0	10	0	1	0	74	74	0.0275730006	0.153532997	0.308418989	0.354000986	0.935271025	1922
+182	0	36	1	40	cplex	1	0	90	11	1	10	0	1	0	74	74	0.0173589997	0.169193998	0.389586985	0.401953995	0.942480028	3143
+183	0	36	1	40	cplex	1	1	90	5	2	10	0	1	0	74	74	0.0179779995	0.136898994	0.286689997	0.309688985	0.950424016	2236
+184	0	36	1	40	cplex	0	0	100	11	3	10	0	1	0	74	74	0.0267650001	0.179692999	0.432431012	0.455231994	1.01174796	2920
+185	0	36	1	40	cplex	1	1	90	1	4	10	0	1	0	74	74	0.0215860009	0.058118999	0.0974709988	0.670641005	0.938117981	495
+186	0	37	1	40	cplex	0	1	100	5	0	13	0	1	0	74	74	0.0249540005	0.195566997	0.406755	0.421238005	0.954463005	2499
+187	0	37	1	40	cplex	1	0	90	11	1	13	0	1	0	74	74	0.0223469995	0.212246001	0.503154993	0.501757979	0.942345023	4086
+188	0	37	1	40	cplex	1	1	90	5	2	13	0	1	0	74	74	0.0224350002	0.174260005	0.373295009	0.383623004	0.932609022	2907
+189	0	37	1	40	cplex	0	0	100	11	3	13	0	1	0	74	74	0.0222670007	0.322587013	0.566304982	0.573101997	0.942538023	3796
+190	0	37	1	40	cplex	1	1	90	1	4	13	0	1	0	74	74	0.0256990008	0.0727870017	0.124029003	0.922464013	0.950097024	643
+191	0	38	1	40	cplex	0	1	100	5	0	8	0	1	0	74	74	0.0185250007	0.120282002	0.244362995	0.300671995	0.357033014	1538
+192	0	38	1	40	cplex	1	0	90	11	1	8	0	1	0	74	74	0.0152799999	0.137023002	0.306746989	0.33928901	0.372368008	2515
+193	0	38	1	40	cplex	1	1	90	5	2	8	0	1	0	74	74	0.0174499992	0.101432003	0.31200701	0.28074199	0.366531014	1788
+194	0	38	1	40	cplex	0	0	100	11	3	8	0	1	0	74	74	0.0234099999	0.158123001	0.35908699	0.405056	0.370700002	2336
+195	0	38	1	40	cplex	1	1	90	1	4	8	0	1	0	74	74	0.0146500003	0.0463039987	0.0783950016	0.633771002	0.359351009	396
+196	0	39	1	40	cplex	0	1	100	5	0	14	0	1	0	74	74	0.0343930013	0.200265005	0.430478007	0.460355014	0.868394971	2691
+197	0	39	1	40	cplex	1	0	90	11	1	14	0	1	0	74	74	0.0199999996	0.214675993	1.10226798	0.544641018	0.876672983	4401
+198	0	39	1	40	cplex	1	1	90	5	2	14	0	1	0	74	74	0.0287120007	0.193629995	0.410643995	0.409637004	0.883455992	3130
+199	0	39	1	40	cplex	0	0	100	11	3	14	0	1	0	74	74	0.033468999	0.26504001	0.624952018	0.626335979	0.871161997	4088
+200	0	39	1	40	cplex	1	1	90	1	4	14	0	1	0	74	74	0.0272259992	0.0762609988	0.134861007	0.936055005	0.910260022	693
+201	0	40	1	40	cplex	0	1	100	7	0	9	0	1	0	49	49	0.0470280014	0.586250007	1.24274302	1.20704103	0.909981012	3918
+202	0	40	1	40	cplex	1	0	68	11	1	9	0	1	0	49	49	0.0204039998	0.37767601	0.877622008	0.832123995	0.913109004	7020
+203	0	40	1	40	cplex	1	1	68	9	2	9	0	1	0	49	49	0.0136550004	0.452410996	0.818881989	0.782855988	0.912679017	6435
+204	0	40	1	40	cplex	0	0	100	11	3	9	0	1	0	49	49	0.0490139984	0.648259997	1.47856605	1.40652895	0.911940992	4878
+205	0	40	1	40	cplex	1	1	68	1	4	9	9	0	0	49		0.0186620001	0.130089998	0.214453995	2.47837305	0.082001999	561
+206	0	41	1	40	cplex	0	1	100	7	0	10	0	1	0	49	49	0.0422829986	0.628912985	1.36350501	1.32873595	0.207089007	4353
+207	0	41	1	40	cplex	1	0	68	11	1	10	0	1	0	49	49	0.0226160008	0.438975006	1.01972401	0.945622981	0.216927007	7800
+208	0	41	1	40	cplex	1	1	68	9	2	10	0	1	0	49	49	0.0204039998	0.433486998	0.916610003	0.888480008	0.207570001	7150
+209	0	41	1	40	cplex	0	0	100	11	3	10	0	1	0	49	49	0.0535360016	0.719676971	1.69250703	1.56373703	0.244646996	5420
+210	0	41	1	40	cplex	1	1	68	1	4	10	0	1	0	49	49	0.0204029996	0.0594579987	0.0994599983	1.52214003	0.245121002	430
+211	0	42	1	40	cplex	0	1	100	7	0	11	0	1	0	49	49	0.0602359995	0.706471026	1.53737104	1.43407404	0.951761007	4789
+212	0	42	1	40	cplex	1	0	68	11	1	11	0	1	0	49	49	0.0178960003	0.458036989	1.09197795	1.01822102	0.944752991	8581
+213	0	42	1	40	cplex	1	1	68	9	2	11	0	1	0	49	49	0.0145889996	0.500356019	1.02431798	0.955761015	0.976445019	7866
+214	0	42	1	40	cplex	0	0	100	11	3	11	0	1	0	49	49	0.0559899993	0.798950016	1.85400403	1.70433605	0.937268019	5962
+215	0	42	1	40	cplex	1	1	68	1	4	11	11	0	0	49		0.0273809992	0.206090003	0.263384014	2.95036292	0.0876080021	668
+216	0	43	1	40	cplex	0	1	100	7	0	7	0	1	0	49	49	0.0361410007	0.427953005	0.944954991	1.01065099	0.692744017	3047
+217	0	43	1	40	cplex	1	0	68	11	1	7	0	1	0	49	49	0.0165119991	0.316134989	0.704074025	0.687276006	0.611509979	5460
+218	0	43	1	40	cplex	1	1	68	9	2	7	0	1	0	49	49	0.0197170004	0.301851988	0.655739009	0.664197028	0.610184014	5005
+219	0	43	1	40	cplex	0	0	100	11	3	7	0	1	0	49	49	0.0419199988	0.493824989	1.15102804	1.21104002	0.607733011	3794
+220	0	43	1	40	cplex	1	1	68	1	4	7	0	1	0	49	49	0.015257	0.0413050018	0.0715600029	1.06726205	0.603546977	301
+221	0	44	1	40	cplex	0	1	100	7	0	13	0	1	0	49	49	0.0661979988	0.790789008	1.77251899	1.67344201	0.881307006	5660
+222	0	44	1	40	cplex	1	0	68	11	1	13	0	1	0	49	49	0.0205940008	0.571102977	1.31532395	1.21944404	0.295242012	10141
+223	0	44	1	40	cplex	1	1	68	9	2	13	0	1	0	49	49	0.028066	0.529825985	1.20191395	1.13045502	0.282361001	9296
+224	0	44	1	40	cplex	0	0	100	11	3	13	0	1	0	49	49	0.0446369983	0.941124976	2.16706204	2.00951004	0.291200995	7046
+225	0	44	1	40	cplex	1	1	68	1	4	13	13	0	0	49		0.0312650017	0.192502007	0.326804012	4.41428709	0.0841630027	786
+226	0	45	1	40	cplex	0	1	100	7	0	8	0	1	0	49	49	0.0401059985	0.525169015	1.07291698	1.127033	0.946998	3483
+227	0	45	1	40	cplex	1	0	68	11	1	8	0	1	0	49	49	0.0194189996	0.358931005	0.817279994	0.777837992	0.945689023	6240
+228	0	45	1	40	cplex	1	1	68	9	2	8	0	1	0	49	49	0.0215910003	0.341078997	0.751326978	0.741824985	0.951201022	5720
+229	0	45	1	40	cplex	0	0	100	11	3	8	0	1	0	49	49	0.0434749983	0.607954979	1.31286299	1.30652702	0.939693987	4336
+230	0	45	1	40	cplex	1	1	68	1	4	8	0	1	0	49	49	0.0161579996	0.0521430001	0.0846410021	1.22868001	0.94264698	344
+231	0	46	1	40	cplex	0	1	100	7	0	12	0	1	0	49	49	0.0468450002	0.728278995	1.65283096	1.52274001	0.647463977	5224
+232	0	46	1	40	cplex	1	0	68	11	1	12	0	1	0	49	49	0.0184359998	0.521438003	1.21467602	1.13147402	0.557641983	9361
+233	0	46	1	40	cplex	1	1	68	9	2	12	0	1	0	49	49	0.0240199994	0.481153011	1.11899602	1.03247499	0.555428982	8581
+234	0	46	1	40	cplex	0	0	100	11	3	12	0	1	0	49	49	0.0375440009	0.935208023	2.03461099	1.87481105	0.552482009	6504
+235	0	46	1	40	cplex	1	1	68	1	4	12	12	0	0	49		0.0285260007	0.181613997	0.308665991	3.84173608	0.0780619979	728
+241	0	48	1	40	cplex	0	1	100	7	0	12	0	1	0	49	49	0.0401609987	0.775907993	1.66829002	1.56649196	0.858260989	5224
+242	0	48	1	40	cplex	1	0	68	11	1	12	0	1	0	49	49	0.0189219993	0.50801003	1.20000803	1.11918104	0.871936977	9361
+243	0	48	1	40	cplex	1	1	68	9	2	12	0	1	0	49	49	0.0239349995	0.512187004	1.14061403	1.04592097	0.854808986	8581
+244	0	48	1	40	cplex	0	0	100	11	3	12	0	1	0	49	49	0.0488159992	0.85611999	2.01782608	1.86106396	0.878018975	6504
+245	0	48	1	40	cplex	1	1	68	1	4	12	12	0	0	49		0.0390469991	0.401670992	0.68740499	5.92676592	0.101452999	1014
+246	0	49	1	40	cplex	0	1	100	7	0	12	0	1	0	49	49	0.0533210002	0.72903502	1.68385506	1.58273399	0.848981977	5224
+247	0	49	1	40	cplex	1	0	68	11	1	12	0	1	0	49	49	0.0249320008	0.521142006	1.21345401	1.12105501	0.860545993	9361
+248	0	49	1	40	cplex	1	1	68	9	2	12	0	1	0	49	49	0.0254120007	0.538487017	1.09858501	1.02319896	0.857406974	8581
+249	0	49	1	40	cplex	0	0	100	11	3	12	0	1	0	49	49	0.0596630014	0.877686977	2.03880405	1.86134803	0.849219978	6504
+250	0	49	1	40	cplex	1	1	68	1	4	12	12	0	0	49		0.0386900008	0.39358601	0.684937	5.30080318	0.0901570022	1014
+251	0	50	1	40	cplex	0	1	500	2	0	12	0	1	0	499	499	0.00416400004	0.000427999999	0.00117800001	0.00828300044	0.99831301	180
+252	0	50	1	40	cplex	1	0	497	11	1	12	0	1	0	499	499	0.0115409996	0.000782000017	0.00245100004	0.00732999993	0.981990993	504
+253	0	50	1	40	cplex	1	1	497	2	2	12	0	1	0	499	499	0.0114139998	0.000432000001	0.00116800005	0.00714799995	0.981990993	180
+254	0	50	1	40	cplex	0	0	500	11	3	12	0	1	0	499	499	0.00311799999	0.000765000004	0.00246199989	0.00747800013	0.988403976	504
+255	0	50	1	40	cplex	1	1	497	1	4	12	0	1	0	499	499	0.0120259998	0.000661000027	0.00147799996	0.0148630003	0.998769999	102
+256	0	51	1	40	cplex	0	1	500	2	0	15	0	1	0	499	499	0.00492099999	0.000430999993	0.00142400002	0.00673000002	0.908738971	225
+257	0	51	1	40	cplex	1	0	497	11	1	15	0	1	0	499	499	0.0127689997	0.000814999978	0.00298899994	0.0085140001	0.909564972	630
+258	0	51	1	40	cplex	1	1	497	2	2	15	0	1	0	499	499	0.0115200002	0.000449000014	0.00141300005	0.00757999998	1.10901594	225
+259	0	51	1	40	cplex	0	0	500	11	3	15	0	1	0	499	499	0.00524300011	0.00091599999	0.00300100003	0.00958700012	0.917985976	630
+260	0	51	1	40	cplex	1	1	497	1	4	15	0	1	0	499	499	0.0128499996	0.000721000019	0.00181499997	0.0152240004	0.921956003	127
+261	0	52	1	40	cplex	0	1	500	2	0	24	0	1	0	499	499	0.00783200003	0.000874000019	0.0022760001	0.00903700013	0.997613013	360
+262	0	52	1	40	cplex	1	0	497	11	1	24	0	1	0	499	499	0.0142989997	0.00119800004	0.00470599998	0.0103669995	0.983931005	1008
+263	0	52	1	40	cplex	1	1	497	2	2	24	0	1	0	499	499	0.0135589996	0.000693999988	0.00217700005	0.00848400034	1.00178802	360
+264	0	52	1	40	cplex	0	0	500	11	3	24	0	1	0	499	499	0.00670199981	0.00117800001	0.00468799984	0.0104750004	0.987744987	1008
+265	0	52	1	40	cplex	1	1	497	1	4	24	0	1	0	499	499	0.0139520001	0.001039	0.00275800005	0.0203060005	0.996030986	204
+266	0	53	1	40	cplex	0	1	500	2	0	11	0	1	0	499	499	0.00393200014	0.000407000014	0.00109799998	0.00742499996	0.925451994	165
+267	0	53	1	40	cplex	1	0	497	11	1	11	0	1	0	499	499	0.0115029998	0.000722000026	0.00222899998	0.00877700001	0.913332999	462
+268	0	53	1	40	cplex	1	1	497	2	2	11	0	1	0	499	499	0.0114390003	0.000407999993	0.00109300006	0.0060680001	0.921959996	165
+269	0	53	1	40	cplex	0	0	500	11	3	11	0	1	0	499	499	0.00337000005	0.00056299998	0.00222099992	0.00864099991	0.924117029	462
+270	0	53	1	40	cplex	1	1	497	1	4	11	0	1	0	499	499	0.0112039996	0.000577000028	0.00136500003	0.0136019997	0.92107898	93
+271	0	54	1	40	cplex	0	1	500	2	0	31	0	1	0	499	499	0.00784199964	0.00100499997	0.0027350001	0.0106520001	1.02037704	465
+272	0	54	1	40	cplex	1	0	497	11	1	31	0	1	0	499	499	0.0149849998	0.00157600001	0.00589400018	0.0119009996	1.20722401	1302
+273	0	54	1	40	cplex	1	1	497	2	2	31	0	1	0	499	499	0.0172659997	0.00101300003	0.00276700011	0.0101239998	0.999441028	465
+274	0	54	1	40	cplex	0	0	500	11	3	31	0	1	0	499	499	0.00923800003	0.00182999996	0.00596999982	0.0117830001	1.00262702	1302
+275	0	54	1	40	cplex	1	1	497	1	4	31	0	1	0	499	499	0.0171559993	0.00134800002	0.00351099996	0.0238920003	1.00160897	263
+276	0	55	1	40	cplex	0	1	500	2	0	13	0	1	0	499	499	0.00443599978	0.000476999994	0.00124899996	0.00692000007	0.96419698	195
+277	0	55	1	40	cplex	1	0	497	11	1	13	0	1	0	499	499	0.0110090002	0.00079999998	0.00264599989	0.00872599985	1.751912	546
+278	0	55	1	40	cplex	1	1	497	2	2	13	0	1	0	499	499	0.011438	0.000467000005	0.00124500005	0.0064559998	0.973442972	195
+279	0	55	1	40	cplex	0	0	500	11	3	13	0	1	0	499	499	0.00426100008	0.000655999989	0.00263400003	0.00847500004	0.972948015	546
+280	0	55	1	40	cplex	1	1	497	1	4	13	0	1	0	499	499	0.012023	0.000543000002	0.00157199998	0.0134629998	0.973635972	110
+281	0	56	1	40	cplex	0	1	500	2	0	9	0	1	0	499	499	0.002844	0.000276000006	0.00102700002	0.0082949996	0.495481014	135
+282	0	56	1	40	cplex	1	0	497	11	1	9	0	1	0	499	499	0.0100039998	0.000461999996	0.00199600006	0.00682100002	0.500775993	378
+283	0	56	1	40	cplex	1	1	497	2	2	9	0	1	0	499	499	0.0104179997	0.000279	0.00100000005	0.00692899991	0.484937996	135
+284	0	56	1	40	cplex	0	0	500	11	3	9	0	1	0	499	499	0.00261400011	0.000464000012	0.00200899993	0.00695700012	0.492031008	378
+285	0	56	1	40	cplex	1	1	497	1	4	9	0	1	0	499	499	0.0108139999	0.000490000006	0.00125500001	0.0156389996	0.498636991	76
+286	0	57	1	40	cplex	0	1	500	2	0	9	0	1	0	499	499	0.00280499994	0.000331999996	0.00100599998	0.00716299983	1.07988703	135
+287	0	57	1	40	cplex	1	0	497	11	1	9	0	1	0	499	499	0.0101260003	0.000464000012	0.00199300004	0.00801500026	1.15041995	378
+288	0	57	1	40	cplex	1	1	497	2	2	9	0	1	0	499	499	0.0100570004	0.000384999992	0.000986999949	0.00563299982	1.07536805	135
+289	0	57	1	40	cplex	0	0	500	11	3	9	0	1	0	499	499	0.00240599993	0.000461999996	0.0020010001	0.00748499995	0.987784028	378
+290	0	57	1	40	cplex	1	1	497	1	4	9	0	1	0	499	499	0.0101330001	0.000403000013	0.00125600002	0.0121900002	0.999889016	76
+291	0	58	1	40	cplex	0	1	500	2	0	9	0	1	0	499	499	0.00318200001	0.000361000013	0.000930999988	0.0077490001	0.977266014	135
+292	0	58	1	40	cplex	1	0	497	11	1	9	0	1	0	499	499	0.0109019997	0.000607999973	0.00185200002	0.00623599999	0.955693007	378
+293	0	58	1	40	cplex	1	1	497	2	2	9	0	1	0	499	499	0.0105889998	0.000292000012	0.000927000016	0.00673400005	1.12171805	135
+294	0	58	1	40	cplex	0	0	500	11	3	9	0	1	0	499	499	0.00323899998	0.00055300002	0.00187499996	0.00631299987	0.970628023	378
+295	0	58	1	40	cplex	1	1	497	1	4	9	0	1	0	499	499	0.0108960001	0.000486000004	0.00141000003	0.0147329997	0.966362	76
+296	0	59	1	40	cplex	0	1	500	2	0	14	0	1	0	499	499	0.00492000021	0.000513000006	0.00132699998	0.00637400011	0.982374012	210
+297	0	59	1	40	cplex	1	0	497	11	1	14	0	1	0	499	499	0.0117929997	0.000868999981	0.00282200007	0.00839800015	0.97309798	588
+298	0	59	1	40	cplex	1	1	497	2	2	14	0	1	0	499	499	0.0121780001	0.00043700001	0.00133100001	0.00656499993	0.968427002	210
+299	0	59	1	40	cplex	0	0	500	11	3	14	0	1	0	499	499	0.00484200008	0.000866000017	0.00282899989	0.00898199994	0.972214997	588
+300	0	59	1	40	cplex	1	1	497	1	4	14	0	1	0	499	499	0.0125780003	0.000681000005	0.00170699996	0.0147390002	0.98822701	119
+301	0	60	1	40	cplex	0	1	500	5	0	7	0	1	0	474	474	0.0794320032	0.118212998	0.228631005	0.331873	0.207741007	1428
+302	0	60	1	40	cplex	1	0	469	11	1	7	0	1	0	474	474	0.0122079998	0.0149950003	0.0370990001	0.067933999	0.221686006	3164
+303	0	60	1	40	cplex	1	1	469	6	2	7	0	1	0	474	474	0.0135319997	0.0139309997	0.0285519995	0.118920997	0.204546005	2257
+304	0	60	1	40	cplex	0	0	500	11	3	7	0	1	0	474	474	0.0806050003	0.134365007	0.311154991	0.398312002	0.206772	2044
+305	0	60	1	40	cplex	1	1	469	1	4	7	0	1	0	474	474	0.0132149998	0.0103860004	0.016051	0.272646993	0.213349	309
+306	0	61	1	40	cplex	0	1	500	5	0	2	0	1	0	474	474	0.0307570007	0.0360679999	0.0713680014	0.194383994	0.186039001	408
+307	0	61	1	40	cplex	1	0	469	11	1	2	0	1	0	474	474	0.0100509999	0.00576400012	0.0106729995	0.0319500007	0.191772997	904
+308	0	61	1	40	cplex	1	1	469	6	2	2	0	1	0	474	474	0.00990999956	0.00517300004	0.0081120003	0.0340289995	0.213327006	645
+309	0	61	1	40	cplex	0	0	500	11	3	2	0	1	0	474	474	0.0269230008	0.0409509987	0.0915749967	0.207995996	0.203609005	584
+310	0	61	1	40	cplex	1	1	469	1	4	2	0	1	0	474	474	0.00948099978	0.00344999996	0.00511399982	0.126389995	0.200516999	88
+311	0	62	1	40	cplex	0	1	500	5	0	7	0	1	0	474	474	0.0577690005	0.111492999	0.245946005	0.334939003	0.216061994	1428
+312	0	62	1	40	cplex	1	0	469	11	1	7	0	1	0	474	474	0.0133910002	0.0170569997	0.0406860001	0.0735469982	0.322593004	3164
+313	0	62	1	40	cplex	1	1	469	6	2	7	0	1	0	474	474	0.0135989999	0.0146700004	0.0313259996	0.0738060027	0.223920003	2257
+314	0	62	1	40	cplex	0	0	500	11	3	7	0	1	0	474	474	0.0557390004	0.134280995	0.328819007	0.382463008	0.226074994	2044
+315	0	62	1	40	cplex	1	1	469	1	4	7	0	1	0	474	474	0.0128140002	0.0109339999	0.0163369998	0.490536004	0.221076995	309
+316	0	63	1	40	cplex	0	1	500	5	0	5	0	1	0	474	474	0.0450309999	0.0814850032	0.165710002	0.286024988	0.207605004	1020
+317	0	63	1	40	cplex	1	0	469	11	1	5	0	1	0	474	474	0.0108439997	0.0109069999	0.0269370005	0.0635960028	0.296498001	2260
+318	0	63	1	40	cplex	1	1	469	6	2	5	0	1	0	474	474	0.0109529998	0.00944299996	0.0196230002	0.0670330003	0.192671001	1612
+319	0	63	1	40	cplex	0	0	500	11	3	5	0	1	0	474	474	0.0445340015	0.0951690003	0.226912007	0.328943998	0.212236002	1460
+320	0	63	1	40	cplex	1	1	469	1	4	5	0	1	0	474	474	0.011992	0.00812599994	0.0118979998	0.500554979	0.255809009	220
+321	0	64	1	40	cplex	0	1	500	5	0	13	0	1	0	474	474	0.0934949964	0.196500003	0.448729992	0.494863987	0.220800996	2652
+322	0	64	1	40	cplex	1	0	469	11	1	13	0	1	0	474	474	0.0162589997	0.0279610008	0.0724000037	0.113475002	0.208765998	5876
+323	0	64	1	40	cplex	1	1	469	6	2	13	0	1	0	474	474	0.0169949997	0.0279040001	0.060095001	0.231294006	0.213241994	4192
+324	0	64	1	40	cplex	0	0	500	11	3	13	0	1	0	474	474	0.0912289992	0.241122007	0.615019023	0.608744025	0.234531	3796
+325	0	64	1	40	cplex	1	1	469	1	4	13	0	1	0	474	474	0.0170230009	0.0186519995	0.0325580016	0.853084028	0.214564994	573
+326	0	65	1	40	cplex	0	1	500	5	0	5	0	1	0	474	474	0.0450379997	0.0801519975	0.165930003	0.351388991	0.188027993	1020
+327	0	65	1	40	cplex	1	0	469	11	1	5	0	1	0	474	474	0.0109289996	0.0110339997	0.0270470008	0.0612929985	0.204403996	2260
+328	0	65	1	40	cplex	1	1	469	6	2	5	0	1	0	474	474	0.0111370003	0.00946999993	0.0197730009	0.0661040023	0.206967995	1612
+329	0	65	1	40	cplex	0	0	500	11	3	5	0	1	0	474	474	0.0440299995	0.0972450003	0.225181997	0.485929996	0.191782996	1460
+330	0	65	1	40	cplex	1	1	469	1	4	5	0	1	0	474	474	0.0110189999	0.00830500014	0.012937	0.296312988	0.191057995	220
+331	0	66	1	40	cplex	0	1	500	5	0	1	0	1	0	474	474	0.0181079991	0.0204390008	0.0359419994	0.585871994	0.383931011	204
+332	0	66	1	40	cplex	1	0	469	11	1	1	0	1	0	474	474	0.00948700029	0.0030710001	0.00543199992	0.0470159985	0.483723015	452
+333	0	66	1	40	cplex	1	1	469	6	2	1	0	1	0	474	474	0.0118610002	0.00247900002	0.00408199988	0.187711999	0.393700004	322
+334	0	66	1	40	cplex	0	0	500	11	3	1	0	1	0	474	474	0.0176359992	0.0232270006	0.0478029996	0.159924001	0.396243989	292
+335	0	66	1	40	cplex	1	1	469	1	4	1	1	0	0	474		0.0576880015	0.120348997	0.149110004	3.26681304	0.0847550035	81
+336	0	67	1	40	cplex	0	1	500	5	0	4	0	1	0	474	474	0.0401559994	0.0674289986	0.135306001	0.297746003	0.208116993	816
+337	0	67	1	40	cplex	1	0	469	11	1	4	0	1	0	474	474	0.0105539998	0.0092559997	0.0214680005	0.0457810014	0.205274001	1808
+338	0	67	1	40	cplex	1	1	469	6	2	4	0	1	0	474	474	0.0115360003	0.00848999992	0.0164579991	0.147085994	0.194226995	1290
+339	0	67	1	40	cplex	0	0	500	11	3	4	0	1	0	474	474	0.039117001	0.0862950012	0.181693003	0.247292995	0.217951	1168
+340	0	67	1	40	cplex	1	1	469	1	4	4	4	0	0	474		0.0726059973	0.429390013	0.539640009	8.40706253	0.119783998	322
+341	0	68	1	40	cplex	0	1	500	5	0	4	0	1	0	474	474	0.0439129993	0.0632020012	0.134729996	0.261682987	0.188462004	816
+342	0	68	1	40	cplex	1	0	469	11	1	4	0	1	0	474	474	0.0105219996	0.00897399988	0.0215119999	0.0551909991	0.212908998	1808
+343	0	68	1	40	cplex	1	1	469	6	2	4	0	1	0	474	474	0.0107819997	0.00838799961	0.0164819993	0.0619309992	0.188912004	1290
+344	0	68	1	40	cplex	0	0	500	11	3	4	0	1	0	474	474	0.0403929986	0.0815130025	0.178807005	0.365110993	0.214983001	1168
+345	0	68	1	40	cplex	1	1	469	1	4	4	0	1	0	474	474	0.0103979995	0.00577000016	0.00936300028	0.412748992	0.186497003	176
+346	0	69	1	40	cplex	0	1	500	5	0	13	0	1	0	474	474	0.101644002	0.208038002	0.44856599	0.589349985	0.219052002	2652
+347	0	69	1	40	cplex	1	0	469	11	1	13	0	1	0	474	474	0.0172630008	0.0326690003	0.0763320029	0.121377997	0.205296993	5876
+348	0	69	1	40	cplex	1	1	469	6	2	13	0	1	0	474	474	0.01578	0.0247009993	0.0546829998	0.139980003	0.208713993	4192
+349	0	69	1	40	cplex	0	0	500	11	3	13	0	1	0	474	474	0.114912003	0.292744994	0.598097026	0.594393015	0.231987	3796
+350	0	69	1	40	cplex	1	1	469	1	4	13	0	1	0	474	474	0.0167730004	0.0164170004	0.0297459997	0.718922973	0.230991006	573
+351	0	70	1	40	cplex	0	1	500	7	0	8	0	1	0	449	449	0.180547997	0.539990008	1.17290795	1.38607705	0.213912994	3598
+352	0	70	1	40	cplex	1	0	459	11	1	8	0	1	0	449	449	0.0344449989	0.344126999	0.641798973	0.791613996	0.207720995	6970
+353	0	70	1	40	cplex	1	1	459	9	2	8	0	1	0	449	449	0.0612119995	0.276354015	0.613052011	0.766911983	0.202124	6338
+354	0	70	1	40	cplex	0	0	500	11	3	8	0	1	0	449	449	0.159573004	0.617779016	1.33728302	1.49194598	0.217148006	4336
+355	0	70	1	40	cplex	1	1	459	1	4	8	0	1	0	449	449	0.0596470013	0.0804949999	0.129063994	1.05322504	0.212372005	500
+356	0	71	1	40	cplex	0	1	500	6	0	9	0	1	0	449	449	0.136246994	1.32921004	1.27279603	1.50406003	0.204820007	3962
+357	0	71	1	40	cplex	1	0	495	11	1	9	0	1	0	449	449	0.133931994	0.638584971	1.470626	1.63784897	0.210777	5116
+358	0	71	1	40	cplex	1	1	495	7	2	9	0	1	0	449	449	0.162459999	0.585617006	1.26200402	1.51948905	0.199362993	4271
+359	0	71	1	40	cplex	0	0	500	11	3	9	0	1	0	449	449	0.138188004	0.673409998	1.54015398	1.732476	0.197798997	4878
+360	0	71	1	40	cplex	1	1	495	1	4	9	0	1	0	449	449	0.164321005	0.105728999	0.178304002	1.04367197	0.192485005	519
+361	0	72	1	40	cplex	0	1	500	6	0	3	0	1	0	449	449	0.0740140006	0.204253003	0.417739004	0.660957992	0.193305001	1320
+362	0	72	1	40	cplex	1	0	497	11	1	3	0	1	0	449	449	0.0588419996	0.283629	0.467330992	0.669712007	0.210123003	1646
+363	0	72	1	40	cplex	1	1	497	7	2	3	0	1	0	449	449	0.0700799972	0.207921997	0.409283012	0.636622012	0.210180998	1368
+364	0	72	1	40	cplex	0	0	500	11	3	3	0	1	0	449	449	0.0881009996	0.232212007	0.492428005	0.70737797	0.195289999	1626
+365	0	72	1	40	cplex	1	1	497	1	4	3	0	1	0	449	449	0.0558400005	0.0444400012	0.0687490031	0.774002016	0.194738999	161
+366	0	73	1	40	cplex	0	1	500	6	0	2	0	1	0	449	449	0.0564929992	0.148885995	0.266963005	0.534138024	0.198868006	880
+367	0	73	1	40	cplex	1	0	497	11	1	2	0	1	0	449	449	0.0706430003	0.156708002	0.301782012	0.546347976	0.201538995	1097
+368	0	73	1	40	cplex	1	1	497	7	2	2	0	1	0	449	449	0.0794100016	0.141786993	0.26255101	0.53054601	0.209279999	912
+369	0	73	1	40	cplex	0	0	500	11	3	2	0	1	0	449	449	0.0754709989	0.157718003	0.321456999	0.590038002	0.185501993	1084
+370	0	73	1	40	cplex	1	1	497	1	4	2	0	1	0	449	449	0.150086999	0.0345479995	0.0553499982	0.477719992	0.210636005	107
+371	0	74	1	40	cplex	0	1	500	6	0	2	0	1	0	449	449	0.0756969973	0.145183995	0.263998002	0.545419991	0.210967004	880
+372	0	74	1	40	cplex	1	0	497	11	1	2	0	1	0	449	449	0.0762490034	0.154442996	0.298114985	0.567377985	0.197004005	1097
+373	0	74	1	40	cplex	1	1	497	7	2	2	0	1	0	449	449	0.0793500021	0.135984004	0.257196009	0.623501003	0.189818993	912
+374	0	74	1	40	cplex	0	0	500	11	3	2	0	1	0	449	449	0.0738580003	0.164492995	0.313241988	0.594218016	0.187536001	1084
+375	0	74	1	40	cplex	1	1	497	1	4	2	0	1	0	449	449	0.0718810037	0.0360050015	0.0544649996	0.47062999	0.191863999	107
+376	0	75	1	40	cplex	0	1	500	6	0	3	0	1	0	449	449	0.0679010004	0.29233399	0.420049995	0.740657985	2.12332702	1320
+377	0	75	1	40	cplex	1	0	497	11	1	3	0	1	0	449	449	0.0940399989	0.219132006	0.46627301	0.811339974	2.18227291	1646
+378	0	75	1	40	cplex	1	1	497	7	2	3	0	1	0	449	449	0.0944940001	0.206502005	0.411496013	0.722365022	2.10058999	1368
+379	0	75	1	40	cplex	0	0	500	11	3	3	0	1	0	449	449	0.0401570015	0.239611998	0.505047977	0.801765978	2.07454109	1626
+380	0	75	1	40	cplex	1	1	497	1	4	3	0	1	0	449	449	0.0684729964	0.0861949995	0.125085995	2.20867801	2.09804296	154
+381	0	76	1	40	cplex	0	1	500	6	0	16	0	1	0	449	449	0.176034003	1.13388503	2.31736302	2.66916108	0.198264003	7043
+382	0	76	1	40	cplex	1	0	497	11	1	16	0	1	0	449	449	0.230607003	1.13479996	2.6310091	2.81817293	0.207783997	8778
+383	0	76	1	40	cplex	1	1	497	7	2	16	0	1	0	449	449	0.25890401	1.04983103	2.29111195	2.67286205	0.216177002	7300
+384	0	76	1	40	cplex	0	0	500	11	3	16	0	1	0	449	449	0.162547007	1.22000504	2.78903699	2.87119389	0.240747005	8672
+385	0	76	1	40	cplex	1	1	497	1	4	16	0	1	0	449	449	0.252434999	0.206266001	0.363247007	2.47695994	0.221495003	862
+386	0	77	1	40	cplex	0	1	500	6	0	11	0	1	0	449	449	0.181498006	0.797818005	1.58382201	1.89138198	0.228119001	4842
+387	0	77	1	40	cplex	1	0	497	11	1	11	0	1	0	449	449	0.136189997	0.755168974	1.84864104	2.04725909	0.225633994	6035
+388	0	77	1	40	cplex	1	1	497	7	2	11	0	1	0	449	449	0.131346002	0.657877982	1.55689001	1.85927701	0.224455997	5018
+389	0	77	1	40	cplex	0	0	500	11	3	11	0	1	0	449	449	0.131310001	0.778602004	1.91824198	2.1225431	0.251691997	5962
+390	0	77	1	40	cplex	1	1	497	1	4	11	0	1	0	449	449	0.213330999	0.133163005	0.248205006	1.35817397	0.234359995	593
+391	0	78	1	40	cplex	0	1	500	6	0	8	0	1	0	449	449	0.127087995	0.542190015	1.16532803	1.453125	0.208987996	3521
+392	0	78	1	40	cplex	1	0	497	11	1	8	0	1	0	449	449	0.129164994	0.599543989	1.31668496	1.52088404	0.217538998	4389
+393	0	78	1	40	cplex	1	1	497	7	2	8	0	1	0	449	449	0.114674002	0.547963023	1.14040005	1.431759	0.200277001	3650
+394	0	78	1	40	cplex	0	0	500	11	3	8	0	1	0	449	449	0.126968995	1.25968695	1.38476396	1.61880803	0.220617995	4336
+395	0	78	1	40	cplex	1	1	497	1	4	8	8	0	0	449		0.189934	0.187391996	0.316828996	1.69814205	0.139947996	604
+396	0	79	1	40	cplex	0	1	500	6	0	4	0	1	0	449	449	0.108794004	0.283948004	0.56518501	0.878516972	0.264279008	1760
+397	0	79	1	40	cplex	1	0	497	11	1	4	0	1	0	449	449	0.0807290003	0.294557989	0.64288801	0.880397975	0.213222995	2194
+398	0	79	1	40	cplex	1	1	497	7	2	4	0	1	0	449	449	0.0820230022	0.265695989	0.55438	0.941488028	0.225926995	1825
+399	0	79	1	40	cplex	0	0	500	11	3	4	0	1	0	449	449	0.0974820033	0.312427014	0.682918012	1.08772695	0.208851993	2168
+400	0	79	1	40	cplex	1	1	497	1	4	4	0	1	0	449	449	0.090034999	0.0599979982	0.0920440033	0.758755982	0.186225995	215
+401	0	80	1	40	cplex	0	1	500	8	0	8	0	1	0	399	399	0.200808004	2.28562689	4.90575409	9.54641247	0.964587986	7503
+402	0	80	1	40	cplex	1	0	470	11	1	8	0	1	0	399	399	0.114538997	2.06707692	4.6430378	7.77071285	0.941658974	10440
+403	0	80	1	40	cplex	1	1	470	9	2	8	0	1	0	399	399	0.129134998	1.98902702	4.45410919	9.19498634	1.00970399	9627
+404	0	80	1	40	cplex	0	0	500	11	3	8	0	1	0	399	399	0.134865999	2.36722398	5.41389418	8.41194439	0.988258004	8336
+405	0	80	1	40	cplex	1	1	470	1	4	8	19	0	1.375	399	476	0.0232960004	0.0177180003	0.0300249998	0.142398	0.601351976	409
+406	0	81	1	40	cplex	0	1	500	8	0	13	0	1	0	399	399	0.219245002	3.50904608	8.07636929	16.923399	0.929158986	12193
+407	0	81	1	40	cplex	1	0	470	11	1	13	0	1	0	399	399	0.157933995	3.35879111	7.65326023	14.7309542	0.908200979	16966
+408	0	81	1	40	cplex	1	1	470	9	2	13	0	1	0	399	399	0.163733006	3.24804997	7.16461611	16.3645649	0.919826984	15644
+409	0	81	1	40	cplex	0	0	500	11	3	13	0	1	0	399	399	0.227908999	3.96750593	8.61032581	15.0767231	0.929929018	13546
+410	0	81	1	40	cplex	1	1	470	1	4	13	77	0	4.92307711	399	496	0.0109890001	0.000788000005	0.00159999996	0.00761299999	0.210619003	208
+411	0	82	1	40	cplex	0	1	500	8	0	14	0	1	0	399	399	0.266820014	4.80222702	8.59321499	16.7582169	0.924530983	13131
+412	0	82	1	40	cplex	1	0	470	11	1	14	0	1	0	399	399	0.131238997	3.72259688	8.20892906	13.0560646	0.946525991	18271
+413	0	82	1	40	cplex	1	1	470	9	2	14	0	1	0	399	399	0.173763007	3.38189292	7.69060278	16.2639179	0.973610997	16848
+414	0	82	1	40	cplex	0	0	500	11	3	14	0	1	0	399	399	0.320885986	3.97304201	9.46836853	13.9979372	0.958534002	14588
+415	0	82	1	40	cplex	1	1	470	1	4	14	21	0	0.5	399	418	0.210408002	0.376733989	0.671230972	2.47900391	0.290843993	1339
+416	0	83	1	40	cplex	0	1	500	8	0	8	0	1	0	399	399	0.265634	2.26230311	4.89565182	9.51260376	0.971305013	7503
+417	0	83	1	40	cplex	1	0	470	11	1	8	0	1	0	399	399	0.111901999	1.96275306	4.69675589	7.71695614	0.966540992	10440
+418	0	83	1	40	cplex	1	1	470	9	2	8	0	1	0	399	399	0.135578007	1.88572896	4.3717351	9.38866901	0.950612009	9627
+419	0	83	1	40	cplex	0	0	500	11	3	8	0	1	0	399	399	0.169319004	2.17292809	5.26506519	8.33742714	0.962486029	8336
+420	0	83	1	40	cplex	1	1	470	1	4	8	19	0	1.375	399	476	0.0219359994	0.0157670006	0.0292770006	0.134157002	1.09152997	409
+421	0	84	1	40	cplex	0	1	500	8	0	10	0	1	0	399	399	0.180441007	2.54935598	6.18405199	8.92077446	0.910363972	9379
+422	0	84	1	40	cplex	1	0	470	11	1	10	0	1	0	399	399	0.139305994	3.14241099	5.90226889	7.88073921	1.41886604	13050
+423	0	84	1	40	cplex	1	1	470	9	2	10	0	1	0	399	399	0.143628001	2.29593301	5.54568005	8.29946327	0.968208015	12034
+424	0	84	1	40	cplex	0	0	500	11	3	10	0	1	0	399	399	0.197724	2.70532799	6.79880381	8.66706371	0.941289008	10420
+425	0	84	1	40	cplex	1	1	470	1	4	10	21	0	1.10000002	399	476	0.0267510004	0.0211900007	0.0369150005	0.154051006	0.646539986	512
+426	0	85	1	40	cplex	0	1	500	8	0	13	0	1	0	399	399	0.208761007	3.51951504	8.03795433	13.6210127	0.942952991	12220
+427	0	85	1	40	cplex	1	0	460	11	1	13	0	1	0	399	399	0.150290996	2.84311604	6.93187523	10.9016962	0.968106985	17859
+428	0	85	1	40	cplex	1	1	460	9	2	13	0	1	0	399	399	0.190566003	2.78973699	6.62933588	12.8020639	0.956959009	16834
+429	0	85	1	40	cplex	0	0	500	11	3	13	0	1	0	399	399	0.264979005	3.70024991	8.72457409	12.9855146	0.945886016	13546
+430	0	85	1	40	cplex	1	1	460	1	4	13	25	0	0.923076987	399	442	0.0850600004	0.0977260023	0.163151994	0.607391	0.437781006	651
+431	0	86	1	40	cplex	0	1	500	8	0	11	0	1	0	399	399	0.186826006	3.72520089	6.98466587	11.8741293	0.495635986	10442
+432	0	86	1	40	cplex	1	0	459	11	1	11	0	1	0	399	399	0.210778996	2.4268539	5.76322699	8.74925041	0.526410997	15227
+433	0	86	1	40	cplex	1	1	459	9	2	11	0	1	0	399	399	0.128737003	2.37154794	5.5243268	9.91170692	0.537254989	14361
+434	0	86	1	40	cplex	0	0	500	11	3	11	0	1	0	399	399	0.28757301	3.08369398	7.45003986	10.3919544	0.512947977	11462
+435	0	86	1	40	cplex	1	1	459	1	4	11	23	0	1.090909	399	442	0.102673002	0.123732001	0.204763994	0.987393022	0.926558971	623
+436	0	87	1	40	cplex	0	1	500	8	0	9	0	1	0	399	399	0.284491003	2.49821496	5.45601606	11.1172647	0.963587999	8441
+437	0	87	1	40	cplex	1	0	470	11	1	9	0	1	0	399	399	0.132768005	2.26621199	5.29997778	9.20951653	1.01716805	11745
+438	0	87	1	40	cplex	1	1	470	9	2	9	0	1	0	399	399	0.182205006	2.18679905	4.99122095	10.6574364	0.96579802	10831
+439	0	87	1	40	cplex	0	0	500	11	3	9	0	1	0	399	399	0.228979006	2.6764009	6.05911779	9.9054451	0.949900985	9378
+440	0	87	1	40	cplex	1	1	470	1	4	9	20	0	1.22222197	399	476	0.0300820004	0.019878	0.0320639983	0.148863003	0.87963599	460
+441	0	88	1	40	cplex	0	1	500	8	0	13	0	1	0	399	399	0.260692	3.72787309	8.09895229	16.949295	0.920252025	12193
+442	0	88	1	40	cplex	1	0	470	11	1	13	0	1	0	399	399	0.152400002	3.36030793	7.67505884	13.2929287	0.980256975	16966
+443	0	88	1	40	cplex	1	1	470	9	2	13	0	1	0	399	399	0.159381002	3.18237209	7.17353487	15.954751	0.908994973	15644
+444	0	88	1	40	cplex	0	0	500	11	3	13	0	1	0	399	399	0.233924001	3.4090631	9.56962776	14.3683653	0.91346401	13546
+445	0	88	1	40	cplex	1	1	470	1	4	13	77	0	4.92307711	399	496	0.0108169997	0.000792999985	0.00166900002	0.00749300001	0.205460995	208
+446	0	89	1	40	cplex	0	1	500	8	0	11	0	1	0	399	399	0.183327004	2.85372305	6.80088711	14.7190199	1.00730002	10317
+447	0	89	1	40	cplex	1	0	470	11	1	11	0	1	0	399	399	0.165441006	2.62656093	6.54374409	10.4305172	0.984129012	14356
+448	0	89	1	40	cplex	1	1	470	9	2	11	0	1	0	399	399	0.150179997	2.58821011	6.11099195	14.6350918	0.963338971	13237
+449	0	89	1	40	cplex	0	0	500	11	3	11	0	1	0	399	399	0.196716994	2.96563411	7.32861519	11.2061157	0.964321971	11462
+450	0	89	1	40	cplex	1	1	470	1	4	11	22	0	1	399	476	0.0193160009	0.0233089998	0.0693430007	0.174755007	0.82219702	563
+451	0	90	1	40	cplex	0	1	500	9	0	7	0	1	0	299	299	0.348457009	7.80554485	17.4401207	29.0748348	0.969931006	13435
+452	0	90	1	40	cplex	1	0	455	11	1	7	0	1	0	299	299	0.194789007	7.72297096	16.9265652	23.8767567	0.990585983	17263
+453	0	90	1	40	cplex	1	1	455	9	2	7	0	1	0	299	299	0.243187994	7.8395772	16.2770882	27.8005924	0.992872	16375
+454	0	90	1	40	cplex	0	0	500	11	3	7	0	1	0	299	299	0.283890992	8.31006813	18.3006725	24.9553795	1.00139201	14294
+455	0	90	1	40	cplex	1	1	455	1	4	7	7	0	0	299		0.456369996	0.693452001	1.12431598	9.44113636	0.100539997	806
+456	0	91	1	40	cplex	0	1	500	9	0	8	0	1	0	299	299	0.381666005	9.11454201	19.8608341	33.5693512	0.981364012	15400
+457	0	91	1	40	cplex	1	0	454	11	1	8	0	1	0	299	299	0.228393003	8.64918423	19.1119595	27.8191566	0.987716019	19825
+458	0	91	1	40	cplex	1	1	454	10	2	8	0	1	0	299	299	0.241794005	8.92263699	18.6355209	32.4389305	0.960964978	18826
+459	0	91	1	40	cplex	0	0	500	11	3	8	0	1	0	299	299	0.301304996	9.15607738	20.3263474	28.9597359	0.965659976	16336
+460	0	91	1	40	cplex	1	1	454	1	4	8	0	1	0	299	299	0.471130013	0.484043986	0.770705998	1.43206501	0.969529986	669
+461	0	92	1	40	cplex	0	1	500	9	0	9	0	1	0	299	299	0.285930991	9.65689373	22.0373173	38.4975853	0.498744994	17274
+462	0	92	1	40	cplex	1	0	454	11	1	9	0	1	0	299	299	0.229307994	9.13499546	21.5059433	31.9768028	0.477973014	22303
+463	0	92	1	40	cplex	1	1	454	10	2	9	0	1	0	299	299	0.273813993	10.1764507	20.7385216	37.0699425	0.468995988	21179
+464	0	92	1	40	cplex	0	0	500	11	3	9	0	1	0	299	299	0.305426002	10.2268677	22.8408585	32.770153	0.470261991	18378
+465	0	92	1	40	cplex	1	1	454	1	4	9	9	0	0	299		0.471534997	0.81318599	1.388134	10.0195551	0.0815640017	1062
+466	0	93	1	40	cplex	0	1	500	9	0	3	0	1	0	299	299	0.243793994	3.52587795	7.47569799	12.297411	0.958438993	5758
+467	0	93	1	40	cplex	1	0	455	11	1	3	0	1	0	299	299	0.165566996	3.27768803	7.23852491	10.2514038	0.946967006	7398
+468	0	93	1	40	cplex	1	1	455	9	2	3	0	1	0	299	299	0.184771001	2.97066402	6.75584221	11.6122074	0.966583014	7018
+469	0	93	1	40	cplex	0	0	500	11	3	3	0	1	0	299	299	0.228944004	3.31115603	7.63772297	10.8524981	0.955771983	6126
+470	0	93	1	40	cplex	1	1	455	1	4	3	3	0	0	299		0.256806999	0.326727003	0.492394	5.27335691	0.102154002	346
+471	0	94	1	40	cplex	0	1	500	9	0	12	0	1	0	299	299	0.426041007	12.8568373	29.4962959	52.2857208	0.938421011	23041
+472	0	94	1	40	cplex	1	0	454	11	1	12	0	1	0	299	299	0.258361995	13.8126516	28.9821892	42.763382	0.954262018	29737
+473	0	94	1	40	cplex	1	1	454	10	2	12	0	1	0	299	299	0.32702601	12.0315313	28.1282749	50.5240555	0.922728002	28239
+474	0	94	1	40	cplex	0	0	500	11	3	12	0	1	0	299	299	0.472714007	13.5144529	31.1912174	44.5274849	0.914399028	24504
+475	0	94	1	40	cplex	1	1	454	1	4	12	12	0	0	299		0.459598005	1.79647303	2.95349908	21.4744434	0.100909002	1781
+476	0	95	1	40	cplex	0	1	500	9	0	3	0	1	0	299	299	0.224250004	3.56462908	7.37768507	12.1024618	0.406796008	5758
+477	0	95	1	40	cplex	1	0	455	11	1	3	0	1	0	299	299	0.140936002	3.41400504	7.24015284	10.2626829	0.419640988	7398
+478	0	95	1	40	cplex	1	1	455	9	2	3	0	1	0	299	299	0.175380006	3.34040594	7.11809015	11.9835625	0.461075991	7018
+479	0	95	1	40	cplex	0	0	500	11	3	3	0	1	0	299	299	0.170718998	3.50677705	7.69417381	11.1614161	0.419494003	6126
+480	0	95	1	40	cplex	1	1	455	1	4	3	0	1	0	299	299	0.206524	0.244654	0.349413991	3.05934906	0.414196998	277
+481	0	96	1	40	cplex	0	1	500	9	0	6	0	1	0	299	299	0.297646999	6.67416716	14.8828573	24.9519024	0.255674988	11516
+482	0	96	1	40	cplex	1	0	455	11	1	6	0	1	0	299	299	0.172481	6.15603781	14.344533	20.7885857	0.240954995	14797
+483	0	96	1	40	cplex	1	1	455	9	2	6	0	1	0	299	299	0.202617005	6.05918217	13.7489357	23.7372513	0.255418986	14036
+484	0	96	1	40	cplex	0	0	500	11	3	6	0	1	0	299	299	0.257654011	7.85370779	15.445878	21.5200424	0.242741004	12252
+485	0	96	1	40	cplex	1	1	455	1	4	6	6	0	0	299		0.259801	0.561989009	0.893746972	4.81442499	0.0833799988	656
+486	0	97	1	40	cplex	0	1	500	9	0	4	0	1	0	299	299	0.257499993	4.57473087	9.72120571	17.1753635	1.03754497	7677
+487	0	97	1	40	cplex	1	0	455	11	1	4	0	1	0	299	299	0.154596001	4.41091681	9.61021805	14.2731371	0.988659024	9864
+488	0	97	1	40	cplex	1	1	455	9	2	4	0	1	0	299	299	0.199382007	4.3959918	9.30269623	16.4572964	0.977681994	9357
+489	0	97	1	40	cplex	0	0	500	11	3	4	0	1	0	299	299	0.224993005	4.75127602	10.2998209	14.9965811	0.977753997	8168
+490	0	97	1	40	cplex	1	1	455	1	4	4	0	1	0	299	299	0.198514	0.29350099	0.48732999	3.96980309	0.980755985	369
+491	0	98	1	40	cplex	0	1	500	9	0	4	0	1	0	299	299	0.203996003	4.55251503	9.86643124	17.4252758	0.955767989	7677
+492	0	98	1	40	cplex	1	0	455	11	1	4	0	1	0	299	299	0.168504	4.42755985	9.74625587	14.1042252	0.940396011	9864
+493	0	98	1	40	cplex	1	1	455	9	2	4	0	1	0	299	299	0.172777995	4.3205719	9.41685009	16.7754574	0.92513299	9357
+494	0	98	1	40	cplex	0	0	500	11	3	4	0	1	0	299	299	0.171044007	4.72821379	10.4071074	14.8458614	0.948334992	8168
+495	0	98	1	40	cplex	1	1	455	1	4	4	4	0	0	299		0.216896996	0.468789995	0.711315989	6.72389078	0.100648999	465
+496	0	99	1	40	cplex	0	1	500	9	0	6	0	1	0	299	299	0.294366002	6.87275314	14.7994766	25.1018181	1.01399899	11516
+497	0	99	1	40	cplex	1	0	455	11	1	6	0	1	0	299	299	0.192726001	7.45930386	14.4378366	20.6510258	0.97477001	14797
+498	0	99	1	40	cplex	1	1	455	9	2	6	0	1	0	299	299	0.220576003	6.357934	13.8121252	24.0621605	0.953260005	14036
+499	0	99	1	40	cplex	0	0	500	11	3	6	0	1	0	299	299	0.276425004	7.02073479	15.723012	22.1242065	0.935357988	12252
+500	0	99	1	40	cplex	1	1	455	1	4	6	6	0	0	299		0.333499998	0.643728018	0.974569976	7.22185802	0.0983920023	694
+506	0	101	1	40	cplex	0	1	500	9	0	7	0	1	0	249	249	0.388356	12.0691118	26.9388161	105.820793	0.972196996	16744
+507	0	101	1	40	cplex	1	0	495	11	1	7	0	1	0	249	249	0.353958011	12.9811583	28.3518696	100.012764	0.984758019	18113
+508	0	101	1	40	cplex	1	1	495	9	2	7	0	1	0	249	249	0.444290012	12.1155882	27.5706348	105.600578	0.969578028	17071
+509	0	101	1	40	cplex	0	0	500	11	3	7	0	1	0	249	249	0.322786987	12.5250568	28.5144424	101.713455	0.944326997	17794
+510	0	101	1	40	cplex	1	1	495	1	4	7	9	0.428570986	0.714286029	249	495	0.0153900003	0.00273300009	0.00496899989	0.0746639967	0.242372006	135
+511	0	102	1	40	cplex	0	1	500	9	0	6	0	1	0	249	249	0.346089005	10.7281618	22.9615707	87.7697449	0.654573977	14352
+512	0	102	1	40	cplex	1	0	495	11	1	6	0	1	0	249	249	0.294245005	10.9422836	24.2695217	79.1715698	0.576502025	15525
+513	0	102	1	40	cplex	1	1	495	9	2	6	0	1	0	249	249	0.338173985	10.5435371	22.954668	87.2904587	0.572264016	14632
+514	0	102	1	40	cplex	0	0	500	11	3	6	0	1	0	249	249	0.289983988	11.9072504	24.2388897	80.5760956	0.576231003	15252
+515	0	102	1	40	cplex	1	1	495	1	4	6	9	0.333332986	0.833333015	249	495	0.0148449996	0.00240899995	0.00435499987	0.0674659982	0.283248007	116
+516	0	103	1	40	cplex	0	1	500	9	0	8	0	1	0	249	249	0.460871994	14.1468773	31.0594826	124.130714	0.972173989	19136
+517	0	103	1	40	cplex	1	0	495	11	1	8	0	1	0	249	249	0.332300991	14.2342653	32.0238228	108.203362	0.985091984	20700
+518	0	103	1	40	cplex	1	1	495	9	2	8	0	1	0	249	249	0.463445008	14.238759	30.7707405	122.975357	0.957001984	19510
+519	0	103	1	40	cplex	0	0	500	11	3	8	0	1	0	249	249	0.334499002	14.4016151	32.3472862	109.329704	0.959776998	20336
+520	0	103	1	40	cplex	1	1	495	1	4	8	9	0.5	0.625	249	495	0.0189650003	0.00364000001	0.00645199977	0.0588129982	0.254424989	155
+521	0	104	1	40	cplex	0	1	500	9	0	5	0	1	0	249	249	0.323547006	8.91439629	19.5026913	69.2901382	0.934768975	11960
+522	0	104	1	40	cplex	1	0	495	11	1	5	0	1	0	249	249	0.289508998	9.10792828	20.2472591	63.120697	0.94799	12938
+523	0	104	1	40	cplex	1	1	495	9	2	5	0	1	0	249	249	0.329622	9.15822029	19.4901123	68.1318054	0.965149999	12193
+524	0	104	1	40	cplex	0	0	500	11	3	5	0	1	0	249	249	0.257230014	9.45123768	20.2707882	62.162014	0.944944978	12710
+525	0	104	1	40	cplex	1	1	495	1	4	5	9	0.200000003	1	249	495	0.0145730004	0.00234799995	0.00365000009	0.0334829986	0.311470002	97
+526	0	105	1	40	cplex	0	1	500	9	0	12	0	1	0	249	249	0.507605016	21.6504917	46.6969757	194.891953	0.981987	28705
+527	0	105	1	40	cplex	1	0	495	11	1	12	0	1	0	249	249	0.450156987	21.7219028	49.2455978	166.37793	0.968217015	31051
+528	0	105	1	40	cplex	1	1	495	9	2	12	0	1	0	249	249	0.545683026	21.6581326	46.6098366	194.688004	0.952511013	29265
+529	0	105	1	40	cplex	0	0	500	11	3	12	0	1	0	249	249	0.454865992	22.0517597	49.1226654	160.831543	0.924108982	30504
+530	0	105	1	40	cplex	1	1	495	1	4	12	9	0.666666985	0.416667014	249	495	0.0259179994	0.00505199982	0.0092740003	0.0595749989	0.295500994	232
+536	0	107	1	40	cplex	0	1	500	9	0	9	0	1	0	249	249	0.552874029	15.8436737	35.2905731	118.573021	0.279087007	21575
+537	0	107	1	40	cplex	1	0	459	11	1	9	0	1	0	249	249	0.297367007	15.7548056	35.6597595	100.326241	0.254691005	26394
+538	0	107	1	40	cplex	1	1	459	9	2	9	0	1	0	249	249	0.388624996	16.8160667	34.5907211	116.555069	0.264218986	25044
+539	0	107	1	40	cplex	0	0	500	11	3	9	0	1	0	249	249	0.423918009	15.9459782	37.0194473	105.162399	0.256904006	22878
+540	0	107	1	40	cplex	1	1	459	1	4	9	9	0	0	249		0.533581972	3.612077	6.52966118	44.3327751	0.291918993	2072
+541	0	108	1	40	cplex	0	1	500	9	0	9	0	1	0	249	249	0.438888997	15.4755087	34.8062248	143.342331	0.981887996	21528
+542	0	108	1	40	cplex	1	0	495	11	1	9	0	1	0	249	249	0.339376003	16.3970394	36.8492813	128.334854	0.984821975	23288
+543	0	108	1	40	cplex	1	1	495	9	2	9	0	1	0	249	249	0.488660008	16.6686897	35.1860237	145.1147	0.960106015	21948
+544	0	108	1	40	cplex	0	0	500	11	3	9	0	1	0	249	249	0.440932006	15.8538656	36.8379135	128.39064	0.966491997	22878
+545	0	108	1	40	cplex	1	1	495	1	4	9	9	0.555555999	0.555555999	249	495	0.0217649993	0.00376900006	0.00639999984	0.0417729989	0.247641996	174
+551	0	110	1	40	cplex	0	1	1000	2	0	16	0	1	0	999	999	0.0086930003	0.000620000006	0.00161699997	0.0070890002	0.37994501	240
+552	0	110	1	40	cplex	1	0	983	11	1	16	0	1	0	999	999	0.0406460017	0.000890999974	0.00336099998	0.00961199962	0.374864012	672
+553	0	110	1	40	cplex	1	1	983	2	2	16	0	1	0	999	999	0.0402689986	0.000520000001	0.00161100004	0.00839199964	0.479034007	240
+554	0	110	1	40	cplex	0	0	1000	11	3	16	0	1	0	999	999	0.0090640001	0.000838999986	0.003333	0.00913400017	0.368975997	672
+555	0	110	1	40	cplex	1	1	983	1	4	16	0	1	0	999	999	0.0409890004	0.000716999988	0.00199600006	0.0180050004	0.380160987	136
+556	0	111	1	40	cplex	0	1	1000	2	0	7	0	1	0	999	999	0.00380000006	0.000266999996	0.000768999977	0.00691800006	0.923425972	105
+557	0	111	1	40	cplex	1	0	983	11	1	7	0	1	0	999	999	0.036669001	0.00046499999	0.00154299999	0.00683900015	0.924755991	294
+558	0	111	1	40	cplex	1	1	983	2	2	7	0	1	0	999	999	0.0362240002	0.000264000002	0.000782000017	0.00656499993	0.912010014	105
+559	0	111	1	40	cplex	0	0	1000	11	3	7	0	1	0	999	999	0.00500999996	0.000480999995	0.00156	0.00729200011	0.917113006	294
+560	0	111	1	40	cplex	1	1	983	1	4	7	0	1	0	999	999	0.0380299985	0.00046499999	0.00101999997	0.0142449997	0.932723999	59
+561	0	112	1	40	cplex	0	1	1000	2	0	8	0	1	0	999	999	0.00506999996	0.000287000003	0.000890000025	0.00757599995	0.934673011	120
+562	0	112	1	40	cplex	1	0	983	11	1	8	0	1	0	999	999	0.0369720012	0.000510999991	0.00176200003	0.0081770001	0.939760029	336
+563	0	112	1	40	cplex	1	1	983	2	2	8	0	1	0	999	999	0.0371299982	0.00029299999	0.000880000007	0.00659300014	1.01710796	120
+564	0	112	1	40	cplex	0	0	1000	11	3	8	0	1	0	999	999	0.00506300014	0.000445000012	0.00175599998	0.00783799961	0.944105029	336
+565	0	112	1	40	cplex	1	1	983	1	4	8	0	1	0	999	999	0.0375320017	0.000444000005	0.00107200001	0.0134049999	0.937026978	68
+566	0	113	1	40	cplex	0	1	1000	2	0	8	0	1	0	999	999	0.00548799988	0.000326999987	0.000895000005	0.00740800006	0.871635973	120
+567	0	113	1	40	cplex	1	0	983	11	1	8	0	1	0	999	999	0.0361730009	0.00044199999	0.00174099999	0.00775799993	0.868279994	336
+568	0	113	1	40	cplex	1	1	983	2	2	8	0	1	0	999	999	0.0347380005	0.000349999988	0.000887000002	0.00760800019	0.871078014	120
+569	0	113	1	40	cplex	0	0	1000	11	3	8	0	1	0	999	999	0.00473800022	0.000517999986	0.00173400005	0.00786099955	0.870705009	336
+570	0	113	1	40	cplex	1	1	983	1	4	8	0	1	0	999	999	0.0411109999	0.000513000006	0.00110300002	0.0139260003	0.900542974	68
+571	0	114	1	40	cplex	0	1	1000	2	0	7	0	1	0	999	999	0.00479699997	0.00026999999	0.000768000027	0.00680400012	0.734360993	105
+572	0	114	1	40	cplex	1	0	983	11	1	7	0	1	0	999	999	0.0380139984	0.000508000026	0.00155299995	0.00695399987	0.86264497	294
+573	0	114	1	40	cplex	1	1	983	2	2	7	0	1	0	999	999	0.0375659987	0.000312999997	0.00076700002	0.00585100008	0.726265013	105
+574	0	114	1	40	cplex	0	0	1000	11	3	7	0	1	0	999	999	0.00496699987	0.000509999983	0.00153999997	0.00568399997	0.721311986	294
+575	0	114	1	40	cplex	1	1	983	1	4	7	0	1	0	999	999	0.0385520011	0.000500999973	0.000957000011	0.0126019996	0.76255101	59
+576	0	115	1	40	cplex	0	1	1000	2	0	21	17	1	0.809524	999	999	0.0118530001	0.000648999994	0.00205000001	0.00866500009	0.949214995	315
+577	0	115	1	40	cplex	1	0	983	11	1	21	17	1	0.809524	999	999	0.0427110009	0.00132699998	0.00439100014	0.0103409998	0.962841988	882
+578	0	115	1	40	cplex	1	1	983	2	2	21	17	1	0.809524	999	999	0.0458070002	0.000624999986	0.00201199995	0.00865999982	0.949222028	315
+579	0	115	1	40	cplex	0	0	1000	11	3	21	17	1	0.809524	999	999	0.0090119997	0.00129100005	0.00440300023	0.0105029996	0.950982988	882
+580	0	115	1	40	cplex	1	1	983	1	4	21	17	1	0.809524	999	999	0.0463379994	0.00100599998	0.00258899992	0.017639	0.94599998	178
+581	0	116	1	40	cplex	0	1	1000	2	0	13	0	1	0	999	999	0.00638400018	0.000436000002	0.00128900004	0.00803900044	0.924454987	195
+582	0	116	1	40	cplex	1	0	983	11	1	13	0	1	0	999	999	0.0387939997	0.000702999998	0.00271799997	0.00820000004	0.925108016	546
+583	0	116	1	40	cplex	1	1	983	2	2	13	0	1	0	999	999	0.0355589986	0.000438999996	0.00127899996	0.00799200032	0.924041986	195
+584	0	116	1	40	cplex	0	0	1000	11	3	13	0	1	0	999	999	0.00808900036	0.000677999982	0.002722	0.00806399994	0.913358986	546
+585	0	116	1	40	cplex	1	1	983	1	4	13	0	1	0	999	999	0.0406190008	0.000758000009	0.001636	0.0155060003	0.963757992	110
+586	0	117	1	40	cplex	0	1	1000	2	0	10	0	1	0	999	999	0.00681699999	0.000356000004	0.00104	0.00740400003	0.937768996	150
+587	0	117	1	40	cplex	1	0	983	11	1	10	0	1	0	999	999	0.0397950001	0.000693999988	0.00212000008	0.00759200007	1.03995502	420
+588	0	117	1	40	cplex	1	1	983	2	2	10	0	1	0	999	999	0.0387590006	0.000436000002	0.00104700006	0.00655099982	0.953267992	150
+589	0	117	1	40	cplex	0	0	1000	11	3	10	0	1	0	999	999	0.00655000005	0.000681000005	0.00211700005	0.00793099962	0.990194023	420
+590	0	117	1	40	cplex	1	1	983	1	4	10	0	1	0	999	999	0.0394829996	0.000520000001	0.00132000004	0.0141479997	0.948307991	85
+591	0	118	1	40	cplex	0	1	1000	2	0	12	0	1	0	999	999	0.134909004	0.00104999996	0.00268699997	0.00909299962	0.847814023	180
+592	0	118	1	40	cplex	1	0	983	11	1	12	0	1	0	999	999	0.0405719988	0.000676000025	0.00256199995	0.00939499959	0.846046984	504
+593	0	118	1	40	cplex	1	1	983	2	2	12	0	1	0	999	999	0.0408030003	0.000511999999	0.00122400001	0.00793999992	2.06305194	180
+594	0	118	1	40	cplex	0	0	1000	11	3	12	0	1	0	999	999	0.00735899992	0.000791000028	0.00256299996	0.00791999977	0.862717986	504
+595	0	118	1	40	cplex	1	1	983	1	4	12	0	1	0	999	999	0.0406460017	0.000677999982	0.001544	0.0151709998	0.862447977	102
+596	0	119	1	40	cplex	0	1	1000	2	0	12	0	1	0	999	999	0.00592999998	0.000410000008	0.00122600002	0.00739300018	0.971409976	180
+597	0	119	1	40	cplex	1	0	983	11	1	12	0	1	0	999	999	0.0389150009	0.000759000017	0.0025549999	0.00887800008	0.968299985	504
+598	0	119	1	40	cplex	1	1	983	2	2	12	0	1	0	999	999	0.0411240011	0.000516999979	0.00122800004	0.00727899978	1.00065899	180
+599	0	119	1	40	cplex	0	0	1000	11	3	12	0	1	0	999	999	0.00768199982	0.000807999982	0.0025559999	0.00806399994	0.969832003	504
+600	0	119	1	40	cplex	1	1	983	1	4	12	0	1	0	999	999	0.0406970009	0.000730000029	0.00153500005	0.0154839996	1.01383805	102
+601	0	120	1	40	cplex	0	1	1000	5	0	12	0	1	0	974	974	0.220457003	0.180162996	0.389313012	0.413585007	1.03051901	2271
+602	0	120	1	40	cplex	1	0	981	11	1	12	0	1	0	974	974	0.158635005	0.139317006	0.343861997	0.351794988	1.00114703	3720
+603	0	120	1	40	cplex	1	1	981	6	2	12	0	1	0	974	974	0.161090001	0.126859993	0.286666989	0.302406013	0.971948981	2985
+604	0	120	1	40	cplex	0	0	1000	11	3	12	0	1	0	974	974	0.169246003	0.231663004	0.56536603	0.557524979	0.977549016	3504
+605	0	120	1	40	cplex	1	1	981	1	4	12	0	1	0	974	974	0.159114003	0.0581489988	0.101934999	0.72842598	0.973896027	554
+606	0	121	1	40	cplex	0	1	1000	5	0	8	0	1	0	974	974	0.157533005	0.121260002	0.252234012	0.322394013	0.991065025	1514
+607	0	121	1	40	cplex	1	0	981	11	1	8	0	1	0	974	974	0.106283002	0.0968929976	0.226537004	0.257578999	0.939482987	2480
+608	0	121	1	40	cplex	1	1	981	6	2	8	0	1	0	974	974	0.102774002	0.0885529965	0.188627005	0.224272996	0.940388024	1990
+609	0	121	1	40	cplex	0	0	1000	11	3	8	0	1	0	974	974	0.0709519982	0.178042993	0.370808989	0.407790005	0.945042014	2336
+610	0	121	1	40	cplex	1	1	981	1	4	8	0	1	0	974	974	0.100856997	0.0421629995	0.0679240003	0.474893987	0.955448985	369
+611	0	122	1	40	cplex	0	1	1000	5	0	11	0	1	0	974	974	0.159784004	0.239258006	0.35987401	0.398463994	0.26038	2082
+612	0	122	1	40	cplex	1	0	981	11	1	11	0	1	0	974	974	0.111744002	0.164883003	0.326604009	0.332637012	0.25613299	3410
+613	0	122	1	40	cplex	1	1	981	6	2	11	0	1	0	974	974	0.158908993	0.123787999	0.268056989	0.293749005	0.244082004	2736
+614	0	122	1	40	cplex	0	0	1000	11	3	11	0	1	0	974	974	0.138889998	0.257515013	0.521322012	0.53452599	0.279011011	3212
+615	0	122	1	40	cplex	1	1	981	1	4	11	0	1	0	974	974	0.112822004	0.0992640033	0.0978360027	0.645488024	0.29035899	508
+616	0	123	1	40	cplex	0	1	1000	5	0	9	0	1	0	974	974	0.186278	0.136380002	0.287313998	0.34819299	0.480006009	1703
+617	0	123	1	40	cplex	1	0	981	11	1	9	0	1	0	974	974	0.120728999	0.107244	0.258091986	0.267246008	0.334594011	2790
+618	0	123	1	40	cplex	1	1	981	6	2	9	0	1	0	974	974	0.141641006	0.0931240022	0.210427999	0.238646001	0.332183003	2239
+619	0	123	1	40	cplex	0	0	1000	11	3	9	0	1	0	974	974	0.114427999	0.225695997	0.421867996	0.440791994	0.347923011	2628
+620	0	123	1	40	cplex	1	1	981	1	4	9	0	1	0	974	974	0.115657002	0.0457030013	0.0786610022	0.525874972	0.334951013	415
+621	0	124	1	40	cplex	0	1	1000	5	0	8	0	1	0	974	974	0.176278993	0.133233994	0.257088006	0.318405986	1.13246202	1514
+622	0	124	1	40	cplex	1	0	981	11	1	8	0	1	0	974	974	0.131042004	0.092325002	0.224806994	0.256009012	0.980563998	2480
+623	0	124	1	40	cplex	1	1	981	6	2	8	0	1	0	974	974	0.132442996	1.40920901	0.186733007	0.221907005	1.00597596	1990
+624	0	124	1	40	cplex	0	0	1000	11	3	8	0	1	0	974	974	0.138751	0.161532	0.372945994	0.409741998	0.972864985	2336
+625	0	124	1	40	cplex	1	1	981	1	4	8	0	1	0	974	974	0.102719001	0.0430519991	0.0680230036	0.461667001	1.04540002	369
+626	0	125	1	40	cplex	0	1	1000	5	0	8	0	1	0	974	974	0.153281003	0.312622011	0.26127699	0.309370011	0.278219998	1514
+627	0	125	1	40	cplex	1	0	981	11	1	8	0	1	0	974	974	0.114635997	0.0871379972	0.222764999	0.250923991	0.261274993	2480
+628	0	125	1	40	cplex	1	1	981	6	2	8	0	1	0	974	974	0.126150995	0.100812003	0.196492001	0.318769008	0.271578014	1990
+629	0	125	1	40	cplex	0	0	1000	11	3	8	0	1	0	974	974	0.141608998	0.149931997	0.368167996	0.393269986	0.268781006	2336
+630	0	125	1	40	cplex	1	1	981	1	4	8	0	1	0	974	974	0.123438001	0.043056	0.0685330033	0.480607003	0.26364699	369
+631	0	126	1	40	cplex	0	1	1000	5	0	10	0	1	0	974	974	0.146858007	0.153822005	0.322620988	0.387924999	0.927974999	1893
+632	0	126	1	40	cplex	1	0	981	11	1	10	0	1	0	974	974	0.113023996	0.327445	0.292474002	0.305611014	0.945001006	3100
+633	0	126	1	40	cplex	1	1	981	6	2	10	0	1	0	974	974	0.128059	0.101816997	0.231079996	0.268831998	0.929036021	2488
+634	0	126	1	40	cplex	0	0	1000	11	3	10	0	1	0	974	974	0.188421994	0.185782	0.458954006	0.490889996	0.99722898	2920
+635	0	126	1	40	cplex	1	1	981	1	4	10	0	1	0	974	974	0.150492996	0.0504759997	0.087263003	0.637389004	0.925701022	462
+636	0	127	1	40	cplex	0	1	1000	5	0	8	0	1	0	974	974	0.180785999	0.190399006	0.256888986	0.339951009	0.466295987	1514
+637	0	127	1	40	cplex	1	0	981	11	1	8	0	1	0	974	974	0.130352005	0.0913840011	0.225450993	0.269033998	0.259045005	2480
+638	0	127	1	40	cplex	1	1	981	6	2	8	0	1	0	974	974	0.133146003	0.0824899971	0.183698997	0.244773999	0.250901014	1990
+639	0	127	1	40	cplex	0	0	1000	11	3	8	0	1	0	974	974	0.168295994	0.166684002	0.379357994	0.423684001	0.325800002	2336
+640	0	127	1	40	cplex	1	1	981	1	4	8	0	1	0	974	974	0.119301997	0.0437869988	0.0691550002	0.512917995	0.252604991	369
+641	0	128	1	40	cplex	0	1	1000	5	0	9	0	1	0	974	974	0.175626993	0.137868002	0.305101991	0.35886699	0.932619989	1873
+642	0	128	1	40	cplex	1	0	975	11	1	9	0	1	0	974	974	0.0863519982	0.101163998	0.204273999	0.219648004	1.19787598	3718
+643	0	128	1	40	cplex	1	1	975	8	2	9	0	1	0	974	974	0.083296001	0.081081003	0.180880994	0.186497003	0.936788976	3162
+644	0	128	1	40	cplex	0	0	1000	11	3	9	0	1	0	974	974	0.129130006	0.173840001	0.418383002	0.410100013	0.993920028	2628
+645	0	128	1	40	cplex	1	1	975	1	4	9	15	0	0.666666985	974	986	0.036522001	0.000846999988	0.00152499997	0.00627199979	0.318049997	180
+646	0	129	1	40	cplex	0	1	1000	5	0	6	0	1	0	974	974	0.0976239964	0.0872249976	0.188108996	0.265727013	0.963338017	1135
+647	0	129	1	40	cplex	1	0	981	11	1	6	0	1	0	974	974	0.091064997	0.0670500025	0.164144993	0.202528998	0.948535979	1860
+648	0	129	1	40	cplex	1	1	981	6	2	6	0	1	0	974	974	0.0957610011	0.0608460009	0.136007994	0.175751001	1.16586101	1492
+649	0	129	1	40	cplex	0	0	1000	11	3	6	0	1	0	974	974	0.116423003	0.115842998	0.272846997	0.330069989	0.952710986	1752
+650	0	129	1	40	cplex	1	1	981	1	4	6	0	1	0	974	974	0.0920300037	0.0328899994	0.0528649986	0.358548999	0.962503016	277
+651	0	130	1	40	cplex	0	1	1000	6	0	6	0	1	0	949	949	0.257925987	0.667608023	0.843747973	0.919755995	0.950169981	2481
+652	0	130	1	40	cplex	1	0	982	11	1	6	0	1	0	949	949	0.211097002	0.325489014	0.758381009	0.864167988	0.954819024	3597
+653	0	130	1	40	cplex	1	1	982	8	2	6	0	1	0	949	949	0.206557006	0.31407401	0.690587997	0.689098001	1.17944396	3143
+654	0	130	1	40	cplex	0	0	1000	11	3	6	0	1	0	949	949	0.263287008	0.448639005	1.03687501	1.10424304	0.947646022	3252
+655	0	130	1	40	cplex	1	1	982	1	4	6	0	1	0	949	949	0.207148999	0.0503720008	0.0776180029	0.83238399	0.948521972	251
+656	0	131	1	40	cplex	0	1	1000	6	0	9	0	1	0	949	949	0.251507998	0.557888985	1.24764097	1.25498497	0.94837302	3721
+657	0	131	1	40	cplex	1	0	982	11	1	9	0	1	0	949	949	0.222885996	0.454964012	1.11819899	1.04862201	2.45242906	5396
+658	0	131	1	40	cplex	1	1	982	8	2	9	0	1	0	949	949	0.265709996	0.443708003	1.01511204	0.970377982	1.07210195	4715
+659	0	131	1	40	cplex	0	0	1000	11	3	9	0	1	0	949	949	0.257515013	0.692475975	1.53323102	1.49810696	0.989987016	4878
+660	0	131	1	40	cplex	1	1	982	1	4	9	9	0	0	949		0.364582986	0.40290001	0.662666023	6.77082205	0.0954409987	690
+661	0	132	1	40	cplex	0	1	1000	6	0	9	0	1	0	949	949	0.383145005	0.572642028	1.26617706	1.20721197	0.512178004	3721
+662	0	132	1	40	cplex	1	0	982	11	1	9	0	1	0	949	949	0.408728004	0.511427999	1.16627395	1.16273904	0.500733972	5396
+663	0	132	1	40	cplex	1	1	982	8	2	9	0	1	0	949	949	0.234233007	0.454250008	1.03640497	1.01295197	0.523579001	4715
+664	0	132	1	40	cplex	0	0	1000	11	3	9	0	1	0	949	949	0.294477999	0.673873007	1.62461698	1.51749003	0.513888001	4878
+665	0	132	1	40	cplex	1	1	982	1	4	9	0	1	0	949	949	0.220928997	0.0648010001	0.115217999	1.10192096	0.575891972	376
+666	0	133	1	40	cplex	0	1	1000	6	0	10	0	1	0	949	949	0.284505993	0.867444992	1.40589094	1.68684304	1.06071305	4135
+667	0	133	1	40	cplex	1	0	982	11	1	10	0	1	0	949	949	0.225119993	0.554404974	1.31966996	1.73356605	1.02430403	5996
+668	0	133	1	40	cplex	1	1	982	8	2	10	0	1	0	949	949	0.167852998	0.589062989	1.16914296	1.13591003	1.083794	5239
+669	0	133	1	40	cplex	0	0	1000	11	3	10	0	1	0	949	949	0.284956992	0.801025987	1.77774	1.57262099	1.05200398	5420
+670	0	133	1	40	cplex	1	1	982	1	4	10	10	0	0	949		0.320607007	0.458481014	0.810805023	10.599988	0.170888007	728
+671	0	134	1	40	cplex	0	1	1000	6	0	12	0	1	0	949	949	0.404747993	0.859417021	1.69735897	1.54111695	0.961326003	4962
+672	0	134	1	40	cplex	1	0	982	11	1	12	0	1	0	949	949	0.307915986	0.640864015	1.57164896	1.38941503	1.03059697	7195
+673	0	134	1	40	cplex	1	1	982	8	2	12	0	1	0	949	949	0.32189101	0.594542027	1.39723802	1.270877	0.954708993	6287
+674	0	134	1	40	cplex	0	0	1000	11	3	12	0	1	0	949	949	0.229403004	0.857751012	2.10179806	1.85075605	0.996891022	6504
+675	0	134	1	40	cplex	1	1	982	1	4	12	0	1	0	949	949	0.248457998	0.0923639983	0.154403001	1.60650098	1.05495203	502
+676	0	135	1	40	cplex	0	1	1000	6	0	14	0	1	0	949	949	0.338871002	1.00576496	1.95789504	1.66964304	0.996029019	5865
+677	0	135	1	40	cplex	1	0	977	11	1	14	0	1	0	949	949	0.162441999	0.774760008	1.70232606	1.49354506	0.94036299	9190
+678	0	135	1	40	cplex	1	1	977	8	2	14	0	1	0	949	949	0.175300002	0.712083995	1.56324506	1.36627996	0.943309009	8351
+679	0	135	1	40	cplex	0	0	1000	11	3	14	0	1	0	949	949	0.254958004	1.05576599	2.52891207	2.18414903	0.910081983	7588
+680	0	135	1	40	cplex	1	1	977	1	4	14	14	0	0	949		0.346890002	0.205256999	0.352183998	5.36598587	0.100694001	925
+681	0	136	1	40	cplex	0	1	1000	6	0	8	0	1	0	949	949	0.167287007	0.474218011	1.08191895	1.01577306	0.557869017	3308
+682	0	136	1	40	cplex	1	0	982	11	1	8	0	1	0	949	949	0.227469996	0.450870007	1.01060498	0.959020972	0.559728026	4797
+683	0	136	1	40	cplex	1	1	982	8	2	8	0	1	0	949	949	0.249568999	0.390056998	0.906216025	0.878260016	0.571209013	4191
+684	0	136	1	40	cplex	0	0	1000	11	3	8	0	1	0	949	949	0.226897001	0.564970016	1.36775899	1.24966502	0.556086004	4336
+685	0	136	1	40	cplex	1	1	982	1	4	8	0	1	0	949	949	0.235424995	0.0622560009	0.101075001	1.07438099	0.562784016	335
+686	0	137	1	40	cplex	0	1	1000	6	0	10	0	1	0	949	949	0.347707987	0.610733986	1.39264798	1.31691802	0.994935989	4135
+687	0	137	1	40	cplex	1	0	982	11	1	10	0	1	0	949	949	0.268772006	0.533096015	1.311028	1.18094206	1.025913	5996
+688	0	137	1	40	cplex	1	1	982	8	2	10	0	1	0	949	949	0.205176994	0.478392005	1.13287604	1.02498996	1.10857606	5239
+689	0	137	1	40	cplex	0	0	1000	11	3	10	0	1	0	949	949	0.254848003	0.758817017	1.74055004	1.58297598	1.05340195	5420
+690	0	137	1	40	cplex	1	1	982	1	4	10	10	0	0	949		0.31724599	0.516878009	0.886476994	13.8618784	0.194950998	698
+691	0	138	1	40	cplex	0	1	1000	6	0	9	0	1	0	949	949	0.170505002	0.66812098	1.24916697	1.20270205	1.04693305	3721
+692	0	138	1	40	cplex	1	0	982	11	1	9	0	1	0	949	949	0.244256005	0.466737986	1.13979197	1.05956602	0.961834013	5396
+693	0	138	1	40	cplex	1	1	982	8	2	9	0	1	0	949	949	0.286092997	0.436291993	1.00748396	0.954577982	0.968698025	4715
+694	0	138	1	40	cplex	0	0	1000	11	3	9	0	1	0	949	949	0.190693006	0.656122029	1.54776895	1.42081904	0.955205023	4878
+695	0	138	1	40	cplex	1	1	982	1	4	9	0	1	0	949	949	0.181523994	0.0663520023	0.115630001	1.11004102	0.959179997	376
+696	0	139	1	40	cplex	0	1	1000	6	0	7	0	1	0	949	949	0.171094999	0.42761001	1.07899702	0.922999978	0.708660007	2894
+697	0	139	1	40	cplex	1	0	982	11	1	7	0	1	0	949	949	0.182941005	0.426189989	0.891525984	0.852303028	0.796199977	4197
+698	0	139	1	40	cplex	1	1	982	8	2	7	0	1	0	949	949	0.236157998	0.373189986	0.788994014	0.749819994	0.819733977	3667
+699	0	139	1	40	cplex	0	0	1000	11	3	7	0	1	0	949	949	0.219540998	0.572009981	1.21314096	1.14732599	0.843591988	3794
+700	0	139	1	40	cplex	1	1	982	1	4	7	7	0	0	949		0.230892003	0.363426	0.590369999	8.53727341	0.109392002	514
+701	0	140	1	40	cplex	0	1	1000	8	0	8	0	1	0	899	899	0.417392999	2.53263688	4.90605021	5.24778605	1.06944501	7408
+702	0	140	1	40	cplex	1	0	983	11	1	8	0	1	0	899	899	0.365696996	3.90612602	4.99940681	5.28151512	0.97874099	9177
+703	0	140	1	40	cplex	1	1	983	9	2	8	0	1	0	899	899	0.474781007	2.75919104	4.68631601	6.36543512	1.20910001	8562
+704	0	140	1	40	cplex	0	0	1000	11	3	8	0	1	0	899	899	0.303121001	2.49141312	5.39406681	5.17771006	1.10667598	8336
+705	0	140	1	40	cplex	1	1	983	1	4	8	0	1	0	899	899	0.489252001	0.185813993	0.280366004	1.87413704	0.940065026	365
+706	0	141	1	40	cplex	0	1	1000	8	0	9	0	1	0	899	899	0.595189989	2.58386898	5.45853519	6.03330421	0.959849	8334
+707	0	141	1	40	cplex	1	0	983	11	1	9	0	1	0	899	899	0.337603986	2.38495398	5.5745101	5.85295105	0.924856007	10325
+708	0	141	1	40	cplex	1	1	983	9	2	9	0	1	0	899	899	0.444314986	2.33376694	5.24044895	6.58812523	0.987380028	9632
+709	0	141	1	40	cplex	0	0	1000	11	3	9	0	1	0	899	899	0.493999004	2.64801407	6.08542585	8.24765396	0.959626019	9378
+710	0	141	1	40	cplex	1	1	983	1	4	9	9	0	0	899		0.542204976	0.429334998	0.69332701	7.81606579	0.221593007	658
+711	0	142	1	40	cplex	0	1	1000	8	0	14	0	1	0	899	899	0.509033024	4.07216597	8.63207912	8.78909397	0.615459979	12964
+712	0	142	1	40	cplex	1	0	983	11	1	14	0	1	0	899	899	0.620287001	3.97252989	8.78863335	9.5210247	0.401062012	16061
+713	0	142	1	40	cplex	1	1	983	9	2	14	0	1	0	899	899	0.566033006	3.66575289	8.31873417	8.4761219	0.402648002	14984
+714	0	142	1	40	cplex	0	0	1000	11	3	14	0	1	0	899	899	0.483361989	13.2610836	9.37388039	9.89316463	0.391339004	14588
+715	0	142	1	40	cplex	1	1	983	1	4	14	14	0	0	899		0.711658001	0.491122991	0.876590014	7.705966	0.0867990032	915
+716	0	143	1	40	cplex	0	1	1000	8	0	37	0	1	0	899	899	0.950169027	9.26566124	22.4389534	27.6118965	0.499127001	34264
+717	0	143	1	40	cplex	1	0	983	11	1	37	0	1	0	899	899	0.797143996	9.58186913	23.1502037	27.4150047	0.475870013	42447
+718	0	143	1	40	cplex	1	1	983	9	2	37	0	1	0	899	899	0.992060006	9.16165447	21.555706	27.3027782	0.508253992	39601
+719	0	143	1	40	cplex	0	0	1000	11	3	37	0	1	0	899	899	1.19039297	10.6474295	25.5356731	27.8418312	0.484508991	38554
+720	0	143	1	40	cplex	1	1	983	1	4	37	37	0	0	899		1.82833004	1.18999505	2.25889897	18.4427719	0.323899001	2405
+721	0	144	1	40	cplex	0	1	1000	8	0	11	0	1	0	899	899	0.644599974	3.03140593	6.86229992	10.7719402	1.11780798	10186
+722	0	144	1	40	cplex	1	0	983	11	1	11	0	1	0	899	899	0.453904986	2.89943099	6.92452383	9.73355675	1.04547	12619
+723	0	144	1	40	cplex	1	1	983	9	2	11	0	1	0	899	899	0.44927001	2.92740989	6.41377401	9.92830276	1.01275694	11773
+724	0	144	1	40	cplex	0	0	1000	11	3	11	0	1	0	899	899	0.574404001	3.07911801	7.38607979	10.0328112	0.948683023	11462
+725	0	144	1	40	cplex	1	1	983	1	4	11	11	0	0	899		0.651292026	0.416294008	0.703414023	8.00854206	0.097788997	726
+726	0	145	1	40	cplex	0	1	1000	8	0	15	0	1	0	899	899	0.624229014	3.98113108	9.16728592	11.6866589	0.390199989	13891
+727	0	145	1	40	cplex	1	0	983	11	1	15	0	1	0	899	899	0.55508697	4.17129993	9.33079147	10.135005	0.305492014	17208
+728	0	145	1	40	cplex	1	1	983	9	2	15	0	1	0	899	899	0.463676006	3.73181891	8.71935558	9.74213409	0.254384011	16054
+729	0	145	1	40	cplex	0	0	1000	11	3	15	0	1	0	899	899	0.547749996	4.05637884	9.88244247	10.1321268	0.323035985	15630
+730	0	145	1	40	cplex	1	1	983	1	4	15	15	0	0	899		0.827045023	0.567653	0.955043018	7.77612114	0.0982320011	981
+731	0	146	1	40	cplex	0	1	1000	8	0	7	0	1	0	899	899	0.504633009	2.01341605	4.1835289	6.70819902	0.772356987	6482
+732	0	146	1	40	cplex	1	0	983	11	1	7	0	1	0	899	899	0.311942995	1.81702101	4.21599579	7.40289879	0.718701005	8030
+733	0	146	1	40	cplex	1	1	983	9	2	7	0	1	0	899	899	0.27432701	1.742926	4.00007677	6.1735158	0.720400989	7492
+734	0	146	1	40	cplex	0	0	1000	11	3	7	0	1	0	899	899	0.511101007	1.95459104	4.62416315	8.05053139	0.659413993	7294
+735	0	146	1	40	cplex	1	1	983	1	4	7	7	0	0	899		0.519556999	0.330639988	0.547931015	9.21070862	0.0872609988	505
+736	0	147	1	40	cplex	0	1	1000	8	0	3	0	1	0	899	899	0.353291988	0.765187979	1.75693405	5.85869598	1.55694497	2778
+737	0	147	1	40	cplex	1	0	983	11	1	3	0	1	0	899	899	0.156466007	0.791405976	1.81667495	2.09892297	1.70452905	3441
+738	0	147	1	40	cplex	1	1	983	9	2	3	0	1	0	899	899	0.218285993	0.818800986	1.69983995	5.56416512	1.52021098	3210
+739	0	147	1	40	cplex	0	0	1000	11	3	3	0	1	0	899	899	0.295648009	0.898352981	2.00860095	7.89591694	1.45230699	3126
+740	0	147	1	40	cplex	1	1	983	1	4	3	0	1	0	899	899	0.318504006	0.0959720016	0.133458003	7.15319014	1.42146099	136
+741	0	148	1	40	cplex	0	1	1000	8	0	3	0	1	0	899	899	0.239950001	0.776417971	1.77085102	2.86012912	1.22894704	2778
+742	0	148	1	40	cplex	1	0	983	11	1	3	0	1	0	899	899	0.152349994	0.797138989	2.01436591	1.88121295	1.15619099	3441
+743	0	148	1	40	cplex	1	1	983	9	2	3	0	1	0	899	899	0.223051995	0.830232024	1.70274305	1.85676599	1.13459802	3210
+744	0	148	1	40	cplex	0	0	1000	11	3	3	0	1	0	899	899	0.229677007	0.863847017	2.06292105	2.23864698	1.11780095	3126
+745	0	148	1	40	cplex	1	1	983	1	4	3	0	1	0	899	899	0.143702999	0.187960997	0.114878997	2.90911293	1.22114301	136
+746	0	149	1	40	cplex	0	1	1000	8	0	7	0	1	0	899	899	0.403178006	2.18260598	4.25965023	6.39177608	0.541534007	6482
+747	0	149	1	40	cplex	1	0	983	11	1	7	0	1	0	899	899	0.27106601	1.75042701	4.20107794	4.32613802	0.747148991	8030
+748	0	149	1	40	cplex	1	1	983	9	2	7	0	1	0	899	899	0.377256989	1.78531206	4.00805378	3.99076295	0.568334997	7492
+749	0	149	1	40	cplex	0	0	1000	11	3	7	0	1	0	899	899	0.457358003	1.960742	4.67462397	4.72396708	0.673340976	7294
+750	0	149	1	40	cplex	1	1	983	1	4	7	7	0	0	899		0.45739001	0.40902099	0.519014001	5.43034697	0.160840005	512
+751	0	150	1	40	cplex	0	1	1000	9	0	6	0	1	0	799	799	0.596584022	6.56189013	14.9546881	40.7250175	1.08991599	11460
+752	0	150	1	40	cplex	1	0	975	11	1	6	0	1	0	799	799	0.546976984	7.48822689	15.5222187	64.7592239	1.06804597	13642
+753	0	150	1	40	cplex	1	1	975	9	2	6	0	1	0	799	799	0.566254973	6.43948412	14.7311773	44.6016693	1.07823205	12919
+754	0	150	1	40	cplex	0	0	1000	11	3	6	0	1	0	799	799	0.573023021	6.74675989	16.3182297	42.8238564	1.08023798	12252
+755	0	150	1	40	cplex	1	1	975	1	4	6	6	0	0	799		0.744428992	0.838822007	1.299137	10.6759386	0.104203999	936
+761	0	152	1	40	cplex	0	1	1000	9	0	10	0	1	0	799	799	0.737559021	11.2157841	25.5691814	62.9319267	0.328705996	19100
+762	0	152	1	40	cplex	1	0	975	11	1	10	0	1	0	799	799	0.629994988	10.5139151	25.9220352	47.3634796	0.229095995	22738
+763	0	152	1	40	cplex	1	1	975	9	2	10	0	1	0	799	799	0.54380101	10.726141	24.8114452	59.5490761	0.275278002	21532
+764	0	152	1	40	cplex	0	0	1000	11	3	10	0	1	0	799	799	0.766016006	11.0748196	26.7939091	49.221096	0.220385998	20420
+765	0	152	1	40	cplex	1	1	975	1	4	10	10	0	0	799		0.781875014	1.27020395	2.209126	11.7822924	0.101944998	1557
+766	0	153	1	40	cplex	0	1	1000	9	0	11	0	1	0	799	799	0.819339991	12.4763603	27.9867821	57.7880516	0.337680012	21010
+767	0	153	1	40	cplex	1	0	975	11	1	11	0	1	0	799	799	0.652530015	11.8876486	28.2028389	51.1874924	0.235146999	25012
+768	0	153	1	40	cplex	1	1	975	9	2	11	0	1	0	799	799	0.60294801	11.3604536	26.9355755	55.6032944	0.229304999	23686
+769	0	153	1	40	cplex	0	0	1000	11	3	11	0	1	0	799	799	0.683287978	12.2181816	29.2380524	50.0589867	0.242007002	22462
+770	0	153	1	40	cplex	1	1	975	1	4	11	11	0	0	799		1.18455803	1.393718	2.44851804	9.15513325	0.105005004	1717
+771	0	154	1	40	cplex	0	1	1000	9	0	9	0	1	0	799	799	1.21451902	9.79423237	22.7820816	43.3899422	0.496138006	17190
+772	0	154	1	40	cplex	1	0	975	11	1	9	0	1	0	799	799	0.557471991	9.75398254	23.0649605	37.6919785	0.307388008	20464
+773	0	154	1	40	cplex	1	1	975	9	2	9	0	1	0	799	799	0.511133015	9.52418518	22.1987724	42.7710495	0.333802998	19379
+774	0	154	1	40	cplex	0	0	1000	11	3	9	0	1	0	799	799	0.741182029	9.54749298	23.2433643	38.2989159	0.344877005	18378
+775	0	154	1	40	cplex	1	1	975	1	4	9	9	0	0	799		0.940796971	1.031618	1.903633	5.70739698	0.0945620015	1402
+776	0	100	1	40	cplex	0	1	500	9	0	7	0	1	0	249	249	0.41543299	12.8195286	24.3915806	102.284515	0.995269001	16749
+777	0	100	1	40	cplex	1	0	470	11	1	7	0	1	0	249	249	0.306484997	12.3225508	24.8676281	93.64888	0.966413975	19811
+778	0	100	1	40	cplex	1	1	470	9	2	7	0	1	0	249	249	0.373338997	11.5485392	23.4269314	100.756233	0.936447978	18734
+779	0	100	1	40	cplex	0	0	500	11	3	7	0	1	0	249	249	0.325352997	12.3229094	25.1573257	92.9894791	0.955202997	17794
+780	0	100	1	40	cplex	1	1	470	1	4	7	13	0.285714	1.14285696	249	496	0.0163969994	0.000595999998	0.000944999978	0.00683999993	0.240248993	112
+781	0	106	1	40	cplex	0	1	500	9	0	7	0	1	0	249	249	0.38687399	12.0798254	23.9263306	101.049904	0.865420997	16744
+782	0	106	1	40	cplex	1	0	495	11	1	7	0	1	0	249	249	0.313735008	12.1494436	24.7227898	94.0555878	0.871164978	18113
+783	0	106	1	40	cplex	1	1	495	9	2	7	0	1	0	249	249	0.35531199	12.0440283	23.6988926	99.9988937	0.853164971	17071
+784	0	106	1	40	cplex	0	0	500	11	3	7	0	1	0	249	249	0.322905988	12.5586004	25.4014473	92.9845047	0.881781995	17794
+785	0	106	1	40	cplex	1	1	495	1	4	7	9	0.428570986	0.714286029	249	495	0.0198810007	0.00311199995	0.00495600002	0.0338659994	0.294052005	135
+786	0	109	1	40	cplex	0	1	500	9	0	9	0	1	0	249	249	0.394632995	15.7060804	31.1028786	151.067154	0.974744022	21528
+787	0	109	1	40	cplex	1	0	495	11	1	9	0	1	0	249	249	0.410869986	16.8459206	33.0535774	134.597137	0.953486025	23288
+788	0	109	1	40	cplex	1	1	495	9	2	9	0	1	0	249	249	0.505351007	16.0057564	30.6902752	149.605957	0.954410017	21948
+789	0	109	1	40	cplex	0	0	500	11	3	9	0	1	0	249	249	0.41693899	15.9001007	32.5512772	132.151306	0.958208025	22878
+790	0	109	1	40	cplex	1	1	495	1	4	9	9	0.555555999	0.555555999	249	495	0.0221139994	0.00364900008	0.00660399999	0.0423909985	0.263900995	174
+791	0	151	1	40	cplex	0	1	1000	9	0	16	0	1	0	799	799	1.03308904	16.9032593	35.0172653	82.2666779	0.292066991	30560
+792	0	151	1	40	cplex	1	0	975	11	1	16	0	1	0	799	799	0.784394026	15.9279795	35.4897118	70.2998581	0.29469201	36381
+793	0	151	1	40	cplex	1	1	975	9	2	16	0	1	0	799	799	0.755752027	16.7200775	34.2018509	80.954689	0.293859005	34452
+794	0	151	1	40	cplex	0	0	1000	11	3	16	0	1	0	799	799	0.872766018	16.0833111	36.6292572	71.8467407	0.30931899	32672
+795	0	151	1	40	cplex	1	1	975	1	4	16	16	0	0	799		1.34784901	1.82482195	3.0964849	8.24793816	0.0949409977	2492
+796	0	155	1	40	cplex	0	1	1000	9	0	7	0	1	0	799	799	0.491638988	7.89910078	15.6080742	44.0697289	0.968731999	13370
+797	0	155	1	40	cplex	1	0	975	11	1	7	0	1	0	799	799	0.413358986	7.77907324	15.8291111	42.1194801	0.975457013	15916
+798	0	155	1	40	cplex	1	1	975	9	2	7	0	1	0	799	799	0.47575599	8.01533508	15.4309196	43.7075195	0.950398028	15072
+799	0	155	1	40	cplex	0	0	1000	11	3	7	0	1	0	799	799	0.416382998	8.03988838	16.2657909	42.3456078	0.945258975	14294
+800	0	155	1	40	cplex	1	1	975	1	4	7	7	0	0	799		0.627830029	0.926431	1.35315096	7.82560205	0.0956809968	1092
+801	0	156	1	40	cplex	0	1	1000	9	0	8	0	1	0	799	799	0.961606026	9.32738018	18.1515598	48.8400726	0.536719978	15280
+802	0	156	1	40	cplex	1	0	975	11	1	8	0	1	0	799	799	0.704846978	8.6873703	18.0779076	46.4493027	0.572411001	18190
+803	0	156	1	40	cplex	1	1	975	9	2	8	0	1	0	799	799	0.613771021	8.5967989	17.7588234	48.4874153	0.536504984	17226
+804	0	156	1	40	cplex	0	0	1000	11	3	8	0	1	0	799	799	0.565265	9.11287022	18.8958511	48.9069977	0.523487985	16336
+805	0	156	1	40	cplex	1	1	975	1	4	8	8	0	0	799		0.853717029	0.949213028	1.56810606	7.22423315	0.0977459997	1248
+816	0	159	1	40	cplex	0	1	1000	9	0	25	0	1	0	799	799	1.31964898	27.2130852	56.6803246	145.03862	0.904317975	47884
+817	0	159	1	40	cplex	1	0	975	11	1	25	0	1	0	799	799	0.858141005	27.9746971	58.1878891	125.906677	0.932718992	56845
+818	0	159	1	40	cplex	1	1	975	9	2	25	0	1	0	799	799	1.14132404	25.9679947	56.0218315	145.146484	0.923816979	53831
+819	0	159	1	40	cplex	0	0	1000	11	3	25	0	1	0	799	799	1.31621599	28.9609089	60.4078941	127.595619	0.929087996	51050
+820	0	159	1	40	cplex	1	1	975	1	4	25	25	0	0	799		2.11326408	8.83426476	15.4948387	131.16127	0.104356997	6700
+821	0	160	1	40	cplex	0	1	1000	9	0	4	0	1	0	749	749	0.499161005	7.05694818	14.0816584	45.2816734	1.08164704	9561
+822	0	160	1	40	cplex	1	0	980	11	1	4	0	1	0	749	749	0.388538986	7.39141417	14.3935242	36.5459213	1.05943096	10885
+823	0	160	1	40	cplex	1	1	980	9	2	4	0	1	0	749	749	0.479793996	6.44608498	13.5732603	45.5035439	1.07755804	10314
+824	0	160	1	40	cplex	0	0	1000	11	3	4	0	1	0	749	749	0.382896006	6.97585917	14.4777412	36.6223564	1.066517	10168
+825	0	160	1	40	cplex	1	1	980	1	4	4	4	0	0	749		0.541544974	1.85765004	2.88755989	38.6149139	0.114367001	1220
+831	0	162	1	40	cplex	0	1	1000	9	0	10	0	1	0	749	749	0.733137012	16.602953	35.216156	109.391884	1.10366404	23904
+832	0	162	1	40	cplex	1	0	980	11	1	10	0	1	0	749	749	0.623058021	16.6600838	36.7560501	85.5118942	1.09570599	27214
+833	0	162	1	40	cplex	1	1	980	9	2	10	0	1	0	749	749	0.751783013	18.1475811	36.2125893	109.057625	1.09261894	25787
+834	0	162	1	40	cplex	0	0	1000	11	3	10	0	1	0	749	749	0.867847025	17.1024342	37.8302116	86.2192154	1.08767104	25420
+835	0	162	1	40	cplex	1	1	980	1	4	10	10	0	0	749		0.892268002	4.17793608	6.95872021	54.2576218	0.100548998	3002
+836	0	163	1	40	cplex	0	1	1000	9	0	5	0	1	0	749	749	0.527449012	9.10305977	18.2561722	47.2137146	1.13160598	11966
+837	0	163	1	40	cplex	1	0	937	11	1	5	0	1	0	749	749	0.331470013	8.71789169	17.8861904	39.1382751	1.12794697	15766
+838	0	163	1	40	cplex	1	1	937	9	2	5	0	1	0	749	749	0.436419994	8.09392262	17.0240993	46.2964897	1.13446403	14961
+839	0	163	1	40	cplex	0	0	1000	11	3	5	0	1	0	749	749	0.496369988	9.15202713	18.6267662	41.0199738	1.11366904	12710
+840	0	163	1	40	cplex	1	1	937	1	4	5	5	0	0	749		0.659420013	2.02003789	3.35223508	35.0088806	0.105003998	1589
+841	0	164	1	40	cplex	0	1	1000	9	0	5	0	1	0	749	749	0.527339995	9.68283844	18.6747494	43.7915344	1.10484695	11970
+842	0	164	1	40	cplex	1	0	975	11	1	5	0	1	0	749	749	0.403041005	8.35162926	18.3848724	37.0172615	1.10739398	13889
+843	0	164	1	40	cplex	1	1	975	9	2	5	0	1	0	749	749	0.430997014	8.00460911	17.4788246	43.3653183	1.10585904	13167
+844	0	164	1	40	cplex	0	0	1000	11	3	5	0	1	0	749	749	0.400660992	8.88148785	18.5280972	36.6154366	1.10662997	12710
+845	0	164	1	40	cplex	1	1	975	1	4	5	5	0	0	749		0.543637991	3.06790209	4.44897604	40.2130394	0.298606008	1266
+846	0	165	1	40	cplex	0	1	1000	9	0	8	0	1	0	749	749	0.657534003	13.8549929	28.4775009	82.1138382	1.08178902	19123
+847	0	165	1	40	cplex	1	0	980	11	1	8	0	1	0	749	749	0.669363976	15.1614466	30.4122601	65.8544693	1.05124104	21771
+848	0	165	1	40	cplex	1	1	980	9	2	8	0	1	0	749	749	0.670325994	13.6522427	28.8606853	82.0941467	1.05269098	20629
+849	0	165	1	40	cplex	0	0	1000	11	3	8	0	1	0	749	749	0.600579023	13.2736349	29.5195503	66.4067917	1.05401695	20336
+850	0	165	1	40	cplex	1	1	980	1	4	8	8	0	0	749		0.956332982	3.16187692	5.4541769	46.5985565	0.0962890014	2394
+851	0	166	1	40	cplex	0	1	1000	9	0	13	0	1	0	749	749	1.35424995	22.5303764	48.2250862	144.239838	0.202660993	31136
+852	0	166	1	40	cplex	1	0	975	11	1	13	0	1	0	749	749	0.772871971	21.846302	49.2682114	115.546043	0.193540007	36111
+853	0	166	1	40	cplex	1	1	975	9	2	13	0	1	0	749	749	0.857131004	22.4098091	46.4233856	143.5625	0.217885002	34234
+854	0	166	1	40	cplex	0	0	1000	11	3	13	0	1	0	749	749	1.10881102	23.6027584	50.5888672	116.132576	0.207911	33046
+855	0	166	1	40	cplex	1	1	975	1	4	13	20	0	0.538461983	749	986	0.0394829996	0.00119800004	0.002171	0.010032	0.594506025	260
+856	0	167	1	40	cplex	0	1	1000	9	0	3	0	1	0	749	749	0.423597991	5.5500598	11.0596857	35.6878738	1.13437402	7192
+857	0	167	1	40	cplex	1	0	975	11	1	3	0	1	0	749	749	0.417320013	5.68912411	11.7093267	24.6047859	1.13405395	8333
+858	0	167	1	40	cplex	1	1	975	9	2	3	0	1	0	749	749	1.00073504	5.71266317	11.1688776	35.8512726	1.11675596	7900
+859	0	167	1	40	cplex	0	0	1000	11	3	3	0	1	0	749	749	0.324966997	5.39810705	11.2802715	25.2081947	1.07483602	7626
+860	0	167	1	40	cplex	1	1	975	1	4	3	126	0	41	749	986	0.0339360014	0.000645999971	0.000806000025	0.0116429999	0.260695994	46
+861	0	168	1	40	cplex	0	1	1000	9	0	4	0	1	0	749	749	0.513216972	7.34130383	14.9044456	40.5213242	0.759003997	9561
+862	0	168	1	40	cplex	1	0	980	11	1	4	0	1	0	749	749	0.440591007	7.37977409	14.876482	34.0045738	0.73538202	10885
+863	0	168	1	40	cplex	1	1	980	9	2	4	0	1	0	749	749	0.463252991	6.86417484	14.1869993	39.914669	0.787047029	10314
+864	0	168	1	40	cplex	0	0	1000	11	3	4	0	1	0	749	749	0.485734999	7.31897879	15.6779537	33.6592102	0.763235986	10168
+865	0	168	1	40	cplex	1	1	980	1	4	4	4	0	0	749		0.609784007	1.837973	2.935004	30.9442825	0.118113004	1218
+866	0	169	1	40	cplex	0	1	1000	9	0	4	0	1	0	749	749	0.533061981	7.59943485	14.7769222	39.2852821	1.13630104	9561
+867	0	169	1	40	cplex	1	0	980	11	1	4	0	1	0	749	749	0.445574999	7.65441322	15.5805264	31.8927898	1.11070895	10885
+868	0	169	1	40	cplex	1	1	980	9	2	4	0	1	0	749	749	0.442483991	7.50010777	14.9577932	39.0408478	1.11373901	10314
+869	0	169	1	40	cplex	0	0	1000	11	3	4	0	1	0	749	749	0.415695012	7.05805302	15.2025118	32.8296432	1.08967304	10168
+870	0	169	1	40	cplex	1	1	980	1	4	4	4	0	0	749		0.600479007	2.38802004	2.99577689	38.4536285	0.287804991	1229
+871	0	157	1	40	cplex	0	1	1000	9	0	16	0	1	0	799	799	0.90200901	16.4268665	34.2624588	81.415802	0.290188998	30560
+872	0	157	1	40	cplex	1	0	975	11	1	16	0	1	0	799	799	0.709280014	17.9872971	36.7862396	70.200119	0.30002901	36381
+873	0	157	1	40	cplex	1	1	975	9	2	16	0	1	0	799	799	0.835033	16.7699223	34.1912689	80.7099457	0.292652011	34452
+874	0	157	1	40	cplex	0	0	1000	11	3	16	0	1	0	799	799	0.899061978	17.9251881	37.3814697	71.6633987	0.292802989	32672
+875	0	157	1	40	cplex	1	1	975	1	4	16	16	0	0	799		1.56849504	1.83029306	3.02739	7.76648092	0.101911999	2492
+876	0	158	1	40	cplex	0	1	1000	9	0	16	0	1	0	799	799	0.996619999	17.0397034	35.189537	81.4312744	0.296447009	30560
+877	0	158	1	40	cplex	1	0	975	11	1	16	0	1	0	799	799	0.666006982	16.6891899	35.7285767	69.6595688	0.280699998	36381
+878	0	158	1	40	cplex	1	1	975	9	2	16	0	1	0	799	799	0.775268972	15.3303003	33.1756287	80.9036865	0.285201013	34452
+879	0	158	1	40	cplex	0	0	1000	11	3	16	0	1	0	799	799	0.687323987	17.4226837	35.5699043	70.5505447	0.282528996	32672
+880	0	158	1	40	cplex	1	1	975	1	4	16	16	0	0	799		1.152439	1.87757802	3.00695896	7.7126832	0.102748998	2492
+881	1	290	1	40	cplex	1	1	972	7	2	18	0	1	0	974	974	0.105412997	0.173521996	0.302850008	0.299618989	0.917473972	6540
+882	1	290	1	40	cplex	0	0	1000	11	3	18	0	1	0	974	974	0.265441	0.340555996	0.780112982	0.692072988	0.973277986	5256
+883	1	290	1	40	cplex	1	1	972	1	4	18	0	1	0	974	974	0.105377004	0.0300789997	0.0525089987	0.149550006	0.931626976	748
+891	0	161	1	40	cplex	0	1	1000	9	0	10	0	1	0	749	749	0.802354991	16.3197365	34.5694199	108.998474	1.12425005	23904
+892	0	161	1	40	cplex	1	0	980	11	1	10	0	1	0	749	749	0.784938991	17.5843124	36.7187386	86.1434021	1.09685695	27214
+893	0	161	1	40	cplex	1	1	980	9	2	10	0	1	0	749	749	0.943269014	15.6793518	34.0271225	108.129478	1.141487	25787
+894	0	161	1	40	cplex	0	0	1000	11	3	10	0	1	0	749	749	0.957498014	17.4251232	37.1086731	86.4470901	1.08952701	25420
+895	0	161	1	40	cplex	1	1	980	1	4	10	10	0	0	749		1.54715502	4.25156498	6.82472181	55.4122429	0.0894899964	3002
+100456	1	261	1	40	cplex	0	1	500	9	0	3	0	1	0	299	299	0.265906006	3.75578308	7.6484971	22.1327286	0.943323016	5731
+100457	1	261	1	40	cplex	1	0	482	11	1	3	0	1	0	299	299	0.164575994	3.78845692	8.02699184	19.2920399	0.970772028	6627
+100458	1	261	1	40	cplex	1	1	482	9	2	3	0	1	0	299	299	0.197840005	3.69759989	7.58319092	21.9490051	0.949368	6254
+100459	1	261	1	40	cplex	0	0	500	11	3	3	0	1	0	299	299	0.200187996	5.16791391	8.11625099	19.4652786	0.948988974	6126
+100460	1	261	1	40	cplex	1	1	482	1	4	3	348	0.333332986	115.333336	299	427	0.0962779969	0.149432003	0.216674998	0.702287972	0.41681999	476
+100001	1	170	1	40	cplex	0	1	50	2	0	24	0	1	0	49	49	0.0153759997	0.0200139992	0.0164439995	0.0290229991	0.383664995	360
+100002	1	170	1	40	cplex	1	0	37	11	1	24	0	1	0	49	49	0.00577200018	0.0119249998	0.0142130004	0.00931300037	0.337428004	1008
+100003	1	170	1	40	cplex	1	1	37	2	2	24	0	1	0	49	49	0.00358000002	0.00411200011	0.00500900019	0.00756500009	0.287346989	360
+100004	1	170	1	40	cplex	0	0	50	11	3	24	0	1	0	49	49	0.00176500005	0.00479699997	0.00976699963	0.00953899976	0.296656996	1008
+100005	1	170	1	40	cplex	1	1	37	1	4	24	0	1	0	49	49	0.00230400008	0.00241199997	0.004067	0.0154419998	0.279976994	204
+100006	1	171	1	40	cplex	0	1	50	2	0	17	0	1	0	49	49	0.000860999979	0.00131800002	0.00212100009	0.00657900004	0.36372599	255
+100007	1	171	1	40	cplex	1	0	37	11	1	17	0	1	0	49	49	0.00162899995	0.00235600001	0.00367800007	0.00714700017	0.431715012	714
+100008	1	171	1	40	cplex	1	1	37	2	2	17	0	1	0	49	49	0.00146499998	0.00138100004	0.00187399995	0.0054299999	0.36204201	255
+100009	1	171	1	40	cplex	0	0	50	11	3	17	0	1	0	49	49	0.000737000024	0.00152599998	0.00336700003	0.00786899962	0.370806009	714
+100010	1	171	1	40	cplex	1	1	37	1	4	17	0	1	0	49	49	0.00134900003	0.001376	0.00251100003	0.0113009997	0.376946002	144
+100011	1	172	1	40	cplex	0	1	50	2	0	15	4	1	0.266667008	49	49	0.00078100001	0.000834000006	0.00161699997	0.00605300022	0.950524986	225
+100012	1	172	1	40	cplex	1	0	37	11	1	15	4	1	0.266667008	49	49	0.00165400002	0.00129799999	0.002996	0.00687800022	1.03764296	630
+100013	1	172	1	40	cplex	1	1	37	2	2	15	4	1	0.266667008	49	49	0.00125500001	0.00104200002	0.00167899998	0.0058360002	1.03381503	225
+100014	1	172	1	40	cplex	0	0	50	11	3	15	4	1	0.266667008	49	49	0.000737999973	0.001146	0.00282700011	0.00705400016	0.941524982	630
+100015	1	172	1	40	cplex	1	1	37	1	4	15	4	1	0.266667008	49	49	0.00127000001	0.00104899995	0.00182400004	0.0107429996	0.955653012	127
+100016	1	173	1	40	cplex	0	1	50	2	0	19	0	1	0	49	49	0.000818	0.000806000025	0.00175199995	0.00616500014	0.90636301	285
+100017	1	173	1	40	cplex	1	0	37	11	1	19	0	1	0	49	49	0.00129499997	0.00124100002	0.00346300006	0.00836300012	0.902917027	798
+100018	1	173	1	40	cplex	1	1	37	2	2	19	0	1	0	49	49	0.00134800002	0.000786999997	0.00180299999	0.00612400007	0.864250004	285
+100019	1	173	1	40	cplex	0	0	50	11	3	19	0	1	0	49	49	0.000752000022	0.00104200002	0.00347000011	0.00785200018	0.866725028	798
+100020	1	173	1	40	cplex	1	1	37	1	4	19	0	1	0	49	49	0.00133	0.000890000025	0.00226700003	0.0135120004	0.866998017	161
+100021	1	174	1	40	cplex	0	1	50	2	0	13	0	1	0	49	49	0.000730000029	0.000707000028	0.001284	0.00543100014	0.202912003	195
+100022	1	174	1	40	cplex	1	0	37	11	1	13	0	1	0	49	49	0.00112200005	0.000884999987	0.00252599991	0.00657200022	0.203463003	546
+100023	1	174	1	40	cplex	1	1	37	2	2	13	0	1	0	49	49	0.00114800001	0.000362999999	0.00164000003	0.00578799983	0.279087007	195
+100024	1	174	1	40	cplex	0	0	50	11	3	13	0	1	0	49	49	0.000679999997	0.000884999987	0.00258699991	0.00697699981	0.198067993	546
+100025	1	174	1	40	cplex	1	1	37	1	4	13	0	1	0	49	49	0.00200799992	0.00082299998	0.00230200007	0.0103369998	0.196330994	110
+100026	1	175	1	40	cplex	0	1	50	2	0	13	0	1	0	49	49	0.000727000006	0.000452000007	0.00131700002	0.00587600004	0.861477017	195
+100027	1	175	1	40	cplex	1	0	37	11	1	13	0	1	0	49	49	0.00165300001	0.00106899999	0.0025210001	0.00632699998	0.855988979	546
+100028	1	175	1	40	cplex	1	1	37	2	2	13	0	1	0	49	49	0.000921999977	0.000704000005	0.001284	0.00550499978	0.858249009	195
+100029	1	175	1	40	cplex	0	0	50	11	3	13	0	1	0	49	49	0.000711000001	0.000752999971	0.00252999994	0.00627300004	0.948011994	546
+100030	1	175	1	40	cplex	1	1	37	1	4	13	0	1	0	49	49	0.00104999996	0.00057600002	0.00159700005	0.010981	0.855831981	110
+100031	1	176	1	40	cplex	0	1	50	2	0	19	0	1	0	49	49	0.000837000029	0.000595999998	0.00175299996	0.00592799997	0.871186018	285
+100032	1	176	1	40	cplex	1	0	37	11	1	19	0	1	0	49	49	0.000992999994	0.000988999964	0.00348199997	0.0077399998	0.891686022	798
+100033	1	176	1	40	cplex	1	1	37	2	2	19	0	1	0	49	49	0.000992999994	0.000518999994	0.00175000005	0.00606200006	0.884231985	285
+100034	1	176	1	40	cplex	0	0	50	11	3	19	0	1	0	49	49	0.000786999997	0.000913999975	0.00347000011	0.007859	0.886165977	798
+100035	1	176	1	40	cplex	1	1	37	1	4	19	0	1	0	49	49	0.00133500004	0.000554999977	0.0025510001	0.0136040002	0.901413023	161
+100036	1	177	1	40	cplex	0	1	50	2	0	14	0	1	0	49	49	0.00102800003	0.000311000011	0.001345	0.00618499983	1.03727305	210
+100037	1	177	1	40	cplex	1	0	37	11	1	14	0	1	0	49	49	0.000891999982	0.000745000027	0.00271099992	0.00638699997	0.919346988	588
+100038	1	177	1	40	cplex	1	1	37	2	2	14	0	1	0	49	49	0.000858000014	0.000403000013	0.00132699998	0.00561300013	0.911796987	210
+100039	1	177	1	40	cplex	0	0	50	11	3	14	0	1	0	49	49	0.000988999964	0.000760999974	0.00271499995	0.00655000005	0.914197028	588
+100040	1	177	1	40	cplex	1	1	37	1	4	14	0	1	0	49	49	0.00126100006	0.00057600002	0.00177199999	0.0122229997	0.912527025	119
+100041	1	178	1	40	cplex	0	1	50	2	0	18	0	1	0	49	49	0.000755999994	0.000493999978	0.00169399998	0.00532600004	0.851686001	270
+100042	1	178	1	40	cplex	1	0	37	11	1	18	0	1	0	49	49	0.000873000012	0.000885999994	0.00333900005	0.00617300021	0.863148987	756
+100043	1	178	1	40	cplex	1	1	37	2	2	18	0	1	0	49	49	0.00127500005	0.000402000005	0.001697	0.00455700001	0.874475002	270
+100044	1	178	1	40	cplex	0	0	50	11	3	18	0	1	0	49	49	0.000755999994	0.00126599998	0.003364	0.00722899986	0.884275973	756
+100045	1	178	1	40	cplex	1	1	37	1	4	18	0	1	0	49	49	0.000891999982	0.000654999982	0.00218600011	0.0119420001	1.34147203	153
+100046	1	179	1	40	cplex	0	1	50	2	0	13	0	1	0	49	49	0.00103100005	0.000595999998	0.00129499997	0.00522800023	0.880882978	195
+100047	1	179	1	40	cplex	1	0	37	11	1	13	0	1	0	49	49	0.000798999972	0.000691999972	0.00257900008	0.00684300018	0.87055099	546
+100048	1	179	1	40	cplex	1	1	37	2	2	13	0	1	0	49	49	0.000820000016	0.000376999989	0.00123199995	0.00521800015	0.873040974	195
+100049	1	179	1	40	cplex	0	0	50	11	3	13	0	1	0	49	49	0.000609999988	0.000620000006	0.0025549999	0.00640599988	0.865498006	546
+100050	1	179	1	40	cplex	1	1	37	1	4	13	0	1	0	49	49	0.00132699998	0.000623000029	0.00219599996	0.0112950001	0.882371008	110
+100051	1	180	1	40	cplex	0	1	50	5	0	21	0	1	0	24	24	0.0222929996	0.284166008	0.541177988	0.492466003	0.919950008	3599
+100521	1	274	1	40	cplex	0	1	500	9	0	10	0	1	0	249	249	0.448316991	18.0194397	38.9360161	111.807457	1.00993299	24002
+100522	1	274	1	40	cplex	1	0	451	11	1	10	0	1	0	249	249	0.312716007	16.7450829	39.328476	84.3822632	0.952332973	30221
+100523	1	274	1	40	cplex	1	1	451	9	2	10	0	1	0	249	249	0.367509991	17.0115299	38.2962456	110.951241	0.964321017	28697
+100524	1	274	1	40	cplex	0	0	500	11	3	10	0	1	0	249	249	0.504566014	17.3652878	41.1128922	84.8847733	0.949082971	25420
+100052	1	180	1	40	cplex	1	0	18	11	1	21	0	1	0	24	24	0.00175099995	0.0364530012	0.0734980032	0.0831649974	0.923380971	6762
+100053	1	180	1	40	cplex	1	1	18	3	2	21	0	1	0	24	24	0.001621	0.0219930001	0.0403980017	0.0723159984	0.93305701	3328
+100054	1	180	1	40	cplex	0	0	50	11	3	21	0	1	0	24	24	0.0256459992	0.358069003	0.86026597	0.729201972	0.893280029	6132
+100055	1	180	1	40	cplex	1	1	18	1	4	21	0	1	0	24	24	0.00155299995	0.0211030003	0.0344920009	0.312409014	0.904693007	861
+100056	1	181	1	40	cplex	0	1	50	5	0	19	0	1	0	24	24	0.0206499994	0.243282005	0.486681014	0.444543988	0.225694999	3257
+100057	1	181	1	40	cplex	1	0	18	11	1	19	0	1	0	24	24	0.00170499994	0.0288500004	0.0672269985	0.0764110014	0.227112994	6118
+100058	1	181	1	40	cplex	1	1	18	3	2	19	0	1	0	24	24	0.00145700003	0.0169569999	0.0365520008	0.073781997	0.228749007	3011
+100059	1	181	1	40	cplex	0	0	50	11	3	19	0	1	0	24	24	0.01523	0.331088006	0.899532974	0.706211984	0.221325994	5548
+100060	1	181	1	40	cplex	1	1	18	1	4	19	19	0	0	24		0.00397600001	0.0272979997	0.0497209989	0.318376005	0.0836739987	646
+100061	1	182	1	40	cplex	0	1	50	5	0	18	0	1	0	24	24	0.0219190009	0.237614006	0.470212996	0.430294007	0.219915003	3085
+100062	1	182	1	40	cplex	1	0	18	11	1	18	0	1	0	24	24	0.00150400004	0.0301300008	0.0629779994	0.0721279979	0.626586974	5796
+100063	1	182	1	40	cplex	1	1	18	3	2	18	0	1	0	24	24	0.00128099998	0.0163749997	0.0344160013	0.0679159984	0.275608003	2853
+100064	1	182	1	40	cplex	0	0	50	11	3	18	0	1	0	24	24	0.0190159995	0.307891995	0.740665972	0.654029012	0.240292996	5256
+100065	1	182	1	40	cplex	1	1	18	1	4	18	0	1	0	24	24	0.00130799995	0.0166950002	0.029693	0.264376014	0.233337	738
+100066	1	183	1	40	cplex	0	1	50	5	0	30	0	1	0	24	24	0.0346969999	0.435948998	0.853652	0.691771984	0.938266993	5142
+100067	1	183	1	40	cplex	1	0	18	11	1	30	0	1	0	24	24	0.0024329999	0.0521860011	0.114106998	0.121096998	0.887241006	9660
+100068	1	183	1	40	cplex	1	1	18	3	2	30	0	1	0	24	24	0.00210099993	0.0318019986	0.0621419996	0.119943	0.878543973	4755
+100069	1	183	1	40	cplex	0	0	50	11	3	30	0	1	0	24	24	0.0346029997	0.606743991	1.32838798	1.06462502	0.860228002	8760
+100070	1	183	1	40	cplex	1	1	18	1	4	30	0	1	0	24	24	0.00178399996	0.0286950003	0.0524460003	0.486524999	0.862331986	1230
+100071	1	184	1	40	cplex	0	1	50	5	0	22	0	1	0	24	24	0.0275810007	0.308001012	0.608084023	0.495243013	0.926320016	3771
+100072	1	184	1	40	cplex	1	0	18	11	1	22	0	1	0	24	24	0.00155699998	0.0329359993	0.0785939991	0.0884390026	0.906593978	7084
+100073	1	184	1	40	cplex	1	1	18	3	2	22	0	1	0	24	24	0.00149299996	0.0238060001	0.0455980003	0.0743839964	0.912347019	3487
+100074	1	184	1	40	cplex	0	0	50	11	3	22	0	1	0	24	24	0.0270269997	0.444692999	0.989560008	0.790868998	0.90395999	6424
+100075	1	184	1	40	cplex	1	1	18	1	4	22	0	1	0	24	24	0.00141699996	0.0231040008	0.0391179994	0.325457007	0.913855016	902
+100076	1	185	1	40	cplex	0	1	50	5	0	16	0	1	0	24	24	0.0218020007	0.228143007	0.450127006	0.396649003	0.805612028	2742
+100077	1	185	1	40	cplex	1	0	18	11	1	16	0	1	0	24	24	0.00150599994	0.0281370003	0.0603980012	0.0645200014	0.787310004	5152
+100078	1	185	1	40	cplex	1	1	18	3	2	16	0	1	0	24	24	0.00128500001	0.0174899995	0.0340880007	0.0607029982	0.790069997	2536
+100079	1	185	1	40	cplex	0	0	50	11	3	16	0	1	0	24	24	0.0166239999	0.993701994	0.721659005	0.590287983	0.813673019	4672
+100080	1	185	1	40	cplex	1	1	18	1	4	16	0	1	0	24	24	0.00120399997	0.0168670006	0.0282860007	0.243772	0.790484011	656
+100081	1	186	1	40	cplex	0	1	50	5	0	20	0	1	0	24	24	0.0242630001	0.285854012	0.565234005	0.466591001	0.198074996	3428
+100082	1	186	1	40	cplex	1	0	18	11	1	20	0	1	0	24	24	0.00178799999	0.0354470015	0.0777079985	0.0805459991	0.207215995	6440
+100083	1	186	1	40	cplex	1	1	18	3	2	20	0	1	0	24	24	0.00133600004	0.0215339996	0.0420229994	0.0695900023	0.202007994	3170
+100084	1	186	1	40	cplex	0	0	50	11	3	20	0	1	0	24	24	0.0247159991	0.405274004	0.917541027	0.711889029	0.206577003	5840
+100085	1	186	1	40	cplex	1	1	18	1	4	20	0	1	0	24	24	0.00132100005	0.0212609991	0.0358819999	0.298056006	0.202338994	820
+100086	1	187	1	40	cplex	0	1	50	5	0	17	0	1	0	24	24	0.0188590009	0.335460007	0.483678013	0.388552994	0.880369008	2914
+100087	1	187	1	40	cplex	1	0	18	11	1	17	0	1	0	24	24	0.00155599997	0.0301559996	0.064462997	0.0680330023	0.877044022	5474
+100088	1	187	1	40	cplex	1	1	18	3	2	17	0	1	0	24	24	0.00138200005	0.0194700006	0.0357999988	0.0631000027	0.87826103	2694
+100089	1	187	1	40	cplex	0	0	50	11	3	17	0	1	0	24	24	0.0218959991	0.344725996	0.760685027	0.609930992	0.879060984	4964
+100090	1	187	1	40	cplex	1	1	18	1	4	17	0	1	0	24	24	0.00138300005	0.0172920004	0.0301070008	0.254382998	0.881901979	697
+100091	1	188	1	40	cplex	0	1	50	5	0	18	0	1	0	24	24	0.022295	0.250770003	0.503166974	0.41434899	1.01982903	3085
+100092	1	188	1	40	cplex	1	0	18	11	1	18	0	1	0	24	24	0.00158599997	0.031307999	0.0682810023	0.0725430027	0.901345015	5796
+100093	1	188	1	40	cplex	1	1	18	3	2	18	0	1	0	24	24	0.00121699995	0.0189709999	0.0376919992	0.0657519996	0.899868011	2853
+100094	1	188	1	40	cplex	0	0	50	11	3	18	0	1	0	24	24	0.0231389999	0.369423002	0.811739981	0.640124023	0.911719978	5256
+100095	1	188	1	40	cplex	1	1	18	1	4	18	0	1	0	24	24	0.00125500001	0.0190789998	0.0324819982	0.266339004	0.90359199	738
+100096	1	189	1	40	cplex	0	1	50	5	0	21	0	1	0	24	24	0.0249170009	0.292329013	0.589432001	0.478329003	0.942025006	3599
+100097	1	189	1	40	cplex	1	0	18	11	1	21	0	1	0	24	24	0.00180099998	0.0360889994	0.0807449967	0.0871179998	0.928717017	6762
+100098	1	189	1	40	cplex	1	1	18	3	2	21	0	1	0	24	24	0.00173200003	0.0225900002	0.0444100015	0.0874959975	0.850597024	3328
+100099	1	189	1	40	cplex	0	0	50	11	3	21	0	1	0	24	24	0.0264509991	0.42463401	0.959758997	0.794287026	0.844645977	6132
+100100	1	189	1	40	cplex	1	1	18	1	4	21	0	1	0	24	24	0.00159999996	0.0221490003	0.0383469984	0.335848004	0.849691987	861
+100101	1	190	1	40	cplex	0	1	100	2	0	18	0	1	0	99	99	0.00135999999	0.000663999992	0.00172299996	0.00673400005	0.496879995	270
+100102	1	190	1	40	cplex	1	0	90	11	1	18	0	1	0	99	99	0.00175900001	0.00112699997	0.00355900009	0.00916500017	1.06167996	756
+100103	1	190	1	40	cplex	1	1	90	2	2	18	0	1	0	99	99	0.00176799996	0.00066000002	0.00174800004	0.00462900009	0.489859998	270
+100104	1	190	1	40	cplex	0	0	100	11	3	18	0	1	0	99	99	0.00132000004	0.001131	0.00358200003	0.00810800027	0.494623989	756
+100105	1	190	1	40	cplex	1	1	90	1	4	18	0	1	0	99	99	0.001727	0.000783000025	0.00217800005	0.0134500004	0.492453992	153
+100106	1	191	1	40	cplex	0	1	100	2	0	25	0	1	0	99	99	0.00182100001	0.000851000019	0.00228599994	0.00877700001	0.927281976	375
+100107	1	191	1	40	cplex	1	0	90	11	1	25	0	1	0	99	99	0.00208400004	0.00142400002	0.00489299977	0.00989300013	0.92888099	1050
+100108	1	191	1	40	cplex	1	1	90	2	2	25	0	1	0	99	99	0.002293	0.000869999989	0.00227400009	0.00920999981	0.92703402	375
+100109	1	191	1	40	cplex	0	0	100	11	3	25	0	1	0	99	99	0.00182699994	0.00154199998	0.00488999998	0.0101060001	0.915741026	1050
+100110	1	191	1	40	cplex	1	1	90	1	4	25	0	1	0	99	99	0.00225899997	0.00108399999	0.00292000012	0.0184080005	0.935522974	212
+100111	1	192	1	40	cplex	0	1	100	2	0	19	0	1	0	99	99	0.001406	0.00067400001	0.00178699999	0.00635799998	0.287398994	285
+100112	1	192	1	40	cplex	1	0	90	11	1	19	0	1	0	99	99	0.00154600001	0.000951000024	0.0037779999	0.00872800034	0.285816014	798
+100113	1	192	1	40	cplex	1	1	90	2	2	19	0	1	0	99	99	0.00191400002	0.000654999982	0.00189199997	0.00673299981	0.419120997	285
+100114	1	192	1	40	cplex	0	0	100	11	3	19	0	1	0	99	99	0.00126399996	0.00124899996	0.0037740001	0.00841099955	0.285066009	798
+100115	1	192	1	40	cplex	1	1	90	1	4	19	0	1	0	99	99	0.00173599995	0.00082299998	0.00241700001	0.0143689997	0.282224	161
+100116	1	193	1	40	cplex	0	1	100	2	0	22	0	1	0	99	99	0.00152599998	0.000759000017	0.00203699991	0.00748000015	0.249356002	330
+100117	1	193	1	40	cplex	1	0	90	11	1	22	0	1	0	99	99	0.00192399998	0.00135399995	0.00426599989	0.00954699982	0.259654999	924
+100118	1	193	1	40	cplex	1	1	90	2	2	22	0	1	0	99	99	0.00193200004	0.000770999992	0.00202500005	0.0070770001	0.262627989	330
+100119	1	193	1	40	cplex	0	0	100	11	3	22	0	1	0	99	99	0.00155499997	0.00135100004	0.00428400002	0.00912499987	0.257391989	924
+100120	1	193	1	40	cplex	1	1	90	1	4	22	0	1	0	99	99	0.00200599991	0.000979000004	0.00257300003	0.0173220001	0.246748	187
+100121	1	194	1	40	cplex	0	1	100	2	0	26	0	1	0	99	99	0.00179799995	0.000914999982	0.002355	0.00824999996	0.849265993	390
+100122	1	194	1	40	cplex	1	0	90	11	1	26	0	1	0	99	99	0.00214700005	0.00163800002	0.00510799978	0.0107239997	0.856561005	1092
+100123	1	194	1	40	cplex	1	1	90	2	2	26	0	1	0	99	99	0.00222899998	0.000973000017	0.00233999989	0.00770699978	0.838791013	390
+100124	1	194	1	40	cplex	0	0	100	11	3	26	0	1	0	99	99	0.00182500004	0.00163900002	0.00511399982	0.00941799954	0.843505979	1092
+100125	1	194	1	40	cplex	1	1	90	1	4	26	0	1	0	99	99	0.00223900005	0.00112699997	0.00302499998	0.0179869998	0.865489006	221
+100126	1	195	1	40	cplex	0	1	100	2	0	10	0	1	0	99	99	0.000712000008	0.000319999992	0.00103499996	0.00465899985	0.995496988	150
+100127	1	195	1	40	cplex	1	0	90	11	1	10	0	1	0	99	99	0.00116300001	0.000647999987	0.00207599998	0.00648400001	0.937391996	420
+100128	1	195	1	40	cplex	1	1	90	2	2	10	0	1	0	99	99	0.00111099996	0.000362999999	0.00102700002	0.00514899986	0.938333988	150
+100129	1	195	1	40	cplex	0	0	100	11	3	10	0	1	0	99	99	0.000747999991	0.000636000012	0.00207599998	0.00697600003	0.96123302	420
+100130	1	195	1	40	cplex	1	1	90	1	4	10	0	1	0	99	99	0.00118100003	0.000478000002	0.00129199994	0.00867899973	0.918954015	85
+100131	1	196	1	40	cplex	0	1	100	2	0	26	0	1	0	99	99	0.00195599999	0.00092000002	0.00237999996	0.00886000041	0.90614301	390
+100132	1	196	1	40	cplex	1	0	90	11	1	26	0	1	0	99	99	0.00216399995	0.00159100001	0.00503600016	0.00970899966	0.899604976	1092
+100133	1	196	1	40	cplex	1	1	90	2	2	26	0	1	0	99	99	0.00221600011	0.000867999974	0.00233300007	0.00844100025	0.937322974	390
+100134	1	196	1	40	cplex	0	0	100	11	3	26	0	1	0	99	99	0.00170200004	0.00164000003	0.0050590001	0.00965499971	0.905815005	1092
+100135	1	196	1	40	cplex	1	1	90	1	4	26	0	1	0	99	99	0.00222599995	0.00113999995	0.00298499991	0.0193399992	0.897810996	221
+100136	1	197	1	40	cplex	0	1	100	2	0	14	0	1	0	99	99	0.000900999992	0.000400999998	0.001407	0.0055300002	0.993438005	210
+100137	1	197	1	40	cplex	1	0	90	11	1	14	0	1	0	99	99	0.00139200001	0.000847999996	0.00285200006	0.007766	0.886494994	588
+100138	1	197	1	40	cplex	1	1	90	2	2	14	0	1	0	99	99	0.00141899998	0.000476999994	0.00136500003	0.0058439998	0.897921026	210
+100139	1	197	1	40	cplex	0	0	100	11	3	14	0	1	0	99	99	0.000944999978	0.000883999979	0.00282400008	0.00759499986	0.881048977	588
+100140	1	197	1	40	cplex	1	1	90	1	4	14	0	1	0	99	99	0.001407	0.000636000012	0.00170999998	0.0129410001	0.891548991	119
+100141	1	198	1	40	cplex	0	1	100	2	0	17	0	1	0	99	99	0.00115000003	0.000589000003	0.00163800002	0.00686499989	0.281578004	255
+100142	1	198	1	40	cplex	1	0	90	11	1	17	0	1	0	99	99	0.00159899995	0.00104400003	0.00334700011	0.00903199986	0.265769005	714
+100143	1	198	1	40	cplex	1	1	90	2	2	17	0	1	0	99	99	0.00164300005	0.000577000028	0.00168500002	0.00687499996	0.282545	255
+100144	1	198	1	40	cplex	0	0	100	11	3	17	0	1	0	99	99	0.00116300001	0.00103799999	0.00339900004	0.00911200047	0.273876011	714
+100145	1	198	1	40	cplex	1	1	90	1	4	17	0	1	0	99	99	0.00160199997	0.000775999972	0.00198900001	0.0140319997	0.272062004	144
+100146	1	199	1	40	cplex	0	1	100	2	0	18	0	1	0	99	99	0.00104999996	0.000501999981	0.00175099995	0.00735000009	0.900547981	270
+100147	1	199	1	40	cplex	1	0	90	11	1	18	0	1	0	99	99	0.00164699997	0.00109100004	0.0035339999	0.0088200001	0.763899982	756
+100148	1	199	1	40	cplex	1	1	90	2	2	18	0	1	0	99	99	0.00166800001	0.000630999974	0.00174099999	0.0067710001	0.75633198	270
+100149	1	199	1	40	cplex	0	0	100	11	3	18	0	1	0	99	99	0.00112499995	0.00104799995	0.00355000002	0.00867300015	0.765893996	756
+100150	1	199	1	40	cplex	1	1	90	1	4	18	0	1	0	99	99	0.00164000003	0.000797000015	0.00220800005	0.0154839996	0.750141025	153
+100151	1	200	1	40	cplex	0	1	100	4	0	18	0	1	0	74	74	0.0406639986	0.262609988	0.521450996	0.551573992	0.917659998	3109
+100152	1	200	1	40	cplex	1	0	90	11	1	18	0	1	0	74	74	0.0245249998	0.252431005	0.577850997	0.547791004	0.993095994	5976
+100153	1	200	1	40	cplex	1	1	90	5	2	18	0	1	0	74	74	0.0249540005	0.185047999	0.379610986	0.387120008	0.921425998	3654
+100154	1	200	1	40	cplex	0	0	100	11	3	18	0	1	0	74	74	0.0406109989	0.365734011	0.833822012	0.786293983	0.915944993	5256
+100155	1	200	1	40	cplex	1	1	90	1	4	18	0	1	0	74	74	0.0247389991	0.081573002	0.136335	1.09213805	0.913417995	918
+100156	1	201	1	40	cplex	0	1	100	4	0	20	0	1	0	74	74	0.0423969999	0.351466	0.565298975	0.599335015	0.303873986	3454
+100157	1	201	1	40	cplex	1	0	90	11	1	20	0	1	0	74	74	0.0265890006	0.282604009	0.656744003	0.615764976	0.302280009	6640
+100158	1	201	1	40	cplex	1	1	90	5	2	20	0	1	0	74	74	0.0274679996	0.203071997	0.415881991	0.44767499	0.306968987	4060
+100159	1	201	1	40	cplex	0	0	100	11	3	20	0	1	0	74	74	0.0419320017	0.399457008	0.935432971	0.867868006	0.306748986	5840
+100160	1	201	1	40	cplex	1	1	90	1	4	20	0	1	0	74	74	0.0200709999	0.244173005	0.152003005	1.23242199	0.314200997	1020
+100161	1	202	1	40	cplex	0	1	100	4	0	21	0	1	0	74	74	0.0458329991	0.306208014	0.609005988	0.638153017	0.848300993	3627
+100162	1	202	1	40	cplex	1	0	90	11	1	21	0	1	0	74	74	0.0281140003	0.300226986	0.694911003	0.63637501	0.849277973	6972
+100163	1	202	1	40	cplex	1	1	90	5	2	21	0	1	0	74	74	0.0287449993	0.218254	0.442597002	0.475658	0.850817978	4263
+100164	1	202	1	40	cplex	0	0	100	11	3	21	0	1	0	74	74	0.0336709991	1.22027898	0.97615099	0.884555995	0.851647019	6132
+100165	1	202	1	40	cplex	1	1	90	1	4	21	0	1	0	74	74	0.0277100001	0.0982030034	0.161909997	1.27281702	0.850549996	1071
+100166	1	203	1	40	cplex	0	1	100	4	0	22	0	1	0	74	74	0.0473960005	0.314022005	0.639308989	0.644752979	0.811164975	3800
+100167	1	203	1	40	cplex	1	0	90	11	1	22	0	1	0	74	74	0.0164860003	0.414779007	0.715914011	0.671818018	0.812538981	7304
+100168	1	203	1	40	cplex	1	1	90	5	2	22	0	1	0	74	74	0.0296989996	0.224776998	0.461813986	0.486155987	0.815056026	4466
+100169	1	203	1	40	cplex	0	0	100	11	3	22	0	1	0	74	74	0.035507001	0.548285007	1.02712405	0.924843013	0.813520014	6424
+100170	1	203	1	40	cplex	1	1	90	1	4	22	22	0	0	74		0.0393269993	0.296808004	0.493633002	4.39319181	0.0904320031	1525
+100171	1	204	1	40	cplex	0	1	100	4	0	22	0	1	0	74	74	0.0266660005	0.344410002	0.642793	0.673318028	0.896251976	3800
+100172	1	204	1	40	cplex	1	0	90	11	1	22	0	1	0	74	74	0.0284839999	0.316637993	0.733714998	0.688220978	0.919143021	7304
+100173	1	204	1	40	cplex	1	1	90	5	2	22	0	1	0	74	74	0.0289960001	0.228231996	0.466369003	0.492285997	0.922239006	4466
+100174	1	204	1	40	cplex	0	0	100	11	3	22	0	1	0	74	74	0.0471299998	0.449593991	1.03350997	0.940221012	0.920403004	6424
+100175	1	204	1	40	cplex	1	1	90	1	4	22	22	0	0	74		0.0330629982	0.339134991	0.575798988	6.2589469	0.100845002	1387
+100176	1	205	1	40	cplex	0	1	100	4	0	22	0	1	0	74	74	0.0260230005	0.343932986	0.643142998	0.65002799	0.925257981	3800
+100177	1	205	1	40	cplex	1	0	90	11	1	22	0	1	0	74	74	0.0290179998	0.317169011	0.73013401	0.670506001	0.939128995	7304
+100178	1	205	1	40	cplex	1	1	90	5	2	22	0	1	0	74	74	0.0286940001	0.230289996	0.46933201	0.482394993	0.92031002	4466
+100179	1	205	1	40	cplex	0	0	100	11	3	22	0	1	0	74	74	0.0448990017	0.473978013	1.022416	0.929912984	0.913727999	6424
+100180	1	205	1	40	cplex	1	1	90	1	4	22	22	0	0	74		0.0399489999	0.345943004	0.58464098	6.29971886	0.0984179974	1387
+100181	1	206	1	40	cplex	0	1	100	4	0	19	0	1	0	74	74	0.042537	0.280315995	0.55705601	0.580859005	0.917712986	3281
+100182	1	206	1	40	cplex	1	0	90	11	1	19	0	1	0	74	74	0.0260199998	0.274834991	0.631196022	0.568847001	0.912824988	6308
+100183	1	206	1	40	cplex	1	1	90	5	2	19	0	1	0	74	74	0.0265260004	0.199901998	0.405274004	0.433405995	0.910093009	3857
+100184	1	206	1	40	cplex	0	0	100	11	3	19	0	1	0	74	74	0.0362609997	0.435865015	0.878862023	0.800952017	0.915965974	5548
+100185	1	206	1	40	cplex	1	1	90	1	4	19	0	1	0	74	74	0.0262480006	0.0890149996	0.145978004	1.13291097	0.914587021	969
+100186	1	207	1	40	cplex	0	1	100	4	0	21	0	1	0	74	74	0.0455339998	0.305139005	0.61313498	0.629203975	0.255847007	3627
+100187	1	207	1	40	cplex	1	0	90	11	1	21	0	1	0	74	74	0.0273340009	0.300457001	0.701264024	0.646521986	0.251192003	6972
+100188	1	207	1	40	cplex	1	1	90	5	2	21	0	1	0	74	74	0.0281479992	0.218183994	0.447865009	0.468100995	0.255901009	4263
+100189	1	207	1	40	cplex	0	0	100	11	3	21	0	1	0	74	74	0.0268939994	1.25186205	1.00462198	0.897958994	0.256399006	6132
+100190	1	207	1	40	cplex	1	1	90	1	4	21	21	0	0	74		0.0376980007	0.325704008	0.55627197	6.58239079	0.0951500013	1294
+100191	1	208	1	40	cplex	0	1	100	4	0	23	0	1	0	74	74	0.0485830009	0.333321005	0.678389013	0.661722004	0.886484981	3972
+100192	1	208	1	40	cplex	1	0	90	11	1	23	0	1	0	74	74	0.0227949992	0.365058005	0.750957012	0.701057971	0.888249993	7636
+100193	1	208	1	40	cplex	1	1	90	5	2	23	0	1	0	74	74	0.0302990004	0.238414004	0.495265007	0.498744011	0.899698019	4669
+100194	1	208	1	40	cplex	0	0	100	11	3	23	0	1	0	74	74	0.0474269986	0.463773012	1.08040595	0.968047023	0.89120698	6716
+100195	1	208	1	40	cplex	1	1	90	1	4	23	0	1	0	74	74	0.0294780005	0.107468002	0.180231005	1.34233701	0.889367998	1174
+100196	1	209	1	40	cplex	0	1	100	4	0	26	0	1	0	74	74	0.0393350013	0.36827901	0.766417027	0.72993499	0.709464014	4491
+100197	1	209	1	40	cplex	1	0	90	11	1	26	0	1	0	74	74	0.0333099999	0.370918006	0.860080004	0.784915984	0.709625006	8632
+100198	1	209	1	40	cplex	1	1	90	5	2	26	0	1	0	74	74	0.0336269997	0.265706986	0.559727013	0.55696702	0.697899997	5278
+100199	1	209	1	40	cplex	0	0	100	11	3	26	0	1	0	74	74	0.0415319987	0.611084998	1.21197295	1.09217501	0.715189993	7592
+100200	1	209	1	40	cplex	1	1	90	1	4	26	0	1	0	74	74	0.0317850001	0.118759997	0.205511004	1.48049295	0.705725014	1327
+100201	1	210	1	40	cplex	0	1	100	6	0	18	0	1	0	49	49	0.0719079971	1.29659903	2.60458589	2.24324989	0.448628008	7962
+100202	1	210	1	40	cplex	1	0	70	11	1	18	0	1	0	49	49	0.0332369991	0.959827006	2.07875896	1.84466696	0.440286011	14279
+100203	1	210	1	40	cplex	1	1	70	8	2	18	0	1	0	49	49	0.0379149988	0.868274987	1.88078797	1.68395901	0.480453998	12711
+100204	1	210	1	40	cplex	0	0	100	11	3	18	0	1	0	49	49	0.0792400017	1.37121797	3.14066792	2.75748706	0.438526005	9756
+100205	1	210	1	40	cplex	1	1	70	1	4	18	0	1	0	49	49	0.035645999	0.075406	0.123291001	0.309859008	0.433279991	676
+100206	1	211	1	40	cplex	0	1	100	6	0	14	0	1	0	49	49	0.063899003	0.918401003	2.03673196	1.74608696	0.926850021	6051
+100207	1	211	1	40	cplex	1	0	70	11	1	14	0	1	0	49	49	0.0300929993	0.717432976	1.62143397	1.45215201	0.919529021	11106
+100208	1	211	1	40	cplex	1	1	70	8	2	14	0	1	0	49	49	0.0164240003	0.703956008	1.45801497	1.29527795	0.920002997	9886
+100209	1	211	1	40	cplex	0	0	100	11	3	14	0	1	0	49	49	0.0585590005	1.08594096	2.41460705	2.10648894	0.924257994	7588
+100210	1	211	1	40	cplex	1	1	70	1	4	14	14	0	0	49		0.042617999	0.270594001	0.451889008	2.09271097	0.0887560025	1056
+100211	1	212	1	40	cplex	0	1	100	6	0	15	4	1	0.266667008	49	49	0.0704400018	0.998134017	2.16687298	1.89830303	0.95213902	6483
+100212	1	212	1	40	cplex	1	0	70	11	1	15	4	1	0.266667008	49	49	0.0233699996	0.815935016	1.72046196	1.52318799	0.959572017	11899
+100213	1	212	1	40	cplex	1	1	70	8	2	15	4	1	0.266667008	49	49	0.0338479988	0.719762981	1.56515396	1.39094996	1.08644497	10592
+100214	1	212	1	40	cplex	0	0	100	11	3	15	4	1	0.266667008	49	49	0.0423909985	1.14375806	3.37454295	2.25336909	0.936667025	8130
+100215	1	212	1	40	cplex	1	1	70	1	4	15	15	0	0	49		0.0363310017	0.35224399	0.593145013	4.42218304	0.0914359987	1170
+100216	1	213	1	40	cplex	0	1	100	6	0	16	0	1	0	49	49	0.0456129983	1.09914804	2.27863908	2.01995611	0.367307007	6916
+100217	1	213	1	40	cplex	1	0	70	11	1	16	0	1	0	49	49	0.0242550001	0.836651027	1.84326899	1.62455595	0.36552	12692
+100218	1	213	1	40	cplex	1	1	70	8	2	16	0	1	0	49	49	0.0354770012	0.766739011	1.66616201	1.51053095	0.398416996	11298
+100219	1	213	1	40	cplex	0	0	100	11	3	16	0	1	0	49	49	0.0697830021	1.23203599	2.78655696	2.37832308	0.415194005	8672
+100220	1	213	1	40	cplex	1	1	70	1	4	16	0	1	0	49	49	0.0326110013	0.102061003	0.162254006	1.66524398	0.361629993	689
+100221	1	214	1	40	cplex	0	1	100	6	0	18	0	1	0	49	49	0.0823239982	1.27729106	2.55791807	2.24537897	0.203730002	7780
+100222	1	214	1	40	cplex	1	0	70	11	1	18	0	1	0	49	49	0.0363279991	0.920333982	2.109267	1.82294095	0.194316998	14279
+100223	1	214	1	40	cplex	1	1	70	8	2	18	0	1	0	49	49	0.0322109982	0.911154985	1.88973606	1.69210505	0.204080999	12711
+100224	1	214	1	40	cplex	0	0	100	11	3	18	0	1	0	49	49	0.0749690011	1.41487896	3.11180592	2.64937711	0.203838006	9756
+100225	1	214	1	40	cplex	1	1	70	1	4	18	0	1	0	49	49	0.0360089988	0.112916	0.183955997	1.84343398	0.196044996	775
+100226	1	215	1	40	cplex	0	1	100	6	0	21	0	1	0	49	49	0.0856639966	1.38478303	3.0930481	2.55211902	0.196288005	9077
+100227	1	215	1	40	cplex	1	0	70	11	1	21	0	1	0	49	49	0.0404679999	1.07186401	2.49009395	2.17297101	0.193958998	16659
+100228	1	215	1	40	cplex	1	1	70	8	2	21	0	1	0	49	49	0.0429049991	1.01190603	2.25542402	1.93884599	0.188934997	14829
+100229	1	215	1	40	cplex	0	0	100	11	3	21	0	1	0	49	49	0.0618229993	1.59849894	3.70057702	3.05375099	0.228342995	11382
+100230	1	215	1	40	cplex	1	1	70	1	4	21	21	0	0	49		0.0476149991	0.558215976	0.973892987	6.2363019	0.0844570026	1787
+100231	1	216	1	40	cplex	0	1	100	6	0	28	0	1	0	49	49	0.0817489997	1.90629005	4.05917883	3.40854692	0.978911996	12103
+100232	1	216	1	40	cplex	1	0	70	11	1	28	0	1	0	49	49	0.0506020002	1.42364597	3.26296711	2.88039589	0.915040016	22212
+100233	1	216	1	40	cplex	1	1	70	8	2	28	0	1	0	49	49	0.0521610007	1.34115505	2.96019506	2.61729288	0.917810023	19772
+100234	1	216	1	40	cplex	0	0	100	11	3	28	0	1	0	49	49	0.0976679996	2.19414592	4.92823076	4.10190392	0.914404988	15176
+100235	1	216	1	40	cplex	1	1	70	1	4	28	28	0	0	49		0.0655689985	0.617697001	1.06592298	7.52941179	0.092073001	2225
+100236	1	217	1	40	cplex	0	1	100	6	0	13	0	1	0	49	49	0.0372989997	0.926482975	1.89473498	1.68057096	0.876618028	5619
+100237	1	217	1	40	cplex	1	0	70	11	1	13	0	1	0	49	49	0.026362	0.700842023	1.49685597	1.33826196	0.89706099	10312
+100238	1	217	1	40	cplex	1	1	70	8	2	13	0	1	0	49	49	0.0303850006	0.62392199	1.38260102	1.21614099	0.958324015	9180
+100239	1	217	1	40	cplex	0	0	100	11	3	13	0	1	0	49	49	0.0608020015	0.998937011	2.28551102	2.00086308	0.902779996	7046
+100240	1	217	1	40	cplex	1	1	70	1	4	13	0	1	0	49	49	0.0221120007	0.0819279999	0.132091999	1.35798895	0.948624015	559
+100241	1	218	1	40	cplex	0	1	100	6	0	16	0	1	0	49	49	0.0731239989	1.06901205	2.28733993	1.96678197	0.406466007	6916
+100242	1	218	1	40	cplex	1	0	70	11	1	16	0	1	0	49	49	0.0214540008	1.82316196	1.84679997	1.65280902	0.411410004	12692
+100243	1	218	1	40	cplex	1	1	70	8	2	16	0	1	0	49	49	0.0345729999	0.773683012	1.69028699	1.49156106	0.514653981	11298
+100244	1	218	1	40	cplex	0	0	100	11	3	16	0	1	0	49	49	0.0700360015	1.22672606	2.81415606	2.44020796	0.421615988	8672
+100245	1	218	1	40	cplex	1	1	70	1	4	16	16	0	0	49		0.0319640003	0.299396992	0.522786021	2.48975801	0.0824550018	1207
+100246	1	219	1	40	cplex	0	1	100	6	0	13	0	1	0	49	49	0.0626460016	0.867467999	1.88919497	1.75000298	0.347104013	5619
+100247	1	219	1	40	cplex	1	0	70	11	1	13	0	1	0	49	49	0.0275030006	0.666163981	1.51218498	1.32194805	0.340885997	10312
+100248	1	219	1	40	cplex	1	1	70	8	2	13	0	1	0	49	49	0.0295180008	0.672280014	1.34834898	1.22548699	0.350261003	9180
+100249	1	219	1	40	cplex	0	0	100	11	3	13	0	1	0	49	49	0.0603859983	0.99792999	2.27546692	1.94522798	0.340204	7046
+100250	1	219	1	40	cplex	1	1	70	1	4	13	13	0	0	49		0.0344949998	0.277635992	0.465330988	3.1844089	0.0926640034	1018
+100251	1	220	1	40	cplex	0	1	500	1	0	21	4	1	0.190476	499	499	0.00698699988	0.000661999977	0.00172099995	0.00634599989	0.923094988	252
+100252	1	220	1	40	cplex	1	0	482	11	1	21	4	1	0.190476	499	499	0.0154339997	0.00129599997	0.00417400012	0.00903000031	1.12587905	882
+100253	1	220	1	40	cplex	1	1	482	1	2	21	4	1	0.190476	499	499	0.0152380001	0.000675000018	0.00171800004	0.00614499999	0.919193029	252
+100254	1	220	1	40	cplex	0	0	500	11	3	21	4	1	0.190476	499	499	0.00685000001	0.00129599997	0.00414300011	0.0101929996	0.943466008	882
+100255	1	220	1	40	cplex	1	1	482	1	4	21	4	1	0.190476	499	499	0.0141350003	0.000702999998	0.00170999998	0.00533600012	0.935416996	252
+100256	1	221	1	40	cplex	0	1	500	1	0	14	0	1	0	499	499	0.00356999994	0.000391000009	0.001208	0.00729699992	1.15853	168
+100257	1	221	1	40	cplex	1	0	482	11	1	14	0	1	0	499	499	0.0125500001	0.000868999981	0.00285899988	0.00765699986	0.977450013	588
+100258	1	221	1	40	cplex	1	1	482	1	2	14	0	1	0	499	499	0.0125759998	0.000490000006	0.00119900005	0.0069980002	0.972015977	168
+100259	1	221	1	40	cplex	0	0	500	11	3	14	0	1	0	499	499	0.00471099978	0.000872000004	0.00286399992	0.0075389999	0.967363	588
+100260	1	221	1	40	cplex	1	1	482	1	4	14	0	1	0	499	499	0.0125660002	0.000465999998	0.00119500002	0.00762500009	0.976113021	168
+100261	1	222	1	40	cplex	0	1	500	1	0	4	0	1	0	499	499	0.00143800001	0.000151	0.000487000012	0.00479200017	0.25355801	48
+100262	1	222	1	40	cplex	1	0	482	11	1	4	0	1	0	499	499	0.00946899969	0.000239999994	0.00102600001	0.00539099984	0.37360701	168
+100263	1	222	1	40	cplex	1	1	482	1	2	4	0	1	0	499	499	0.00911400001	0.000169000006	0.000500999973	0.00505500007	0.261188	48
+100264	1	222	1	40	cplex	0	0	500	11	3	4	0	1	0	499	499	0.00126399996	0.000237999993	0.00101600005	0.00510499999	0.260796994	168
+100265	1	222	1	40	cplex	1	1	482	1	4	4	0	1	0	499	499	0.0091289999	0.000151	0.000488999998	0.00494100014	0.250752002	48
+100266	1	223	1	40	cplex	0	1	500	1	0	4	0	1	0	499	499	0.00132799998	0.000182999996	0.000493000029	0.00450700009	0.956700027	48
+100267	1	223	1	40	cplex	1	0	482	11	1	4	0	1	0	499	499	0.00909699965	0.000241999995	0.00103499996	0.00589099992	0.950626016	168
+100268	1	223	1	40	cplex	1	1	482	1	2	4	0	1	0	499	499	0.00907799974	0.000155000002	0.000491000013	0.00484299986	0.979852974	48
+100269	1	223	1	40	cplex	0	0	500	11	3	4	0	1	0	499	499	0.00153500005	0.000284999987	0.00101999997	0.00687899999	0.965673029	168
+100270	1	223	1	40	cplex	1	1	482	1	4	4	0	1	0	499	499	0.00912600011	0.000151	0.000491000013	0.00542199984	0.963891983	48
+100271	1	224	1	40	cplex	0	1	500	1	0	5	0	1	0	499	499	0.00147400005	0.000190999999	0.000561999972	0.00499799987	1.18343103	60
+100272	1	224	1	40	cplex	1	0	482	11	1	5	0	1	0	499	499	0.00960399956	0.000280000007	0.001192	0.00697100023	0.972908974	210
+100273	1	224	1	40	cplex	1	1	482	1	2	5	0	1	0	499	499	0.00985999964	0.000203999996	0.000545000017	0.00576499989	0.97815001	60
+100274	1	224	1	40	cplex	0	0	500	11	3	5	0	1	0	499	499	0.00157399999	0.000297999999	0.00124000001	0.00714500016	0.977882028	210
+100275	1	224	1	40	cplex	1	1	482	1	4	5	0	1	0	499	499	0.00983200036	0.000288999989	0.000516999979	0.00463500014	0.98407501	60
+100276	1	225	1	40	cplex	0	1	500	1	0	13	0	1	0	499	499	0.00320099993	0.000364000007	0.00120399997	0.00649200007	0.928417981	156
+100277	1	225	1	40	cplex	1	0	482	11	1	13	0	1	0	499	499	0.0113260001	0.000806000025	0.00279700011	0.00766299991	1.06900299	546
+100278	1	225	1	40	cplex	1	1	482	1	2	13	0	1	0	499	499	0.0111060003	0.000349999988	0.00120399997	0.00622999994	0.925087988	156
+100279	1	225	1	40	cplex	0	0	500	11	3	13	0	1	0	499	499	0.00319000008	0.000653999974	0.00275800005	0.00817899965	0.935096025	546
+100280	1	225	1	40	cplex	1	1	482	1	4	13	0	1	0	499	499	0.0110309999	0.00035300001	0.00120000006	0.00622999994	0.928637981	156
+100281	1	226	1	40	cplex	0	1	500	1	0	4	0	1	0	499	499	0.00126799999	0.000148000006	0.000501999981	0.00556600001	0.921284974	48
+100282	1	226	1	40	cplex	1	0	482	11	1	4	0	1	0	499	499	0.00908499956	0.000243000002	0.00100100006	0.00460699992	0.930060029	168
+100283	1	226	1	40	cplex	1	1	482	1	2	4	0	1	0	499	499	0.00912600011	0.000151999993	0.000515999971	0.00523399981	0.927271008	48
+100284	1	226	1	40	cplex	0	0	500	11	3	4	0	1	0	499	499	0.00125199999	0.000249000004	0.00102299999	0.00494500017	0.924241006	168
+100285	1	226	1	40	cplex	1	1	482	1	4	4	0	1	0	499	499	0.00917000044	0.000161999997	0.000475999987	0.0047050002	0.912001014	48
+100286	1	227	1	40	cplex	0	1	500	1	0	10	0	1	0	499	499	0.00259599998	0.000292000012	0.000959999976	0.00615799986	0.96518898	120
+100287	1	227	1	40	cplex	1	0	482	11	1	10	0	1	0	499	499	0.0105349999	0.000513000006	0.00219999999	0.00755399978	0.970010996	420
+100288	1	227	1	40	cplex	1	1	482	1	2	10	0	1	0	499	499	0.0105079999	0.000287000003	0.000954999996	0.0047050002	0.96180898	120
+100289	1	227	1	40	cplex	0	0	500	11	3	10	0	1	0	499	499	0.00258300011	0.000515000022	0.00221799989	0.00767599978	0.970647991	420
+100290	1	227	1	40	cplex	1	1	482	1	4	10	0	1	0	499	499	0.0106140003	0.000291000004	0.000941000006	0.0058579999	0.960485995	120
+100291	1	228	1	40	cplex	0	1	500	1	0	6	0	1	0	499	499	0.00216599996	0.000241999995	0.000663999992	0.00681699999	0.203770995	72
+100292	1	228	1	40	cplex	1	0	482	11	1	6	0	1	0	499	499	0.0100689996	0.000423999998	0.00133400003	0.00712700002	0.202591002	252
+100293	1	228	1	40	cplex	1	1	482	1	2	6	0	1	0	499	499	0.010094	0.000241000002	0.000654999982	0.00572700007	0.201015994	72
+100294	1	228	1	40	cplex	0	0	500	11	3	6	0	1	0	499	499	0.00214800006	0.000399000011	0.00137199997	0.00667299982	0.188244	252
+100295	1	228	1	40	cplex	1	1	482	1	4	6	0	1	0	499	499	0.0100870002	0.000232999999	0.000635000004	0.00637000008	0.200627998	72
+100296	1	229	1	40	cplex	0	1	500	1	0	4	0	1	0	499	499	0.00129199994	0.000151999993	0.000472999993	0.00540299993	0.267708987	48
+100297	1	229	1	40	cplex	1	0	482	11	1	4	0	1	0	499	499	0.0091289999	0.000253000006	0.000969999994	0.005901	0.270173997	168
+100298	1	229	1	40	cplex	1	1	482	1	2	4	0	1	0	499	499	0.00942500029	0.000220000002	0.000449999992	0.00563400006	0.279473007	48
+100299	1	229	1	40	cplex	0	0	500	11	3	4	0	1	0	499	499	0.00146199996	0.000319000013	0.000975999981	0.00541999983	0.274809986	168
+100300	1	229	1	40	cplex	1	1	482	1	4	4	0	1	0	499	499	0.0094750002	0.000180999996	0.000452000007	0.00532	0.272745013	48
+100301	1	230	1	40	cplex	0	1	500	4	0	9	0	1	0	474	474	0.0925029963	0.12421	0.249525994	0.284570992	0.814249992	1500
+100302	1	230	1	40	cplex	1	0	483	11	1	9	0	1	0	474	474	0.0512459986	0.104590997	0.228385001	0.234283	0.806264997	3063
+100303	1	230	1	40	cplex	1	1	483	6	2	9	0	1	0	474	474	0.0379189998	0.0862179995	0.187626004	0.185866997	0.800513983	2307
+100304	1	230	1	40	cplex	0	0	500	11	3	9	0	1	0	474	474	0.096826002	0.187290996	0.421860009	0.436596006	0.805432022	2628
+100305	1	230	1	40	cplex	1	1	483	1	4	9	0	1	0	474	474	0.042684	0.0225120001	0.0360679999	0.384503007	0.805013001	271
+100306	1	231	1	40	cplex	0	1	500	4	0	17	0	1	0	474	474	0.151362002	0.226925001	0.486817002	0.478639007	0.957216978	2833
+100307	1	231	1	40	cplex	1	0	483	11	1	17	0	1	0	474	474	0.0608469993	0.160465002	0.419126987	0.379779011	0.82327503	5785
+100308	1	231	1	40	cplex	1	1	483	6	2	17	0	1	0	474	474	0.0609739982	0.138833001	0.330256999	0.32032299	0.833890021	4357
+100309	1	231	1	40	cplex	0	0	500	11	3	17	0	1	0	474	474	0.109393001	0.295832992	0.778272986	0.685011029	0.807650983	4964
+100310	1	231	1	40	cplex	1	1	483	1	4	17	0	1	0	474	474	0.0569770001	0.0361399986	0.0697889999	0.699643016	0.817207992	512
+100311	1	232	1	40	cplex	0	1	500	4	0	28	0	1	0	474	474	0.170813993	0.328065991	0.783751011	0.70422101	0.855780005	4667
+100312	1	232	1	40	cplex	1	0	483	11	1	28	0	1	0	474	474	0.0865759999	0.261741012	0.699630022	0.623301983	0.84880501	9529
+100313	1	232	1	40	cplex	1	1	483	6	2	28	0	1	0	474	474	0.0696400031	0.450401992	0.561818004	0.508634984	0.88132	7177
+100314	1	232	1	40	cplex	0	0	500	11	3	28	0	1	0	474	474	0.172803	0.488579005	1.30067098	1.11946595	1.01923895	8176
+100315	1	232	1	40	cplex	1	1	483	1	4	28	0	1	0	474	474	0.0872960016	0.0585439987	0.115645997	1.15424895	0.879263997	844
+100316	1	233	1	40	cplex	0	1	500	4	0	13	0	1	0	474	474	0.0900780037	0.157049999	0.361873001	0.36818701	0.186095998	2167
+100317	1	233	1	40	cplex	1	0	483	11	1	13	0	1	0	474	474	0.0505709983	0.125310004	0.326878011	0.300900996	0.187205002	4424
+100318	1	233	1	40	cplex	1	1	483	6	2	13	0	1	0	474	474	0.0537879989	0.108964004	0.256455004	0.255962998	0.182436004	3332
+100319	1	233	1	40	cplex	0	0	500	11	3	13	0	1	0	474	474	0.090940997	0.233345002	0.611339986	0.582865	0.182089999	3796
+100320	1	233	1	40	cplex	1	1	483	1	4	13	0	1	0	474	474	0.0473270006	0.0288389996	0.0545249991	0.551904023	0.181417003	392
+100321	1	234	1	40	cplex	0	1	500	4	0	19	0	1	0	474	474	0.172837004	0.262201011	0.54993403	0.522800028	0.582148015	3167
+100322	1	234	1	40	cplex	1	0	483	11	1	19	0	1	0	474	474	0.0851079971	0.212062001	0.493508995	0.420410991	0.584501982	6466
+100323	1	234	1	40	cplex	1	1	483	6	2	19	0	1	0	474	474	0.0896890014	0.184129	0.384339988	0.356887013	1.38829899	4870
+100324	1	234	1	40	cplex	0	0	500	11	3	19	0	1	0	474	474	0.171721995	0.389670014	0.917420983	0.790630996	0.57990402	5548
+100325	1	234	1	40	cplex	1	1	483	1	4	19	0	1	0	474	474	0.0876069963	0.0459459983	0.0772050023	0.782275021	0.584137976	573
+100326	1	235	1	40	cplex	0	1	500	4	0	21	0	1	0	474	474	0.0809409991	0.255389988	0.586616993	0.541773975	0.507250011	3500
+100327	1	235	1	40	cplex	1	0	483	11	1	21	0	1	0	474	474	0.0697489977	0.201100007	0.535001993	0.475510001	0.502928972	7147
+100328	1	235	1	40	cplex	1	1	483	6	2	21	0	1	0	474	474	0.0776010007	0.173940003	0.413648009	0.393112004	0.490496993	5383
+100329	1	235	1	40	cplex	0	0	500	11	3	21	0	1	0	474	474	0.0947099999	0.459863991	0.993206024	0.864166021	0.513100028	6132
+100330	1	235	1	40	cplex	1	1	483	1	4	21	0	1	0	474	474	0.0725430027	0.0455310009	0.086916998	0.847766995	0.481557012	633
+100331	1	236	1	40	cplex	0	1	500	4	0	11	0	1	0	474	474	0.0767470002	0.133490995	0.305175006	0.331716001	0.511838973	1833
+100332	1	236	1	40	cplex	1	0	483	11	1	11	0	1	0	474	474	0.044075001	0.106848001	0.275893986	0.268480003	0.400453001	3743
+100333	1	236	1	40	cplex	1	1	483	6	2	11	0	1	0	474	474	0.0433260016	0.0940070003	0.215591997	0.230679005	0.411130995	2819
+100334	1	236	1	40	cplex	0	0	500	11	3	11	0	1	0	474	474	0.0950239971	0.197060004	0.512126029	0.477091998	0.416173011	3212
+100335	1	236	1	40	cplex	1	1	483	1	4	11	0	1	0	474	474	0.0514760017	0.0244600009	0.0451919995	0.460485995	0.402875006	331
+100336	1	237	1	40	cplex	0	1	500	4	0	16	0	1	0	474	474	0.154142007	0.222571	0.462855011	0.420958996	0.252050012	2667
+100337	1	237	1	40	cplex	1	0	483	11	1	16	0	1	0	474	474	0.0776380002	0.179013997	0.418843001	0.37530899	0.317759007	5445
+100338	1	237	1	40	cplex	1	1	483	6	2	16	0	1	0	474	474	0.0769950002	0.152801007	0.324604988	0.318612993	0.241953	4101
+100339	1	237	1	40	cplex	0	0	500	11	3	16	0	1	0	474	474	0.147286996	0.320726007	0.764612973	0.665413022	0.232253	4672
+100340	1	237	1	40	cplex	1	1	483	1	4	16	0	1	0	474	474	0.0749619976	0.0388300009	0.0652180016	0.682798982	0.225949004	482
+100341	1	238	1	40	cplex	0	1	500	4	0	19	0	1	0	474	474	0.101952001	0.369583994	0.543172002	0.493405014	0.95589	3167
+100342	1	238	1	40	cplex	1	0	483	11	1	19	0	1	0	474	474	0.089726001	0.212591007	0.501722991	0.433881015	0.965546012	6466
+100343	1	238	1	40	cplex	1	1	483	6	2	19	0	1	0	474	474	0.0897430032	0.187044993	0.386932999	0.349265009	0.932281017	4870
+100344	1	238	1	40	cplex	0	0	500	11	3	19	0	1	0	474	474	0.130713001	0.439736992	0.905642986	0.782890022	0.98941201	5548
+100345	1	238	1	40	cplex	1	1	483	1	4	19	19	0	0	474		0.0677959993	0.0552389994	0.105517	1.02753305	0.104693003	665
+100346	1	239	1	40	cplex	0	1	500	4	0	13	0	1	0	474	474	0.0883769989	0.156597003	0.361458987	0.36353299	0.196835995	2167
+100347	1	239	1	40	cplex	1	0	483	11	1	13	0	1	0	474	474	0.0543360002	0.13662	0.46587199	0.312635005	0.184100002	4424
+100348	1	239	1	40	cplex	1	1	483	6	2	13	0	1	0	474	474	0.0491579995	0.108804002	0.261519015	0.255809993	0.181577995	3332
+100349	1	239	1	40	cplex	0	0	500	11	3	13	0	1	0	474	474	0.0888660029	0.230169997	0.609404027	0.56151098	0.181503996	3796
+100350	1	239	1	40	cplex	1	1	483	1	4	13	0	1	0	474	474	0.0464899987	0.0293639991	0.0551850013	0.544294	0.188409999	392
+100351	1	240	1	40	cplex	0	1	500	6	0	28	0	1	0	449	449	0.270520985	1.71473205	3.86639905	4.79758406	1.75850594	11599
+100352	1	240	1	40	cplex	1	0	482	11	1	28	0	1	0	449	449	0.229714006	1.56275499	3.99900508	3.95176291	0.916375995	18816
+100353	1	240	1	40	cplex	1	1	482	8	2	28	0	1	0	449	449	0.207246006	1.47850001	3.48044491	3.44507909	0.96687001	16023
+100354	1	240	1	40	cplex	0	0	500	11	3	28	0	1	0	449	449	0.271001995	1.902982	4.85542822	4.74191999	1.00274205	15176
+100355	1	240	1	40	cplex	1	1	482	1	4	28	28	0	0	449		0.135389999	0.469397008	0.782444	7.64912605	0.0842979997	1608
+100356	1	241	1	40	cplex	0	1	500	6	0	40	0	1	0	449	449	0.390433997	2.75502801	5.68017292	5.21105003	0.229149997	16570
+100357	1	241	1	40	cplex	1	0	482	11	1	40	0	1	0	449	449	0.238159001	2.619205	6.02220106	5.4661088	0.298734009	26880
+100358	1	241	1	40	cplex	1	1	482	8	2	40	0	1	0	449	449	0.204334006	2.09904408	5.05311298	4.9355278	0.276690006	22890
+100359	1	241	1	40	cplex	0	0	500	11	3	40	0	1	0	449	449	0.380071998	2.69330406	7.042243	6.48017502	0.253401011	21680
+100360	1	241	1	40	cplex	1	1	482	1	4	40	40	0	0	449		0.299374998	0.622527003	1.10965395	11.0378704	0.102658004	2297
+100361	1	242	1	40	cplex	0	1	500	6	0	23	0	1	0	449	449	0.222349003	1.38903201	3.14742398	3.43152189	0.837060988	9420
+100362	1	242	1	40	cplex	1	0	482	11	1	23	0	1	0	449	449	0.141982004	1.30715299	3.3232379	4.63322306	0.851767004	15456
+100363	1	242	1	40	cplex	1	1	482	8	2	23	0	1	0	449	449	0.179858997	1.20724297	2.88486195	3.18472505	0.844788015	13162
+100364	1	242	1	40	cplex	0	0	500	11	3	23	0	1	0	449	449	0.189648002	1.52741897	3.991431	4.19117308	0.873911977	12466
+100365	1	242	1	40	cplex	1	1	482	1	4	23	23	0	0	449		0.221773997	0.379595011	0.672779024	6.4061799	0.107190996	1541
+100366	1	243	1	40	cplex	0	1	500	6	0	29	0	1	0	449	449	0.368097007	1.95591104	4.08465481	4.19460201	0.845278978	11878
+100367	1	243	1	40	cplex	1	0	482	11	1	29	0	1	0	449	449	0.141308993	1.82018995	4.31802893	4.44094515	0.827408016	19488
+100368	1	243	1	40	cplex	1	1	482	8	2	29	0	1	0	449	449	0.310402006	1.67854297	3.7530601	3.88546395	0.860786021	16595
+100369	1	243	1	40	cplex	0	0	500	11	3	29	0	1	0	449	449	0.293311	2.25978088	5.15185404	5.09220505	0.852038026	15718
+100370	1	243	1	40	cplex	1	1	482	1	4	29	29	0	0	449		0.362417012	0.387252003	0.688811004	2.4204421	0.0989470035	2022
+100371	1	244	1	40	cplex	0	1	500	6	0	45	0	1	0	449	449	0.40309	3.01626492	6.34841585	6.30621481	0.795831978	18432
+100372	1	244	1	40	cplex	1	0	482	11	1	45	0	1	0	449	449	0.187546998	2.92920804	6.77641678	6.85841322	0.763621986	30240
+100373	1	244	1	40	cplex	1	1	482	8	2	45	0	1	0	449	449	0.236490995	3.65760207	5.8432889	6.06255007	0.776498973	25751
+100374	1	244	1	40	cplex	0	0	500	11	3	45	0	1	0	449	449	0.327969015	3.42045212	8.06960297	7.85523796	0.771309972	24390
+100375	1	244	1	40	cplex	1	1	482	1	4	45	45	0	0	449		0.521767974	0.725499988	1.33699596	10.4165421	0.0895560011	3065
+100376	1	245	1	40	cplex	0	1	500	6	0	24	0	1	0	449	449	0.367036998	1.59680498	3.3549571	3.57004905	0.877893984	9830
+100377	1	245	1	40	cplex	1	0	482	11	1	24	0	1	0	449	449	0.284294009	1.57872105	3.56125808	3.78089404	0.848074973	16128
+100378	1	245	1	40	cplex	1	1	482	8	2	24	0	1	0	449	449	0.291671991	1.447487	3.1231029	3.34057808	0.835412979	13734
+100379	1	245	1	40	cplex	0	0	500	11	3	24	0	1	0	449	449	0.387309015	1.86975598	4.31374502	4.41262484	0.854520023	13008
+100380	1	245	1	40	cplex	1	1	482	1	4	24	24	0	0	449		0.286428988	0.40614301	0.711750984	6.65387011	0.0905639976	1608
+100381	1	246	1	40	cplex	0	1	500	6	0	43	0	1	0	449	449	0.394470006	2.81166005	6.07472086	6.15289688	0.789124012	17613
+100382	1	246	1	40	cplex	1	0	482	11	1	43	0	1	0	449	449	0.249070004	2.79738903	6.46991682	6.67631388	0.78875798	28896
+100383	1	246	1	40	cplex	1	1	482	8	2	43	0	1	0	449	449	0.302767992	2.59591508	5.68859196	7.120152	0.825766981	24607
+100384	1	246	1	40	cplex	0	0	500	11	3	43	0	1	0	449	449	0.403474003	2.84890604	7.46952391	7.62375784	0.797656	23306
+100385	1	246	1	40	cplex	1	1	482	1	4	43	43	0	0	449		0.349624991	0.61275202	1.23193896	9.83762646	0.0939420015	2929
+100386	1	247	1	40	cplex	0	1	500	6	0	44	0	1	0	449	449	0.328249991	2.811234	6.22009802	6.83794403	0.900222003	18228
+100387	1	247	1	40	cplex	1	0	482	11	1	44	0	1	0	449	449	0.206551999	2.83664703	6.58254814	7.24891186	0.903748989	29568
+100388	1	247	1	40	cplex	1	1	482	8	2	44	0	1	0	449	449	0.334894001	2.59842992	5.74128294	6.62575579	0.919417977	25179
+100389	1	247	1	40	cplex	0	0	500	11	3	44	0	1	0	449	449	0.555175006	3.3268261	7.92100477	8.21573353	0.889020979	23848
+100390	1	247	1	40	cplex	1	1	482	1	4	44	44	0	0	449		0.354555011	0.842881978	1.48951006	8.77562141	0.0822800025	2550
+100391	1	248	1	40	cplex	0	1	500	6	0	36	0	1	0	449	449	0.525887012	2.36220503	5.02893209	5.27773714	0.844313979	14745
+100392	1	248	1	40	cplex	1	0	482	11	1	36	0	1	0	449	449	0.289606005	2.34893799	5.36369514	6.78752613	0.82359302	24192
+100393	1	248	1	40	cplex	1	1	482	8	2	36	0	1	0	449	449	0.256065011	2.13849497	4.69080114	5.0141778	0.917330027	20601
+100394	1	248	1	40	cplex	0	0	500	11	3	36	0	1	0	449	449	0.502156973	2.75604606	6.44674015	6.52944613	0.855903029	19512
+100395	1	248	1	40	cplex	1	1	482	1	4	36	36	0	0	449		0.390513986	0.597182989	1.08457899	9.08032894	0.0925939977	2412
+100396	1	249	1	40	cplex	0	1	500	6	0	30	0	1	0	449	449	0.340193003	2.00747299	4.36881924	4.01707697	0.888728976	12776
+100397	1	249	1	40	cplex	1	0	480	11	1	30	0	1	0	449	449	0.273088992	1.90768099	4.39076614	4.1361208	0.860454977	21022
+100398	1	249	1	40	cplex	1	1	480	8	2	30	0	1	0	449	449	0.248747006	1.75402403	3.83561993	3.70085692	0.88381201	18039
+100399	1	249	1	40	cplex	0	0	500	11	3	30	0	1	0	449	449	0.252225995	2.1121769	5.19521713	5.0161438	0.922502995	16260
+100400	1	249	1	40	cplex	1	1	480	1	4	30	30	0	0	449		0.185463995	0.196627006	0.391140014	1.45840204	0.0991809964	1434
+100401	1	250	1	40	cplex	0	1	500	8	0	4	0	1	0	399	399	0.189267993	1.22919202	2.47255707	3.1308279	0.379772991	3751
+100402	1	250	1	40	cplex	1	0	454	11	1	4	0	1	0	399	399	0.123589002	0.953945994	2.08934808	2.6634779	0.382346004	5808
+100403	1	250	1	40	cplex	1	1	454	9	2	4	0	1	0	399	399	0.0622819997	0.946483016	1.94284105	2.561198	0.39013201	5372
+100404	1	250	1	40	cplex	0	0	500	11	3	4	0	1	0	399	399	0.184333995	1.271209	2.72597909	3.34810901	0.392854989	4168
+100405	1	250	1	40	cplex	1	1	454	1	4	4	4	0	0	399		0.162376001	0.87777698	1.36300898	14.6667309	0.105297998	595
+100406	1	251	1	40	cplex	0	1	500	8	0	4	0	1	0	399	399	0.127489001	1.21454704	2.51059294	3.13374305	0.957247972	3751
+100407	1	251	1	40	cplex	1	0	454	11	1	4	0	1	0	399	399	0.109081998	0.961607993	2.061903	2.59022689	0.960497022	5808
+100408	1	251	1	40	cplex	1	1	454	9	2	4	0	1	0	399	399	0.131797999	0.906596005	1.94641805	2.56268597	0.986657023	5372
+100409	1	251	1	40	cplex	0	0	500	11	3	4	0	1	0	399	399	0.126266003	1.13101101	2.64229393	3.16292191	0.943473995	4168
+100410	1	251	1	40	cplex	1	1	454	1	4	4	0	1	0	399	399	0.0727190003	0.0541380011	0.0909589976	0.862878025	0.960385978	170
+100411	1	252	1	40	cplex	0	1	500	8	0	3	0	1	0	399	399	0.0984639972	0.874444008	1.80381501	2.37198305	0.942902029	2813
+100412	1	252	1	40	cplex	1	0	454	11	1	3	0	1	0	399	399	0.079039	0.637151003	1.51681697	1.97276402	0.930555999	4356
+100413	1	252	1	40	cplex	1	1	454	9	2	3	0	1	0	399	399	0.0899410024	0.599403024	1.40843296	1.94675696	0.943188012	4029
+100414	1	252	1	40	cplex	0	0	500	11	3	3	0	1	0	399	399	0.125467002	0.887567997	1.99034703	2.51357698	1.027794	3126
+100415	1	252	1	40	cplex	1	1	454	1	4	3	3	0	0	399		0.134293005	0.606456995	0.911441982	8.44708824	0.0908629969	428
+100416	1	253	1	40	cplex	0	1	500	8	0	5	0	1	0	399	399	0.117991999	1.50599802	3.16122699	3.79664993	0.301959008	4688
+100417	1	253	1	40	cplex	1	0	454	11	1	5	0	1	0	399	399	0.0946480036	1.20971406	2.63963199	3.25012994	0.338198006	7260
+100418	1	253	1	40	cplex	1	1	454	9	2	5	0	1	0	399	399	0.136402994	1.161237	2.45597005	3.14496112	0.331983	6715
+100419	1	253	1	40	cplex	0	0	500	11	3	5	0	1	0	399	399	0.230890006	1.59825099	3.44504809	3.98107791	0.346404999	5210
+100420	1	253	1	40	cplex	1	1	454	1	4	5	5	0	0	399		0.185341999	1.08386695	1.72105396	17.9768963	0.0957430005	730
+100421	1	254	1	40	cplex	0	1	500	8	0	10	0	1	0	399	399	0.24729	2.86189198	6.49198914	7.58809423	0.934450984	9377
+100422	1	254	1	40	cplex	1	0	454	11	1	10	0	1	0	399	399	0.0940930024	2.35907102	5.28701782	6.4664588	0.927734017	14521
+100423	1	254	1	40	cplex	1	1	454	9	2	10	0	1	0	399	399	0.107000999	2.211375	6.32124519	6.28953886	0.947526991	13430
+100424	1	254	1	40	cplex	0	0	500	11	3	10	0	1	0	399	399	0.170147002	3.07470989	6.98263311	7.87131691	0.976200998	10420
+100425	1	254	1	40	cplex	1	1	454	1	4	10	10	0	0	399		0.314864993	1.93951404	3.23225904	31.9757423	0.0942680016	1495
+100426	1	255	1	40	cplex	0	1	500	8	0	4	0	1	0	399	399	0.178872004	1.23665094	2.48268795	3.14703107	0.95402199	3751
+100427	1	255	1	40	cplex	1	0	454	11	1	4	0	1	0	399	399	0.102156997	0.972061992	2.08013701	2.60518503	0.951297998	5808
+100428	1	255	1	40	cplex	1	1	454	9	2	4	0	1	0	399	399	0.114476003	0.936451018	1.93978095	2.57962489	0.968007028	5372
+100429	1	255	1	40	cplex	0	0	500	11	3	4	0	1	0	399	399	0.171906993	1.25020802	2.74887991	3.28494906	0.960844994	4168
+100430	1	255	1	40	cplex	1	1	454	1	4	4	0	1	0	399	399	0.0731289983	0.0595850013	0.0869539976	0.849285007	0.992048979	170
+100431	1	256	1	40	cplex	0	1	500	8	0	2	0	1	0	399	399	0.111785002	0.534377992	1.18365705	1.68827903	2.1424799	1875
+100432	1	256	1	40	cplex	1	0	454	11	1	2	0	1	0	399	399	0.0900539979	0.435005993	0.99140799	1.42583203	1.72681999	2904
+100433	1	256	1	40	cplex	1	1	454	9	2	2	0	1	0	399	399	0.0582089983	0.46391499	0.928128004	1.34941995	1.53463495	2686
+100434	1	256	1	40	cplex	0	0	500	11	3	2	0	1	0	399	399	0.0937130004	0.617191017	1.30317998	1.88052297	1.48084605	2084
+100435	1	256	1	40	cplex	1	1	454	1	4	2	0	1	0	399	399	0.0468619987	0.0316440016	0.0477069989	0.549102008	1.50657105	81
+100436	1	257	1	40	cplex	0	1	500	8	0	2	0	1	0	399	399	0.115759999	0.535682976	1.18387306	1.785267	1.47684801	1875
+100437	1	257	1	40	cplex	1	0	454	11	1	2	0	1	0	399	399	0.0442259982	0.425604999	0.984651983	1.37405896	1.67400098	2904
+100438	1	257	1	40	cplex	1	1	454	9	2	2	0	1	0	399	399	0.0588149987	0.474339008	0.937623978	1.46229994	1.49303997	2686
+100439	1	257	1	40	cplex	0	0	500	11	3	2	0	1	0	399	399	0.0960460007	0.619535983	1.29591596	1.75059998	1.47863305	2084
+100440	1	257	1	40	cplex	1	1	454	1	4	2	0	1	0	399	399	0.0567420013	0.0351379998	0.0520410016	0.606669009	1.47091997	81
+100441	1	258	1	40	cplex	0	1	500	8	0	10	0	1	0	399	399	0.203095004	2.95854092	6.34828377	7.41455221	0.221435994	9377
+100442	1	258	1	40	cplex	1	0	454	11	1	10	0	1	0	399	399	0.106182002	2.44330502	5.33009005	6.40390682	0.243589997	14521
+100443	1	258	1	40	cplex	1	1	454	9	2	10	0	1	0	399	399	0.136103004	2.28017712	4.97685719	6.30478621	0.244560003	13430
+100444	1	258	1	40	cplex	0	0	500	11	3	10	0	1	0	399	399	0.225508004	3.13436604	6.96181011	7.68718481	0.270646989	10420
+100445	1	258	1	40	cplex	1	1	454	1	4	10	10	0	0	399		0.289373994	1.81982803	2.93354988	26.9090652	0.0927190036	1405
+100446	1	259	1	40	cplex	0	1	500	8	0	2	0	1	0	399	399	0.152114004	0.615558982	1.19957697	1.76857305	1.47793198	1875
+100447	1	259	1	40	cplex	1	0	454	11	1	2	0	1	0	399	399	0.0630479977	0.583920002	1.11358297	1.49034905	1.73356903	2904
+100448	1	259	1	40	cplex	1	1	454	9	2	2	0	1	0	399	399	0.095836997	0.471251994	0.951088011	1.40152705	1.46180499	2686
+100449	1	259	1	40	cplex	0	0	500	11	3	2	0	1	0	399	399	0.136262	0.62024498	1.28499806	1.85972297	1.5503	2084
+100450	1	259	1	40	cplex	1	1	454	1	4	2	0	1	0	399	399	0.0615609996	0.0366129987	0.0483089983	0.591126978	1.47060204	81
+100451	1	260	1	40	cplex	0	1	500	9	0	3	0	1	0	299	299	0.28560099	3.67803192	7.57635021	28.1501408	0.986859024	5731
+100452	1	260	1	40	cplex	1	0	482	11	1	3	0	1	0	299	299	0.225667	3.65209389	7.8791132	24.5798798	0.998179972	6627
+100453	1	260	1	40	cplex	1	1	482	9	2	3	0	1	0	299	299	0.218132004	3.61066508	7.61419678	27.9235497	0.963809013	6254
+100454	1	260	1	40	cplex	0	0	500	11	3	3	0	1	0	299	299	0.233877003	3.84344506	8.07334709	24.707983	0.954921007	6126
+100455	1	260	1	40	cplex	1	1	482	1	4	3	348	0.333332986	115.333336	299	427	0.102509998	0.149406999	0.218426004	1.290061	0.428299993	476
+100461	1	262	1	40	cplex	0	1	500	9	0	6	0	1	0	299	299	0.30162999	7.40965796	15.3549976	48.0040894	0.74919802	11463
+100462	1	262	1	40	cplex	1	0	482	11	1	6	0	1	0	299	299	0.217088997	7.35194397	15.8623466	44.7692833	0.736952007	13255
+100463	1	262	1	40	cplex	1	1	482	9	2	6	0	1	0	299	299	0.268436015	7.25905704	15.0943727	48.4603844	0.756125987	12508
+100464	1	262	1	40	cplex	0	0	500	11	3	6	0	1	0	299	299	0.233054996	7.15775013	15.8517914	43.2069893	0.754691005	12252
+100465	1	262	1	40	cplex	1	1	482	1	4	6	2	0.666666985	0	299	299	0.335952997	2.37957191	3.89092994	27.5796566	0.216001004	2459
+100466	1	263	1	40	cplex	0	1	500	9	0	8	0	1	0	299	299	0.367906988	9.48014069	20.215147	62.7253494	0.578791022	15338
+100467	1	263	1	40	cplex	1	0	480	11	1	8	0	1	0	299	299	0.238692001	9.55258369	20.9077244	56.8363647	0.567445993	17863
+100468	1	263	1	40	cplex	1	1	480	9	2	8	0	1	0	299	299	0.270790994	9.32459641	19.7575932	63.3826752	0.566182971	16859
+100469	1	263	1	40	cplex	0	0	500	11	3	8	0	1	0	299	299	0.333326012	9.38420582	20.9127827	54.060955	0.550400972	16336
+100470	1	263	1	40	cplex	1	1	480	1	4	8	8	0	0	299		0.212595001	1.85632598	0.963100016	5.42089796	0.085954003	833
+100471	1	264	1	40	cplex	0	1	500	9	0	6	0	1	0	299	299	0.255230993	6.76074886	14.7223206	62.6469955	1.00704706	11463
+100472	1	264	1	40	cplex	1	0	482	11	1	6	0	1	0	299	299	0.23488	7.14777088	15.4875088	60.5244217	0.958133996	13255
+100473	1	264	1	40	cplex	1	1	482	9	2	6	0	1	0	299	299	0.246808007	6.51747799	14.6166992	63.7370758	0.956502974	12508
+100474	1	264	1	40	cplex	0	0	500	11	3	6	0	1	0	299	299	0.250503987	7.69912291	15.8828402	60.1671753	0.961799979	12252
+100475	1	264	1	40	cplex	1	1	482	1	4	6	348	0.666666985	57.6666679	299	427	0.156737	0.28360799	0.433052003	2.65282011	0.420845002	953
+100481	1	266	1	40	cplex	0	1	500	9	0	20	0	1	0	299	299	0.614759028	23.1365242	50.1527748	300.713684	1.00274098	38212
+100482	1	266	1	40	cplex	1	0	482	11	1	20	0	1	0	299	299	0.624849975	24.2175655	53.0808678	262.861877	0.896887004	44186
+100483	1	266	1	40	cplex	1	1	482	9	2	20	0	1	0	299	299	0.508432984	23.4329414	50.6089783	294.988647	0.878471971	41693
+100484	1	266	1	40	cplex	0	0	500	11	3	20	0	1	0	299	299	0.608313024	25.7927723	53.6657295	262.487274	0.906821012	40840
+100485	1	266	1	40	cplex	1	1	482	1	4	20	330	0.899999976	16.3999996	299	427	0.209876999	1.03052795	1.59924495	11.1896734	0.393559009	3178
+100486	1	267	1	40	cplex	0	1	500	9	0	22	0	1	0	299	299	0.645597994	24.8311558	55.5603104	224.903702	0.803734004	42086
+100487	1	267	1	40	cplex	1	0	480	11	1	22	0	1	0	299	299	0.550493002	24.9427738	58.2454147	202.955856	0.821807027	49124
+100488	1	267	1	40	cplex	1	1	480	9	2	22	0	1	0	299	299	0.573324025	27.4734001	54.8714294	224.551956	0.803288996	46362
+100489	1	267	1	40	cplex	0	0	500	11	3	22	0	1	0	299	299	0.542867005	29.1090298	59.7949219	203.571014	0.796244025	44924
+100490	1	267	1	40	cplex	1	1	480	1	4	22	22	0	0	299		0.359941989	3.36488605	5.98768902	43.0993042	0.0956730023	3544
+100491	1	268	1	40	cplex	0	1	500	9	0	6	0	1	0	299	299	0.316935986	7.04915285	15.4164753	42.2929039	0.986998975	11507
+100492	1	268	1	40	cplex	1	0	480	11	1	6	0	1	0	299	299	0.283506989	6.74164009	15.6000786	41.1329536	0.959331989	13397
+100493	1	268	1	40	cplex	1	1	480	9	2	6	0	1	0	299	299	0.326072991	6.96273279	15.235795	44.3450928	0.976077974	12644
+100494	1	268	1	40	cplex	0	0	500	11	3	6	0	1	0	299	299	0.268514007	6.81670713	15.76756	43.0726089	0.975019991	12252
+100495	1	268	1	40	cplex	1	1	480	1	4	6	6	0	0	299		0.232956007	0.970306993	1.61843705	18.4726772	0.0917500034	890
+100496	1	269	1	40	cplex	0	1	500	9	0	14	0	1	0	299	299	0.568323016	15.5880661	35.4085922	150.97226	0.970719993	26748
+100497	1	269	1	40	cplex	1	0	482	11	1	14	0	1	0	299	299	0.499520987	18.6341305	36.8905716	140.704895	0.910317004	30930
+100498	1	269	1	40	cplex	1	1	482	9	2	14	0	1	0	299	299	0.469011992	16.1158409	35.3748779	144.733932	0.926482975	29185
+100499	1	269	1	40	cplex	0	0	500	11	3	14	0	1	0	299	299	0.418431014	16.1185913	37.2401733	140.285019	0.935460985	28588
+100500	1	269	1	40	cplex	1	1	482	1	4	14	2	0.857142985	0	299	299	0.485769004	4.99116611	9.09701633	81.9135666	0.209658995	5738
+100501	1	270	1	40	cplex	0	1	500	9	0	11	0	1	0	249	249	0.614143014	17.9426174	42.1713982	90.662323	0.962415993	26403
+100502	1	270	1	40	cplex	1	0	451	11	1	11	0	1	0	249	249	0.311457992	19.0549984	43.78125	75.7471924	0.935066998	33244
+100503	1	270	1	40	cplex	1	1	451	9	2	11	0	1	0	249	249	0.407175004	17.9668255	41.8008728	89.6795044	0.949625015	31566
+100504	1	270	1	40	cplex	0	0	500	11	3	11	0	1	0	249	249	0.420388013	19.6464157	45.9068832	80.8581619	0.977995992	27962
+100505	1	270	1	40	cplex	1	1	451	1	4	11	11	0	0	249		0.124628998	0.420515001	0.717418015	3.48376989	0.0916870013	672
+100506	1	271	1	40	cplex	0	1	500	9	0	11	0	1	0	249	249	0.508746982	17.7932796	42.1219215	90.1118622	0.528039992	26440
+100507	1	271	1	40	cplex	1	0	437	11	1	11	0	1	0	249	249	0.334037989	16.9690609	41.54319	76.1600418	0.466365993	34810
+100508	1	271	1	40	cplex	1	1	437	10	2	11	0	1	0	249	249	0.350347012	18.7325859	39.9641228	87.1987457	0.47361201	33059
+100509	1	271	1	40	cplex	0	0	500	11	3	11	0	1	0	249	249	0.559253991	18.5304165	44.711422	78.4817352	0.465945989	27962
+100510	1	271	1	40	cplex	1	1	437	1	4	11	11	0	0	249		0.103802003	0.364488006	0.616904974	3.55051303	0.0803430006	722
+100511	1	272	1	40	cplex	0	1	500	9	0	13	0	1	0	249	249	0.638374984	21.2025242	50.0684891	122.078094	0.731031001	31283
+100512	1	272	1	40	cplex	1	0	437	11	1	13	0	1	0	249	249	0.361826003	20.5881214	48.7427979	100.684525	0.737866998	41139
+100513	1	272	1	40	cplex	1	1	437	10	2	13	0	1	0	249	249	0.411859989	19.9935951	46.9223976	120.666473	0.747529984	39070
+100514	1	272	1	40	cplex	0	0	500	11	3	13	0	1	0	249	249	0.447640985	23.0476742	53.1513824	104.27549	0.851942003	33046
+100515	1	272	1	40	cplex	1	1	437	1	4	13	13	0	0	249		0.185678005	0.463625014	0.732136011	4.01457691	0.0978849977	854
+100516	1	273	1	40	cplex	0	1	500	9	0	28	0	1	0	249	249	0.913686991	49.566906	110.849716	563.046753	0.627690017	67350
+100517	1	273	1	40	cplex	1	0	437	11	1	28	0	1	0	249	249	0.599891007	63.0508308	109.081032	364.853516	1.04684496	88607
+100518	1	273	1	40	cplex	1	1	437	10	2	28	0	1	0	249	249	0.674075007	47.7719879	106.326477	550.465637	0.453595012	84151
+100519	1	273	1	40	cplex	0	0	500	11	3	28	0	1	0	249	249	0.937824011	51.0450821	118.099121	365.689636	0.437770009	71176
+100520	1	273	1	40	cplex	1	1	437	1	4	28	28	0	0	249		1.01453805	7.43963003	13.2154484	142.307541	0.125156999	4294
+100525	1	274	1	40	cplex	1	1	451	1	4	10	10	0	0	249		0.208242998	0.403699994	0.667950988	3.92265892	0.132230997	611
+100526	1	275	1	40	cplex	0	1	500	9	0	16	0	1	0	249	249	0.65407902	29.2111511	61.8463783	144.705719	1.80296397	38503
+100527	1	275	1	40	cplex	1	0	437	11	1	16	0	1	0	249	249	0.417641014	47.6016045	61.739254	120.488358	2.63471007	50632
+100528	1	275	1	40	cplex	1	1	437	10	2	16	0	1	0	249	249	0.47924301	25.5825768	58.3374443	140.149918	1.19747698	48086
+100529	1	275	1	40	cplex	0	0	500	11	3	16	0	1	0	249	249	0.688714027	26.9997807	65.4675369	130.902466	1.34008801	40672
+100530	1	275	1	40	cplex	1	1	437	1	4	16	16	0	0	249		0.146258995	1.12045503	1.24482	10.2188988	0.142830998	1051
+884	1	291	1	40	cplex	0	1	1000	5	0	6	0	1	0	974	974	0.114229001	0.091659002	0.181141004	0.242291003	1.22116804	1166
+885	1	291	1	40	cplex	1	0	972	11	1	6	0	1	0	974	974	0.0543520004	0.0535049997	0.123860002	0.142377004	1.37298405	2742
+886	1	291	1	40	cplex	1	1	972	7	2	6	0	1	0	974	974	0.0637810007	0.0492389984	0.103119999	0.121785	1.20515096	2180
+887	1	291	1	40	cplex	0	0	1000	11	3	6	0	1	0	974	974	0.108378001	0.114537999	0.258235991	0.30852899	1.20595396	1752
+888	1	291	1	40	cplex	1	1	972	1	4	6	0	1	0	974	974	0.0703300014	0.0263679996	0.0400579982	0.432713985	1.21972704	200
+889	1	292	1	40	cplex	0	1	1000	5	0	13	0	1	0	974	974	0.221240997	0.190828994	0.40506801	0.412721992	0.998822987	2526
+890	1	292	1	40	cplex	1	0	972	11	1	13	0	1	0	974	974	0.0947799981	0.272181988	0.279303998	0.264878988	0.991952002	5941
+546	1	277	1	40	cplex	0	0	500	11	3	26	0	1	0	249	249	0.811147988	44.5126839	97.0755997	319.686829	0.302087992	66092
+547	1	277	1	40	cplex	1	1	437	1	4	26	26	0	0	249		0.346453995	0.902089	1.34551096	7.50738621	0.0889229998	1728
+548	1	278	1	40	cplex	0	1	500	9	0	27	0	1	0	249	249	0.88210398	44.6227455	97.0598221	406.164429	0.849574983	64974
+549	1	278	1	40	cplex	1	0	437	11	1	27	0	1	0	249	249	0.566275001	45.3382988	95.4243698	307.824982	0.822754979	85442
+550	1	278	1	40	cplex	1	1	437	10	2	27	0	1	0	249	249	0.578343987	45.8359375	91.5752182	401.367737	0.854601979	81146
+896	1	293	1	40	cplex	1	1	972	7	2	6	0	1	0	974	974	0.0698800012	0.0503339991	0.105401002	0.126587003	1.34290802	2180
+897	1	293	1	40	cplex	0	0	1000	11	3	6	0	1	0	974	974	0.100887999	0.315319985	0.26651299	0.308750004	1.39940703	1752
+898	1	293	1	40	cplex	1	1	972	1	4	6	0	1	0	974	974	0.0751380026	0.0278609991	0.0410699993	0.468636006	1.37990701	200
+899	1	294	1	40	cplex	0	1	1000	5	0	18	0	1	0	974	974	0.290407002	0.264012009	0.560293972	0.554512024	0.835416973	3498
+900	1	294	1	40	cplex	1	0	972	11	1	18	0	1	0	974	974	0.0793339983	0.378284007	0.396454006	0.383886009	0.84604001	8226
+901	1	294	1	40	cplex	1	1	972	7	2	18	0	1	0	974	974	0.111850001	0.149711996	0.326743007	0.331357986	0.853911996	6540
+902	1	294	1	40	cplex	0	0	1000	11	3	18	0	1	0	974	974	0.294353008	0.325511992	0.789707005	0.767800987	0.843019009	5256
+903	1	294	1	40	cplex	1	1	972	1	4	18	0	1	0	974	974	0.137376994	0.103744	0.0718490034	0.585371017	0.83177799	639
+904	1	295	1	40	cplex	0	1	1000	6	0	34	0	1	0	974	974	0.477519006	0.680725992	1.12228	0.975430012	0.956668019	6987
+905	1	295	1	40	cplex	1	0	972	11	1	34	0	1	0	974	974	0.199937999	0.303995013	0.729200006	0.643145978	0.923931003	15538
+906	1	295	1	40	cplex	1	1	972	7	2	34	0	1	0	974	974	0.193489	0.251836002	0.581978023	0.523805022	1.52725005	12354
+907	1	295	1	40	cplex	0	0	1000	11	3	34	0	1	0	974	974	0.513265014	0.62903899	1.50043797	1.26220405	0.895464003	9928
+908	1	295	1	40	cplex	1	1	972	1	4	34	34	0	0	974		0.210956007	0.672122002	1.19162202	12.4446421	0.125692993	1732
+909	1	296	1	40	cplex	0	1	1000	5	0	11	0	1	0	974	974	0.172848001	0.163023993	0.348784	0.395924985	0.959299982	2137
+910	1	296	1	40	cplex	1	0	972	11	1	11	0	1	0	974	974	0.0886600018	0.100897998	0.238814995	0.229301006	0.95223403	5027
+911	1	296	1	40	cplex	1	1	972	7	2	11	0	1	0	974	974	0.0849850029	0.0906189978	0.199495003	0.202390999	0.971172988	3997
+912	1	296	1	40	cplex	0	0	1000	11	3	11	0	1	0	974	974	0.130356997	0.380338013	0.484095991	0.478419989	0.949054003	3212
+913	1	296	1	40	cplex	1	1	972	1	4	11	11	0	0	974		0.173813	0.262807012	0.433349997	6.35735989	0.0947249979	591
+914	1	297	1	40	cplex	0	1	1000	5	0	8	0	1	0	974	974	0.123163	0.119883001	0.255962014	0.315717995	0.658042014	1554
+915	1	297	1	40	cplex	1	0	972	11	1	8	0	1	0	974	974	0.0770160034	0.0744630024	0.172852993	0.175384	0.645998001	3656
+916	1	297	1	40	cplex	1	1	972	7	2	8	0	1	0	974	974	0.0812800005	0.0714310035	0.149147004	0.152465999	0.829755008	2907
+917	1	297	1	40	cplex	0	0	1000	11	3	8	0	1	0	974	974	0.150222003	0.156599998	0.357870013	0.391912013	0.661670029	2336
+918	1	297	1	40	cplex	1	1	972	1	4	8	0	1	0	974	974	0.0803920031	0.0217920002	0.0333370008	0.279630005	0.659573019	284
+919	1	298	1	40	cplex	0	1	1000	5	0	6	0	1	0	974	974	0.138292998	0.0991109982	0.190188006	0.245470002	1.51798797	1166
+920	1	298	1	40	cplex	1	0	972	11	1	6	0	1	0	974	974	0.0631169975	0.0563360006	0.131053999	0.138903007	1.35306704	2742
+921	1	298	1	40	cplex	1	1	972	7	2	6	0	1	0	974	974	0.0638699979	0.0506480001	0.107322	0.119296998	1.36084497	2180
+922	1	298	1	40	cplex	0	0	1000	11	3	6	0	1	0	974	974	0.115183003	0.112420999	0.261546999	0.294101	1.37632596	1752
+923	1	298	1	40	cplex	1	1	972	1	4	6	0	1	0	974	974	0.0707330033	0.0276800003	0.0413310006	0.459899008	1.38371003	200
+924	1	299	1	40	cplex	0	1	1000	5	0	6	0	1	0	974	974	0.118045002	0.0889080018	0.184379995	0.243825004	1.38230097	1166
+925	1	299	1	40	cplex	1	0	972	11	1	6	0	1	0	974	974	0.0678159967	0.0591709986	0.130270004	0.149588004	1.34202504	2742
+926	1	299	1	40	cplex	1	1	972	7	2	6	0	1	0	974	974	0.0677549988	0.0510060005	0.106521003	0.120454997	1.34638405	2180
+927	1	299	1	40	cplex	0	0	1000	11	3	6	0	1	0	974	974	0.0880480036	0.263642997	0.26482299	0.314253986	1.37892306	1752
+928	1	299	1	40	cplex	1	1	972	1	4	6	0	1	0	974	974	0.0718740001	0.0262759998	0.0412539989	0.43116799	1.34265602	200
+929	1	300	1	40	cplex	0	1	1000	7	0	51	0	1	0	949	949	0.943310976	4.22217607	7.2741909	6.91244793	0.94085902	23087
+930	1	300	1	40	cplex	1	0	963	11	1	51	0	1	0	949	949	0.284363002	1.86396301	4.30833817	4.73318577	0.957647979	39995
+931	1	300	1	40	cplex	1	1	963	9	2	51	0	1	0	949	949	0.217457995	2.22087312	3.93728709	4.18480492	0.928851008	35793
+932	1	300	1	40	cplex	0	0	1000	11	3	51	0	1	0	949	949	0.652278006	3.70752597	8.52558422	8.13384533	0.923200011	27642
+933	1	300	1	40	cplex	1	1	963	1	4	51	51	0	0	949		4.12496424	24.1902103	43.8136063	296.788055	0.101682998	7495
+944	1	303	1	40	cplex	0	1	1000	7	0	48	0	1	0	949	949	0.631084025	2.97129393	6.97036982	6.24293089	0.962850988	21099
+945	1	303	1	40	cplex	1	0	966	11	1	48	0	1	0	949	949	0.468282998	1.87386596	4.50202513	4.45144081	0.952495992	34290
+946	1	303	1	40	cplex	1	1	966	8	2	48	0	1	0	949	949	0.432020992	1.63366997	3.94240594	3.9055891	0.948652029	29280
+947	1	303	1	40	cplex	0	0	1000	11	3	48	0	1	0	949	949	1.03493404	3.4375701	8.3066473	7.54812193	0.96973002	26016
+948	1	303	1	40	cplex	1	1	966	1	4	48	48	0	0	949		2.38509703	23.5005798	43.5686531	465.737061	0.100455999	9674
+949	1	304	1	40	cplex	0	1	1000	7	0	35	0	1	0	949	949	0.695809007	2.25657511	4.92745876	4.56461477	0.975039005	15384
+950	1	304	1	40	cplex	1	0	966	11	1	35	0	1	0	949	949	0.421157002	1.83424699	3.19144607	3.15733099	0.939229012	25003
+951	1	304	1	40	cplex	1	1	966	8	2	35	0	1	0	949	949	0.437417001	1.22210801	2.77956891	2.78490996	0.953541994	21350
+952	1	304	1	40	cplex	0	0	1000	11	3	35	0	1	0	949	949	0.793338001	2.45980906	5.90763617	5.46165514	1.040025	18970
+953	1	304	1	40	cplex	1	1	966	1	4	35	35	0	0	949		1.55570102	14.0143127	25.5486965	287.811737	0.127415001	6621
+964	1	307	1	40	cplex	0	1	1000	7	0	34	0	1	0	949	949	0.665717006	2.92401195	4.97990894	4.47653484	1.00995195	14945
+965	1	307	1	40	cplex	1	0	966	11	1	34	0	1	0	949	949	0.366750002	1.30552697	3.13908792	3.12782693	0.952584982	24288
+966	1	307	1	40	cplex	1	1	966	8	2	34	0	1	0	949	949	0.37706399	1.13829303	2.77380705	2.70291495	0.944685996	20740
+967	1	307	1	40	cplex	0	0	1000	11	3	34	0	1	0	949	949	0.70747298	2.37346792	5.77300882	5.41704416	0.944302022	18428
+968	1	307	1	40	cplex	1	1	966	1	4	34	34	0	0	949		1.65695	13.5142441	24.4687729	278.532288	0.0949060023	6435
+979	1	310	1	40	cplex	0	1	1000	8	0	34	0	1	0	899	899	1.02578497	8.88988495	20.7426529	34.7399826	0.898113012	32123
+980	1	310	1	40	cplex	1	0	955	11	1	34	0	1	0	899	899	0.517378986	6.64438581	16.1485691	25.9102459	0.85323298	44396
+981	1	310	1	40	cplex	1	1	955	9	2	34	0	1	0	899	899	0.53895402	6.31511497	15.1797609	27.2781525	0.88033098	41392
+982	1	310	1	40	cplex	0	0	1000	11	3	34	0	1	0	899	899	1.02139902	9.19249535	22.2913704	33.6009445	0.939293981	35428
+983	1	310	1	40	cplex	1	1	955	1	4	34	34	0	0	899		1.41331995	5.37978792	7.818398	51.1049461	0.101452999	2964
+984	1	311	1	40	cplex	0	1	1000	8	0	27	0	1	0	899	899	0.819658995	7.01395416	16.2214203	26.2922325	0.940632999	25093
+985	1	311	1	40	cplex	1	0	974	11	1	27	0	1	0	899	899	0.734031975	6.36703682	15.6728878	23.0092201	0.931294024	32986
+986	1	311	1	40	cplex	1	1	974	9	2	27	0	1	0	899	899	0.649658978	6.14411402	14.6052408	24.0165844	0.935624003	30240
+987	1	311	1	40	cplex	0	0	1000	11	3	27	0	1	0	899	899	0.838732004	7.36356115	17.7927513	25.4463902	0.898521006	28134
+988	1	311	1	40	cplex	1	1	974	1	4	27	27	0	0	899		1.68701303	7.78681278	14.0999508	96.9319992	0.0963850021	5600
+989	1	312	1	40	cplex	0	1	1000	8	0	17	0	1	0	899	899	0.579976976	4.62931824	10.1960669	15.6523638	0.985495985	16061
+990	1	312	1	40	cplex	1	0	955	11	1	17	0	1	0	899	899	0.399829	3.52702594	7.97459888	11.6558027	0.935577989	22198
+991	1	312	1	40	cplex	1	1	955	9	2	17	0	1	0	899	899	0.26691401	3.48352098	7.55380011	12.3301229	0.922497988	20696
+992	1	312	1	40	cplex	0	0	1000	11	3	17	0	1	0	899	899	0.627300978	5.00454998	11.0959978	15.525198	0.917236984	17714
+993	1	312	1	40	cplex	1	1	955	1	4	17	17	0	0	899		0.283360004	0.763284028	1.26910806	10.729887	0.103807002	1236
+994	1	313	1	40	cplex	0	1	1000	8	0	25	0	1	0	899	899	0.966844976	6.47886515	15.6391306	24.1716785	0.940847993	23693
+995	1	313	1	40	cplex	1	0	955	11	1	25	0	1	0	899	899	0.471763015	4.91847515	12.0078239	18.1881142	0.962595999	32644
+996	1	313	1	40	cplex	1	1	955	9	2	25	0	1	0	899	899	0.536293983	4.77359486	11.2543011	18.8986206	0.920623004	30435
+997	1	313	1	40	cplex	0	0	1000	11	3	25	0	1	0	899	899	0.811740994	6.91543818	16.371027	23.3772755	0.919223011	26050
+998	1	313	1	40	cplex	1	1	955	1	4	25	25	0	0	899		1.04464698	3.30845499	5.68042278	41.9378662	0.0994639993	2176
+999	1	314	1	40	cplex	0	1	1000	8	0	24	0	1	0	899	899	0.837399006	6.21844196	14.6600504	23.3162098	0.249879003	22240
+1000	1	314	1	40	cplex	1	0	974	11	1	24	0	1	0	899	899	0.591961026	5.86204386	13.9845352	20.6400299	0.228210002	29321
+1001	1	314	1	40	cplex	1	1	974	9	2	24	0	1	0	899	899	0.432166994	5.89064789	12.8514681	21.0506039	0.236313	26880
+1002	1	314	1	40	cplex	0	0	1000	11	3	24	0	1	0	899	899	0.760486007	6.7559371	15.7476196	22.6219254	0.225214005	25008
+1003	1	314	1	40	cplex	1	1	974	1	4	24	673	0	27.0416679	899	947	0.286745012	0.152739003	0.253439993	1.12485397	0.204062998	1008
+1004	1	315	1	40	cplex	0	1	1000	8	0	25	0	1	0	899	899	0.929745018	6.60921907	15.3220882	24.0749073	0.915431023	23167
+1005	1	315	1	40	cplex	1	0	974	11	1	25	0	1	0	899	899	0.463449001	6.01149082	14.3434849	21.2670403	0.888795018	30543
+1006	1	315	1	40	cplex	1	1	974	9	2	25	0	1	0	899	899	0.641201019	5.72876787	13.3684702	21.9440041	0.909506023	28000
+1007	1	315	1	40	cplex	0	0	1000	11	3	25	0	1	0	899	899	0.879543006	7.02012777	16.6176052	23.3106461	0.859400988	26050
+1008	1	315	1	40	cplex	1	1	974	1	4	25	25	0	0	899		1.61709297	2.64357805	4.760427	25.4846382	0.0965230018	2653
+1009	1	316	1	40	cplex	0	1	1000	8	0	15	0	1	0	899	899	0.563252985	3.81210208	9.06301498	13.6254387	0.258807987	13900
+1010	1	316	1	40	cplex	1	0	974	11	1	15	0	1	0	899	899	0.455412	3.57167912	8.76533508	12.2194691	0.198800996	18326
+1011	1	316	1	40	cplex	1	1	974	9	2	15	0	1	0	899	899	0.492657989	3.40233994	8.15411758	12.5485344	0.207174003	16800
+1012	1	316	1	40	cplex	0	0	1000	11	3	15	0	1	0	899	899	0.447459012	5.17615891	9.82336617	13.4248142	0.215650007	15630
+1013	1	316	1	40	cplex	1	1	974	1	4	15	15	0	0	899		0.547522008	0.58555001	1.04268897	7.56821203	0.084311001	1348
+1014	1	317	1	40	cplex	0	1	1000	8	0	26	0	1	0	899	899	0.821229994	6.61167383	15.9556627	25.0999527	0.286006987	24164
+1015	1	317	1	40	cplex	1	0	974	11	1	26	0	1	0	899	899	0.52433002	6.12758493	15.1158819	22.6049976	0.246956006	31765
+1016	1	317	1	40	cplex	1	1	974	9	2	26	0	1	0	899	899	0.434307009	5.97804213	14.0004158	23.20718	0.225861996	29120
+1017	1	317	1	40	cplex	0	0	1000	11	3	26	0	1	0	899	899	0.801020026	7.13535786	17.3237	24.5411873	0.254352003	27092
+1018	1	317	1	40	cplex	1	1	974	1	4	26	667	0	24.6538467	899	947	0.384191006	0.154042006	0.274688005	0.86559701	0.229523003	1092
+1019	1	318	1	40	cplex	0	1	1000	8	0	14	0	1	0	899	899	0.799274981	3.73811793	8.44364834	12.7996941	0.922316015	12973
+1020	1	318	1	40	cplex	1	0	974	11	1	14	0	1	0	899	899	0.30557099	3.4087069	8.08644104	11.3139172	1.010607	17104
+1021	1	318	1	40	cplex	1	1	974	9	2	14	0	1	0	899	899	0.515591979	3.25923109	7.43750286	11.5520229	0.94729799	15680
+1022	1	318	1	40	cplex	0	0	1000	11	3	14	0	1	0	899	899	0.353924006	3.88647389	9.21842861	12.4520397	0.961192012	14588
+1023	1	318	1	40	cplex	1	1	974	1	4	14	661	0	46.2142868	899	947	0.356848001	0.0888750032	0.145245999	0.473351002	0.228097007	588
+1024	1	321	1	40	cplex	0	1	1000	9	0	13	0	1	0	799	799	0.818459988	15.4888687	32.1799545	117.395966	0.359818995	24708
+1025	1	321	1	40	cplex	1	0	972	11	1	13	0	1	0	799	799	0.626182973	13.6853361	32.8851433	96.2416992	0.320724994	29784
+1026	1	321	1	40	cplex	1	1	972	9	2	13	0	1	0	799	799	0.714672029	13.3811188	30.7664871	116.346542	0.322088003	28038
+1027	1	321	1	40	cplex	0	0	1000	11	3	13	0	1	0	799	799	0.676272988	14.7501993	33.9313202	94.9298401	0.327100992	26546
+1028	1	321	1	40	cplex	1	1	972	1	4	13	699	0.461537987	53.2307701	799	845	0.598776996	1.72385097	3.067976	18.0737247	1.05397999	2476
+1029	1	322	1	40	cplex	0	1	1000	9	0	17	0	1	0	799	799	0.890967011	17.4926472	42.1616096	106.680466	0.955370009	32489
+1030	1	322	1	40	cplex	1	0	944	11	1	17	0	1	0	799	799	0.593034983	17.1988449	39.6476288	94.1187744	0.884810984	42934
+1031	1	322	1	40	cplex	1	1	944	9	2	17	0	1	0	799	799	0.703931987	16.4693394	38.2525597	100.122459	0.870427012	40755
+1032	1	322	1	40	cplex	0	0	1000	11	3	17	0	1	0	799	799	0.837098002	21.0426598	44.6740608	100.336906	0.859337986	34714
+1033	1	322	1	40	cplex	1	1	944	1	4	17	17	0	0	799		0.581709981	2.8231039	4.64664221	37.0505867	0.0935849994	2546
+1039	1	324	1	40	cplex	0	1	1000	9	0	13	0	1	0	799	799	0.709089994	13.7431364	32.0570335	79.4716568	0.934274018	24753
+1040	1	324	1	40	cplex	1	0	935	11	1	13	0	1	0	799	799	0.468353987	13.4283962	30.3341122	62.5791206	0.930805981	34336
+1041	1	324	1	40	cplex	1	1	935	10	2	13	0	1	0	799	799	0.506456017	12.1740284	28.1905155	74.7870255	0.923907995	32607
+1042	1	324	1	40	cplex	0	0	1000	11	3	13	0	1	0	799	799	0.655562997	14.6603518	33.9660378	67.0383682	0.93492198	26546
+1043	1	324	1	40	cplex	1	1	935	1	4	13	13	0	0	799		1.08268297	0.95350498	1.61107802	11.8157043	0.110060997	1350
+1152	1	332	1	40	cplex	0	1	1000	10	0	14	0	1	0	749	749	0.878094971	22.9344521	50.1848068	102.928864	0.920265019	35391
+1153	1	332	1	40	cplex	1	0	942	11	1	14	0	1	0	749	749	0.619104981	20.2308121	45.7031021	97.3669052	0.920287013	42930
+1154	1	332	1	40	cplex	1	1	942	11	2	14	0	1	0	749	749	0.761691988	20.7613926	46.0703583	97.8525314	0.896595001	42930
+1155	1	332	1	40	cplex	0	0	1000	11	3	14	0	1	0	749	749	0.900442004	22.1149311	49.6301613	101.965958	0.910924971	35588
+1156	1	333	1	40	cplex	0	1	1000	10	0	11	0	1	0	749	749	1.00912702	20.5511284	41.5787239	123.695374	0.898585021	27807
+1157	1	333	1	40	cplex	1	0	942	11	1	11	0	1	0	749	749	0.852775991	17.9820843	38.405777	122.494873	0.901634991	33731
+1158	1	333	1	40	cplex	1	1	942	11	2	11	0	1	0	749	749	0.573996007	18.0313129	37.299881	123.624634	0.902069986	33731
+1159	1	333	1	40	cplex	0	0	1000	11	3	11	0	1	0	749	749	0.857190013	18.8255138	39.9151154	124.470154	0.891246021	27962
+1160	1	334	1	40	cplex	0	1	1000	10	0	12	0	1	0	749	749	0.82684201	21.4374561	43.9139214	109.115807	0.922113001	30354
+1161	1	334	1	40	cplex	1	0	935	11	1	12	0	1	0	749	749	0.581193984	19.7817097	41.2068214	104.963913	0.906997979	37858
+1162	1	334	1	40	cplex	1	1	935	11	2	12	0	1	0	749	749	0.633840978	19.6820107	40.2255173	103.206314	0.901368022	37858
+1163	1	334	1	40	cplex	0	0	1000	11	3	12	0	1	0	749	749	0.787259996	20.6586666	44.1885338	108.995361	0.904965997	30504
+1164	1	335	1	40	cplex	0	1	1000	10	0	16	0	1	0	749	749	0.910148978	29.4549103	59.7229614	107.180794	0.474310011	40452
+1165	1	335	1	40	cplex	1	0	942	11	1	16	0	1	0	749	749	0.761259019	26.0723801	55.3494186	101.802071	0.457789987	49063
+1166	1	335	1	40	cplex	1	1	942	11	2	16	0	1	0	749	749	1.26523304	26.1656628	54.4991035	102.338112	0.483803004	49063
+1167	1	335	1	40	cplex	0	0	1000	11	3	16	0	1	0	749	749	1.16978395	27.5704651	59.5748978	107.59037	0.481956005	40672
+1168	1	336	1	40	cplex	0	1	1000	10	0	15	0	1	0	749	749	1.572649	27.0404568	56.7497215	111.837212	0.923887014	37938
+1169	1	336	1	40	cplex	1	0	942	11	1	15	0	1	0	749	749	0.693041027	24.5714989	52.3656998	105.667717	0.902444005	45996
+1170	1	336	1	40	cplex	1	1	942	11	2	15	0	1	0	749	749	0.782155991	24.7610283	51.1005592	105.405144	0.970143974	45996
+1171	1	336	1	40	cplex	0	0	1000	11	3	15	0	1	0	749	749	1.06714106	27.0338516	55.880722	111.323997	0.915223002	38130
+1172	1	337	1	40	cplex	0	1	1000	10	0	15	0	1	0	749	749	0.964128971	26.005146	55.4230537	142.77887	0.927139997	37919
+1173	1	337	1	40	cplex	1	0	942	11	1	15	0	1	0	749	749	0.730947018	24.7770195	51.8024597	139.168564	0.872179985	45996
+1174	1	337	1	40	cplex	1	1	942	11	2	15	0	1	0	749	749	0.670907021	24.4356804	52.146347	137.681839	0.875427008	45996
+1175	1	337	1	40	cplex	0	0	1000	11	3	15	0	1	0	749	749	0.818009019	26.5392818	55.8227425	142.552139	0.870802999	38130
+1176	1	338	1	40	cplex	0	1	1000	10	0	25	0	1	0	749	749	1.54078698	43.2588844	94.2585602	201.803848	0.338999003	63387
+1177	1	338	1	40	cplex	1	0	942	11	1	25	0	1	0	749	749	1.06664598	39.5642242	87.0028687	191.052719	0.340535998	76661
+1178	1	338	1	40	cplex	1	1	942	11	2	25	0	1	0	749	749	1.12569797	40.7228928	86.7185898	191.589523	0.340449005	76661
+1179	1	338	1	40	cplex	0	0	1000	11	3	25	0	1	0	749	749	1.49938405	43.2224312	94.0082474	201.577194	0.345968008	63550
+1180	1	339	1	40	cplex	0	1	1000	10	0	14	0	1	0	749	749	1.22093296	24.3995991	53.2619553	136.19165	0.897109985	35391
+1181	1	339	1	40	cplex	1	0	942	11	1	14	0	1	0	749	749	0.685577989	23.2522354	48.7531357	129.700485	0.896602988	42930
+1182	1	339	1	40	cplex	1	1	942	11	2	14	0	1	0	749	749	0.831677973	23.0141888	49.1526375	129.28537	0.88341099	42930
+1183	1	339	1	40	cplex	0	0	1000	11	3	14	0	1	0	749	749	0.906620979	24.9728737	52.4226799	135.090698	0.908526003	35588
+756	1	319	1	40	cplex	0	0	1000	11	3	20	0	1	0	899	899	0.516066015	5.73492384	13.7796526	18.1203957	0.950385988	20840
+757	1	319	1	40	cplex	1	1	974	1	4	20	666	0	32.2999992	899	947	0.466675997	0.125939995	0.208217993	0.571837008	0.216635004	840
+758	1	320	1	40	cplex	0	1	1000	9	0	7	0	1	0	799	799	0.544758976	8.03400612	17.540472	50.3744774	0.475400001	13295
+759	1	320	1	40	cplex	1	0	972	11	1	7	0	1	0	799	799	0.410957992	7.41764402	17.3906078	38.2638435	0.44253099	16037
+760	1	320	1	40	cplex	1	1	972	9	2	7	0	1	0	799	799	0.423972994	7.26999807	16.5630684	50.6047211	0.428007007	15097
+1064	1	265	1	40	cplex	0	1	500	10	0	6	0	1	0	299	299	0.309139013	7.15995312	13.807086	59.1844444	1.00812399	12080
+1065	1	265	1	40	cplex	1	0	482	11	1	6	0	1	0	299	299	0.219629005	6.46813488	13.1070375	58.1126022	0.96795398	13255
+1066	1	265	1	40	cplex	1	1	482	10	2	6	0	1	0	299	299	0.392201006	6.717659	13.3062067	58.1487045	0.934677005	13176
+1067	1	265	1	40	cplex	0	0	500	11	3	6	0	1	0	299	299	0.224457994	6.66219282	13.4115343	58.6403885	1.01014996	12252
+1068	1	276	1	40	cplex	0	1	500	10	0	14	0	1	0	249	249	0.547392011	22.6292496	48.8471603	105.197075	0.902687013	35556
+1069	1	276	1	40	cplex	1	0	437	11	1	14	0	1	0	249	249	0.382102013	20.5500164	44.9589195	102.093521	0.899837017	44303
+1070	1	276	1	40	cplex	1	1	437	11	2	14	0	1	0	249	249	0.42751199	21.1570435	45.0338593	100.981583	0.90160501	44303
+1071	1	276	1	40	cplex	0	0	500	11	3	14	0	1	0	249	249	0.486896008	22.7541962	49.3841743	106.043472	1.015908	35588
+1072	1	281	1	40	cplex	0	1	1000	3	0	5	0	1	0	999	999	0.00435200008	0.000243000002	0.000654999982	0.0061499998	0.903056979	90
+1073	1	281	1	40	cplex	1	0	993	11	1	5	0	1	0	999	999	0.0393429995	0.000365000014	0.00110300002	0.00581600005	0.909654975	210
+1074	1	281	1	40	cplex	1	1	993	3	2	5	0	1	0	999	999	0.0374229997	0.000257000007	0.000665	0.0052769999	0.936173022	90
+1075	1	281	1	40	cplex	0	0	1000	11	3	5	0	1	0	999	999	0.00405200012	0.000423999998	0.00109200005	0.00642800005	0.910818994	210
+1076	1	282	1	40	cplex	0	1	1000	3	0	15	0	1	0	999	999	0.00747000007	0.00056700001	0.00161000004	0.00736699998	0.896185994	270
+1077	1	282	1	40	cplex	1	0	993	11	1	15	0	1	0	999	999	0.0414649993	0.000898999977	0.00285600009	0.010241	0.893239975	630
+1078	1	282	1	40	cplex	1	1	993	3	2	15	0	1	0	999	999	0.041937001	0.000574000005	0.00161699997	0.00693099992	0.897598982	270
+1079	1	282	1	40	cplex	0	0	1000	11	3	15	0	1	0	999	999	0.00717400014	0.000877999992	0.00299099996	0.00948899984	0.901144981	630
+1080	1	283	1	40	cplex	0	1	1000	3	0	13	0	1	0	999	999	0.00881600007	0.000620000006	0.00147999998	0.00794100016	0.933978975	234
+1081	1	283	1	40	cplex	1	0	993	11	1	13	0	1	0	999	999	0.0427020006	0.000927000016	0.00272600004	0.00859099999	0.916364014	546
+1082	1	283	1	40	cplex	1	1	993	3	2	13	0	1	0	999	999	0.0421740003	0.000612000003	0.00145700003	0.00640599988	0.907130003	234
+1083	1	283	1	40	cplex	0	0	1000	11	3	13	0	1	0	999	999	0.0062859999	0.000768000027	0.00265099993	0.00740699982	0.90338999	546
+1084	1	284	1	40	cplex	0	1	1000	3	0	13	0	1	0	999	999	0.00903599989	0.000601999986	0.00148900005	0.00808999967	0.26741001	234
+1085	1	284	1	40	cplex	1	0	993	11	1	13	0	1	0	999	999	0.0403579995	0.000816999993	0.00275300001	0.00858500041	0.444032997	546
+1086	1	284	1	40	cplex	1	1	993	3	2	13	0	1	0	999	999	0.043122001	0.000616999983	0.00143299997	0.00718000019	0.245645002	234
+1087	1	284	1	40	cplex	0	0	1000	11	3	13	0	1	0	999	999	0.00901599973	0.000925	0.00266	0.00788800046	0.240701005	546
+1088	1	285	1	40	cplex	0	1	1000	3	0	5	0	1	0	999	999	0.00388800004	0.000296999991	0.000684999977	0.00623599999	0.94511199	90
+1089	1	285	1	40	cplex	1	0	993	11	1	5	0	1	0	999	999	0.0418820009	0.000367000001	0.001131	0.00640100008	0.922288001	210
+1090	1	285	1	40	cplex	1	1	993	3	2	5	0	1	0	999	999	0.0376759991	0.000269000011	0.000668000022	0.00563899986	0.945822001	90
+1091	1	285	1	40	cplex	0	0	1000	11	3	5	0	1	0	999	999	0.00287299999	0.000354999996	0.00112999999	0.00613899995	0.93780899	210
+1092	1	286	1	40	cplex	0	1	1000	3	0	5	0	1	0	999	999	0.00380400009	0.000277999992	0.000668999972	0.00565000018	0.921537995	90
+1093	1	286	1	40	cplex	1	0	993	11	1	5	0	1	0	999	999	0.0382749997	0.000404999999	0.00112200005	0.00539299985	0.934183002	210
+1094	1	286	1	40	cplex	1	1	993	3	2	5	0	1	0	999	999	0.0381520018	0.000283000001	0.000661000027	0.00573199987	0.922819972	90
+1095	1	286	1	40	cplex	0	0	1000	11	3	5	0	1	0	999	999	0.00387399993	0.00039999999	0.00112000003	0.00526099978	0.930543005	210
+1096	1	287	1	40	cplex	0	1	1000	3	0	21	0	1	0	999	999	0.00962600019	0.000759000017	0.00222499995	0.00907499995	0.859030008	378
+1097	1	287	1	40	cplex	1	0	993	11	1	21	0	1	0	999	999	0.0436119996	0.00118400005	0.00400400022	0.00930599961	0.857348979	882
+1098	1	287	1	40	cplex	1	1	993	3	2	21	0	1	0	999	999	0.0459059998	0.000882999972	0.00220300001	0.00916399993	1.45529497	378
+1099	1	287	1	40	cplex	0	0	1000	11	3	21	0	1	0	999	999	0.00980500039	0.00115799997	0.00400099996	0.0112180002	0.863834023	882
+1100	1	288	1	40	cplex	0	1	1000	3	0	9	0	1	0	999	999	0.00453000003	0.000350999995	0.00105900003	0.00704699988	0.903542995	162
+1101	1	288	1	40	cplex	1	0	993	11	1	9	0	1	0	999	999	0.174746007	0.00079000002	0.00271199993	0.00758800004	0.925583005	378
+1102	1	288	1	40	cplex	1	1	993	3	2	9	0	1	0	999	999	0.0384109989	0.00037200001	0.00104999996	0.00719599985	0.91744101	162
+806	1	329	1	40	cplex	0	0	1000	11	3	9	0	1	0	799	799	0.542542994	11.9751205	23.3137798	51.7786903	0.264939994	18378
+807	1	329	1	40	cplex	1	1	972	1	4	9	9	0	0	799		0.582129002	2.32251906	4.14437914	25.4141483	0.0923850015	2274
+808	1	330	1	40	cplex	0	1	1000	9	0	16	0	1	0	749	749	1.00811994	26.4863529	62.8035049	140.403748	0.950582027	38503
+809	1	330	1	40	cplex	1	0	942	11	1	16	0	1	0	749	749	0.72162497	25.5926495	61.6315727	115.504173	0.936657012	49063
+810	1	330	1	40	cplex	1	1	942	10	2	16	0	1	0	749	749	0.758455992	24.6661263	57.7335548	134.38121	0.920755982	46595
+811	1	330	1	40	cplex	0	0	1000	11	3	16	0	1	0	749	749	1.14047599	29.4293594	67.3136826	125.222488	0.899882972	40672
+812	1	330	1	40	cplex	1	1	942	1	4	16	16	0	0	749		1.04818404	8.14410114	13.2783012	130.019806	0.126578003	2249
+813	1	331	1	40	cplex	0	1	1000	9	0	14	0	1	0	749	749	1.37731194	24.459177	56.5562172	116.923859	0.943095982	33601
+814	1	331	1	40	cplex	1	0	942	11	1	14	0	1	0	749	749	0.69530201	30.4167652	56.0794525	98.8665085	0.912368	42930
+815	1	331	1	40	cplex	1	1	942	10	2	14	0	1	0	749	749	0.780928016	23.7359905	53.8261757	110.971146	0.914824009	40771
+1103	1	288	1	40	cplex	0	0	1000	11	3	9	0	1	0	999	999	0.00443399977	0.000533999992	0.00189399999	0.00741200009	0.914492011	378
+1104	1	289	1	40	cplex	0	1	1000	3	0	34	0	1	0	999	999	0.0218320005	0.00133899995	0.00350199989	0.0115080001	0.795162022	612
+1105	1	289	1	40	cplex	1	0	993	11	1	34	0	1	0	999	999	0.0559820011	0.00219899998	0.00622599991	0.0124620004	0.940684974	1428
+1106	1	289	1	40	cplex	1	1	993	3	2	34	0	1	0	999	999	0.0553250015	0.00130700006	0.00345900003	0.010946	0.791689992	612
+1107	1	289	1	40	cplex	0	0	1000	11	3	34	0	1	0	999	999	0.0217850003	0.00215699989	0.00626800023	0.0129079996	0.791612029	1428
+1108	1	301	1	40	cplex	0	1	1000	8	0	51	0	1	0	949	949	0.577884972	3.18070793	5.83380985	5.5465169	0.792568028	19195
+1109	1	301	1	40	cplex	1	0	963	11	1	51	0	1	0	949	949	0.221236005	1.66833305	3.3723731	3.367975	0.819069982	31368
+1110	1	301	1	40	cplex	1	1	963	10	2	51	0	1	0	949	949	0.680581987	1.50261104	3.24201488	3.22880197	0.877327025	29660
+1111	1	301	1	40	cplex	0	0	1000	11	3	51	0	1	0	949	949	0.879584014	3.36792898	6.57167578	6.1654768	0.86372298	21680
+1112	1	302	1	40	cplex	0	1	1000	8	0	51	0	1	0	949	949	0.444445014	3.32859707	5.73299503	5.56490421	0.76413101	19195
+826	1	279	1	40	cplex	1	1	437	10	2	27	0	1	0	249	249	0.604485989	43.1604195	89.3659668	397.676727	0.833642006	81146
+827	1	279	1	40	cplex	0	0	500	11	3	27	0	1	0	249	249	0.764724016	46.9408035	100.05323	314.964325	0.823045015	68634
+828	1	279	1	40	cplex	1	1	437	1	4	27	27	0	0	249		1.26711202	17.1612968	27.5617447	357.607147	0.0926489979	4959
+829	1	280	1	40	cplex	0	1	1000	2	0	13	0	1	0	999	999	0.00752299977	0.000434999994	0.00127500005	0.00846900046	0.958024025	195
+830	1	280	1	40	cplex	1	0	993	11	1	13	0	1	0	999	999	0.0429340005	0.00076700002	0.00262199994	0.00920400023	0.934888005	546
+1113	1	302	1	40	cplex	1	0	963	11	1	51	0	1	0	949	949	0.434408009	1.47133005	3.4032681	3.36916804	0.756097019	31368
+1114	1	302	1	40	cplex	1	1	963	10	2	51	0	1	0	949	949	0.329881012	1.46943796	3.15736699	3.24474192	0.775161982	29660
+1115	1	302	1	40	cplex	0	0	1000	11	3	51	0	1	0	949	949	0.430204988	3.38279891	6.45963812	6.22219181	0.781508982	21680
+1116	1	305	1	40	cplex	0	1	1000	8	0	51	0	1	0	949	949	0.550319016	3.23193097	5.78361893	5.54146004	0.782198012	19195
+1117	1	305	1	40	cplex	1	0	963	11	1	51	0	1	0	949	949	0.172548994	1.47012901	3.354038	3.43926692	0.812261999	31368
+1118	1	305	1	40	cplex	1	1	963	10	2	51	0	1	0	949	949	0.456043988	1.42014301	3.24335194	3.20437098	0.816582978	29660
+1119	1	305	1	40	cplex	0	0	1000	11	3	51	0	1	0	949	949	0.877781987	3.39664006	6.54465389	6.23386812	0.781094015	21680
+1120	1	306	1	40	cplex	0	1	1000	8	0	51	0	1	0	949	949	0.70847702	2.62638593	5.64496613	5.48894119	0.755854011	19195
+1121	1	306	1	40	cplex	1	0	963	11	1	51	0	1	0	949	949	0.284429014	1.43847299	3.21690989	3.36359811	0.784766972	31368
+1122	1	306	1	40	cplex	1	1	963	10	2	51	0	1	0	949	949	0.252056986	1.38250101	3.05876589	3.20858908	1.32982302	29660
+1123	1	306	1	40	cplex	0	0	1000	11	3	51	0	1	0	949	949	0.747364998	2.77136397	6.27344418	6.12607813	0.795382977	21680
+1124	1	308	1	40	cplex	0	1	1000	8	0	51	0	1	0	949	949	0.773975015	2.54620695	5.69601202	5.5771699	0.756471992	19195
+1125	1	308	1	40	cplex	1	0	963	11	1	51	0	1	0	949	949	0.317238986	1.38827896	3.33586407	3.36045194	0.784174025	31368
+1126	1	308	1	40	cplex	1	1	963	10	2	51	0	1	0	949	949	0.276540011	1.49360096	3.127388	3.18895507	0.786746979	29660
+1127	1	308	1	40	cplex	0	0	1000	11	3	51	0	1	0	949	949	0.586398005	3.24802089	6.3800478	6.18170691	0.774012983	21680
+1128	1	309	1	40	cplex	0	1	1000	8	0	51	0	1	0	949	949	0.827799976	2.58913493	5.61878586	5.5158391	0.772823989	19195
+1129	1	309	1	40	cplex	1	0	963	11	1	51	0	1	0	949	949	0.355201989	1.97172105	3.25704002	3.38007689	0.770892978	31368
+1130	1	309	1	40	cplex	1	1	963	10	2	51	0	1	0	949	949	0.290233999	1.38153505	3.1163981	3.19590902	0.773627996	29660
+1131	1	309	1	40	cplex	0	0	1000	11	3	51	0	1	0	949	949	0.636927009	2.84893894	6.41276979	6.1857338	0.779954016	21680
+1132	1	323	1	40	cplex	0	1	1000	10	0	13	0	1	0	799	799	0.83840102	14.438467	30.5665188	67.6936646	0.917329013	26088
+1133	1	323	1	40	cplex	1	0	935	11	1	13	0	1	0	799	799	0.508563995	11.749896	26.3662796	63.0263481	0.907890975	34336
+1134	1	323	1	40	cplex	1	1	935	11	2	13	0	1	0	799	799	0.496656001	12.0367098	26.885788	63.5050888	0.935488999	34336
+1135	1	323	1	40	cplex	0	0	1000	11	3	13	0	1	0	799	799	0.676685989	14.9684181	32.2454987	66.1447678	0.957334995	26546
+1136	1	325	1	40	cplex	0	1	1000	10	0	14	0	1	0	799	799	0.854871988	15.4894133	32.8376694	68.5631409	0.920661986	28057
+1137	1	325	1	40	cplex	1	0	971	11	1	14	0	1	0	799	799	0.684495986	16.3341904	33.5197144	68.0659637	0.981902003	32234
+1138	1	325	1	40	cplex	1	1	971	10	2	14	0	1	0	799	799	0.734073997	14.8300428	32.1641426	68.1278076	0.921315014	31973
+1139	1	325	1	40	cplex	0	0	1000	11	3	14	0	1	0	799	799	0.737362981	15.6525555	33.8073273	69.5438995	0.899902999	28588
+1140	1	326	1	40	cplex	0	1	1000	10	0	7	0	1	0	799	799	0.547625005	7.5536499	16.5069618	31.7639732	0.560159981	14091
+1141	1	326	1	40	cplex	1	0	955	11	1	7	0	1	0	799	799	0.366939992	7.05403423	15.3112164	31.3220444	0.520555019	16845
+1142	1	326	1	40	cplex	1	1	955	10	2	7	0	1	0	799	799	0.405160993	8.33861828	15.9708557	30.6835136	0.529785991	16787
+1143	1	326	1	40	cplex	0	0	1000	11	3	7	0	1	0	799	799	0.466744006	8.76799297	17.4808922	31.6379185	0.531975985	14294
+1144	1	327	1	40	cplex	0	1	1000	10	0	17	0	1	0	799	799	1.11419201	19.3725662	41.5835381	100.330132	0.854758024	34237
+1145	1	327	1	40	cplex	1	0	944	11	1	17	0	1	0	799	799	0.601705015	16.8873177	37.2105751	95.9448776	0.861827016	42934
+1146	1	327	1	40	cplex	1	1	944	10	2	17	0	1	0	799	799	0.567273974	18.0968304	37.2780914	95.082283	0.860387027	42917
+1147	1	327	1	40	cplex	0	0	1000	11	3	17	0	1	0	799	799	0.855004013	18.1742706	41.4427223	100.703064	0.881685019	34714
+1148	1	328	1	40	cplex	0	1	1000	10	0	12	0	1	0	799	799	0.803960025	13.692193	29.146244	58.866394	0.326131999	24023
+1149	1	328	1	40	cplex	1	0	972	11	1	12	0	1	0	799	799	0.587481976	12.7820387	28.3866024	58.1909256	0.323799014	27493
+1150	1	328	1	40	cplex	1	1	972	10	2	12	0	1	0	799	799	0.574370027	13.2846584	28.5490742	57.7303619	0.373335004	27266
+1151	1	328	1	40	cplex	0	0	1000	11	3	12	0	1	0	799	799	0.817312002	13.4384584	29.7538052	59.8872337	0.337576985	24504
+1	2	340	1	40	cplex	0	1	50	2	0	47	0	1	0	49	49	0.0191029999	0.0266159996	0.0238329992	0.0336240008	1.05439603	705
+2	2	340	1	40	cplex	1	0	41	11	1	47	0	1	0	49	49	0.00549199991	0.00830299966	0.0165260006	0.0158019997	0.892283976	1974
+3	2	340	1	40	cplex	1	1	41	2	2	47	0	1	0	49	49	0.00291600008	0.00348900002	0.00550100021	0.0104069998	0.869149983	705
+4	2	340	1	40	cplex	0	0	50	11	3	47	0	1	0	49	49	0.00156700006	0.00455000019	0.00916299969	0.0150269996	0.875935018	1974
+5	2	340	1	40	cplex	1	1	41	1	4	47	0	1	0	49	49	0.00296399998	0.00353999995	0.00645000022	0.0237770006	0.813660979	399
+6	2	341	1	40	cplex	0	1	50	2	0	57	0	1	0	49	49	0.00201599998	0.00360599998	0.00553999981	0.0123389997	0.977661014	855
+7	2	341	1	40	cplex	1	0	41	11	1	57	0	1	0	49	49	0.00243999995	0.00521600014	0.0109970002	0.0166330002	0.88953203	2394
+8	2	341	1	40	cplex	1	1	41	2	2	57	0	1	0	49	49	0.00240899995	0.00239400007	0.00485200016	0.0107209999	0.925844014	855
+9	2	341	1	40	cplex	0	0	50	11	3	57	0	1	0	49	49	0.00168600003	0.00315400003	0.0100729996	0.0170990005	0.897432983	2394
+10	2	341	1	40	cplex	1	1	41	1	4	57	0	1	0	49	49	0.00236500008	0.00270999991	0.00624899985	0.0270479992	0.908142984	484
+11	2	342	1	40	cplex	0	1	50	2	0	27	0	1	0	49	49	0.00101300003	0.000964000006	0.00240499992	0.00745500019	0.355879992	405
+12	2	342	1	40	cplex	1	0	41	11	1	27	0	1	0	49	49	0.00159200002	0.00145900005	0.00495899981	0.0104320003	0.351842999	1134
+13	2	342	1	40	cplex	1	1	41	2	2	27	0	1	0	49	49	0.00157800002	0.000864000001	0.00241299998	0.00702399993	0.400323987	405
+14	2	342	1	40	cplex	0	0	50	11	3	27	0	1	0	49	49	0.00089700002	0.00146199996	0.00498599978	0.0104390001	0.363950014	1134
+15	2	342	1	40	cplex	1	1	41	1	4	27	0	1	0	49	49	0.00155499997	0.001193	0.00315500004	0.0174139999	0.353419989	229
+16	2	343	1	40	cplex	0	1	50	2	0	36	0	1	0	49	49	0.00114399998	0.00155799999	0.00317299995	0.0100039998	0.961856008	540
+17	2	343	1	40	cplex	1	0	41	11	1	36	0	1	0	49	49	0.00170300005	0.002416	0.00647599995	0.0123349996	0.984453976	1512
+18	2	343	1	40	cplex	1	1	41	2	2	36	0	1	0	49	49	0.00170899997	0.00119900005	0.00317499996	0.00804299954	0.923233986	540
+19	2	343	1	40	cplex	0	0	50	11	3	36	0	1	0	49	49	0.00108700001	0.00195299997	0.00659700017	0.0127879996	0.937968016	1512
+20	2	343	1	40	cplex	1	1	41	1	4	36	0	1	0	49	49	0.00182300003	0.00138100004	0.00401300006	0.0210670009	0.934988976	306
+21	2	344	1	40	cplex	0	1	50	2	0	36	0	1	0	49	49	0.00116500002	0.000982000027	0.00308599998	0.00937199965	0.988021016	540
+22	2	344	1	40	cplex	1	0	41	11	1	36	0	1	0	49	49	0.00167899998	0.001712	0.00642800005	0.0122790001	0.916971982	1512
+23	2	344	1	40	cplex	1	1	41	2	2	36	0	1	0	49	49	0.00176599994	0.00110300002	0.00311599998	0.0088109998	0.911787987	540
+24	2	344	1	40	cplex	0	0	50	11	3	36	0	1	0	49	49	0.00112799997	0.00169599999	0.00644000014	0.0123920003	0.921083987	1512
+25	2	344	1	40	cplex	1	1	41	1	4	36	0	1	0	49	49	0.00153000001	0.00173400005	0.00415599998	0.0218519997	0.93879199	306
+26	2	345	1	40	cplex	0	1	50	2	0	58	0	1	0	49	49	0.00173500006	0.00159600005	0.00498200022	0.0115210004	0.817993999	870
+27	2	345	1	40	cplex	1	0	41	11	1	58	0	1	0	49	49	0.00197799993	0.00271799997	0.0102690002	0.0173429996	0.828083992	2436
+28	2	345	1	40	cplex	1	1	41	2	2	58	0	1	0	49	49	0.00201299996	0.00156100001	0.00476900022	0.0114890002	0.83168	870
+29	2	345	1	40	cplex	0	0	50	11	3	58	0	1	0	49	49	0.00161799998	0.00271599996	0.0103150001	0.0181339998	0.82774502	2436
+30	2	345	1	40	cplex	1	1	41	1	4	58	0	1	0	49	49	0.00197899994	0.00210499996	0.00623100018	0.0264870003	0.829042971	493
+31	2	346	1	40	cplex	0	1	50	2	0	39	0	1	0	49	49	0.00123399997	0.00106299995	0.00340300007	0.00893099979	0.228391007	585
+32	2	346	1	40	cplex	1	0	41	11	1	39	0	1	0	49	49	0.00147200003	0.00199100003	0.00715500023	0.014091	0.645524979	1638
+33	2	346	1	40	cplex	1	1	41	2	2	39	0	1	0	49	49	0.00136899995	0.00103599997	0.00344999996	0.00974200014	0.234237	585
+34	2	346	1	40	cplex	0	0	50	11	3	39	0	1	0	49	49	0.001208	0.0019749999	0.00711200014	0.013549	0.226333007	1638
+35	2	346	1	40	cplex	1	1	41	1	4	39	0	1	0	49	49	0.00134199997	0.001361	0.00437999982	0.0226240009	0.225281	331
+36	2	347	1	40	cplex	0	1	50	2	0	39	0	1	0	49	49	0.00133799994	0.00101699994	0.00362899993	0.0116450004	0.250732005	585
+37	2	347	1	40	cplex	1	0	41	11	1	39	0	1	0	49	49	0.00132799998	0.001927	0.00715500023	0.0138839995	0.251511991	1638
+38	2	347	1	40	cplex	1	1	41	2	2	39	0	1	0	49	49	0.00137399998	0.00106899999	0.00349200005	0.0089370003	0.252763987	585
+39	2	347	1	40	cplex	0	0	50	11	3	39	0	1	0	49	49	0.00116099999	0.00186700001	0.00731799984	0.0131470002	0.332037985	1638
+40	2	347	1	40	cplex	1	1	41	1	4	39	0	1	0	49	49	0.00135399995	0.00137800002	0.00438900013	0.0228719991	0.248594999	331
+41	2	348	1	40	cplex	0	1	50	2	0	50	0	1	0	49	49	0.001406	0.001345	0.00432700012	0.0107810004	0.629813015	750
+42	2	348	1	40	cplex	1	0	41	11	1	50	0	1	0	49	49	0.00195199996	0.00306500006	0.00931099989	0.0146840001	0.614540994	2100
+43	2	348	1	40	cplex	1	1	41	2	2	50	0	1	0	49	49	0.00193799997	0.00162700005	0.00448600017	0.0103979995	0.610647023	750
+44	2	348	1	40	cplex	0	0	50	11	3	50	0	1	0	49	49	0.00103100005	0.00287099998	0.00915700011	0.0159280002	0.61342299	2100
+45	2	348	1	40	cplex	1	1	41	1	4	50	0	1	0	49	49	0.00177900004	0.00204699999	0.00556199998	0.0255590007	0.608386993	425
+46	2	349	1	40	cplex	0	1	50	2	0	43	0	1	0	49	49	0.00153000001	0.00117900001	0.00388800004	0.00995699968	0.785170019	645
+47	2	349	1	40	cplex	1	0	41	11	1	43	0	1	0	49	49	0.00175599998	0.00257900008	0.00783499982	0.0143759996	0.777280986	1806
+48	2	349	1	40	cplex	1	1	41	2	2	43	0	1	0	49	49	0.00143900001	0.001131	0.00419599982	0.00962899998	0.869382977	645
+49	2	349	1	40	cplex	0	0	50	11	3	43	0	1	0	49	49	0.00144100003	0.00253199995	0.0078800004	0.0141500002	0.791652977	1806
+50	2	349	1	40	cplex	1	1	41	1	4	43	0	1	0	49	49	0.00164100004	0.001881	0.00482799998	0.0233490001	0.778401971	365
+51	2	350	1	40	cplex	0	1	50	6	0	41	0	1	0	24	24	0.0434390008	0.767547011	1.35244703	1.24188697	0.842715979	8882
+52	2	350	1	40	cplex	1	0	25	11	1	41	0	1	0	24	24	0.00686499989	0.222352996	0.485785991	0.543047011	0.830125988	20582
+53	2	350	1	40	cplex	1	1	25	9	2	41	0	1	0	24	24	0.00575600006	0.193607002	0.4102	0.511218011	0.930444002	18450
+54	2	350	1	40	cplex	0	0	50	11	3	41	0	1	0	24	24	0.0454499982	0.807889998	1.79713202	1.58419299	0.843837023	11972
+55	2	350	1	40	cplex	1	1	25	1	4	41	41	0	0	24		0.00661899988	0.159696996	0.228121996	2.22526407	0.0790849999	1670
+56	2	351	1	40	cplex	0	1	50	5	0	29	0	1	0	24	24	0.0288309995	0.440023005	0.876112998	0.849729002	0.456613988	5775
+57	2	351	1	40	cplex	1	0	25	11	1	29	0	1	0	24	24	0.00377699989	0.234024003	0.338802993	0.387501001	0.44126901	14558
+58	2	351	1	40	cplex	1	1	25	9	2	29	0	1	0	24	24	0.00591799989	0.157215998	0.317171007	0.354460001	0.434287995	13050
+59	2	351	1	40	cplex	0	0	50	11	3	29	0	1	0	24	24	0.0308090001	0.535565019	1.24048901	1.18498302	0.441390991	8468
+60	2	351	1	40	cplex	1	1	25	1	4	29	0	1	0	24	24	0.00460499991	0.0938329995	0.164529994	2.21841192	0.557385981	1279
+61	2	352	1	40	cplex	0	1	50	6	0	32	0	1	0	24	24	0.0391280018	0.515390992	1.051368	0.953881979	0.820587993	6594
+62	2	352	1	40	cplex	1	0	25	11	1	32	0	1	0	24	24	0.00438599987	0.150959998	0.355758995	0.432884991	0.828743994	16064
+63	2	352	1	40	cplex	1	1	25	9	2	32	0	1	0	24	24	0.00495499978	0.144955993	0.323740005	0.401354015	0.821502984	14400
+64	2	352	1	40	cplex	0	0	50	11	3	32	0	1	0	24	24	0.0235559996	0.81653899	1.40477705	1.30104196	0.825161994	9344
+65	2	352	1	40	cplex	1	1	25	1	4	32	44	0.03125	0.40625	24	23	0.00661000004	0.100759	0.163525999	1.62014198	0.468176007	1399
+66	2	353	1	40	cplex	0	1	50	5	0	22	0	1	0	24	24	0.0299779996	0.36302501	0.735341012	0.699422002	0.896191001	4381
+67	2	353	1	40	cplex	1	0	25	11	1	22	0	1	0	24	24	0.00426399987	0.127211004	0.270435005	0.301607996	0.908532977	11044
+68	2	353	1	40	cplex	1	1	25	9	2	22	0	1	0	24	24	0.00479499996	0.120236002	0.248396993	0.275092989	0.946307003	9900
+69	2	353	1	40	cplex	0	0	50	11	3	22	0	1	0	24	24	0.0212629996	0.399100989	0.948328972	0.967499018	0.889584005	6424
+70	2	353	1	40	cplex	1	1	25	1	4	22	0	1	0	24	24	0.00386700011	0.0725760013	0.128382996	1.80972004	0.940973997	970
+71	2	354	1	40	cplex	0	1	50	6	0	33	0	1	0	24	24	0.038364999	0.551092029	1.14149201	1.04748404	0.800190985	7149
+72	2	354	1	40	cplex	1	0	25	11	1	33	0	1	0	24	24	0.00445399992	0.156411007	0.369641989	0.453280985	0.801846981	16566
+73	2	354	1	40	cplex	1	1	25	9	2	33	0	1	0	24	24	0.00619800016	0.179012001	0.365603	0.417573988	0.798874974	14850
+74	2	354	1	40	cplex	0	0	50	11	3	33	0	1	0	24	24	0.0291080009	0.596662998	1.40491498	1.33238304	0.801186025	9636
+75	2	354	1	40	cplex	1	1	25	1	4	33	33	0	0	24		0.0213690009	0.802179992	0.690533996	4.43697786	0	1195
+76	2	355	1	40	cplex	0	1	50	6	0	25	0	1	0	24	24	0.0316849984	0.403609008	0.831426024	0.786448002	0.854017019	5110
+77	2	355	1	40	cplex	1	0	25	11	1	25	0	1	0	24	24	0.00372699997	0.119264998	0.287597001	0.337781012	0.854480982	12550
+78	2	355	1	40	cplex	1	1	25	9	2	25	0	1	0	24	24	0.00398499984	0.114657	0.26069501	0.309208006	0.865236998	11250
+79	2	355	1	40	cplex	0	0	50	11	3	25	0	1	0	24	24	0.0236300007	0.517077982	1.09137404	1.06212997	0.883081973	7300
+80	2	355	1	40	cplex	1	1	25	1	4	25	0	1	0	24	24	0.00386400009	0.0877880007	0.142914996	1.939726	0.955105007	1056
+81	2	356	1	40	cplex	0	1	50	5	0	28	0	1	0	24	24	0.0255980007	0.390807986	0.860509992	0.895011008	0.88438499	5428
+82	2	356	1	40	cplex	1	0	25	11	1	28	0	1	0	24	24	0.00498099998	0.159669995	0.344617993	0.391790986	0.901014984	14056
+83	2	356	1	40	cplex	1	1	25	9	2	28	0	1	0	24	24	0.00529199978	0.156035006	0.318241	0.390480995	0.886986971	12600
+84	2	356	1	40	cplex	0	0	50	11	3	28	0	1	0	24	24	0.0282129999	0.624337018	1.24497294	1.14826095	0.894897997	8176
+85	2	356	1	40	cplex	1	1	25	1	4	28	0	1	0	24	24	0.00436699996	0.0856710002	0.143131003	2.16233897	0.888269007	1235
+86	2	357	1	40	cplex	0	1	50	6	0	33	0	1	0	24	24	0.0387610011	0.541006029	1.10879898	1.01243699	0.795445979	6631
+87	2	357	1	40	cplex	1	0	25	11	1	33	0	1	0	24	24	0.00447200006	0.157985002	0.377036989	0.446177989	0.789411008	16566
+88	2	357	1	40	cplex	1	1	25	9	2	33	0	1	0	24	24	0.00459600007	0.162823007	0.355904013	0.427237004	0.802341998	14850
+89	2	357	1	40	cplex	0	0	50	11	3	33	0	1	0	24	24	0.0375190005	0.689517021	1.52610004	1.39422798	1.40917802	9636
+90	2	357	1	40	cplex	1	1	25	1	4	33	33	0	0	24		0.0232490003	0.846134007	1.37776899	7.07525396	0	2454
+91	2	358	1	40	cplex	0	1	50	5	0	29	0	1	0	24	24	0.0292070005	0.415479988	0.92285198	0.904721975	0.880111992	5775
+92	2	358	1	40	cplex	1	0	25	11	1	29	0	1	0	24	24	0.00510099996	0.165590003	0.360610992	0.393795013	0.890897989	14558
+93	2	358	1	40	cplex	1	1	25	9	2	29	0	1	0	24	24	0.00530599989	0.157969996	0.328981012	0.36074999	0.895844996	13050
+94	2	358	1	40	cplex	0	0	50	11	3	29	0	1	0	24	24	0.0303540006	0.625743985	1.32914805	1.267277	0.87945199	8468
+95	2	358	1	40	cplex	1	1	25	1	4	29	0	1	0	24	24	0.00418699998	0.0953430012	0.173051998	2.44460702	0.885233998	1279
+96	2	359	1	40	cplex	0	1	50	5	0	23	0	1	0	24	24	0.0224389993	0.324773997	0.726719022	0.78363502	0.879401028	4459
+97	2	359	1	40	cplex	1	0	25	11	1	23	0	1	0	24	24	0.00430299994	0.131183997	0.29074201	0.309536994	0.885577977	11546
+98	2	359	1	40	cplex	1	1	25	9	2	23	0	1	0	24	24	0.00454000011	0.126255006	0.265464008	0.286725014	0.884221971	10350
+99	2	359	1	40	cplex	0	0	50	11	3	23	0	1	0	24	24	0.0259140003	0.566784024	1.059986	0.965619981	0.873664021	6716
+100	2	359	1	40	cplex	1	1	25	1	4	23	0	1	0	24	24	0.00378899998	0.0646319985	0.115189001	1.87222397	0.866204023	1015
+101	2	360	1	40	cplex	0	1	100	2	0	25	0	1	0	99	99	0.00188899995	0.000859999971	0.00234199991	0.00885699969	0.345488995	375
+102	2	360	1	40	cplex	1	0	87	11	1	25	0	1	0	99	99	0.00221100007	0.00143599999	0.00510999979	0.0101739997	0.341529012	1050
+103	2	360	1	40	cplex	1	1	87	2	2	25	0	1	0	99	99	0.002201	0.000868999981	0.00236400007	0.021714	0.367089003	375
+104	2	360	1	40	cplex	0	0	100	11	3	25	0	1	0	99	99	0.00174700003	0.195641994	0.00527400011	0.0107770003	0.336086005	1050
+105	2	360	1	40	cplex	1	1	87	1	4	25	0	1	0	99	99	0.00190399995	0.000910000002	0.00292899995	0.0200769994	0.328848004	212
+106	2	361	1	40	cplex	0	1	100	2	0	25	0	1	0	99	99	0.00147500006	0.00069299998	0.002354	0.0167309996	0.936199009	375
+107	2	361	1	40	cplex	1	0	87	11	1	25	0	1	0	99	99	0.00220700004	0.00149599998	0.0050499998	0.0106220003	0.953832984	1050
+108	2	361	1	40	cplex	1	1	87	2	2	25	0	1	0	99	99	0.0022150001	0.000830999983	0.00233800011	0.00851199962	0.953606009	375
+109	2	361	1	40	cplex	0	0	100	11	3	25	0	1	0	99	99	0.00176500005	0.00149699999	0.00508099981	0.0280530006	0.972334027	1050
+110	2	361	1	40	cplex	1	1	87	1	4	25	0	1	0	99	99	0.00222099992	0.00112000003	0.00298100011	0.0191210005	0.963723004	212
+111	2	362	1	40	cplex	0	1	100	2	0	27	0	1	0	99	99	0.00163499999	0.000724999991	0.00253099995	0.0105360001	0.956938028	405
+112	2	362	1	40	cplex	1	0	87	11	1	27	0	1	0	99	99	0.00193300005	0.00127899996	0.00546400016	0.011655	0.955067992	1134
+113	2	362	1	40	cplex	1	1	87	2	2	27	0	1	0	99	99	0.00193100004	0.000757000002	0.00252599991	0.00920499954	0.957709014	405
+114	2	362	1	40	cplex	0	0	100	11	3	27	0	1	0	99	99	0.00158299995	0.00160199997	0.00544600002	0.0116760004	0.967835009	1134
+115	2	362	1	40	cplex	1	1	87	1	4	27	0	1	0	99	99	0.00236000004	0.00123099994	0.00320699997	0.0261059999	0.996390998	229
+116	2	363	1	40	cplex	0	1	100	2	0	33	0	1	0	99	99	0.00237099989	0.00108399999	0.00303000002	0.0237269998	0.676910996	495
+117	2	363	1	40	cplex	1	0	87	11	1	33	0	1	0	99	99	0.00284800003	0.00193400006	0.00658100005	0.0134659996	0.748793006	1386
+118	2	363	1	40	cplex	1	1	87	2	2	33	0	1	0	99	99	0.00230200007	0.000890999974	0.00301299989	0.00955099985	0.661076009	495
+119	2	363	1	40	cplex	0	0	100	11	3	33	0	1	0	99	99	0.00168900006	0.00154800003	0.00657099998	0.0130129997	0.667337	1386
+120	2	363	1	40	cplex	1	1	87	1	4	33	0	1	0	99	99	0.0021269999	0.00118400005	0.00382400001	0.0432340018	0.675523996	280
+121	2	364	1	40	cplex	0	1	100	2	0	29	0	1	0	99	99	0.0020010001	0.000969999994	0.00271399994	0.010117	0.211236998	435
+122	2	364	1	40	cplex	1	0	87	11	1	29	0	1	0	99	99	0.00235700002	0.00171999994	0.00585199986	0.0202799998	0.242046997	1218
+123	2	364	1	40	cplex	1	1	87	2	2	29	0	1	0	99	99	0.00242800009	0.00102199998	0.00276799989	0.0160569996	0.217590004	435
+124	2	364	1	40	cplex	0	0	100	11	3	29	0	1	0	99	99	0.0019739999	0.00174099999	0.00586399995	0.0120219998	0.212390006	1218
+125	2	364	1	40	cplex	1	1	87	1	4	29	0	1	0	99	99	0.00237899995	0.00133500004	0.00351099996	0.0347950011	0.188879997	246
+126	2	365	1	40	cplex	0	1	100	2	0	33	0	1	0	99	99	0.00232099998	0.00107700005	0.0031059999	0.00974799972	0.808079004	495
+127	2	365	1	40	cplex	1	0	87	11	1	33	0	1	0	99	99	0.00276799989	0.00195399998	0.00658500008	0.0127490005	0.832134008	1386
+128	2	365	1	40	cplex	1	1	87	2	2	33	0	1	0	99	99	0.00271999999	0.001086	0.00303700007	0.0173589997	0.951875985	495
+129	2	365	1	40	cplex	0	0	100	11	3	33	0	1	0	99	99	0.00171300001	0.00156100001	0.00656699995	0.0128910001	0.812656999	1386
+130	2	365	1	40	cplex	1	1	87	1	4	33	0	1	0	99	99	0.00219199993	0.001223	0.00380400009	0.0266290009	0.816901028	280
+131	2	366	1	40	cplex	0	1	100	2	0	33	0	1	0	99	99	0.00171400001	0.000891999982	0.00301999995	0.0108399997	0.826216996	495
+132	2	366	1	40	cplex	1	0	87	11	1	33	0	1	0	99	99	0.00211100001	0.00158299995	0.00652700011	0.0167110004	0.809777021	1386
+133	2	366	1	40	cplex	1	1	87	2	2	33	0	1	0	99	99	0.00260000001	0.00110700005	0.0030400001	0.018228	0.841642976	495
+134	2	366	1	40	cplex	0	0	100	11	3	33	0	1	0	99	99	0.00218500011	0.00192099996	0.00655099982	0.0239189994	0.823441029	1386
+135	2	366	1	40	cplex	1	1	87	1	4	33	0	1	0	99	99	0.00259099994	0.001452	0.00392000005	0.0419510007	0.830838025	280
+136	2	367	1	40	cplex	0	1	100	2	0	30	0	1	0	99	99	0.00202200003	0.00102500001	0.0027650001	0.0103019997	0.861589015	450
+137	2	367	1	40	cplex	1	0	87	11	1	30	0	1	0	99	99	0.00247099996	0.00177700003	0.00601800019	0.0119899996	0.800639987	1260
+138	2	367	1	40	cplex	1	1	87	2	2	30	0	1	0	99	99	0.00242600008	0.00101899996	0.00275400002	0.00974799972	0.964414001	450
+139	2	367	1	40	cplex	0	0	100	11	3	30	0	1	0	99	99	0.00154099998	0.00140099996	0.00600299984	0.0122870002	0.798593998	1260
+140	2	367	1	40	cplex	1	1	87	1	4	30	0	1	0	99	99	0.00198900001	0.00113700004	0.00351499999	0.0212629996	0.82078898	255
+141	2	368	1	40	cplex	0	1	100	2	0	31	0	1	0	99	99	0.00161899999	0.000853999984	0.00283199991	0.0146920001	0.885411024	465
+142	2	368	1	40	cplex	1	0	87	11	1	31	0	1	0	99	99	0.00203899993	0.00146599999	0.00617199996	0.0269409996	0.876232982	1302
+143	2	368	1	40	cplex	1	1	87	2	2	31	0	1	0	99	99	0.00207499997	0.000836000021	0.00285000005	0.00991399959	0.887013018	465
+144	2	368	1	40	cplex	0	0	100	11	3	31	0	1	0	99	99	0.00207099994	0.00182200002	0.006207	0.0126750004	0.898559988	1302
+145	2	368	1	40	cplex	1	1	87	1	4	31	0	1	0	99	99	0.00256099994	0.00134299998	0.00364300003	0.0748820007	0.881469011	263
+146	2	369	1	40	cplex	0	1	100	2	0	30	0	1	0	99	99	0.00164200005	0.000798000023	0.00279500009	0.00907700043	0.860059023	450
+147	2	369	1	40	cplex	1	0	87	11	1	30	0	1	0	99	99	0.0020049999	0.00141200004	0.00602399977	0.0117450003	0.849434972	1260
+148	2	369	1	40	cplex	1	1	87	2	2	30	0	1	0	99	99	0.00202000001	0.000793999992	0.00277799997	0.00953300018	0.840113997	450
+149	2	369	1	40	cplex	0	0	100	11	3	30	0	1	0	99	99	0.00157800002	0.00140399998	0.00606699986	0.0201750007	1.01385605	1260
+150	2	369	1	40	cplex	1	1	87	1	4	30	0	1	0	99	99	0.00225499994	0.00124899996	0.00355900009	0.0206119996	0.849677026	255
+151	2	370	1	40	cplex	0	1	100	5	0	21	0	1	0	74	74	0.0418759994	0.325731009	0.701934993	0.655710995	0.206101	4152
+152	2	370	1	40	cplex	1	0	87	11	1	21	0	1	0	74	74	0.0226969998	0.247182995	0.638861001	0.539888024	0.228352994	8086
+153	2	370	1	40	cplex	1	1	87	7	2	21	0	1	0	74	74	0.0177960005	0.212247998	0.507660985	0.470248014	0.221745998	6204
+154	2	370	1	40	cplex	0	0	100	11	3	21	0	1	0	74	74	0.0282439999	0.527481973	1.00711596	0.885990024	0.229493007	6132
+155	2	370	1	40	cplex	1	1	87	1	4	21	0	1	0	74	74	0.0232239999	0.0128340004	0.0245830007	0.270633012	0.229065999	245
+156	2	371	1	40	cplex	0	1	100	5	0	24	0	1	0	74	74	0.0478200018	0.358447999	0.813273013	0.817067981	0.366919994	4745
+157	2	371	1	40	cplex	1	0	87	11	1	24	0	1	0	74	74	0.0256760009	0.343712002	0.783627987	0.701192975	0.37747401	9241
+158	2	371	1	40	cplex	1	1	87	7	2	24	0	1	0	74	74	0.0204709992	0.384721994	0.600166976	0.568051994	0.362208009	7091
+159	2	371	1	40	cplex	0	0	100	11	3	24	0	1	0	74	74	0.0362690017	0.437521011	1.10627496	1.10956001	0.355120003	7008
+160	2	371	1	40	cplex	1	1	87	1	4	24	0	1	0	74	74	0.0263199992	0.0146599999	0.0265420005	0.172383994	0.347849011	280
+161	2	372	1	40	cplex	0	1	100	5	0	19	0	1	0	74	74	0.0437970012	0.316837013	0.648223996	0.712040007	0.862767994	3756
+162	2	372	1	40	cplex	1	0	87	11	1	19	0	1	0	74	74	0.0165950004	0.248827994	0.724277973	0.529883981	0.855292022	7316
+163	2	372	1	40	cplex	1	1	87	7	2	19	0	1	0	74	74	0.0162749998	0.197099	0.45194301	0.593317986	0.863789022	5613
+164	2	372	1	40	cplex	0	0	100	11	3	19	0	1	0	74	74	0.0318059996	0.399809986	0.926537991	0.815118015	0.857891977	5548
+165	2	372	1	40	cplex	1	1	87	1	4	19	0	1	0	74	74	0.0187560003	0.0113380002	0.0198880006	0.142507002	0.879514992	222
+166	2	373	1	40	cplex	0	1	100	6	0	25	0	1	0	74	74	0.0281300005	1.22753298	0.855122983	0.822072029	0.419239014	5184
+167	2	373	1	40	cplex	1	0	84	11	1	25	0	1	0	74	74	0.0207279995	0.272682995	0.655719995	0.582094014	0.410430998	10400
+168	2	373	1	40	cplex	1	1	84	8	2	25	0	1	0	74	74	0.0210360009	0.272608012	0.593586981	0.479111999	0.42117399	8832
+169	2	373	1	40	cplex	0	0	100	11	3	25	0	1	0	74	74	0.0407080017	0.50504303	1.17125297	1.029845	0.417874008	7300
+170	2	373	1	40	cplex	1	1	84	1	4	25	0	1	0	74	74	0.0152789997	0.0247719996	0.0459560007	0.244642004	0.407407999	345
+171	2	374	1	40	cplex	0	1	100	5	0	23	0	1	0	74	74	0.0500379987	0.38321799	0.822862029	0.703534007	0.379723996	4617
+172	2	374	1	40	cplex	1	0	84	11	1	23	0	1	0	74	74	0.019142	0.270617992	0.62183398	0.517512023	0.497323006	9568
+173	2	374	1	40	cplex	1	1	84	8	2	23	0	1	0	74	74	0.0146679999	0.211868003	0.51048398	0.430983007	0.387616992	8125
+174	2	374	1	40	cplex	0	0	100	11	3	23	0	1	0	74	74	0.0491669998	0.465519011	1.09823895	0.987565994	0.394322008	6716
+175	2	374	1	40	cplex	1	1	84	1	4	23	0	1	0	74	74	0.0192760006	0.0108240005	0.0189590007	0.123269998	0.418280989	271
+176	2	375	1	40	cplex	0	1	100	5	0	24	0	1	0	74	74	0.0405739993	0.440968007	0.800868988	0.760113001	0.372483999	4745
+177	2	375	1	40	cplex	1	0	87	11	1	24	0	1	0	74	74	0.018747	0.294934988	0.737764001	0.667240977	0.376744002	9241
+178	2	375	1	40	cplex	1	1	87	7	2	24	0	1	0	74	74	0.0261909999	0.289916992	0.62172401	0.568122029	0.401569009	7091
+179	2	375	1	40	cplex	0	0	100	11	3	24	0	1	0	74	74	0.0439769998	0.542056024	1.14832199	1.04267001	0.371109009	7008
+180	2	375	1	40	cplex	1	1	87	1	4	24	0	1	0	74	74	0.0189599991	0.0120440004	0.0242539998	0.285977989	0.386355996	280
+181	2	376	1	40	cplex	0	1	100	5	0	15	0	1	0	74	74	0.028283	0.240035996	0.510830998	0.686717987	0.877709985	2965
+182	2	376	1	40	cplex	1	0	87	11	1	15	0	1	0	74	74	0.0180970002	0.215525001	0.484533012	0.57279402	0.869920015	5776
+183	2	376	1	40	cplex	1	1	87	7	2	15	0	1	0	74	74	0.0128030004	0.260336995	0.364710003	0.496481001	0.862910986	4431
+184	2	376	1	40	cplex	0	0	100	11	3	15	0	1	0	74	74	0.0300479997	0.29193601	0.705637991	0.867721975	0.878112018	4380
+185	2	376	1	40	cplex	1	1	87	1	4	15	0	1	0	74	74	0.0121269999	0.00777200004	0.0154950004	0.136533007	0.885643005	175
+186	2	377	1	40	cplex	0	1	100	5	0	26	0	1	0	74	74	0.0425910018	0.502873003	0.869247019	0.954135001	0.660308003	5141
+187	2	377	1	40	cplex	1	0	87	11	1	26	0	1	0	74	74	0.0197059996	0.317791998	0.799515009	0.77077198	0.658532977	10012
+188	2	377	1	40	cplex	1	1	87	7	2	26	0	1	0	74	74	0.0283710007	0.313814998	0.676374972	0.667801023	0.672070026	7682
+189	2	377	1	40	cplex	0	0	100	11	3	26	0	1	0	74	74	0.0512450002	0.623991013	1.23810995	1.22810996	0.677033007	7592
+190	2	377	1	40	cplex	1	1	87	1	4	26	0	1	0	74	74	0.0194550008	0.0130789997	0.0259499997	0.188494995	0.677636981	304
+191	2	378	1	40	cplex	0	1	100	5	0	21	0	1	0	74	74	0.0345739983	0.334922999	0.722100019	0.798874974	0.861518979	4152
+192	2	378	1	40	cplex	1	0	87	11	1	21	0	1	0	74	74	0.0232350007	0.297656	0.689015985	0.637120008	1.17214298	8086
+193	2	378	1	40	cplex	1	1	87	7	2	21	0	1	0	74	74	0.0235779993	0.252193004	0.54144001	0.453343004	0.864739001	6204
+194	2	378	1	40	cplex	0	0	100	11	3	21	0	1	0	74	74	0.0453599989	0.444633007	1.78367996	0.916731	0.917578995	6132
+195	2	378	1	40	cplex	1	1	87	1	4	21	0	1	0	74	74	0.018313	0.0105299996	0.0211539995	0.223942995	0.842342019	245
+196	2	379	1	40	cplex	0	1	100	5	0	21	3	1	0.142857	74	74	0.0348370001	0.339533001	0.719112992	0.850299001	0.896055996	4152
+197	2	379	1	40	cplex	1	0	87	11	1	21	3	1	0.142857	74	74	0.0232340004	0.29974401	0.682967007	0.678368986	0.905683994	8086
+198	2	379	1	40	cplex	1	1	87	7	2	21	3	1	0.142857	74	74	0.0176919997	0.224168003	0.518759012	0.482073009	0.914941013	6204
+199	2	379	1	40	cplex	0	0	100	11	3	21	3	1	0.142857	74	74	0.0455959998	0.44244501	1.02668798	0.912059009	1.01503205	6132
+200	2	379	1	40	cplex	1	1	87	1	4	21	3	1	0.142857	74	74	0.0155440001	0.0105799995	0.0209619999	0.0868780017	0.891408026	245
+201	2	380	1	40	cplex	0	1	100	7	0	42	0	1	0	49	49	0.112657003	3.09067988	6.6270628	6.59439707	0.430985987	19718
+202	2	380	1	40	cplex	1	0	84	11	1	42	0	1	0	49	49	0.0667669997	2.87406802	6.59721422	6.16085577	0.424593002	29052
+203	2	380	1	40	cplex	1	1	84	8	2	42	0	1	0	49	49	0.0662700012	2.66569996	6.007236	5.99860001	0.413681	25966
+204	2	380	1	40	cplex	0	0	100	11	3	42	0	1	0	49	49	0.0950469971	3.239995	7.50644588	6.92300606	0.395038009	22764
+205	2	380	1	40	cplex	1	1	84	1	4	42	42	0	0	49		0.140731007	3.25113702	5.46662092	50.6189308	0	3298
+206	2	381	1	40	cplex	0	1	100	7	0	36	0	1	0	49	49	0.105417997	3.25330591	5.58074284	5.59152412	0.929753006	16901
+207	2	381	1	40	cplex	1	0	84	11	1	36	0	1	0	49	49	0.0621679984	2.33735394	5.49126911	5.54278421	0.914605975	24901
+208	2	381	1	40	cplex	1	1	84	8	2	36	0	1	0	49	49	0.0542780012	2.16391706	5.00815916	5.04755878	0.92267698	22257
+209	2	381	1	40	cplex	0	0	100	11	3	36	0	1	0	49	49	0.0819099993	2.60426497	6.32893515	6.1337328	0.931777	19512
+210	2	381	1	40	cplex	1	1	84	1	4	36	36	0	0	49		0.116273999	2.89603305	4.75981379	47.0338974	0	2818
+211	2	382	1	40	cplex	0	1	100	7	0	35	0	1	0	49	49	0.100110002	2.38923502	5.41244984	5.27991676	0.854839027	16432
+212	2	382	1	40	cplex	1	0	84	11	1	35	0	1	0	49	49	0.0444950014	2.39958405	5.32709408	5.27975798	0.863264978	24210
+213	2	382	1	40	cplex	1	1	84	8	2	35	0	1	0	49	49	0.0828659981	2.87723899	4.92056322	4.86460495	0.855055988	21639
+214	2	382	1	40	cplex	0	0	100	11	3	35	0	1	0	49	49	0.0734559968	2.57269192	6.11644602	5.9725728	0.86224699	18970
+215	2	382	1	40	cplex	1	1	84	1	4	35	35	0	0	49		0.139076993	2.74274707	4.53320599	42.2775688	0	2740
+216	2	383	1	40	cplex	0	1	100	7	0	35	0	1	0	49	49	0.0697100013	2.4549849	5.39999008	5.32437515	0.345086008	16432
+217	2	383	1	40	cplex	1	0	84	11	1	35	0	1	0	49	49	0.0753180012	2.27151704	5.40316391	5.31591702	0.328624994	24210
+218	2	383	1	40	cplex	1	1	84	8	2	35	0	1	0	49	49	0.050113	2.19384289	4.82607317	4.94865704	0.429995	21639
+219	2	383	1	40	cplex	0	0	100	11	3	35	0	1	0	49	49	0.113714002	2.52560592	6.18242884	5.94125891	0.342732012	18970
+220	2	383	1	40	cplex	1	1	84	1	4	35	35	0	0	49		0.121822	2.7106421	4.45907211	42.1666718	0	2716
+221	2	384	1	40	cplex	0	1	100	7	0	32	0	1	0	49	49	0.0835490003	2.24596095	5.00978994	4.75907087	0.539901018	15023
+222	2	384	1	40	cplex	1	0	84	11	1	32	0	1	0	49	49	0.0456920005	2.0434351	4.89289379	4.76800919	0.550006986	22134
+223	2	384	1	40	cplex	1	1	84	8	2	32	0	1	0	49	49	0.0398249999	1.97368395	4.46758795	4.40370178	0.52957499	19784
+224	2	384	1	40	cplex	0	0	100	11	3	32	0	1	0	49	49	0.108070001	2.31726789	5.57619286	5.31482887	0.532438993	17344
+225	2	384	1	40	cplex	1	1	84	1	4	32	32	0	0	49		0.102242999	2.54745412	4.19487381	39.4423523	0	2512
+226	2	385	1	40	cplex	0	1	100	7	0	36	0	1	0	49	49	0.100714996	2.49043989	5.5838728	5.97550011	0.872617006	16901
+227	2	385	1	40	cplex	1	0	84	11	1	36	0	1	0	49	49	0.0620810017	3.14524007	5.50813723	5.58595514	0.904076993	24901
+228	2	385	1	40	cplex	1	1	84	8	2	36	0	1	0	49	49	0.0831400007	2.19939804	5.02539587	5.04553699	0.857903004	22257
+229	2	385	1	40	cplex	0	0	100	11	3	36	0	1	0	49	49	0.119813003	2.60476995	6.31639814	5.87361097	0.870751023	19512
+230	2	385	1	40	cplex	1	1	84	1	4	36	36	0	0	49		0.117908999	2.86182809	4.68723392	45.2142105	0	2827
+231	2	386	1	40	cplex	0	1	100	7	0	29	0	1	0	49	49	0.111350998	1.985677	4.48839903	4.41108084	0.678821027	13615
+232	2	386	1	40	cplex	1	0	84	11	1	29	0	1	0	49	49	0.0491570011	1.94157505	4.45617199	4.47437286	0.670515001	20059
+233	2	386	1	40	cplex	1	1	84	8	2	29	0	1	0	49	49	0.0473710001	1.834059	4.0586791	4.210464	0.679332018	17929
+234	2	386	1	40	cplex	0	0	100	11	3	29	0	1	0	49	49	0.0568890013	2.2696991	5.10129786	4.97247791	0.686811984	15718
+235	2	386	1	40	cplex	1	1	84	1	4	29	29	0	0	49		0.109931	2.48401594	4.05617905	40.4752464	0	2313
+236	2	387	1	40	cplex	0	1	100	7	0	33	0	1	0	49	49	0.0967139974	2.45685601	5.16450882	5.42363977	0.943221986	15493
+237	2	387	1	40	cplex	1	0	84	11	1	33	0	1	0	49	49	0.0627190024	3.06951189	5.15170717	4.84815693	0.853709996	22826
+238	2	387	1	40	cplex	1	1	84	8	2	33	0	1	0	49	49	0.0423960015	2.10293102	4.64082813	4.7931118	0.912415981	20402
+239	2	387	1	40	cplex	0	0	100	11	3	33	0	1	0	49	49	0.085115999	2.48332596	5.85931778	5.38719893	0.855198026	17886
+240	2	387	1	40	cplex	1	1	84	1	4	33	33	0	0	49		0.125788003	2.61638999	4.33691597	44.8442879	0	2583
+241	2	388	1	40	cplex	0	1	100	8	0	37	0	1	0	49	49	0.0930719972	2.66897893	5.88314009	5.46147585	0.244229004	17697
+242	2	388	1	40	cplex	1	0	70	11	1	37	0	1	0	49	49	0.0402240008	1.87820196	4.44930887	4.25130415	0.236007005	29545
+243	2	388	1	40	cplex	1	1	70	9	2	37	0	1	0	49	49	0.0374660008	1.86715305	4.05962276	3.92431092	0.217676997	26886
+244	2	388	1	40	cplex	0	0	100	11	3	37	0	1	0	49	49	0.0718989968	2.83857799	6.74631691	6.11206484	0.229150996	20054
+245	2	388	1	40	cplex	1	1	70	1	4	37	37	0	0	49		0.107906997	2.70267701	4.53351593	40.9980049	0	2967
+246	2	389	1	40	cplex	0	1	100	7	0	31	0	1	0	49	49	0.0825729966	2.083318	4.75647402	4.53577709	0.857491016	14554
+247	2	389	1	40	cplex	1	0	84	11	1	31	0	1	0	49	49	0.0546599999	2.08145809	4.82900715	4.49881697	0.846961021	21443
+248	2	389	1	40	cplex	1	1	84	8	2	31	0	1	0	49	49	0.041974999	1.96885002	4.39504385	4.4972868	0.852039993	19165
+249	2	389	1	40	cplex	0	0	100	11	3	31	0	1	0	49	49	0.0776889995	2.30078793	5.47113514	5.71985197	0.879386008	16802
+250	2	389	1	40	cplex	1	1	84	1	4	31	31	0	0	49		0.111597002	2.53996491	4.08715105	40.0054626	0	2426
+251	2	390	1	40	cplex	0	1	500	2	0	19	0	1	0	499	499	0.00731399981	0.000792999985	0.00187499996	0.00630400004	0.940582991	285
+252	2	390	1	40	cplex	1	0	486	11	1	19	0	1	0	499	499	0.0144429998	0.00116400002	0.00394900003	0.00666300021	0.957620025	798
+253	2	390	1	40	cplex	1	1	486	2	2	19	0	1	0	499	499	0.0144199999	0.000686999992	0.00187799998	0.00473499997	0.947108984	285
+254	2	390	1	40	cplex	0	0	500	11	3	19	0	1	0	499	499	0.00631899992	0.00117299997	0.003945	0.108727001	1.02874506	798
+255	2	390	1	40	cplex	1	1	486	1	4	19	0	1	0	499	499	0.0145800002	0.000979000004	0.00239000004	0.148548007	1.01585603	161
+256	2	391	1	40	cplex	0	1	500	2	0	25	0	1	0	499	499	0.00592700019	0.000734000001	0.0023980001	0.00694799982	0.935633004	375
+257	2	391	1	40	cplex	1	0	486	11	1	25	0	1	0	499	499	0.0143100005	0.00123099994	0.00521400012	0.0540090017	0.938462019	1050
+258	2	391	1	40	cplex	1	1	486	2	2	25	0	1	0	499	499	0.0145399999	0.000728000014	0.00240599993	0.00617500022	0.953064024	375
+259	2	391	1	40	cplex	0	0	500	11	3	25	0	1	0	499	499	0.00591599988	0.00121799996	0.00517799985	0.0101380004	0.938003004	1050
+260	2	391	1	40	cplex	1	1	486	1	4	25	0	1	0	499	499	0.0164449997	0.00111499999	0.00302099995	0.0144260004	0.921710014	212
+261	2	392	1	40	cplex	0	1	500	2	0	23	0	1	0	499	499	0.00753800012	0.00082299998	0.00224000006	0.00662299991	0.356748998	345
+262	2	392	1	40	cplex	1	0	486	11	1	23	0	1	0	499	499	0.0158089995	0.00139700004	0.00480700005	0.00889199972	0.358269989	966
+263	2	392	1	40	cplex	1	1	486	2	2	23	0	1	0	499	499	0.0119860005	0.000690000015	0.00224799989	0.00670399982	0.356171012	345
+264	2	392	1	40	cplex	0	0	500	11	3	23	0	1	0	499	499	0.00530799991	0.00115999999	0.00480900006	0.00844900031	0.356739014	966
+265	2	392	1	40	cplex	1	1	486	1	4	23	0	1	0	499	499	0.0135310004	0.000861999986	0.00279200007	0.0144649995	0.345842004	195
+266	2	393	1	40	cplex	0	1	500	2	0	30	0	1	0	499	499	0.00964600034	0.00104300003	0.00283599994	0.00802799966	0.600214005	450
+267	2	393	1	40	cplex	1	0	486	11	1	30	0	1	0	499	499	0.0180680007	0.00177600002	0.00617699977	0.00969099998	0.593823016	1260
+268	2	393	1	40	cplex	1	1	486	2	2	30	0	1	0	499	499	0.0179030001	0.00102199998	0.00280799996	0.00648899982	0.589721024	450
+269	2	393	1	40	cplex	0	0	500	11	3	30	0	1	0	499	499	0.00958300009	0.00177700003	0.0060800002	0.00920700002	0.58980298	1260
+270	2	393	1	40	cplex	1	1	486	1	4	30	0	1	0	499	499	0.0174250007	0.001162	0.00350499991	0.0958769992	0.704517007	255
+271	2	394	1	40	cplex	0	1	500	2	0	68	0	1	0	499	499	0.0211740006	0.00221600011	0.00614099996	0.0117260003	0.270206988	1020
+272	2	394	1	40	cplex	1	0	486	11	1	68	0	1	0	499	499	0.0292499997	0.00391300023	0.0144029995	0.0188749991	0.270301014	2856
+273	2	394	1	40	cplex	1	1	486	2	2	68	0	1	0	499	499	0.0228850003	0.001819	0.006238	0.0129180001	0.260547012	1020
+274	2	394	1	40	cplex	0	0	500	11	3	68	0	1	0	499	499	0.0208560005	0.00387799996	0.0145079996	0.0209759995	0.257562011	2856
+275	2	394	1	40	cplex	1	1	486	1	4	68	0	1	0	499	499	0.0291719995	0.002355	0.00809200015	0.032926999	0.250346988	578
+276	2	395	1	40	cplex	0	1	500	2	0	82	0	1	0	499	499	0.0240599997	0.00257400004	0.00746800005	0.0140479999	0.268420994	1230
+277	2	395	1	40	cplex	1	0	486	11	1	82	0	1	0	499	499	0.0329409987	0.00467600022	0.0183680002	0.0222100001	0.271344006	3444
+278	2	395	1	40	cplex	1	1	486	2	2	82	0	1	0	499	499	0.0276689995	0.0021540001	0.00758199999	0.0135939997	0.280387014	1230
+279	2	395	1	40	cplex	0	0	500	11	3	82	0	1	0	499	499	0.0174390003	0.00383400009	0.0174630005	0.0227049999	0.257564992	3444
+280	2	395	1	40	cplex	1	1	486	1	4	82	0	1	0	499	499	0.0165689997	0.00290700002	0.00920899957	0.112609997	0.287061989	697
+281	2	396	1	40	cplex	0	1	500	2	0	32	0	1	0	499	499	0.0103890002	0.00110899995	0.00313699991	0.00944299996	1.000386	480
+282	2	396	1	40	cplex	1	0	486	11	1	32	0	1	0	499	499	0.0154670002	0.00156300003	0.00665700017	0.0421929993	0.870305002	1344
+283	2	396	1	40	cplex	1	1	486	2	2	32	0	1	0	499	499	0.0154839996	0.000928999973	0.00307899993	0.0280830003	0.897119999	480
+284	2	396	1	40	cplex	0	0	500	11	3	32	0	1	0	499	499	0.00723299989	0.00157299999	0.00663900003	0.0292409994	0.864575028	1344
+285	2	396	1	40	cplex	1	1	486	1	4	32	0	1	0	499	499	0.0184850004	0.00141799997	0.00394200021	0.0390819982	0.857997	272
+286	2	397	1	40	cplex	0	1	500	2	0	15	0	1	0	499	499	0.00494599994	0.000451	0.00150200003	0.00788499974	0.291413993	225
+287	2	397	1	40	cplex	1	0	486	11	1	15	0	1	0	499	499	0.0132499998	0.000936000026	0.00319200009	0.0337469988	0.225133002	630
+288	2	397	1	40	cplex	1	1	486	2	2	15	0	1	0	499	499	0.0132090002	0.000551000005	0.00149099994	0.0185909998	0.203187004	225
+289	2	397	1	40	cplex	0	0	500	11	3	15	0	1	0	499	499	0.0050499998	0.000953999988	0.00318400003	0.0481930003	0.254298002	630
+290	2	397	1	40	cplex	1	1	486	1	4	15	0	1	0	499	499	0.0119449999	0.000627000001	0.00187799998	0.0759280026	0.201737002	127
+291	2	398	1	40	cplex	0	1	500	2	0	36	0	1	0	499	499	0.0117149996	0.00126799999	0.00337300007	0.0704350024	0.897119999	540
+292	2	398	1	40	cplex	1	0	486	11	1	36	0	1	0	499	499	0.0199110005	0.00212599989	0.00728800008	0.0113359997	0.883635998	1512
+293	2	398	1	40	cplex	1	1	486	2	2	36	0	1	0	499	499	0.0197969992	0.00122199999	0.00337899989	0.00673499983	0.956956029	540
+294	2	398	1	40	cplex	0	0	500	11	3	36	0	1	0	499	499	0.0113890003	0.111204997	0.00725399982	0.0113420002	0.883077025	1512
+295	2	398	1	40	cplex	1	1	486	1	4	36	0	1	0	499	499	0.0162160005	0.00126100006	0.00418800022	0.0166730005	0.880746007	306
+296	2	399	1	40	cplex	0	1	500	2	0	19	0	1	0	499	499	0.00446100021	0.000549999997	0.00193999999	0.00555399992	0.950119972	285
+297	2	399	1	40	cplex	1	0	486	11	1	19	0	1	0	499	499	0.0127619999	0.000939999998	0.00401399983	0.00673000002	0.936124027	798
+298	2	399	1	40	cplex	1	1	486	2	2	19	0	1	0	499	499	0.0127480002	0.000561999972	0.00191899994	0.00584599981	0.92770499	285
+299	2	399	1	40	cplex	0	0	500	11	3	19	0	1	0	499	499	0.00447000004	0.000942000013	0.00402300013	0.00688500004	1.03451502	798
+300	2	399	1	40	cplex	1	1	486	1	4	19	0	1	0	499	499	0.0145009998	0.000880000007	0.00242800009	0.0118140001	0.939850986	161
+301	2	400	1	40	cplex	0	1	500	4	0	19	0	1	0	474	474	0.134201005	0.247878	0.542596996	0.637416005	0.921402991	3130
+302	2	400	1	40	cplex	1	0	482	11	1	19	0	1	0	474	474	0.0738940015	0.202961996	0.527984023	0.498874009	0.913838983	6118
+303	2	400	1	40	cplex	1	1	482	5	2	19	0	1	0	474	474	0.074500002	0.163642004	0.383679003	0.402684003	1.16018403	4269
+304	2	400	1	40	cplex	0	0	500	11	3	19	0	1	0	474	474	0.174885005	0.391986012	0.939773977	0.83919698	0.917733014	5548
+305	2	400	1	40	cplex	1	1	482	1	4	19	0	1	0	474	474	0.0709209964	0.0805969983	0.150764003	1.955194	0.901097	852
+306	2	401	1	40	cplex	0	1	500	5	0	36	0	1	0	474	474	0.218530998	0.460961998	1.05916202	0.907050014	0.804108977	6241
+307	2	401	1	40	cplex	1	0	468	11	1	36	0	1	0	474	474	0.0562920012	0.211548001	0.485525995	0.473187	0.816496015	18432
+308	2	401	1	40	cplex	1	1	468	9	2	36	0	1	0	474	474	0.0395159982	0.39754501	0.417685002	0.425615996	0.825836003	16038
+309	2	401	1	40	cplex	0	0	500	11	3	36	0	1	0	474	474	0.219183996	0.724198997	1.75631499	1.42423701	0.820632994	10512
+310	2	401	1	40	cplex	1	1	468	1	4	36	0	1	0	474	474	0.0562670007	0.121357001	0.214270994	4.54080677	0.834394991	1656
+311	2	402	1	40	cplex	0	1	500	4	0	14	0	1	0	474	474	0.095544003	0.197044998	0.41012001	0.458400011	0.93147397	2306
+312	2	402	1	40	cplex	1	0	482	11	1	14	0	1	0	474	474	0.0815979987	0.176883996	0.408634007	0.434258014	0.942200005	4508
+313	2	402	1	40	cplex	1	1	482	5	2	14	0	1	0	474	474	0.070867002	0.215324	0.291112006	0.293101013	0.952489972	3146
+314	2	402	1	40	cplex	0	0	500	11	3	14	0	1	0	474	474	0.0945819989	0.257468998	0.648877025	0.641296983	0.933619976	4088
+315	2	402	1	40	cplex	1	1	482	1	4	14	0	1	0	474	474	0.0739710033	0.0687170029	0.109746002	1.67037201	0.925454021	628
+316	2	403	1	40	cplex	0	1	500	4	0	31	0	1	0	474	474	0.194029003	0.377947003	0.873760998	0.886251986	0.243976995	5107
+317	2	403	1	40	cplex	1	0	482	11	1	31	0	1	0	474	474	0.0758420005	0.388002008	0.860621989	0.841553986	0.245178998	9982
+318	2	403	1	40	cplex	1	1	482	5	2	31	0	1	0	474	474	0.143417001	0.295237988	0.691102028	0.637301981	0.258038998	6966
+319	2	403	1	40	cplex	0	0	500	11	3	31	0	1	0	474	474	0.174530998	0.610700011	1.50095904	1.32646096	0.277083993	9052
+320	2	403	1	40	cplex	1	1	482	1	4	31	31	0	0	474		0.117403999	0.148017004	0.282775998	1.29171205	0.123847999	1904
+321	2	404	1	40	cplex	0	1	500	5	0	15	0	1	0	474	474	0.114400998	0.206889004	0.465353996	0.467536986	0.712679029	2723
+322	2	404	1	40	cplex	1	0	468	11	1	15	0	1	0	474	474	0.0303300004	0.0888900012	0.203499004	0.221052006	0.715300977	7680
+323	2	404	1	40	cplex	1	1	468	9	2	15	0	1	0	474	474	0.0303949993	0.0819749981	0.179752007	0.202102005	0.713587999	6682
+324	2	404	1	40	cplex	0	0	500	11	3	15	0	1	0	474	474	0.145647004	0.458723009	0.732065976	0.828543007	0.694738984	4380
+325	2	404	1	40	cplex	1	1	468	1	4	15	15	0	0	474		0.0311970003	0.0764409974	0.138853997	0.849210978	0.0899920017	1007
+326	2	405	1	40	cplex	0	1	500	4	0	20	0	1	0	474	474	0.187395006	0.281524986	0.591826022	1.21697903	0.440124005	3295
+327	2	405	1	40	cplex	1	0	482	11	1	20	0	1	0	474	474	0.107396998	0.249381006	0.592477024	0.62934798	0.631772995	6440
+328	2	405	1	40	cplex	1	1	482	5	2	20	0	1	0	474	474	0.0775900036	0.171184003	0.402063996	0.394728988	0.428822994	4494
+329	2	405	1	40	cplex	0	0	500	11	3	20	0	1	0	474	474	0.130160004	0.382791996	0.967790008	0.949625015	0.433589995	5840
+330	2	405	1	40	cplex	1	1	482	1	4	20	20	0	0	474		0.112695001	0.108012997	0.184141994	0.912957013	0.0871680006	1228
+331	2	406	1	40	cplex	0	1	500	5	0	16	0	1	0	474	474	0.129034996	0.212849006	0.492199987	0.510414004	0.40140599	2904
+332	2	406	1	40	cplex	1	0	468	11	1	16	0	1	0	474	474	0.0243980009	0.0794930011	0.203885004	0.220134005	0.399026006	8192
+333	2	406	1	40	cplex	1	1	468	9	2	16	0	1	0	474	474	0.0246370006	0.0737869963	0.180640996	0.200673997	0.403719008	7128
+334	2	406	1	40	cplex	0	0	500	11	3	16	0	1	0	474	474	0.131541997	0.443269998	0.770250022	1.33517694	0.398167998	4672
+335	2	406	1	40	cplex	1	1	468	1	4	16	0	1	0	474	474	0.0255180001	0.0602670014	0.108635001	1.721838	0.374633014	746
+336	2	407	1	40	cplex	0	1	500	5	0	30	0	1	0	474	474	0.269401997	0.46103099	0.984454989	0.945371985	0.365514994	5446
+337	2	407	1	40	cplex	1	0	468	11	1	30	0	1	0	474	474	0.0488560013	0.175612003	0.409864008	0.397720009	0.551099002	15360
+338	2	407	1	40	cplex	1	1	468	9	2	30	0	1	0	474	474	0.0492580011	0.163057998	0.369807005	0.363276988	0.358031005	13365
+339	2	407	1	40	cplex	0	0	500	11	3	30	0	1	0	474	474	0.249608994	0.554726005	1.428177	1.26486504	0.386979014	8760
+340	2	407	1	40	cplex	1	1	468	1	4	30	30	0	0	474		0.0973519981	0.70439899	1.29839206	8.61358929	0.0922980011	2822
+341	2	408	1	40	cplex	0	1	500	4	0	15	0	1	0	474	474	0.101801999	0.183648005	0.419869006	0.516485989	0.372868001	2471
+342	2	408	1	40	cplex	1	0	482	11	1	15	0	1	0	474	474	0.072676003	0.173454002	0.42255801	0.699033976	0.400422007	4830
+343	2	408	1	40	cplex	1	1	482	5	2	15	0	1	0	474	474	0.0870670006	0.152349994	0.322028995	0.476907998	0.409281999	3370
+344	2	408	1	40	cplex	0	0	500	11	3	15	0	1	0	474	474	0.145776004	0.321040004	0.746822	1.02639103	0.615270972	4380
+345	2	408	1	40	cplex	1	1	482	1	4	15	0	1	0	474	474	0.0581139997	0.0641210005	0.115930997	1.50596094	0.373050004	673
+346	2	409	1	40	cplex	0	1	500	5	0	20	0	1	0	474	474	0.129308	0.290751994	0.640133023	1.04162502	0.776106	3630
+347	2	409	1	40	cplex	1	0	468	11	1	20	0	1	0	474	474	0.029112	0.0999189988	0.262115985	0.381487012	0.759335995	10240
+348	2	409	1	40	cplex	1	1	468	9	2	20	0	1	0	474	474	0.0325819999	0.10306	0.237683997	0.491699994	0.726490021	8910
+349	2	409	1	40	cplex	0	0	500	11	3	20	0	1	0	474	474	0.133975998	0.355073005	0.935559988	1.03222001	0.699180007	5840
+350	2	409	1	40	cplex	1	1	468	1	4	20	20	0	0	474		0.0468400009	0.122125998	0.217831001	2.22815609	1.52689004	1349
+351	2	410	1	40	cplex	0	1	500	6	0	34	0	1	0	449	449	0.370748997	2.053653	4.49721098	5.409338	0.261303008	13200
+352	2	410	1	40	cplex	1	0	482	11	1	34	0	1	0	449	449	0.157674	1.84991801	4.60998106	5.07711792	0.255021006	21230
+353	2	410	1	40	cplex	1	1	482	8	2	34	0	1	0	449	449	0.209041998	1.68643701	3.9023509	4.56339693	0.266290009	17906
+354	2	410	1	40	cplex	0	0	500	11	3	34	0	1	0	449	449	0.464910001	2.54829097	6.08543921	6.59942198	0.280755013	18428
+355	2	410	1	40	cplex	1	1	482	1	4	34	0	1	0	449	449	0.385610014	0.280719012	0.508500993	0.65763098	0.261406988	1871
+356	2	411	1	40	cplex	0	1	500	6	0	15	0	1	0	449	449	0.196496993	0.887112975	1.97447097	2.28561902	0.269944012	5823
+357	2	411	1	40	cplex	1	0	482	11	1	15	0	1	0	449	449	0.121440001	0.800164998	2.12326002	2.16255307	0.282279998	9366
+358	2	411	1	40	cplex	1	1	482	8	2	15	0	1	0	449	449	0.196283996	0.810109019	1.78645003	2.04592395	0.339902997	7900
+359	2	411	1	40	cplex	0	0	500	11	3	15	0	1	0	449	449	0.200147003	1.12775803	2.68670702	2.958215	0.313299	8130
+360	2	411	1	40	cplex	1	1	482	1	4	15	0	1	0	449	449	0.109506004	0.194402993	0.202769995	0.330345988	0.287993997	825
+361	2	412	1	40	cplex	0	1	500	6	0	17	0	1	0	449	449	0.219332993	1.03522694	2.28884912	2.875139	0.318271011	6600
+362	2	412	1	40	cplex	1	0	482	11	1	17	0	1	0	449	449	0.153023005	0.942040026	2.246943	2.47618198	0.396427006	10615
+363	2	412	1	40	cplex	1	1	482	8	2	17	0	1	0	449	449	0.141646996	0.803209007	1.911461	2.30179	0.355156988	8953
+364	2	412	1	40	cplex	0	0	500	11	3	17	0	1	0	449	449	0.205170006	1.28219795	3.03379512	3.470052	0.406372011	9214
+365	2	412	1	40	cplex	1	1	482	1	4	17	0	1	0	449	449	0.195135996	0.269730002	0.237444997	0.924126029	0.355962992	935
+366	2	413	1	40	cplex	0	1	500	6	0	46	0	1	0	449	449	0.520101011	2.92251992	6.2490449	6.71764994	0.907351971	17858
+367	2	413	1	40	cplex	1	0	482	11	1	46	0	1	0	449	449	0.261337012	2.75655603	6.11122179	6.57232714	0.929279029	28723
+368	2	413	1	40	cplex	1	1	482	8	2	46	0	1	0	449	449	0.257604003	2.35431504	5.26802206	5.95492077	1.08224106	24226
+369	2	413	1	40	cplex	0	0	500	11	3	46	0	1	0	449	449	0.43513599	4.86892414	8.20471954	9.04105854	0.89853102	24932
+370	2	413	1	40	cplex	1	1	482	1	4	46	0	1	0	449	449	0.407923013	0.392307997	0.671573997	0.579703987	0.901929975	2531
+371	2	414	1	40	cplex	0	1	500	6	0	19	0	1	0	449	449	0.30903399	1.20829999	2.51946712	2.94708991	0.922002971	7376
+372	2	414	1	40	cplex	1	0	482	11	1	19	0	1	0	449	449	0.113169998	1.01889098	2.56016302	2.79205108	0.901712	11864
+373	2	414	1	40	cplex	1	1	482	8	2	19	0	1	0	449	449	0.166215003	0.992739022	2.2024529	2.67324996	0.908288002	10006
+374	2	414	1	40	cplex	0	0	500	11	3	19	0	1	0	449	449	0.276511014	1.438344	3.46422696	3.94289088	0.934283972	10298
+375	2	414	1	40	cplex	1	1	482	1	4	19	0	1	0	449	449	0.162554994	0.140193999	0.264057994	0.334416002	0.915908992	1045
+376	2	415	1	40	cplex	0	1	500	6	0	24	0	1	0	449	449	0.420248002	1.33976495	3.15946388	3.87715697	0.289977998	9317
+377	2	415	1	40	cplex	1	0	482	11	1	24	0	1	0	449	449	0.201311007	1.48711205	3.24060106	4.02326822	0.327288985	14986
+378	2	415	1	40	cplex	1	1	482	8	2	24	0	1	0	449	449	0.156330004	1.29538596	2.83194709	3.4296701	0.465272993	12640
+379	2	415	1	40	cplex	0	0	500	11	3	24	0	1	0	449	449	0.403524011	1.73789299	4.56519604	5.92639017	0.282550991	13008
+380	2	415	1	40	cplex	1	1	482	1	4	24	0	1	0	449	449	0.210430995	0.175864995	0.338432997	0.517333984	0.270355999	1320
+381	2	416	1	40	cplex	0	1	500	6	0	27	0	1	0	449	449	0.215838	1.66942	3.74373102	3.40788603	0.926533997	10843
+382	2	416	1	40	cplex	1	0	470	11	1	27	0	1	0	449	449	0.296876013	1.21198595	2.82189107	2.42732501	0.960726976	20548
+383	2	416	1	40	cplex	1	1	470	9	2	27	0	1	0	449	449	0.107592002	1.18824005	2.58175111	2.78815699	0.933504999	18997
+384	2	416	1	40	cplex	0	0	500	11	3	27	0	1	0	449	449	0.303884	2.15114307	4.79861116	4.37874508	0.912802994	14634
+385	2	416	1	40	cplex	1	1	470	1	4	27	0	1	0	449	449	0.205780998	0.174113005	0.299908012	0.315694988	0.915310025	1769
+386	2	417	1	40	cplex	0	1	500	6	0	25	0	1	0	449	449	0.372673005	1.41439795	3.23852706	3.65183806	0.920329988	9705
+387	2	417	1	40	cplex	1	0	482	11	1	25	0	1	0	449	449	0.163703993	1.39389706	3.35327101	3.58801293	0.91635102	15610
+388	2	417	1	40	cplex	1	1	482	8	2	25	0	1	0	449	449	0.290491998	1.23376906	2.91656804	3.39187789	0.916485012	13166
+389	2	417	1	40	cplex	0	0	500	11	3	25	0	1	0	449	449	0.270500004	3.02285695	4.35753584	4.70211506	0.908971012	13550
+390	2	417	1	40	cplex	1	1	482	1	4	25	0	1	0	449	449	0.205952004	0.180545002	0.341062009	0.378549993	0.878614008	1375
+391	2	418	1	40	cplex	0	1	500	6	0	24	0	1	0	449	449	0.333472997	1.54131103	3.14297795	3.70003796	0.326563001	9317
+392	2	418	1	40	cplex	1	0	482	11	1	24	0	1	0	449	449	0.204859003	1.40136397	3.27980709	3.64144492	0.316172004	14986
+393	2	418	1	40	cplex	1	1	482	8	2	24	0	1	0	449	449	0.228227004	1.26271296	2.801965	3.34534907	0.339872003	12640
+394	2	418	1	40	cplex	0	0	500	11	3	24	0	1	0	449	449	0.287791997	1.80324399	4.27937317	4.67195988	0.313663989	13008
+395	2	418	1	40	cplex	1	1	482	1	4	24	0	1	0	449	449	0.286231995	0.200929999	0.342375994	0.46717599	0.331169993	1320
+396	2	419	1	40	cplex	0	1	500	6	0	72	0	1	0	449	449	0.629233003	4.63190317	9.66576576	13.5220385	0.252180994	27952
+397	2	419	1	40	cplex	1	0	482	11	1	72	0	1	0	449	449	0.498937011	4.05374622	9.77661419	12.490098	0.255667001	44958
+398	2	419	1	40	cplex	1	1	482	8	2	72	0	1	0	449	449	0.299941987	3.55222392	8.20540142	11.1710081	0.272693008	37920
+399	2	419	1	40	cplex	0	0	500	11	3	72	0	1	0	449	449	0.597728014	6.94630194	12.6716604	15.400074	0.236451	39024
+400	2	419	1	40	cplex	1	1	482	1	4	72	0	1	0	449	449	0.373872995	0.539740026	1.04563701	1.45047998	0.227495998	3962
+401	2	420	1	40	cplex	0	1	500	8	0	34	0	1	0	399	399	0.466309994	9.50903225	21.4272537	36.2436371	0.866696	32505
+402	2	420	1	40	cplex	1	0	465	11	1	34	0	1	0	399	399	0.289662987	8.47363853	19.6875801	30.600111	0.925611019	46101
+403	2	420	1	40	cplex	1	1	465	10	2	34	0	1	0	399	399	0.319130987	9.08020687	19.1626644	34.4844818	0.887727022	43766
+404	2	420	1	40	cplex	0	0	500	11	3	34	0	1	0	399	399	0.470804006	10.0183334	23.8145638	34.4762039	0.879754007	35428
+405	2	420	1	40	cplex	1	1	465	1	4	34	34	0	0	399		0.329667985	1.80909002	3.15359712	22.7980709	0.0959829986	2875
+406	2	421	1	40	cplex	0	1	500	8	0	35	0	1	0	399	399	0.500563025	9.9705658	22.4572525	37.8872108	0.963828981	33173
+407	2	421	1	40	cplex	1	0	465	11	1	35	0	1	0	399	399	0.284922987	8.89727116	22.1393528	31.7050648	0.950275004	47457
+408	2	421	1	40	cplex	1	1	465	10	2	35	0	1	0	399	399	0.340371996	8.50059509	19.7211781	35.0869484	0.952795982	45053
+409	2	421	1	40	cplex	0	0	500	11	3	35	0	1	0	399	399	0.513517022	9.97404575	23.918148	34.4693413	0.990720987	36470
+410	2	421	1	40	cplex	1	1	465	1	4	35	35	0	0	399		0.868032992	13.1388206	23.2365227	182.437057	0.100194998	5970
+411	2	422	1	40	cplex	0	1	500	8	0	39	0	1	0	399	399	0.539451003	10.5020542	24.832798	43.2674408	0.882683992	37285
+412	2	422	1	40	cplex	1	0	465	11	1	39	0	1	0	399	399	0.405066997	10.8116417	23.1817436	37.3405037	0.783104002	52881
+413	2	422	1	40	cplex	1	1	465	10	2	39	0	1	0	399	399	0.346947998	10.9949141	22.5656776	41.1627693	0.784175992	50202
+414	2	422	1	40	cplex	0	0	500	11	3	39	0	1	0	399	399	0.536352992	11.1868534	27.4056721	39.7139168	0.73883599	40638
+415	2	422	1	40	cplex	1	1	465	1	4	39	39	0	0	399		0.485076994	1.59265804	2.91723609	17.845602	0.0952979997	2590
+416	2	423	1	40	cplex	0	1	500	8	0	30	0	1	0	399	399	0.400976002	7.82566977	18.4481659	31.1633091	0.895693004	28680
+417	2	423	1	40	cplex	1	0	465	11	1	30	0	1	0	399	399	0.26306501	7.2360611	17.1729755	26.4098797	0.875383019	40678
+418	2	423	1	40	cplex	1	1	465	10	2	30	0	1	0	399	399	0.275680989	8.34844017	17.2672577	29.749567	0.874666989	38617
+419	2	423	1	40	cplex	0	0	500	11	3	30	0	1	0	399	399	0.506976008	8.57578945	20.7702084	29.7490559	0.870999992	31260
+420	2	423	1	40	cplex	1	1	465	1	4	30	30	0	0	399		0.313838005	0.852563024	1.25752199	9.57401752	0.0954919979	1982
+421	2	424	1	40	cplex	0	1	500	8	0	46	0	1	0	399	399	0.527674019	13.0800829	30.3302574	51.506176	0.419856995	43901
+422	2	424	1	40	cplex	1	0	465	11	1	46	0	1	0	399	399	0.333503991	11.5422993	27.0753727	44.0158997	0.389313012	62373
+423	2	424	1	40	cplex	1	1	465	10	2	46	0	1	0	399	399	0.411352009	13.0761528	26.1325092	47.708313	0.452131987	59213
+424	2	424	1	40	cplex	0	0	500	11	3	46	0	1	0	399	399	0.582056999	12.8442411	31.7883167	46.5296936	0.391449004	47932
+425	2	424	1	40	cplex	1	1	465	1	4	46	46	0	0	399		0.480893999	1.88577795	3.46317911	20.7913818	0.0980079994	2913
+426	2	425	1	40	cplex	0	1	500	8	0	33	0	1	0	399	399	0.568641007	9.66631794	21.2374687	35.0389328	0.709007978	31277
+427	2	425	1	40	cplex	1	0	465	11	1	33	0	1	0	399	399	0.285160989	8.44803143	19.1192036	29.7654324	0.709791005	44746
+428	2	425	1	40	cplex	1	1	465	10	2	33	0	1	0	399	399	0.30745101	8.53865528	18.2310715	33.1812325	0.698527992	42479
+429	2	425	1	40	cplex	0	0	500	11	3	33	0	1	0	399	399	0.561903	9.60826111	22.5421772	32.7456169	0.695757985	34386
+430	2	425	1	40	cplex	1	1	465	1	4	33	33	0	0	399		0.284902006	0.736746013	1.24554706	7.34547091	0.104128003	2235
+431	2	426	1	40	cplex	0	1	500	9	0	38	0	1	0	399	399	0.671422005	10.876586	25.1648293	42.4358711	0.822336972	36583
+432	2	426	1	40	cplex	1	0	465	11	1	38	0	1	0	399	399	0.275032997	11.4944763	22.9801178	35.6883469	0.797743976	51525
+433	2	426	1	40	cplex	1	1	465	10	2	38	0	1	0	399	399	0.334996998	8.90876675	21.0323753	38.6581192	0.805100977	48915
+434	2	426	1	40	cplex	0	0	500	11	3	38	0	1	0	399	399	0.458903998	10.4974861	25.5847855	37.7497787	0.809210002	39596
+435	2	426	1	40	cplex	1	1	465	1	4	38	38	0	0	399		0.400478989	2.02611589	3.59989309	29.7246761	0.0820100009	2643
+436	2	427	1	40	cplex	0	1	500	8	0	32	0	1	0	399	399	0.611124992	9.70913219	21.137785	34.5030212	0.844205022	30329
+437	2	427	1	40	cplex	1	0	465	11	1	32	0	1	0	399	399	0.279720992	8.06408596	18.7356071	28.6798401	0.82752502	43390
+438	2	427	1	40	cplex	1	1	465	10	2	32	0	1	0	399	399	0.299492002	7.74787807	18.0226269	32.3698692	0.796106994	41191
+439	2	427	1	40	cplex	0	0	500	11	3	32	0	1	0	399	399	0.426302999	9.07647705	22.3021851	31.7138386	0.826575994	33344
+440	2	427	1	40	cplex	1	1	465	1	4	32	32	0	0	399		0.79865402	11.3556738	20.3298283	152.498764	0.0982839987	5419
+441	2	428	1	40	cplex	0	1	500	8	0	34	0	1	0	399	399	0.62282598	12.0687971	22.1216812	36.2488251	0.905847013	32448
+442	2	428	1	40	cplex	1	0	465	11	1	34	0	1	0	399	399	0.290342003	8.545578	20.2911606	31.8169289	0.957787991	46101
+443	2	428	1	40	cplex	1	1	465	10	2	34	0	1	0	399	399	0.362529993	8.54571247	19.8559532	33.5729103	0.90022099	43766
+444	2	428	1	40	cplex	0	0	500	11	3	34	0	1	0	399	399	0.405056	9.25421143	22.8368816	33.2057533	0.892630994	35428
+445	2	428	1	40	cplex	1	1	465	1	4	34	34	0	0	399		0.298707992	1.06296396	1.849733	9.16757488	0.0936350003	1739
+446	2	429	1	40	cplex	0	1	500	8	0	47	0	1	0	399	399	0.608588994	13.6621971	29.7350693	52.5737495	0.988776028	44910
+447	2	429	1	40	cplex	1	0	465	11	1	47	0	1	0	399	399	0.389811009	12.6596451	27.8633709	45.4277382	0.997080028	63729
+448	2	429	1	40	cplex	1	1	465	10	2	47	0	1	0	399	399	0.474839985	11.653595	26.9970665	49.1627579	0.957948029	60500
+449	2	429	1	40	cplex	0	0	500	11	3	47	0	1	0	399	399	0.586905003	15.9683084	33.7654114	49.0957909	0.971252024	48974
+450	2	429	1	40	cplex	1	1	465	1	4	47	47	0	0	399		1.137146	16.5587387	29.7537632	258.058594	0.246931002	7961
+451	2	430	1	40	cplex	0	1	500	9	0	18	0	1	0	299	299	0.674337029	20.5255146	46.4434013	142.753098	1.14142096	34558
+452	2	430	1	40	cplex	1	0	468	11	1	18	0	1	0	299	299	0.474400997	20.346199	47.6353073	122.322281	0.943714976	42213
+453	2	430	1	40	cplex	1	1	468	9	2	18	0	1	0	299	299	0.445439011	19.7953777	45.2571983	143.017105	0.948594987	40058
+454	2	430	1	40	cplex	0	0	500	11	3	18	0	1	0	299	299	0.586973011	21.0923061	49.3447609	121.285133	0.905951977	36756
+455	2	430	1	40	cplex	1	1	468	1	4	18	18	0	0	299		0.701390982	1.41529298	2.44718194	7.136518	0.105789997	1396
+456	2	431	1	40	cplex	0	1	500	9	0	17	0	1	0	299	299	0.599964023	19.3958359	43.7453194	134.479034	1.48405397	32638
+457	2	431	1	40	cplex	1	0	468	11	1	17	0	1	0	299	299	0.392383993	19.3411369	44.9114418	113.025276	1.320768	39868
+458	2	431	1	40	cplex	1	1	468	9	2	17	0	1	0	299	299	0.402969003	18.9639053	42.8416481	137.541504	1.34498298	37833
+459	2	431	1	40	cplex	0	0	500	11	3	17	0	1	0	299	299	0.558477998	19.9187279	46.5438385	117.038437	1.32048404	34714
+460	2	431	1	40	cplex	1	1	468	1	4	17	17	0	0	299		0.428833991	1.45834601	2.35937595	8.94281578	0.0991920009	1368
+461	2	432	1	40	cplex	0	1	500	9	0	18	0	1	0	299	299	0.835730016	20.4949741	46.6260185	145.431564	0.55834198	34591
+462	2	432	1	40	cplex	1	0	468	11	1	18	0	1	0	299	299	0.466701001	20.1348801	47.3842278	118.894684	0.472851992	42213
+463	2	432	1	40	cplex	1	1	468	9	2	18	0	1	0	299	299	0.483319014	19.7415676	44.9983826	142.634857	0.489935011	40058
+464	2	432	1	40	cplex	0	0	500	11	3	18	0	1	0	299	299	0.568642974	21.2860794	49.7746582	123.920662	0.535580993	36756
+465	2	432	1	40	cplex	1	1	468	1	4	18	18	0	0	299		0.832955003	1.75536203	2.83808899	14.8107796	0.150996	1520
+466	2	433	1	40	cplex	0	1	500	9	0	35	0	1	0	299	299	0.94146198	38.213932	79.6841583	223.578384	1.22703695	67379
+467	2	433	1	40	cplex	1	0	465	11	1	35	0	1	0	299	299	0.66257	37.4944115	79.9492645	179.381866	0.838111997	83218
+468	2	433	1	40	cplex	1	1	465	10	2	35	0	1	0	299	299	0.674346983	35.4337616	76.2190094	221.948685	0.818979025	79025
+469	2	433	1	40	cplex	0	0	500	11	3	35	0	1	0	299	299	0.723209023	36.7109032	82.8860016	183.518112	0.834933996	71470
+470	2	433	1	40	cplex	1	1	465	1	4	35	35	0	0	299		2.161834	18.8618736	30.2879639	197.424728	0	4636
+471	2	434	1	40	cplex	0	1	500	9	0	20	0	1	0	299	299	0.55015099	20.6486607	44.5383377	160.873688	0.809445024	38398
+472	2	434	1	40	cplex	1	0	468	11	1	20	0	1	0	299	299	0.395705998	20.2698879	45.6918564	131.835434	0.78707701	46903
+473	2	434	1	40	cplex	1	1	468	9	2	20	0	1	0	299	299	0.410750002	19.625742	43.2591553	160.120575	0.805023015	44509
+474	2	434	1	40	cplex	0	0	500	11	3	20	0	1	0	299	299	0.601235986	22.4503937	47.8676643	131.294189	0.832840979	40840
+475	2	434	1	40	cplex	1	1	468	1	4	20	20	0	0	299		0.576973975	1.57422805	2.74157095	10.4921799	0.0976139978	1609
+476	2	435	1	40	cplex	0	1	500	9	0	24	0	1	0	299	299	0.766577005	25.2096157	56.215416	206.986923	0.849601984	46078
+477	2	435	1	40	cplex	1	0	468	11	1	24	0	1	0	299	299	0.51463598	25.7652321	55.9965782	158.321594	0.86136198	56284
+478	2	435	1	40	cplex	1	1	468	9	2	24	0	1	0	299	299	0.573031008	25.3967209	53.3288803	205.232178	0.899886012	53411
+479	2	435	1	40	cplex	0	0	500	11	3	24	0	1	0	299	299	0.583653986	26.2936096	57.9071541	159.796814	0.835731983	49008
+480	2	435	1	40	cplex	1	1	468	1	4	24	24	0	0	299		0.764587998	2.03551793	3.27402091	20.0344391	0.0961380005	2097
+481	2	436	1	40	cplex	0	1	500	9	0	31	0	1	0	299	299	0.782496989	31.8737602	69.2272415	184.271729	0.902235985	59693
+482	2	436	1	40	cplex	1	0	468	11	1	31	0	1	0	299	299	0.648092985	34.2008324	73.4441833	151.083649	0.896570027	72701
+483	2	436	1	40	cplex	1	1	468	9	2	31	0	1	0	299	299	0.738793015	33.3550835	68.9953079	181.50914	0.876201987	68989
+484	2	436	1	40	cplex	0	0	500	11	3	31	0	1	0	299	299	0.898146987	33.9140472	74.3887482	151.418076	0.884213984	63302
+485	2	436	1	40	cplex	1	1	468	1	4	31	31	0	0	299		0.962203979	4.58513689	7.76298714	36.1098366	0.0959319994	3119
+486	2	437	1	40	cplex	0	1	500	9	0	34	0	1	0	299	299	0.824648023	35.3740463	76.7645798	212.7117	0.825284004	65580
+487	2	437	1	40	cplex	1	0	468	11	1	34	0	1	0	299	299	0.699092984	36.2433548	78.3974609	174.031342	0.822733998	79736
+488	2	437	1	40	cplex	1	1	468	9	2	34	0	1	0	299	299	0.761407971	34.1152954	75.4200974	210.407166	0.828079998	75666
+489	2	437	1	40	cplex	0	0	500	11	3	34	0	1	0	299	299	0.886614978	37.6065331	81.6444931	177.792419	0.834665	69428
+490	2	437	1	40	cplex	1	1	468	1	4	34	34	0	0	299		1.16671205	5.07363176	8.26624012	38.5668297	0.0944219977	3379
+491	2	438	1	40	cplex	0	1	500	9	0	52	0	1	0	299	299	1.27258396	58.8215179	122.782257	386.837341	0.763706028	99931
+492	2	438	1	40	cplex	1	0	468	11	1	52	0	1	0	299	299	0.899655998	58.3936234	124.451408	309.20755	0.756097972	121950
+493	2	438	1	40	cplex	1	1	468	9	2	52	0	1	0	299	299	0.92247802	59.4366684	118.792313	392.31958	0.749208987	115724
+494	2	438	1	40	cplex	0	0	500	11	3	52	0	1	0	299	299	1.26959002	58.7917938	128.193176	317.481232	0.745950997	106184
+495	2	438	1	40	cplex	1	1	468	1	4	52	52	0	0	299		2.21624804	7.24012899	12.9208422	73.1282883	0.0965600014	5115
+496	2	439	1	40	cplex	0	1	500	9	0	21	0	1	0	299	299	0.565594971	22.6499748	48.8147583	112.52253	0.345160007	40318
+497	2	439	1	40	cplex	1	0	468	11	1	21	0	1	0	299	299	0.453860015	22.3987236	49.640667	93.2148514	0.324999988	49249
+498	2	439	1	40	cplex	1	1	468	9	2	21	0	1	0	299	299	0.515953004	21.2340755	47.5673904	115.097557	0.36423701	46735
+499	2	439	1	40	cplex	0	0	500	11	3	21	0	1	0	299	299	0.582262993	23.4400387	51.791893	96.944313	0.331714988	42882
+500	2	439	1	40	cplex	1	1	468	1	4	21	21	0	0	299		0.560504019	1.48254204	2.51489997	8.02884388	0.0994080007	1629
+506	2	441	1	40	cplex	0	1	500	9	0	9	0	1	0	249	249	0.465359002	14.2846317	32.1514626	69.965889	0.931935012	21547
+507	2	441	1	40	cplex	1	0	469	11	1	9	0	1	0	249	249	0.327210993	14.2501554	33.2323151	59.7649727	0.927559018	25565
+508	2	441	1	40	cplex	1	1	469	9	2	9	0	1	0	249	249	0.395590007	14.2703505	31.3784847	70.1442337	0.960946023	24231
+509	2	441	1	40	cplex	0	0	500	11	3	9	0	1	0	249	249	0.440845996	14.5056067	33.9803581	60.2613449	0.939779997	22878
+510	2	441	1	40	cplex	1	1	469	1	4	9	9	0	0	249		0.389016002	1.83284605	3.10339403	22.6504841	0.0972890034	855
+511	2	442	1	40	cplex	0	1	500	9	0	3	0	1	0	249	249	0.338560998	5.01858902	10.7012196	31.8748646	0.983675003	7172
+512	2	442	1	40	cplex	1	0	469	11	1	3	0	1	0	249	249	0.232152998	5.01359701	11.074728	23.4434967	1.02805698	8521
+513	2	442	1	40	cplex	1	1	469	9	2	3	0	1	0	249	249	0.240530998	4.8201952	10.5694742	32.0089378	0.988029003	8077
+514	2	442	1	40	cplex	0	0	500	11	3	3	0	1	0	249	249	0.256532013	5.07652521	11.3304195	24.0995636	0.987778008	7626
+515	2	442	1	40	cplex	1	1	469	1	4	3	3	0	0	249		0.51601398	0.716300011	1.107952	10.471858	0.100181997	436
+516	2	443	1	40	cplex	0	1	500	9	0	5	0	1	0	249	249	0.403207988	8.19842052	18.1785259	37.9639053	0.259122014	11989
+517	2	443	1	40	cplex	1	0	465	11	1	5	0	1	0	249	249	0.271777987	8.14682293	18.8170223	31.5099792	0.273440003	14404
+518	2	443	1	40	cplex	1	1	465	10	2	5	0	1	0	249	249	0.269324005	8.59195614	18.8465137	37.6919174	0.275115997	13680
+519	2	443	1	40	cplex	0	0	500	11	3	5	0	1	0	249	249	0.37854901	8.35776424	19.3349113	31.5983829	0.288111001	12710
+520	2	443	1	40	cplex	1	1	465	1	4	5	5	0	0	249		0.423132002	0.478527009	0.778344989	3.65469599	0.0923720002	438
+521	2	444	1	40	cplex	0	1	500	9	0	12	0	1	0	249	249	0.492888004	20.3311882	45.3210297	98.0874481	0.259858996	28690
+522	2	444	1	40	cplex	1	0	469	11	1	12	0	1	0	249	249	0.420255989	20.9299183	46.4152145	79.2291946	0.298620999	34087
+523	2	444	1	40	cplex	1	1	469	9	2	12	0	1	0	249	249	0.564481974	20.3920078	44.3732185	96.3872833	0.275916994	32308
+524	2	444	1	40	cplex	0	0	500	11	3	12	0	1	0	249	249	0.51018697	21.2945023	47.9837875	81.5437927	0.265433997	30504
+525	2	444	1	40	cplex	1	1	469	1	4	12	12	0	0	249		1.02872801	2.39411402	4.0129652	29.4454079	0.0897340029	1635
+562	2	446	1	40	cplex	0	1	500	10	0	25	0	1	0	249	249	0.909027994	41.9234047	89.6435547	206.851288	0.421092004	63156
+563	2	446	1	40	cplex	1	0	465	11	1	25	0	1	0	249	249	0.596588016	41.9776115	90.0539627	205.008514	0.451270014	72024
+564	2	446	1	40	cplex	1	1	465	11	2	25	0	1	0	249	249	0.787158012	41.9242821	88.8884048	203.641479	0.44639799	72024
+565	2	446	1	40	cplex	0	0	500	11	3	25	0	1	0	249	249	0.852814972	43.1179771	90.970047	206.315262	0.440122008	63550
+566	2	447	1	40	cplex	0	1	500	10	0	6	0	1	0	249	249	0.397803009	10.7625189	21.5723419	36.5600586	0.929431975	15109
+567	2	447	1	40	cplex	1	0	469	11	1	6	0	1	0	249	249	0.241262004	10.5561638	21.0105038	36.5413246	0.944222987	17043
+568	2	447	1	40	cplex	1	1	469	10	2	6	0	1	0	249	249	0.331028998	10.5646181	21.4569817	36.6526413	0.931824982	17011
+569	2	447	1	40	cplex	0	0	500	11	3	6	0	1	0	249	249	0.324896991	10.9868593	22.0845699	38.0491295	0.952058971	15252
+570	2	448	1	40	cplex	0	1	500	10	0	2	0	1	0	249	249	0.277393997	4.13650322	7.13750887	15.5706272	0.246628001	5036
+571	2	448	1	40	cplex	1	0	469	11	1	2	0	1	0	249	249	0.176313996	3.72191811	7.03617716	15.3369923	0.230375007	5681
+572	2	448	1	40	cplex	1	1	469	10	2	2	0	1	0	249	249	0.246808007	3.85880899	7.01486397	15.7690411	0.224236995	5670
+573	2	448	1	40	cplex	0	0	500	11	3	2	0	1	0	249	249	0.174732	3.7366991	7.18905497	15.9927273	0.226411998	5084
+574	2	449	1	40	cplex	0	1	500	10	0	4	0	1	0	249	249	0.304906994	7.53208685	14.3714218	24.8577976	0.975676	10118
+575	2	449	1	40	cplex	1	0	465	11	1	4	0	1	0	249	249	0.220183	6.77069712	13.7611952	24.1207542	0.999213994	11523
+576	2	449	1	40	cplex	1	1	465	11	2	4	0	1	0	249	249	0.272558987	7.232337	13.9958344	24.114727	1.01424205	11523
+577	2	449	1	40	cplex	0	0	500	11	3	4	0	1	0	249	249	0.253645986	6.768466	14.2442369	24.8009853	1.00636196	10168
+578	2	450	1	40	cplex	0	1	1000	3	0	15	0	1	0	999	999	0.00776500022	0.00056299998	0.00166199997	0.00591900013	0.286707997	270
+579	2	450	1	40	cplex	1	0	986	11	1	15	0	1	0	999	999	0.0393159986	0.00108099997	0.00298499991	0.00791299995	0.29201299	630
+580	2	450	1	40	cplex	1	1	986	3	2	15	0	1	0	999	999	0.038116999	0.000554999977	0.00163199997	0.00716099981	0.305000007	270
+581	2	450	1	40	cplex	0	0	1000	11	3	15	0	1	0	999	999	0.0097719999	0.00102800003	0.00296199997	0.00818900019	0.276915014	630
+582	2	451	1	40	cplex	0	1	1000	3	0	12	0	1	0	999	999	0.0063649998	0.000455000001	0.00134900003	0.00672100019	0.966862023	216
+583	2	451	1	40	cplex	1	0	986	11	1	12	0	1	0	999	999	0.0374029987	0.000707000028	0.00250499998	0.00693099992	0.981406987	504
+584	2	451	1	40	cplex	1	1	986	3	2	12	0	1	0	999	999	0.0381609984	0.000475999987	0.00135499996	0.00552499993	0.953886986	216
+585	2	451	1	40	cplex	0	0	1000	11	3	12	0	1	0	999	999	0.00804399978	0.000708999985	0.00245700008	0.00583499996	0.926127017	504
+586	2	452	1	40	cplex	0	1	1000	3	0	26	0	1	0	999	999	0.0114160003	0.00106100005	0.00266	0.00875100028	0.827935994	468
+587	2	452	1	40	cplex	1	0	986	11	1	26	0	1	0	999	999	0.0405780002	0.00163499999	0.00485400017	0.0100880004	0.846668005	1092
+588	2	452	1	40	cplex	1	1	986	3	2	26	0	1	0	999	999	0.040651001	0.00104500004	0.0026159999	0.00831899978	0.834631026	468
+589	2	452	1	40	cplex	0	0	1000	11	3	26	0	1	0	999	999	0.0105480002	0.00168300001	0.00490200007	0.0101570003	0.837706029	1092
+590	2	453	1	40	cplex	0	1	1000	3	0	5	0	1	0	999	999	0.00409199996	0.000354999996	0.00116999994	0.00431199977	1.04743695	90
+591	2	453	1	40	cplex	1	0	986	11	1	5	0	1	0	999	999	0.0389849991	0.000419999997	0.00112999999	0.00466299988	0.938098013	210
+592	2	453	1	40	cplex	1	1	986	3	2	5	0	1	0	999	999	0.0338610001	0.000247999997	0.000665	0.00391699979	0.89072001	90
+593	2	453	1	40	cplex	0	0	1000	11	3	5	0	1	0	999	999	0.00307899993	0.000358999998	0.00112100004	0.00482300017	0.923317015	210
+594	2	454	1	40	cplex	0	1	1000	3	0	13	0	1	0	999	999	0.00859099999	0.000493999978	0.00144300004	0.00581899984	0.420071989	234
+595	2	454	1	40	cplex	1	0	986	11	1	13	0	1	0	999	999	0.0401870012	0.000936999975	0.00267100008	0.00725599984	0.394879997	546
+596	2	454	1	40	cplex	1	1	986	3	2	13	0	1	0	999	999	0.039673999	0.000500999973	0.00143900001	0.00733599998	0.380968988	234
+597	2	454	1	40	cplex	0	0	1000	11	3	13	0	1	0	999	999	0.00804299954	0.000939999998	0.00266300002	0.00557000004	0.381419986	546
+598	2	455	1	40	cplex	0	1	1000	3	0	26	0	1	0	999	999	0.00813800003	0.00107	0.00263200002	0.00793400034	0.819500983	468
+599	2	455	1	40	cplex	1	0	986	11	1	26	0	1	0	999	999	0.0458550006	0.00142400002	0.00497400016	0.00919200014	0.818275988	1092
+600	2	455	1	40	cplex	1	1	986	3	2	26	0	1	0	999	999	0.0400630012	0.00104	0.00266600004	0.00857300032	0.825495005	468
+601	2	455	1	40	cplex	0	0	1000	11	3	26	0	1	0	999	999	0.0145370001	0.00173500006	0.00495100021	0.0101030003	0.85037303	1092
+602	2	456	1	40	cplex	0	1	1000	3	0	30	0	1	0	999	999	0.0165139996	0.001009	0.00303200004	0.00886400044	0.307536989	540
+603	2	456	1	40	cplex	1	0	986	11	1	30	0	1	0	999	999	0.0473369993	0.00162700005	0.00564299989	0.0107279997	0.268133014	1260
+604	2	456	1	40	cplex	1	1	986	3	2	30	0	1	0	999	999	0.0477290004	0.000980000012	0.00306600006	0.00952500012	0.259045005	540
+605	2	456	1	40	cplex	0	0	1000	11	3	30	0	1	0	999	999	0.0162749998	0.00157600001	0.00560100004	0.011349	0.258628011	1260
+606	2	457	1	40	cplex	0	1	1000	3	0	5	0	1	0	999	999	0.00300000003	0.000264000002	0.000676000025	0.0357419997	0.232629001	90
+607	2	457	1	40	cplex	1	0	986	11	1	5	0	1	0	999	999	0.0348090008	0.000413000002	0.00112399994	0.0301089995	0.223049	210
+608	2	457	1	40	cplex	1	1	986	3	2	5	0	1	0	999	999	0.0346320011	0.000288999989	0.00068300002	0.0301169995	0.239488006	90
+609	2	457	1	40	cplex	0	0	1000	11	3	5	0	1	0	999	999	0.0029839999	0.000387000007	0.00114399998	0.0279949997	0.220624	210
+610	2	458	1	40	cplex	0	1	1000	3	0	18	0	1	0	999	999	0.0105309999	0.000648999994	0.00197299989	0.00735400012	0.865162015	324
+611	2	458	1	40	cplex	1	0	986	11	1	18	0	1	0	999	999	0.0352779999	0.00117099995	0.00362399989	0.00815900043	0.853614986	756
+612	2	458	1	40	cplex	1	1	986	3	2	18	0	1	0	999	999	0.0415210016	0.000751000014	0.00195599999	0.00637899991	0.859245002	324
+613	2	458	1	40	cplex	0	0	1000	11	3	18	0	1	0	999	999	0.0107140001	0.00119500002	0.00357399997	0.00875199959	0.93630898	756
+614	2	459	1	40	cplex	0	1	1000	3	0	18	0	1	0	999	999	0.0105010001	0.000783000025	0.00199400005	0.00662099989	0.880551994	324
+615	2	459	1	40	cplex	1	0	986	11	1	18	0	1	0	999	999	0.0395810008	0.00120299996	0.00363599998	0.0081989998	0.972221971	756
+616	2	459	1	40	cplex	1	1	986	3	2	18	0	1	0	999	999	0.0412809998	0.000740999996	0.00197200011	0.00618400006	0.877246022	324
+617	2	459	1	40	cplex	0	0	1000	11	3	18	0	1	0	999	999	0.0109689999	0.001192	0.00361600006	0.00818299968	0.864753008	756
+618	2	460	1	40	cplex	0	1	1000	6	0	27	0	1	0	974	974	0.36174199	0.738156974	0.776784003	0.796459973	0.828610003	5123
+619	2	460	1	40	cplex	1	0	983	11	1	27	0	1	0	974	974	0.143839002	0.393595994	0.801364005	0.817009985	0.843890011	10044
+620	2	460	1	40	cplex	1	1	983	7	2	27	0	1	0	974	974	0.188144997	0.270550013	0.587899983	0.642661989	0.85037899	7156
+621	2	460	1	40	cplex	0	0	1000	11	3	27	0	1	0	974	974	0.344924986	0.554922998	1.15666103	1.17821503	0.849102974	7884
+622	2	461	1	40	cplex	0	1	1000	6	0	24	0	1	0	974	974	0.377801001	0.762112021	0.68453902	0.778551996	0.855328023	4554
+623	2	461	1	40	cplex	1	0	983	11	1	24	0	1	0	974	974	0.238607004	0.301411986	0.734879017	0.770268977	0.863179028	8928
+624	2	461	1	40	cplex	1	1	983	7	2	24	0	1	0	974	974	0.235405996	0.234662995	0.523868978	0.597498	0.937937021	6361
+625	2	461	1	40	cplex	0	0	1000	11	3	24	0	1	0	974	974	0.353751004	0.497799009	1.02886903	1.06833398	0.873933971	7008
+626	2	462	1	40	cplex	0	1	1000	6	0	24	0	1	0	974	974	0.346313	0.311143011	0.694827974	0.783832014	0.568611979	4554
+627	2	462	1	40	cplex	1	0	983	11	1	24	0	1	0	974	974	0.206466004	0.307945013	0.712803006	0.769249976	0.567933977	8928
+628	2	462	1	40	cplex	1	1	983	7	2	24	0	1	0	974	974	0.218321994	0.243163005	0.936205983	0.595037997	0.569706976	6361
+629	2	462	1	40	cplex	0	0	1000	11	3	24	0	1	0	974	974	0.338914007	0.515430987	1.046646	1.07711995	0.574590981	7008
+630	2	463	1	40	cplex	0	1	1000	6	0	26	0	1	0	974	974	0.315438986	0.334946007	0.750797987	0.824002028	0.673578024	4934
+631	2	463	1	40	cplex	1	0	983	11	1	26	0	1	0	974	974	0.224347994	0.347375989	0.795359015	0.819683015	0.247700006	9672
+632	2	463	1	40	cplex	1	1	983	7	2	26	0	1	0	974	974	0.219576001	0.313881993	0.571191013	0.644218981	0.253470004	6891
+633	2	463	1	40	cplex	0	0	1000	11	3	26	0	1	0	974	974	0.381817013	0.492511004	1.13251603	1.16426504	0.251780987	7592
+634	2	464	1	40	cplex	0	1	1000	6	0	24	0	1	0	974	974	0.398227006	0.316716999	0.697238982	0.872823	0.891472995	4554
+635	2	464	1	40	cplex	1	0	983	11	1	24	0	1	0	974	974	0.132705003	0.51989001	0.706255972	0.851234972	0.907846987	8928
+636	2	464	1	40	cplex	1	1	983	7	2	24	0	1	0	974	974	0.223765999	0.242036	0.536670983	0.695131004	0.891587973	6361
+637	2	464	1	40	cplex	0	0	1000	11	3	24	0	1	0	974	974	0.277619988	0.885224998	1.02890003	1.16445196	0.896861017	7008
+638	2	465	1	40	cplex	0	1	1000	6	0	23	0	1	0	974	974	0.389144003	0.30409801	0.667420983	0.737684011	1.10663295	4364
+639	2	465	1	40	cplex	1	0	983	11	1	23	0	1	0	974	974	0.205726996	0.292356998	0.687125981	0.736980975	0.881870985	8556
+640	2	465	1	40	cplex	1	1	983	7	2	23	0	1	0	974	974	0.243865997	0.222873002	0.502928972	0.573705018	0.864766002	6096
+641	2	465	1	40	cplex	0	0	1000	11	3	23	0	1	0	974	974	0.231095999	0.532693982	0.988029003	1.02480304	0.865271986	6716
+642	2	466	1	40	cplex	0	1	1000	6	0	25	0	1	0	974	974	0.316251993	0.549410999	0.734625995	0.810446024	0.503517985	4744
+643	2	466	1	40	cplex	1	0	983	11	1	25	0	1	0	974	974	0.206424996	0.327776015	0.756675005	0.772668004	0.49919799	9300
+644	2	466	1	40	cplex	1	1	983	7	2	25	0	1	0	974	974	0.236084998	0.230945006	0.543084025	0.614036024	0.503894985	6626
+645	2	466	1	40	cplex	0	0	1000	11	3	25	0	1	0	974	974	0.162964001	0.457839012	1.09986305	1.09775603	0.519474983	7300
+646	2	467	1	40	cplex	0	1	1000	6	0	26	0	1	0	974	974	0.233401	0.476040989	0.759070992	0.838900983	0.893284023	4934
+647	2	467	1	40	cplex	1	0	983	11	1	26	0	1	0	974	974	0.26839301	0.342451006	0.802204013	0.802035987	0.897993982	9672
+648	2	467	1	40	cplex	1	1	983	7	2	26	0	1	0	974	974	0.237776995	0.308789015	0.570823014	0.623923004	0.907471001	6891
+649	2	467	1	40	cplex	0	0	1000	11	3	26	0	1	0	974	974	0.347750008	0.491816998	1.15096903	1.11954904	0.900991976	7592
+650	2	468	1	40	cplex	0	1	1000	6	0	25	0	1	0	974	974	0.356721014	0.338878006	0.746746004	0.789545	0.319644004	4744
+651	2	468	1	40	cplex	1	0	983	11	1	25	0	1	0	974	974	0.253109008	0.310716987	0.745869994	0.788378	0.887394011	9300
+652	2	468	1	40	cplex	1	1	983	7	2	25	0	1	0	974	974	0.224437997	0.240294993	0.555465996	0.616747022	0.313434988	6626
+653	2	468	1	40	cplex	0	0	1000	11	3	25	0	1	0	974	974	0.435959011	0.451247007	1.08891904	1.11691499	0.339042008	7300
+654	2	469	1	40	cplex	0	1	1000	6	0	24	0	1	0	974	974	0.418709993	0.309540004	0.704070985	0.783713996	0.997102976	4554
+655	2	469	1	40	cplex	1	0	983	11	1	24	0	1	0	974	974	0.228522003	0.304001987	0.727101982	0.77502501	0.885823011	8928
+656	2	469	1	40	cplex	1	1	983	7	2	24	0	1	0	974	974	0.235960007	0.229837	0.535974026	0.599372983	0.857980013	6361
+657	2	469	1	40	cplex	0	0	1000	11	3	24	0	1	0	974	974	0.384954005	0.451386005	1.06432104	1.06957603	0.845856011	7008
+658	2	470	1	40	cplex	0	1	1000	8	0	22	0	1	0	949	949	0.541700006	1.85004795	3.04017401	2.62391591	0.964496017	9789
+659	2	470	1	40	cplex	1	0	934	11	1	22	0	1	0	949	949	0.0552590005	0.0970420018	0.226133004	0.319848001	0.990513027	18964
+660	2	470	1	40	cplex	1	1	934	11	2	22	0	1	0	949	949	0.0542760007	0.0939169973	0.224421993	0.321736008	0.957859993	18964
+661	2	470	1	40	cplex	0	0	1000	11	3	22	0	1	0	949	949	0.477140993	1.62527502	3.6448369	3.14934492	0.946677029	11924
+662	2	471	1	40	cplex	0	1	1000	7	0	29	0	1	0	949	949	0.578903973	2.2825439	3.88597202	3.36055589	0.876942992	12632
+663	2	471	1	40	cplex	1	0	934	11	1	29	0	1	0	949	949	0.0669530034	0.159588993	0.297044009	0.415838987	0.878066003	24998
+664	2	471	1	40	cplex	1	1	934	11	2	29	0	1	0	949	949	0.0607220009	0.125391006	0.296705008	0.414494008	0.890636027	24998
+665	2	471	1	40	cplex	0	0	1000	11	3	29	0	1	0	949	949	0.404177994	2.09162688	4.75922585	4.07326412	0.920673013	15718
+666	2	472	1	40	cplex	0	1	1000	8	0	35	0	1	0	949	949	0.583048999	2.77147603	4.8098712	4.06353283	0.929839015	15568
+667	2	472	1	40	cplex	1	0	934	11	1	35	0	1	0	949	949	0.0740540028	0.197319001	0.358482987	0.503570974	0.905786991	30170
+668	2	472	1	40	cplex	1	1	934	11	2	35	0	1	0	949	949	0.0674929991	0.152164996	0.364567012	0.505895019	0.886222005	30170
+669	2	472	1	40	cplex	0	0	1000	11	3	35	0	1	0	949	949	0.478403002	3.07657003	5.81490088	4.95146084	0.887214005	18970
+670	2	473	1	40	cplex	0	1	1000	8	0	62	0	1	0	949	949	0.737820029	2.70152402	5.81030989	4.63292217	0.309675992	17953
+671	2	473	1	40	cplex	1	0	934	11	1	62	0	1	0	949	949	0.077568002	0.177237004	0.437299013	0.598707974	0.289003998	34480
+672	2	473	1	40	cplex	1	1	934	11	2	62	0	1	0	949	949	0.0710090026	0.181819007	0.438692987	0.603133976	0.295552999	34480
+673	2	473	1	40	cplex	0	0	1000	11	3	62	0	1	0	949	949	0.825801015	2.99011493	6.81084013	5.46085405	0.296539992	21680
+674	2	474	1	40	cplex	0	1	1000	8	0	23	0	1	0	949	949	0.58829999	1.40587699	3.47662306	2.79716206	0.86600399	10405
+675	2	474	1	40	cplex	1	0	934	11	1	23	0	1	0	949	949	0.0610800013	0.101199999	0.241524994	0.334670007	0.87441802	19826
+676	2	474	1	40	cplex	1	1	934	11	2	23	0	1	0	949	949	0.0573260002	0.0994070023	0.237651005	0.335667014	0.987195015	19826
+677	2	474	1	40	cplex	0	0	1000	11	3	23	0	1	0	949	949	0.598258972	2.2338891	3.82972097	3.31638408	0.870100021	12466
+678	2	475	1	40	cplex	0	1	1000	8	0	23	0	1	0	949	949	0.439466	1.34458995	3.364465	2.70044208	0.934230983	10120
+679	2	475	1	40	cplex	1	0	934	11	1	23	0	1	0	949	949	0.0522979982	0.0918750018	0.234405994	0.330125004	1.02932894	19826
+680	2	475	1	40	cplex	1	1	934	11	2	23	0	1	0	949	949	0.0571210012	0.0970719978	0.239827007	0.330709994	0.927079976	19826
+681	2	475	1	40	cplex	0	0	1000	11	3	23	0	1	0	949	949	0.655263007	1.66078997	3.83848596	3.2257781	0.951943994	12466
+682	2	476	1	40	cplex	0	1	1000	8	0	38	0	1	0	949	949	0.838671029	2.48723698	5.77411604	4.59807396	0.389604002	17559
+683	2	476	1	40	cplex	1	0	934	11	1	38	0	1	0	949	949	0.0761070028	0.168598995	0.418646008	0.549681008	0.298130006	32756
+684	2	476	1	40	cplex	1	1	934	11	2	38	0	1	0	949	949	0.0685530007	0.163993999	0.414106995	0.547904015	0.314767987	32756
+685	2	476	1	40	cplex	0	0	1000	11	3	38	0	1	0	949	949	0.603527009	3.41197801	6.68034506	5.17714214	0.323720008	20596
+686	2	477	1	40	cplex	0	1	1000	7	0	27	0	1	0	949	949	0.712020993	1.70459795	3.74221992	3.1409831	0.965375006	11761
+687	2	477	1	40	cplex	1	0	934	11	1	27	0	1	0	949	949	0.0668980032	0.121629998	0.287010014	0.381716996	0.936522007	23274
+688	2	477	1	40	cplex	1	1	934	11	2	27	0	1	0	949	949	0.0636890009	0.123221003	0.292062998	0.385733008	0.934692979	23274
+689	2	477	1	40	cplex	0	0	1000	11	3	27	0	1	0	949	949	0.283861011	2.68542099	4.50841713	3.78782701	0.968104005	14634
+690	2	478	1	40	cplex	0	1	1000	7	0	17	0	1	0	949	949	0.368586004	1.12717199	2.31766796	2.07614803	0.713349998	7405
+691	2	478	1	40	cplex	1	0	934	11	1	17	0	1	0	949	949	0.0538240001	0.0766040012	0.179973006	0.248444006	0.729112983	14654
+692	2	478	1	40	cplex	1	1	934	11	2	17	0	1	0	949	949	0.0473930016	0.0689100027	0.171336994	0.248242006	0.781754017	14654
+693	2	478	1	40	cplex	0	0	1000	11	3	17	0	1	0	949	949	0.512578011	1.19941497	2.96045494	2.47269511	0.728811979	9214
+694	2	479	1	40	cplex	0	1	1000	8	0	60	0	1	0	949	949	0.835725009	2.52189994	5.95755482	4.67849398	0.262421995	17953
+695	2	479	1	40	cplex	1	0	934	11	1	60	0	1	0	949	949	0.0730559975	0.167824	0.425911993	0.604004979	0.281147987	34480
+696	2	479	1	40	cplex	1	1	934	11	2	60	0	1	0	949	949	0.0747400001	0.167812005	0.421903014	0.601001978	0.280088991	34480
+697	2	479	1	40	cplex	0	0	1000	11	3	60	0	1	0	949	949	0.827943027	2.82230711	6.85035706	5.47135401	0.275377005	21680
+698	2	480	1	40	cplex	0	1	1000	9	0	5	0	1	0	899	899	0.261319995	1.47080302	3.12442398	3.81744909	0.244367003	4913
+699	2	480	1	40	cplex	1	0	962	11	1	5	0	1	0	899	899	0.149865001	1.23907101	2.75049901	3.28215504	0.241176993	6852
+700	2	480	1	40	cplex	1	1	962	10	2	5	0	1	0	899	899	0.159265995	1.18039501	2.68701696	3.29388809	0.247991994	6724
+701	2	480	1	40	cplex	0	0	1000	11	3	5	0	1	0	899	899	0.205919996	1.42732596	3.27818704	3.90313411	0.221919	5210
+702	2	481	1	40	cplex	0	1	1000	9	0	14	0	1	0	899	899	0.656139016	3.806041	8.70979214	10.0389585	0.260670006	13825
+703	2	481	1	40	cplex	1	0	961	11	1	14	0	1	0	899	899	0.267114997	3.18884397	7.38147688	8.93641853	0.255144	19469
+704	2	481	1	40	cplex	1	1	961	10	2	14	0	1	0	899	899	0.392720014	3.204	7.41794586	8.82089901	0.217507005	19126
+705	2	481	1	40	cplex	0	0	1000	11	3	14	0	1	0	899	899	0.63796097	3.88403106	8.9700346	10.3651524	0.213453993	14588
+706	2	482	1	40	cplex	0	1	1000	9	0	16	0	1	0	899	899	0.656400979	4.39156485	9.75679302	11.471056	0.970884979	15722
+707	2	482	1	40	cplex	1	0	962	11	1	16	0	1	0	899	899	0.412591994	3.6706481	8.4693346	10.3389883	0.937996984	21929
+708	2	482	1	40	cplex	1	1	962	10	2	16	0	1	0	899	899	0.274691999	3.69004011	8.29293919	10.2634239	0.946376979	21518
+709	2	482	1	40	cplex	0	0	1000	11	3	16	0	1	0	899	899	0.671312988	4.50849581	10.3789806	11.912343	0.932483017	16672
+710	2	483	1	40	cplex	0	1	1000	9	0	18	0	1	0	899	899	0.799217999	5.75750113	11.47365	12.9324284	0.555545986	17687
+711	2	483	1	40	cplex	1	0	962	11	1	18	0	1	0	899	899	0.404886991	4.2555418	9.87022591	11.7171402	0.55172199	24670
+712	2	483	1	40	cplex	1	1	962	10	2	18	0	1	0	899	899	0.416373998	4.21497583	9.68863964	11.5918074	0.545502007	24208
+713	2	483	1	40	cplex	0	0	1000	11	3	18	0	1	0	899	899	0.648186028	5.27741909	11.9819832	13.4930611	0.544803977	18756
+714	2	484	1	40	cplex	0	1	1000	9	0	19	0	1	0	899	899	0.631940007	5.34669209	11.9210186	13.5209026	0.260289013	18670
+715	2	484	1	40	cplex	1	0	962	11	1	19	0	1	0	899	899	0.441610992	4.31610012	10.3520451	12.2776403	0.236581996	26040
+716	2	484	1	40	cplex	1	1	962	10	2	19	0	1	0	899	899	0.405124992	4.2183342	10.8689623	12.1196537	0.216986001	25552
+717	2	484	1	40	cplex	0	0	1000	11	3	19	0	1	0	899	899	0.624318004	5.257442	12.6368895	14.145606	0.25742501	19798
+718	2	485	1	40	cplex	0	1	1000	9	0	20	0	1	0	899	899	0.661625028	5.55318499	12.4820328	14.3633366	0.942821026	19750
+719	2	485	1	40	cplex	1	0	961	11	1	20	0	1	0	899	899	0.374646008	4.54754877	10.9000406	13.1328087	0.907230973	27814
+720	2	485	1	40	cplex	1	1	961	10	2	20	0	1	0	899	899	0.378280997	4.74861002	10.5529861	12.9558611	0.926432014	27323
+721	2	485	1	40	cplex	0	0	1000	11	3	20	0	1	0	899	899	0.752125978	5.71653509	13.169095	15.1289177	0.899245977	20840
+722	2	486	1	40	cplex	0	1	1000	9	0	18	0	1	0	899	899	0.604498982	5.93604612	11.3859978	13.0205221	0.960512996	17775
+723	2	486	1	40	cplex	1	0	961	11	1	18	0	1	0	899	899	0.447939992	4.07590389	9.80258179	11.6155434	0.915309012	25032
+724	2	486	1	40	cplex	1	1	961	10	2	18	0	1	0	899	899	0.381235987	4.06918001	9.62740993	11.611311	0.905386984	24591
+725	2	486	1	40	cplex	0	0	1000	11	3	18	0	1	0	899	899	0.645251989	5.00656605	11.7627411	13.3866692	0.92760098	18756
+726	2	487	1	40	cplex	0	1	1000	9	0	25	0	1	0	899	899	0.786818027	6.81602478	15.6064692	18.7848148	0.924942017	24566
+727	2	487	1	40	cplex	1	0	962	11	1	25	0	1	0	899	899	0.465553999	6.91471004	13.6613607	17.0388584	0.925499976	34264
+728	2	487	1	40	cplex	1	1	962	10	2	25	0	1	0	899	899	0.557313979	5.83667278	13.2826338	16.9977112	0.960340977	33622
+729	2	487	1	40	cplex	0	0	1000	11	3	25	0	1	0	899	899	0.905369997	6.99116278	16.4263039	19.4936008	0.933927	26050
+730	2	488	1	40	cplex	0	1	1000	9	0	14	0	1	0	899	899	0.613834977	3.9857049	8.64905453	9.77157116	0.393047005	13825
+731	2	488	1	40	cplex	1	0	961	11	1	14	0	1	0	899	899	0.328741014	3.14265203	7.49834919	8.8898592	0.356550992	19469
+732	2	488	1	40	cplex	1	1	961	10	2	14	0	1	0	899	899	0.245313004	3.19382811	7.44471312	8.89539433	0.358606994	19126
+733	2	488	1	40	cplex	0	0	1000	11	3	14	0	1	0	899	899	0.588859975	4.84948206	9.06610107	10.353651	0.396465987	14588
+734	2	489	1	40	cplex	0	1	1000	9	0	16	0	1	0	899	899	0.600499988	4.27189779	9.86924744	11.5479774	0.963069975	15722
+735	2	489	1	40	cplex	1	0	962	11	1	16	0	1	0	899	899	0.320196003	3.67216992	8.42588043	10.3586407	0.946289003	21929
+736	2	489	1	40	cplex	1	1	962	10	2	16	0	1	0	899	899	0.299825013	3.58123589	8.41800594	10.1640358	0.934584975	21518
+737	2	489	1	40	cplex	0	0	1000	11	3	16	0	1	0	899	899	0.439756989	4.5050168	10.321249	12.0318623	0.918479025	16672
+738	2	490	1	40	cplex	0	1	1000	10	0	23	0	1	0	799	799	1.08757305	26.8584614	58.6069756	108.183739	0.408904999	46447
+739	2	490	1	40	cplex	1	0	934	11	1	23	0	1	0	799	799	0.733627975	23.3101501	52.7127762	101.533836	0.234178007	61859
+740	2	490	1	40	cplex	1	1	934	11	2	23	0	1	0	799	799	0.786485016	23.6165581	52.6723022	101.582611	0.299369007	61859
+741	2	490	1	40	cplex	0	0	1000	11	3	23	0	1	0	799	799	1.36260903	26.3709011	58.8839302	107.970963	0.240397006	46966
+742	2	491	1	40	cplex	0	1	1000	10	0	33	0	1	0	799	799	1.43697095	36.6963081	85.1542206	166.388016	0.815603971	66642
+743	2	491	1	40	cplex	1	0	934	11	1	33	0	1	0	799	799	0.853781998	34.5453682	75.6585541	157.537308	0.788814008	88755
+744	2	491	1	40	cplex	1	1	934	11	2	33	0	1	0	799	799	0.967068017	32.3130302	75.0345993	156.954178	0.794589996	88755
+745	2	491	1	40	cplex	0	0	1000	11	3	33	0	1	0	799	799	1.30583298	37.6174927	84.901413	165.301956	0.804804981	67386
+746	2	492	1	40	cplex	0	1	1000	10	0	28	0	1	0	799	799	1.45436597	32.9611855	72.5208435	138.88765	0.861429989	56653
+747	2	492	1	40	cplex	1	0	931	11	1	28	0	1	0	799	799	0.812439024	29.3040237	64.2892532	130.903168	0.825241983	76389
+748	2	492	1	40	cplex	1	1	931	11	2	28	0	1	0	799	799	0.877341986	28.0508327	63.7109108	128.237976	0.825627029	76389
+749	2	492	1	40	cplex	0	0	1000	11	3	28	0	1	0	799	799	1.29140699	31.5006123	72.2085037	137.576996	0.830756009	57176
+750	2	493	1	40	cplex	0	1	1000	10	0	30	0	1	0	799	799	1.60657001	34.7639389	77.9891052	147.440048	0.82050401	60584
+751	2	493	1	40	cplex	1	0	934	11	1	30	0	1	0	799	799	0.883083999	29.2356663	68.7537766	139.067551	0.862975001	80686
+752	2	493	1	40	cplex	1	1	934	11	2	30	0	1	0	799	799	2.09534407	30.612009	68.5622864	137.6866	0.823459983	80686
+753	2	493	1	40	cplex	0	0	1000	11	3	30	0	1	0	799	799	1.61035204	33.2126198	78.1439667	147.851242	0.811452985	61260
+754	2	494	1	40	cplex	0	1	1000	10	0	31	0	1	0	799	799	1.38543105	36.6986008	80.5957565	159.530197	0.911947012	62603
+755	2	494	1	40	cplex	1	0	934	11	1	31	0	1	0	799	799	0.839197993	31.1428947	71.7584686	147.852173	0.800872028	83376
+756	2	494	1	40	cplex	1	1	934	11	2	31	0	1	0	799	799	0.916750014	32.7247124	71.0340424	146.225388	0.804504991	83376
+757	2	494	1	40	cplex	0	0	1000	11	3	31	0	1	0	799	799	1.34355795	36.4247551	80.7955093	158.489792	0.808390975	63302
+758	2	495	1	40	cplex	0	1	1000	10	0	24	0	1	0	799	799	1.20447803	26.4402275	62.0864716	128.712601	0.875344992	48467
+759	2	495	1	40	cplex	1	0	934	11	1	24	0	1	0	799	799	0.753076971	25.2666759	56.4130478	120.453606	0.81903702	64549
+760	2	495	1	40	cplex	1	1	934	11	2	24	0	1	0	799	799	0.843868971	23.5786991	56.0884209	121.41774	0.847213984	64549
+761	2	495	1	40	cplex	0	0	1000	11	3	24	0	1	0	799	799	1.12959504	26.9314651	62.7269363	126.47477	0.865145028	49008
+762	2	496	1	40	cplex	0	1	1000	10	0	26	0	1	0	799	799	1.11114597	31.0303326	67.9693375	114.616417	0.842583001	52551
+763	2	496	1	40	cplex	1	0	934	11	1	26	0	1	0	799	799	0.717041016	25.8467503	60.5093689	109.706871	0.850561023	69928
+764	2	496	1	40	cplex	1	1	934	11	2	26	0	1	0	799	799	0.786260009	25.6681786	60.5626221	109.478989	0.850103974	69928
+765	2	496	1	40	cplex	0	0	1000	11	3	26	0	1	0	799	799	1.38735199	29.1885891	68.6203842	116.351776	0.815711021	53092
+766	2	497	1	40	cplex	0	1	1000	10	0	29	0	1	0	799	799	1.35429704	32.7915077	75.4952621	138.541092	0.228431001	58564
+767	2	497	1	40	cplex	1	0	934	11	1	29	0	1	0	799	799	0.846662998	28.5542526	66.9786911	129.878159	0.229480997	77997
+768	2	497	1	40	cplex	1	1	934	11	2	29	0	1	0	799	799	0.919332981	28.3798294	66.2380829	129.276642	0.236470997	77997
+769	2	497	1	40	cplex	0	0	1000	11	3	29	0	1	0	799	799	1.31303799	34.1910477	75.2221375	138.451096	0.235808	59218
+770	2	498	1	40	cplex	0	1	1000	10	0	38	0	1	0	799	799	1.92116201	42.0810928	99.3027954	184.523834	0.763540983	76806
+771	2	498	1	40	cplex	1	0	934	11	1	38	0	1	0	799	799	0.938345015	38.9161186	89.1098328	177.17926	0.769940972	102203
+772	2	498	1	40	cplex	1	1	934	11	2	38	0	1	0	799	799	1.22746205	37.7532272	88.1477051	173.80629	0.746024013	102203
+773	2	498	1	40	cplex	0	0	1000	11	3	38	0	1	0	799	799	1.62865102	45.4798584	102.725677	187.825867	0.783016026	77596
+774	2	499	1	40	cplex	0	1	1000	10	0	29	0	1	0	799	799	1.64490497	32.2033501	74.414444	139.705338	0.306555986	58564
+775	2	499	1	40	cplex	1	0	934	11	1	29	0	1	0	799	799	0.904731989	29.8690052	67.5018158	135.226135	0.295949996	77997
+776	2	499	1	40	cplex	1	1	934	11	2	29	0	1	0	799	799	0.955182016	32.8381386	66.0530243	129.813095	0.292804986	77997
+777	2	499	1	40	cplex	0	0	1000	11	3	29	0	1	0	799	799	1.50640595	32.6709023	77.9533768	140.53212	0.280243009	59218
+778	2	500	1	40	cplex	0	1	1000	10	0	16	1	1	0.0625	749	749	1.15412796	28.5182209	65.0331192	159.68013	0.906297982	40366
+779	2	500	1	40	cplex	1	0	937	11	1	16	1	1	0.0625	749	749	4.61723185	26.0784454	60.9658279	157.985001	0.876097023	50673
+780	2	500	1	40	cplex	1	1	937	11	2	16	1	1	0.0625	749	749	0.746760011	25.9539261	60.8687859	155.319214	0.894793987	50673
+781	2	500	1	40	cplex	0	0	1000	11	3	16	1	1	0.0625	749	749	1.09290004	28.9574871	65.1568756	161.054962	0.927886009	40672
+782	2	501	1	40	cplex	0	1	1000	10	0	15	0	1	0	749	749	1.09479403	30.7880077	60.7294807	138.338226	0.799592972	38050
+783	2	501	1	40	cplex	1	0	937	11	1	15	0	1	0	749	749	0.667280018	25.0288353	56.9826126	136.655197	0.801199973	47506
+784	2	501	1	40	cplex	1	1	937	11	2	15	0	1	0	749	749	0.706053972	25.1884556	57.5037842	138.962601	0.754921973	47506
+785	2	501	1	40	cplex	0	0	1000	11	3	15	0	1	0	749	749	1.05260897	28.3536625	60.9378471	137.6866	0.757475972	38130
+786	2	502	1	40	cplex	0	1	1000	10	0	20	0	1	0	749	749	1.47474301	34.9612045	82.8722534	183.449738	1.09552002	50803
+787	2	502	1	40	cplex	1	0	931	11	1	20	0	1	0	749	749	0.823822975	41.6752281	76.4265976	179.315521	0.991548002	64585
+788	2	502	1	40	cplex	1	1	931	11	2	20	0	1	0	749	749	0.84563601	33.0347519	76.2085953	177.822083	1.00638294	64585
+789	2	502	1	40	cplex	0	0	1000	11	3	20	0	1	0	749	749	1.50104105	35.604187	82.6009216	183.910889	0.949826002	50840
+790	2	503	1	40	cplex	0	1	1000	10	0	6	0	1	0	749	749	0.731482983	32.0306664	24.4749966	59.0404778	1.20404601	15142
+791	2	503	1	40	cplex	1	0	938	11	1	6	0	1	0	749	749	0.506363988	9.97074318	22.8090611	55.6852837	0.927034974	18914
+792	2	503	1	40	cplex	1	1	938	10	2	6	0	1	0	749	749	0.482448995	9.85476303	22.7754974	60.5750694	1.08627605	18913
+793	2	503	1	40	cplex	0	0	1000	11	3	6	0	1	0	749	749	0.570145011	10.4782124	24.4544506	60.3380356	0.976173997	15252
+794	2	504	1	40	cplex	0	1	1000	10	0	8	0	1	0	749	749	1.05235195	14.6137342	32.5828743	74.2542877	1.54904497	20293
+795	2	504	1	40	cplex	1	0	937	11	1	8	0	1	0	749	749	0.596548975	13.2864666	30.2619228	72.4957809	1.15552104	25336
+796	2	504	1	40	cplex	1	1	937	11	2	8	0	1	0	749	749	0.60157001	12.8243904	30.1975403	72.0740662	1.09107602	25336
+797	2	504	1	40	cplex	0	0	1000	11	3	8	0	1	0	749	749	0.782176018	13.9971399	32.5314255	73.1319199	1.02317297	20336
+798	2	505	1	40	cplex	0	1	1000	10	0	4	0	1	0	749	749	0.71528703	7.46602583	16.1049461	43.803524	0.407326013	10087
+799	2	505	1	40	cplex	1	0	938	11	1	4	0	1	0	749	749	0.488777995	6.76156092	15.0936584	44.7606735	0.493524998	12609
+800	2	505	1	40	cplex	1	1	938	10	2	4	0	1	0	749	749	0.669744015	6.82467699	15.1584578	44.59935	0.771180987	12609
+801	2	505	1	40	cplex	0	0	1000	11	3	4	0	1	0	749	749	0.872281015	7.29150915	16.2544708	47.277359	0.610989988	10168
+802	2	506	1	40	cplex	0	1	1000	10	0	9	0	1	0	749	749	0.668267012	14.7788763	31.236002	83.6940613	0.905768991	22738
+803	2	506	1	40	cplex	1	0	938	11	1	9	0	1	0	749	749	0.537495971	13.1546307	28.6683197	82.7604446	0.939116001	28371
+804	2	506	1	40	cplex	1	1	938	10	2	9	0	1	0	749	749	0.710408986	14.0330858	29.6083298	81.9706802	0.905587018	28370
+805	2	506	1	40	cplex	0	0	1000	11	3	9	0	1	0	749	749	0.616106987	14.807868	31.6114807	85.9523468	0.907674015	22878
+806	2	507	1	40	cplex	0	1	1000	10	0	17	0	1	0	749	749	1.03885806	28.5516071	60.8341866	214.47789	0.902844012	42939
+807	2	507	1	40	cplex	1	0	931	11	1	17	0	1	0	749	749	0.774671972	26.9211044	55.9211426	206.315002	0.867042005	54897
+808	2	507	1	40	cplex	1	1	931	11	2	17	0	1	0	749	749	0.820540011	27.0821247	56.8074074	207.772964	0.870221019	54897
+809	2	507	1	40	cplex	0	0	1000	11	3	17	0	1	0	749	749	1.36208999	29.7203121	61.6315308	212.294189	0.885720015	43214
+810	2	508	1	40	cplex	0	1	1000	10	0	8	0	1	0	749	749	0.647955	14.8095446	28.3661232	92.3873825	0.238588005	20190
+811	2	508	1	40	cplex	1	0	937	11	1	8	0	1	0	749	749	0.436531991	13.4160566	27.1267262	88.7001114	0.286662012	25336
+812	2	508	1	40	cplex	1	1	937	11	2	8	0	1	0	749	749	0.468374997	12.6862602	26.3628101	91.8833237	0.284135014	25336
+813	2	508	1	40	cplex	0	0	1000	11	3	8	0	1	0	749	749	0.563968003	13.7965879	28.1871624	92.6104736	0.291350007	20336
+814	2	509	1	40	cplex	0	1	1000	10	0	6	0	1	0	749	749	0.713322997	10.9078274	21.4042397	69.2514954	0.289485991	15148
+815	2	509	1	40	cplex	1	0	937	11	1	6	0	1	0	749	749	0.395292014	10.048007	20.158392	68.7709503	0.264494002	19002
+816	2	509	1	40	cplex	1	1	937	11	2	6	0	1	0	749	749	0.417221993	10.0544281	20.0103607	70.0780106	0.248071998	19002
+817	2	509	1	40	cplex	0	0	1000	11	3	6	0	1	0	749	749	0.563664019	11.380744	21.5946331	72.0807953	0.230012	15252
+818	2	440	1	40	cplex	0	1	500	10	0	60	0	1	0	249	249	1.357108	70.1529083	147.977219	401.337097	0.882466018	101061
+819	2	440	1	40	cplex	1	0	465	11	1	60	0	1	0	249	249	0.87311399	66.2073212	141.524963	394.739227	1.19377398	115239
+820	2	440	1	40	cplex	1	1	465	11	2	60	0	1	0	249	249	1.01265395	67.5252151	142.010864	394.184479	0.844202995	115239
+821	2	440	1	40	cplex	0	0	500	11	3	60	0	1	0	249	249	1.12285602	70.4457779	146.208405	398.729675	0.846503973	101680
+\.
+
+
+--
+-- Name: exps_exp_id_seq; Type: SEQUENCE SET; Schema: public; Owner: xlwang
+--
+
+SELECT pg_catalog.setval('exps_exp_id_seq', 821, true);
+
+
+--
+-- PostgreSQL database dump complete
+--
+
