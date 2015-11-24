@@ -1,3 +1,33 @@
+# Paper editing
+
+The paper is pretty good!  I am reasonably happy with the experiments section, though it needs to expalin the results better.
+
+* benchmark exps: corruption go back to q0
+* 7d: why does taq do worse than q or t only?
+      is it because of attr slicing?
+* 7b/e: weird bump at q275
+* 7c: why does deletion cost slightly more than insert?  
+      can we extend insert/delete to laarger logs and see when they collapse?
+      tradeoff between prep time and solve time right?
+* 7f: why does f1 for delete dip a bit?
+* need name for second iteration of tuple slicing.  Maybe Repair Repair? or fixup
+* synthetic experiments, show less configs
+* 8b: split into stacked graph showing prep vs solver time.
+* we study attribute skew, what about data skew?
+* we mention size of the MILP problme.  one graph may be useful, or to at least talk about 
+  relationships between problem size and solver time
+* cut 9b
+* how does data auditor/xray differ from scorpion/roy+suciu?  the descriptions sound the same
+  "generate feature sets or patters of attributes that characterize errors"
+  
+Conclusion
+
+* first approach to formalize this problem!
+* find that with common query workloads such as point update workloads, can go very far back -- XXX if taking read queries into account.
+
+
+
+
 # Timeline
 
 Jan 28
