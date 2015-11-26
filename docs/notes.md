@@ -25,6 +25,9 @@ Conclusion
 * first approach to formalize this problem!
 * find that with common query workloads such as point update workloads, can go very far back -- XXX if taking read queries into account.
 
+Glossary
+
+
 
 
 
