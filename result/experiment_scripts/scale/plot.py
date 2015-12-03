@@ -1,6 +1,7 @@
 from sqlalchemy import *
 from pygg import *
 from wuutils import *
+import sys
 sys.path.append("..")
 from util import *
 
@@ -16,7 +17,7 @@ if 1:
   and opt_approx in (0,1,2,3) and skewness <= 1 and max_num_compl > 20
   """
   data = group_on([('name', 'name'), 'skewness', ('301 - (logsize - corrupt_qidx)', 'corrupt_qidx')], 
-            where, True)
+            where)
 
   p = ggplot(data, aes(x='skewness', y='prep_time+add_time', color='name', shape='name', linetype='name'))
   p += geom_point(size=2) + geom_line(size=.6)
@@ -27,7 +28,6 @@ if 1:
   p += legend_bottom
   p += guides(col = guide_legend(nrow = 2))
   ggsave("skew_preptime.png", p, libs=['grid'], width=6, height=4, scale=0.7)
-  exit()
 
 
   p = ggplot(data, aes(x='skewness', y='total_time', color='name', shape='name', linetype='name'))
@@ -61,7 +61,7 @@ if 1:
   and opt_approx in (0,1,2,3)  and max_num_compl > 20
   """
   data = group_on([('name', 'name'), ('db_size', 'dbsize'), ('301 - (logsize - corrupt_qidx)', 'corrupt_qidx')], 
-            where, True)
+            where)
 
 
 
@@ -133,8 +133,9 @@ if True:
   logsize = 300 and skewness = 1 and range = 8 and db_size=1000 and corrupt_qidx in (49, 199, 149)
   and opt_approx in (0,1,2,3)  and max_num_compl > 20
   """
-  data = group_on([('name', 'name'), ('wheresize'), ('301 - (logsize - corrupt_qidx)', 'corrupt_qidx')], 
-            where, True)
+  data = group_on(
+      [('name', 'name'), ('wheresize'), ('301 - (logsize - corrupt_qidx)', 'corrupt_qidx')], 
+      where )
 
 
   p = ggplot(data, aes(x='wheresize', y='total_time', color='name', shape='name', linetype='name'))

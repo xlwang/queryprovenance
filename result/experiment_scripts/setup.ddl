@@ -16,15 +16,23 @@ update configs set idx = 5 where corrupt_qidx = '0,10,20,30,40';
 
 
 
+drop table if exists names;
 create table names(sname text, name text);
 insert into names values ('cplex-attr-slicing', 'a')
 ,('cplex-query-slicing', 'q')
 ,('cplex-tuple-slicing', 't')
 ,('cplex-all-opt', 'taq')
-,('cplex-all','No Optimizations');
-insert into names values
-('cplex0',    'ta,inc-1st')
+,('cplex-all','No Optimizations')
+,('cplex0',    'ta,inc-1st')
 ,('cplex1',    'tq,inc-1st')
 ,('cplex2',    'taq,inc-1st')
-,('cplex3',    't,inc-1st');
+,('t,inc-1st' ,    't,inc-1st')
+,('ta,inc-1st' ,    'ta,inc-1st')
+,('tq,inc-1st' ,    'tq,inc-1st')
+,('taq,inc-1st',    'taq,inc-1st')
+,('t,inc-1st',    't,inc-1st')
+,('tq,inc-1st1', 'tq,inc-1st')
+,('taq,inc-1st2', 'taq,inc-1st')
+,('ta,inc-1st0', 'ta,inc-1st')
+,('t,inc-1st3', 't,inc-1st');
 
