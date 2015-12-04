@@ -14,11 +14,19 @@ update configs set idx = 3 where corrupt_qidx = '0,10,20';
 update configs set idx = 4 where corrupt_qidx = '0,10,20,30';
 update configs set idx = 5 where corrupt_qidx = '0,10,20,30,40';
 
-
-
 drop table if exists names;
-create table names(sname text, name text);
-insert into names values ('cplex-attr-slicing', 'a')
+create table if not exists names(sname text, name text);
+insert into names values 
+('cplex_allqueries', 'All Queries')
+,('cplex_singlequery', 'Single Query')
+,('cplex_singlequery3', 'Single Query')
+,('Naive_cplex', 'Exh')
+,('cplex_searchall', 'inc-all')
+,('cplex_searchall_1iter',  'inc-all')
+,('cplex_stopearly', 'inc-1st')
+,('cplex_stopearly_1iter', 'inc-1st')
+,('cplex_stopearly_2iter',   't,inc-1st')
+,('cplex-attr-slicing', 'a')
 ,('cplex-query-slicing', 'q')
 ,('cplex-tuple-slicing', 't')
 ,('cplex-all-opt', 'taq')
@@ -26,6 +34,7 @@ insert into names values ('cplex-attr-slicing', 'a')
 ,('cplex0',    'ta,inc-1st')
 ,('cplex1',    'tq,inc-1st')
 ,('cplex2',    'taq,inc-1st')
+,('cplex3',  't,inc-1st')
 ,('t,inc-1st' ,    't,inc-1st')
 ,('ta,inc-1st' ,    'ta,inc-1st')
 ,('tq,inc-1st' ,    'tq,inc-1st')

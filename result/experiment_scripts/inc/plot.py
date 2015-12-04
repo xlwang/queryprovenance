@@ -2,6 +2,7 @@ from pygg import *
 from wuutils import *
 from sqlalchemy import *
 
+import sys
 sys.path.append("..")
 from util import *
 

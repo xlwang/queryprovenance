@@ -31,7 +31,7 @@ def create_group_on(dbname):
           avg(preproc_time + solver_prep_cons_time + solver_add_cons_time + 
               solver_solve_time + finish_time) as total_time
     from names, exps join configs on exps.pid = configs.pid
-    where names.sname = solver2 and %s
+    where (names.sname = solver or names.sname = solver2) and %s
     group by   %s
     order by %s"""
     if selstr:
