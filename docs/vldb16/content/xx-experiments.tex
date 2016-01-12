@@ -1,0 +1,544 @@
+%!TEX root = ../main.tex
+
+%
+% Notes: 
+%
+%  exact implementation
+%  comparison with rollback at batch N
+%  relaxing the solvers
+%  dealing with false positives
+%
+%  running on TPC-C/sanjay's.  equality is easier
+%
+% Need names for
+%  * rollback
+%  * exact solution
+%  * fixing an individual/batch of queries
+%
+\section{Experiments}
+\label{sec:experiments}
+
+% \ewu{Should say this somewhere: 
+% Updates are often a small fractice of a query workload -- typically $10\%$~\cite{} in most benchmarks --
+% thus in practice \sys can work for much larger workloads.  In the experiments, we filtered the workloads to 
+% only look at modification queries, and specifically UPDATE queries which are hard.
+% }
+
+
+In this section, we carefully study the performance and accuracy
+characteristics of the naive MILP-based repair algorithm, as well as 
+slicing-based optimizations that improve the latency of the system
+, an incremental algorithm for single query corruptions that
+further improves the latency, and 
+the multi-pass tuple-slicing algorithm that tolerates incomplete complaint sets with minimal loss in accuracy.
+Our goals in the evaluation is to understand these trade-offs in
+controlled synthetic scenarios, as well as study the effectiveness
+in typical database query workloads based on widely used benchmarks.
+
+To this end, our experiments are organized as follows: First, 
+we compare the exhaustive MILP algorithm against the different optimizations 
+to highlight the value of different optimizations.  We then compare the
+repair costs of \texttt{INSERT}, \texttt{DELETE}, or \texttt{UPDATE}-only query logs 
+and find that the latter query type is by far the most complicated and costly to repair.
+For the subsequent experiments, we focus solely on \texttt{UPDATE}-only synthetic workloads 
+to understand how \sys responds to different query logs and databases.  
+Finally, we evaluate the efficacy on real-world databases transaction benchmarks,
+TPC-C and AuctionMark.
+All experiments were run on 12x2.66 GHz  machines with 16GB RAM running CentOS release 6.6.
+
+
+
+% establish the quality limitations of existing heuristics and the need for a formal, 
+% constraint-based algorithm (\exact).  Second, we study how each of the 
+% optimizations described in Section~\ref{s:optimiztaions} improves algorithm scalability.
+% Third, we introduce different forms of error in the input complaint sets and study the 
+% effectiveness of our noise-handling heuristics.  
+
+
+
+
+%
+% NOTE: figures are named <experimentsection>_<subsection>_<xaxis>.pdf
+%
+
+\subsection{Experimental Setup}
+
+
+\iffalse
+\begin{table}[t]\small
+  \centering
+  \begin{tabular}{@{}cll@{}}
+  \toprule
+  {\bf Param} & {\bf Description} & {\bf Default} \\ \midrule
+  $V_d$  & Domain range of the attributes  & $[0, 100]$ \\
+  $N_D$  & \# tuples in final database & $1000$ \\
+  $N_a$  & \# attributes in database & $10$ \\
+  $N_w$  & \# predicates in \texttt{WHERE} clauses & $1$ \\
+  $N_s$  & \# \texttt{SET} clauses & $1$ \\
+  $N_q$  & \# queries in query log & $300$ \\
+  $idx$  & Index of corrupted query & $\{0, 25, 50,$ \\
+         & (backwards from most recent) & $100, 200, 250 \}$ \\ %$\frac{N_q}{2}$ \\
+  $r$    & Range size of \texttt{UPDATE} queries & 8 (tuples) \\
+  $s$    & Zipf $\alpha$ param of query attributes, & $1$ \\ \bottomrule \end{tabular}
+  %$set$  & Constant vs relative \texttt{SET} clauses. & const \\ 
+         %& power low distribution $P(v) = v^{-s}$ & \\\end{tabular}
+  \caption{Experimental Parameters}
+  \label{t:params}
+\end{table}
+\fi
+
+
+\iffalse
+  \begin{table}[t]\small
+    \centering
+    \begin{tabular}{@{}cl@{}}
+    \toprule
+    {\bf Param} & {\bf Description} \\ \midrule
+    $p$ & Precision: \% of repaired tuples that are correct. \\
+    $r$ & Recall: \% of full complaint set repaired.\\
+    % $t_{prep}$ & Time to construct CPLEX problem \\
+    % $t_{send}$ & Time to send CPLEX problem to solver \\
+    % $t_{solve}$ & Time for solver to generate a solutions\\
+    $t_{total}$ & End-to-end execution time \\ 
+    $d_{measure}$ & \red{Some sort of distance measure} \\ \bottomrule \end{tabular}
+    \caption{Metrics Compared}
+    \label{t:metrics}
+  \end{table}
+\fi
+
+
+
+
+Each of our experiments follows a consistent procedure. 
+We generate a sequence of queries using a synthetic query generator or 
+the benchmark program, and corrupt the query log as described below. 
+We then execute the original and corrupt query logs on an initial (possibly empty) database,
+and perform a tuple-wise comparison between the resulting database states 
+to generate a true complaint set.  
+We then add noise to the complaint set by 1) picking random tuples not in the true
+complaint set to add false positive complaints, and 2) removing true complaints to simulate false negatives.
+Finally, we execute the evaluated algorithms on the complaints and compare the fixed
+query log with the true query log, as well as the fixed and true
+final database states to measure performance and accuracy metrics.
+
+We compare the following algorithms:
+$\sys_{exh}$ is the naive, exhaustive algorithma 
+$\sys_{S \subseteq \{t,q,a,inc\}}$, where the subscripts $t,q,a,inc$ represent the
+application of tuple, query and attribute slicing and single query incremental repairs, 
+and $S$ defines the set of optimizations present in the algorithm.
+For example, $\sys_{t,q,inc}$ uses both tuple and query slicing along with incremental repair.
+When the algorithm uses incremental computation, the superscripts $\sys_{inc}^{1st}$
+and $\sys_{inc}^{all}$ variants that either returns the first successful repair,
+or the repair with the lowest objective function across the entire query log.
+
+We evaluate the algorithms along several metrics.  Performance is measured as wall clock
+time between submitting a query log and the system terminating after retrieving all relevant repairs 
+(e.g., the time to the first repairt for $\sys_{inc}^{1st}$, or the time to process the full log for $\sys{inc}^{all}$).  
+We also measure the repair's precision (percentage of repaired tuples that were correctly fixed), 
+the recall (the percentage of the full complaint set that was repaired), 
+and the F1 measure (the harmonic mean of precision and recall).
+We note that in the context of complete complaint sets, the recall will always be $1$ if \sys returns a result.
+The recall can only degrade due to solver infeasibility (the solver does not find a valid assignment within a loose time bound), 
+or in the context of incomplete complaint sets.   Thus our reported metrics are the average across multiple runs.
+%Finally, Table~\ref{t:params} summarizes the key parameters that we vary throughout our experiments.  
+We describe the experimental parameters in the context of the datasets and workloads below.
+
+
+
+\subsubsection{Datasets and Workloads}
+
+This subsection describes the query and data generation process in greater detail.
+
+\stitle{Synthetic:} \label{sec:syntheticgen}
+We generate an initial database of $N_D$ random tuples.  
+The schema contains $N_a=5$ attributes $a_1\ldots a_5$, whose values are
+picked from $V_d$ uniformly at random, along with a primary key $id$.
+We then generate a sequence of $N_q$ \texttt{UPDATE} queries~\footnote{\scriptsize We focus on
+\texttt{UPDATE} only query logs because they are the {\it predominant} cost 
+in a query log.  Experiment~\ref{sec:indelup} compares \texttt{INSERT}, \texttt{DELETE} and \texttt{UPDATE}
+only workloads to illustrate the differenc.} where 
+\verb|?| is a randomly generated value and \verb|r| is the size of the range predicate: 
+{\scriptsize
+\begin{verbatim}
+  UPDATE SET (a_i = ?),.. WHERE a_j = ? AND ...
+  UPDATE SET (a_i = ?),.. WHERE a_j in [?, ?+r] AND ...
+\end{verbatim}
+}
+
+The \texttt{SET} clause sets the attribute to a random constant value in $V_d$ and 
+the \texttt{WHERE} clauses form a conjunction.  
+% The $set$ parameter controls whether the \texttt{UPDATE} queries set attributes to random constant values ({\it const}),  
+% or relative values ({\it rel}) by incrementing by a random, possibly negative, value.  
+In addition, the skew parameter $s$ determines the distribution attributes referenced in the \texttt{WHERE} and \texttt{SET} clauses.  
+Each attribute in a query is picked from either a uniform distribution when $s=0$ or a zipfian distribution.
+This allows our experiments to vary between a uniform distribution, where each attribute is
+equally likely to be picked, and a skewed distribution where nearly all attributes are the same. \\
+The \texttt{WHERE} clauses in \texttt{DELETE} queries are generated in an identical fashion, while
+\texttt{INSERT} queries insert values picked uniformly at random from $V_d$.
+
+
+
+\stitle{TPC-C:} We use the data and query workload over the {\it ORDER} table in TPC-C~\cite{difallah2013oltp,}.  
+We generated a database at scale 1 with one warehouse, and kept the queries that modify the
+{\it ORDER} table. The initial table contains 4570 tuples and we ultimately generated a log with
+1000 queries, where $530$ are \texttt{UPDATE}s and the rest are \texttt{INSERT}s.
+
+\stitle{AuctionMark:} Auctionmark workload simulates the 
+actual action market. We generate a database 
+with 8729 tuples and $1000$ queries, with $540$ \texttt{UPDATE}s and $110$ \texttt{INSERT}s.
+Both TPC-C and AuctionMark setups were generated using the OLTP-bench project~\cite{difallah2013oltp}.
+
+
+\stitle{Corrupting Queries:} We corrupt query $q_i$ by replacing it with a randomly
+generated query of the same type based on the procedures described above.
+To standardize our procedures, we selected a fixed set of indexes $idx$
+that are used in all experiments.  Appendix~\ref{app:qidx} presents
+experiments that justify the rationale behind our selection.
+
+
+
+
+
+
+% \begin{figure}[h]
+% \centering
+%   \begin{subfigure}[t]{\columnwidth}
+%   \includegraphics[width = .95\columnwidth]{figures/tpcc_time}
+%   \caption{Performance on TPC-C Benchmark}
+%   \label{f:tpcc} 
+%   \end{subfigure}
+%   \begin{subfigure}[t]{\columnwidth}
+%   \includegraphics[width = .95\columnwidth]{figures/auction_time}
+%   \caption{Performance on AuctionMark Benchmark}
+%   \label{f:auctionmark} 
+%   \end{subfigure}
+%   \caption{Benchmark Performance}
+% \end{figure}
+
+\subsection{Benchmark}
+
+\begin{figure}[h]
+\centering
+  \includegraphics[width = .75\columnwidth]{figures/benchmark_time}
+  \label{f:benchmarks} 
+  \vspace*{-.2in}
+  \caption{Performance on Benchmarks}
+  \vspace*{-.1in}
+\end{figure}
+
+Figure~\ref{f:benchmarks} plots the performance of the incremental, optimized \sys algorithm
+on both benchmark applications.  In both workloads, the latency to derive a repair was consistenly less
+than $5$ seconds, and for TPC-C, on the order of milliseconds.  The precision and recall measures were
+$1$ both all settings.   One reason for the good performance is due to the fact that the benchmark queries
+are pre-dominantly point update queries.  In this setting, each tuples affects a very small set of 
+tuples, which results in $1$ or $2$ complaints on average.  In this case, the tuple and query slicing algorithms
+reduce the total number of constraints for almost every setting to less than $100$.  
+
+{\it Takeaway: many workloads in practice are dominated by point update queries.  In these settings,
+ \sys is very effective at reducing the number of constraints and can derive repairs in nearly
+ interactive latencies.}
+
+
+
+
+
+
+  \begin{figure*}[h]
+  \centering
+    \vspace*{-.2in}
+    \begin{subfigure}[t]{.3\textwidth}
+    \includegraphics[width = .99\columnwidth]{figures/multi_time}
+    \vspace*{-.1in}
+    \caption{Performance for multiple corruptions.}
+    \label{f:multi_time} 
+    \end{subfigure}
+    \begin{subfigure}[t]{.3\textwidth}
+    \includegraphics[width = .99\columnwidth]{figures/incrementalcompare_time}
+    \vspace*{-.1in}
+    \caption{Performance for exhaustive and incremental algorithms.}
+    \label{f:singlequeryinc_time} 
+    \end{subfigure}
+    \begin{subfigure}[t]{.3\textwidth}
+    \includegraphics[width = .99\columnwidth]{figures/indelup_time}
+    \vspace*{-.1in}
+    \caption{Performance for different query types.}
+    \label{f:indelup_time} 
+    \end{subfigure}
+    \\
+    \begin{subfigure}[t]{.3\textwidth}
+    \includegraphics[width = .99\columnwidth]{figures/multi_pr}
+    \vspace*{-.1in}
+    \caption{Accuracy for multiple corruptions.}
+    \label{f:multi_acc} 
+    \end{subfigure}
+    \begin{subfigure}[t]{.3\textwidth}
+    \includegraphics[width = .99\columnwidth]{figures/incrementalcompare_acc}
+    \vspace*{-.1in}
+    \caption{Accuracy for exhaustive and incremental algorithms.}
+    \label{f:singlequeryinc_acc} 
+    \end{subfigure}
+    \begin{subfigure}[t]{.3\textwidth}
+    \includegraphics[width = .99\columnwidth]{figures/indelup_acc}
+    \vspace*{-.1in}
+    \caption{F1-score for different query types.}
+    \label{f:indelup_acc} 
+    \end{subfigure}
+    \vspace*{-.1in}
+    \caption{Preliminary Experiments}
+  \end{figure*}
+
+
+\subsection{Preliminaries}
+The following set of experiments are designed to establish the rationale for 
+our experimental settings in the subsequent experiments.  
+Specifically, we compare different slicing-based optimizations of the exhaustive approach
+as the number of corrupted queries increases.  
+We then evaluate the scalability of the different exhaustive algorithms in the context of a single
+corrupted query and highlight the value of the second MILP iteration when using tuple-slicing.
+We then establish the difficulty of repairing \texttt{UPDATE} workloads as compared to other query types.
+
+
+\stitle{Multiple Corrupt Queries:}
+In this experiment, we compare the naive exhaustive algorithm with four types of algorithms
+$\sys_S$, where $S \in \{t, q, a, tqa\}$.  We use the default settings with $1000$ tuples and
+$50$ \texttt{update} queries.  We corrupt every tenth query starting from oldest query $q_0$,
+up to $q_{40}$.  For example, when we corrupt $3$ queries, we corrupt $q_{0,10,20}$.
+We find that the number of corruptions greatly affects both the scalabality (Figure~\ref{f:multi_time}) 
+and the accuracy (Figure~\ref{f:multi_acc}) of the algorithms.  Specifically, as the number increases,
+the number of possible assignments of the MILP parameters increases exponentially and the solver often takes
+longer than our experimental time limit of $1000$ seconds and returns an infeasibility error.  
+This is a predominant reason why the accuracy degrades past $3$ corruptions.  For example, 
+when $4$ queries are corrupted and we ignore the infeasible executions, the average execution time is $300$ seconds
+and the precision and recall are greater than $0.94$.  Unfortunately, with $5$ queries, all runs exceed the time limit.
+
+
+\stitle{Single Query Optimization:}
+In this experiment, we evaluate the efficacy of the incremental repair algorithm (Section~\ref{sec:incremental})
+in the special case when only one query has been corrupted.  We compare the exhaustive 
+algorithm against $\sys_{inc}^{1st}$ and $\sys_{inc}^{all}$ using the default parameters.
+We also compare against $\sys_{t,inc}^{1st}$ to illustrate the value of the second MILP iteration in tuple slicing.
+Figure~\ref{f:singlequeryinc_time} highlights the scalability limitations of the exhaustive algorithm 
+even $25$ queries in this experiment.  In contrast, the incremental algorithms perform at nearly the same rate
+across the different query indexes.  Figure~\ref{f:singlequeryinc_acc} shows the value of tuple-slicing --
+both basic incremental algorithms have severely degraded precision measures due to their propensity to over-generalize
+-- however the introduction of the second MILP iteration significantly improves the precision.  
+In all algorithms, the recall is near $1$ because the complaint sets are complete and the solver is able to find 
+an assignment in nearly all cases.
+
+
+\stitle{Query Type Experiment:}\label{sec:indelup}
+Our final preliminary experiment evaluates the exhaustive, tuple-slicing algorithm 
+$\sys_{exh,t}$ on insert, delete, or update-only workloads.
+We increase the number of queries from $20$ to $100$ and corrupt the oldest query in the log.  
+Figure~\ref{f:indelup_time} shows that while the cost of repairing insert and delete-only workloads
+remains relatively constaint, the cost for update-only workloads increases rapidly -- this is
+despite a near perfect F1-score for all settings (Figure~\ref{f:indelup_acc}).
+
+
+{\it Takeaways: we find that the exhaustive MILP algorithms, even when using the optimizations,
+have severe scalability limitations due to the large number of undetermined values -- this is not surprising
+since ILP constraint solving is a known NP-hard problem.
+In contrast, we find that the incremental algorithms are more effective at scaling to larger query log sizes.  
+Furthermore, we show that \texttt{UPDATE}-only workloads are significantly more expensive to repair than other 
+query types.
+}
+
+
+\subsection{Synthetic Experiments}
+In the following set of synthetic experiments, we individually vary 
+the parameters skewness $s$, log size $N_q$, database size $N_D$, and
+query complexity $N_w$ in order to tease apart the parameters that most affect our metrics.
+Motivated by our preliminary results, we focus on \texttt{UPDATE}-only query logs with a single corruption,
+and on variations of the incremental repair algorithm.   In the figures below,
+we use a shorthand name for each algorithm based on the sub and superscript in the full algorithm name.  
+For instance, the incremental algorithm using tuple and query slicing, and returns the first valid repair
+$\sys_{ta,inc}^{1st}$ is denoted $ta,inc-1st$.  
+
+
+
+  \begin{figure*}[h]
+    \centering
+    \begin{subfigure}[t]{.3\textwidth}
+      \includegraphics[width = \columnwidth]{figures/logsize_time}
+      \vspace*{-.1in}
+      \caption{Query Log Size vs Time.}
+      \label{f:logsize_time} 
+    \end{subfigure}
+    \begin{subfigure}[t]{.3\textwidth}
+      \includegraphics[width = \columnwidth]{figures/dbsize_time}
+      \vspace*{-.1in}
+      \caption{Database Size vs Time.}
+      \label{f:dbsize_time} 
+    \end{subfigure}
+    \begin{subfigure}[t]{.3\textwidth}
+      \includegraphics[width = \columnwidth]{figures/where_time}
+      \vspace*{-.1in}
+      \caption{Query Complexity vs Time}
+      \label{f:where_time} 
+    \end{subfigure}
+    \\
+    \begin{subfigure}[t]{.3\textwidth}
+      \includegraphics[width = .95\columnwidth]{figures/logsize_acc}
+      \vspace*{-.1in}
+      \caption{Query Log Size vs F1-score.}
+      \label{f:logsize_acc} 
+    \end{subfigure}
+    \begin{subfigure}[t]{.3\textwidth}
+      \includegraphics[width = .95\columnwidth]{figures/dbsize_acc}
+      \vspace*{-.1in}
+      \caption{Database Size vs F1-score. }
+      \label{f:dbsize_acc} 
+    \end{subfigure}
+    \begin{subfigure}[t]{.3\textwidth}
+      \includegraphics[width = .95\columnwidth]{figures/where_acc}
+      \vspace*{-.1in}
+      \caption{Query Complexity vs F1-score.}
+      \label{f:where_acc} 
+    \end{subfigure}
+    \caption{Scalability Experiments}
+  \end{figure*}
+
+
+
+\stitle{Scalability - Log Size:}
+Figures~\ref{f:logsize_time} and~\ref{f:logsize_acc} increase the query log size (each subplot) between $50, 100, 500$ and $1000$.
+We compared the baseline $\sys_{t,inc}^{1st}$ with addition attribute, query or both slicing optimizations.
+For readibility purposes, we have normalized the x-axis to show the distance of the corrupted query from the most recent query in the log
+(e.g., $x=50$ denotes that $q_{N-50}$ was corrupted).
+As expectied, the cost increases as the corruption is older in the query log since more queries need to be tested before the
+true corruption is encountered.  There algorithms all execute at roughly the same performance, though there is a slight advantage to
+using the query-slicing optimization. The optimization reduces the time to linearize the query log by roughly $20\%$, however
+the CPLEX solver time contributes to over half the total time so the improvement is difficult to see.
+All algorithms exhibit near perfect F1-scores.
+
+
+
+\stitle{Scalability - DB Size:}
+Figures~\ref{f:dbsize_time} and~\ref{f:dbsize_acc} vary the database size from $100$ to $100$k tuples while setting the other parameters to their default settings.
+For simplicity, we plot the performance and accuracy of corruptions at two query indexes: $50$ and $200$.
+The more recent corruption ($200$) is executed in nearly constant time as the database size increases, with a perfect F1-score.
+In contrast, the older corruption increases in cost as the database size increases.  One reason is because as the database size increases, the
+number of complaints also increases.  We have found that the performance of the solver in dependent on the number of complaints (which
+increases the size of the MILP problem).  This is verified by the fact that the cost of linearizing the query log increases linearly with the 
+database size, from $100$ to $200$ seconds, however the solver time varies in the "v" shape shown in Figure~\ref{f:dbsize_time}
+and dominates the cost.   Despite this, the F1-score remains high.
+
+
+
+
+\stitle{Scalability - Query Complexity:}
+Our final scalability experiment (Figures~\ref{f:where_time}, Figures~\ref{f:where_acc})
+varies the complexity of the update queries by increasing the number of predicates in the \texttt{WHERE} clause, 
+while keeping the overall selectivity constant.   We find that the performance improves as the number of predicates increases.
+This counter-intuitive result is due to the reduction in the complaint set size as the complexity increases.
+
+
+
+
+\stitle{Skew:} We now study the effects of attribute skew on the algorithms.
+We vary the skew parameter from $0$ (uniform) to $1e-7, 0.5, 1$. When $s=1$, nearly every attribute is on $A_0$.
+Figure~\ref{f:skew_time} shows that the performance is weakly related to the skewness.  
+This result, in particular when $idx=50$, is misleading for a similar reason as the database size scalability experiments.
+Though the cost of linearizing the problem increases with the skew, the solver time behaves 
+unpredictably, and dominates the shape of the curve.  This effect is less noticable when $idx > 50$
+due to the smaller size of the linearized MILP problem.
+The F1-score for all settings remains near $1$.
+
+
+% 
+% Our hypothesis is that higher skew results in a larger number of relevant queries, thus limiting the effectiveness of query slicing.
+% In addition, recall that each query sets all tuples within the same range to the same value.  
+% Since increasing the skew makes it more likely that both the \texttt{SET} and \texttt{WHERE} clauses reference the same attributes,
+% it causes the tuples to cluster around the values, thus increasing the selectivity of the queries.
+% This results in a larger complaint set, which 
+% 
+% with high skew, each query is more likely to modify the same tuples, thus increasing the number of
+% 
+% We generate query log at 4 different skewness levels from uniform to 
+% super skewed with $s = 0, 1e-7, 0.5, 1$. As we can see as query log
+% is more skewed, the execution time for solving same amount of queries 
+% increase. This is also due to the fact that increasing skewness also
+% increase the query dependency, which, in turn, increase the searching
+% space in the MILP problem.
+ 
+  \begin{figure*}[h]
+    \vspace*{-.1in}
+    \centering
+    \begin{subfigure}[t]{.23\textwidth}
+    \includegraphics[width = \columnwidth]{figures/skew_time}
+    \caption{Skew vs Time}
+    \label{f:skew_time} 
+    \end{subfigure}
+    \begin{subfigure}[t]{.23\textwidth}
+    \includegraphics[width = \columnwidth]{figures/skew_acc}
+    \caption{Skew vs F1-score}
+    \label{f:skew_acc} 
+    \end{subfigure}
+    \begin{subfigure}[t]{.23\textwidth}
+    \includegraphics[width = .9\columnwidth]{figures/noise_fn_time}
+    \caption{Time vs False Negative}
+    \label{f:falsenegative_time} 
+    \end{subfigure}
+    \begin{subfigure}[t]{.23\textwidth}
+    \includegraphics[width = .9\columnwidth]{figures/noise_fn_acc}
+    \caption{F1-score vs False Negative}
+    \label{f:falsenegative_acc} 
+    \end{subfigure}
+    \vspace*{-.15in}
+    \caption{Skew and False Negative experiments. }
+  \end{figure*}
+
+
+
+
+
+\stitle{Incomplete Complaint Sets:}
+Our final experiment (Figures~\ref{f:falsenegative_time} and~\ref{f:falsenegative_acc}) evaluates the fase positive rate in incomplete complaint sets.
+We increase the rate from $0$, meaning a full complaint set, to $0.75$, where 
+$75\%$ of the full complaint set is missing.  
+We find that reduciing the size of the submitted complaint set naturally improves the repair performance,
+however the repair quality may suffer if the corruption occured in a very old query.
+
+
+%   \begin{figure}[h!]
+%     \centering
+%     \begin{subfigure}[t]{\columnwidth}
+%     \includegraphics[width = .9\columnwidth]{figures/noise_fn_time}
+%     \caption{Time vs Incomplete Complaint Size}
+%     \label{f:falsenegative_time} 
+%     \end{subfigure}
+%     \begin{subfigure}[t]{\columnwidth}
+%     \includegraphics[width = .9\columnwidth]{figures/noise_fn_acc}
+%     \caption{F1-score vs Incomplete Complaint Size}
+%     \label{f:falsenegative_acc} 
+%     \end{subfigure}
+%     \label{f:falsenegative}
+%     \caption{Incomplete Complaint Experiments}
+%   \end{figure}
+% 
+
+{\it Takeaways: we find that the performance of the repair algorithm heavily depends on the 
+number of complaints in the complaint set.  This is expected, since each complaint requires 
+an additional linearization of all relevant queries.  In addition, since CPLEX is a black-box
+solver, its performance can vary unpredictably -- though its performance weakly correlates to the 
+size of the MILP problem.  We also find that the quality of our repairs 
+is high when the corruption is between the most recent to the $100$th most recent query.  However,
+when the corruption is very old, it can be very difficult to identify the perfect fix -- 
+in particular because a more recent query may provide a partial, though over-generalized fix.}
+
+% \stitle{Incremental Results}
+% INcremental algorithm, incremental results
+
+
+
+
+
+
+
+
+
+
+
+
+
+
