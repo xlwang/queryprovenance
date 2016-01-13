@@ -14,8 +14,12 @@ To run all the scripts run:
         sh setup.sh
 
 
-Thsi script goes into each directory and runs
+This script goes into each directory and runs
 
         # in the directory:
         sh setup.sh
         python plot.py
+
+To clean databases created for the experiments
+
+        sh clean.sh
