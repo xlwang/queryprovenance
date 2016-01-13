@@ -8,20 +8,20 @@ from util import *
 
 group_on = create_group_on("queryprovindel")
 where = """
- opt_approx in (3)
+ opt_approx in (0)
 """
 data = group_on(
-    ['logsize', ('exps.sid', 'sid')],
+    [('logsize - corrupt_qidx', 'logsize'), ('exps.sid', 'sid')],
     where
 )
 
 for d in data:
-  if d['sid'] == 0:
-    d['sid'] = "DELETE only"
   if d['sid'] == 1:
-    d['sid'] = "INSERT only"
+    d['sid'] = "DELETE only"
   if d['sid'] == 2:
     d['sid'] = "UPDATE only"
+  if d['sid'] == 3:
+    d['sid'] = "INSERT only"
 
 p = ggplot(data, aes(x='logsize', y='total_time', color='sid', shape='sid', linetype='sid'))
 p += geom_point(size=2) + geom_line(size=.6)

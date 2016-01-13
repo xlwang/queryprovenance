@@ -1,2 +1,6 @@
 #!/bin/bash
-echo "run setup in ../scale/ first"
+
+dropdb queryprovinc
+createdb queryprovinc
+psql -f inc.sql queryprovinc
+psql -f ../setup.ddl queryprovinc

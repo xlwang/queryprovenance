@@ -35,6 +35,7 @@ insert into names values
 ,('cplex1',    'tq,inc-1st')
 ,('cplex2',    'taq,inc-1st')
 ,('cplex3',  't,inc-1st')
+,('heuristic', 'heuristic')
 ,('t,inc-1st' ,    't,inc-1st')
 ,('ta,inc-1st' ,    'ta,inc-1st')
 ,('tq,inc-1st' ,    'tq,inc-1st')
@@ -42,6 +43,13 @@ insert into names values
 ,('t,inc-1st',    't,inc-1st')
 ,('tq,inc-1st1', 'tq,inc-1st')
 ,('taq,inc-1st2', 'taq,inc-1st')
-,('ta,inc-1st0', 'ta,inc-1st')
+,('ta,inc-1st', 'ta,inc-1st')
+,('inc-1st', 'inc-1st')
+,('tq,inc-1st, equalcons', 'tq,inc-1st')
+,('t,inc-1st,equalcons', 't,inc-1st')
+,('t,inc-1st,partial-inc', 't,part-inc-1st')
+,('tq,inc-1st,partial-inc', 'tq,part-inc-1st')
+,('taq,inc-1st,partial-inc', 'taq,part-inc-1st')
+,('ta,inc-1st,partial-inc', 'ta,part-inc-1st')
 ,('t,inc-1st3', 't,inc-1st');
 
