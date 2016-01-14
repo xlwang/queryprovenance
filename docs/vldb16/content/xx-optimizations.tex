@@ -390,21 +390,6 @@ However, our experiments on synthetic workloads show that this optimization is n
 
 \subsection{Single Query Incremental Repairs}\label{sec:incremental}
 
-Even with the slicing optimizations, the number of undetermined variables can remain high in many cases, resulting in slow runtime for the MILP solver.  As we saw in
-Figure~\ref{fig:querysize_vs_time}, the solver runtime increases exponentially
-as the log size (and thus the number of variables) increases (red bars).
-In contrast, we find that the scalability is significantly better when only a \emph{single query}
-is parameterized, despite linearizing the same number of queries (light blue bars).
-
-These results suggest that it is \emph{faster} to run a separate MILP problem for each 
-suffix of the query log (e.g., $q_i, q_{i+1}\ldots, q_n$) where only $q_i$'s constraints contain
-undetermined variables, rather than encode and parameterize the entire log.
-\incremental (Algorithm~\ref{alg:incalg}) handles cases where the log contains a single corrupted query (or the search focuses on a single repair),
-The algorithm linearizes the entire log, incorporating any slicing optimizations, but parameterizes a single query at a time, moving from the most recent to the oldest.
-The algorithm calls a modified version of \naive,
-which takes an extra parameter $q_i$.  The modified algorithm only parameterizes $q_i$, 
-and fixes the values for the parameters for the rest of the queries in $\mathcal{Q}$.
-
 \begin{algorithm}[t]
 \caption{\incremental algorithm. 
 }
@@ -422,7 +407,22 @@ and fixes the values for the parameters for the rest of the queries in $\mathcal
 \ENDFOR
 \end{algorithmic}
 \end{algorithm}
-\vspace*{-.1in}
+
+Even with the slicing optimizations, the number of undetermined variables can remain high in many cases, resulting in slow runtime for the MILP solver.  As we saw in
+Figure~\ref{fig:querysize_vs_time}, the solver runtime increases exponentially
+as the log size (and thus the number of variables) increases (red bars).
+In contrast, we find that the scalability is significantly better when only a \emph{single query}
+is parameterized, despite linearizing the same number of queries (light blue bars).
+
+These results suggest that it is \emph{faster} to run a separate MILP problem for each 
+suffix of the query log (e.g., $q_i, q_{i+1}\ldots, q_n$) where only $q_i$'s constraints contain
+undetermined variables, rather than encode and parameterize the entire log.
+\incremental (Algorithm~\ref{alg:incalg}) handles cases where the log contains a single corrupted query (or the search focuses on a single repair),
+The algorithm linearizes the entire log, incorporating any slicing optimizations, but parameterizes a single query at a time, moving from the most recent to the oldest.
+The algorithm calls a modified version of \naive,
+which takes an extra parameter $q_i$.  The modified algorithm only parameterizes $q_i$, 
+and fixes the values for the parameters for the rest of the queries in $\mathcal{Q}$.
+
 
 
 

@@ -94,14 +94,24 @@ to generate a initial table with 1000 tuples and one
 We further adjust the range (\# of tuples modified by the query) 
 from 5 tuples to 500 tuples. 
 
- \begin{figure}[h]
-\centering
-  \begin{subfigure}[t]{.48\columnwidth}
-  \includegraphics[width = .95\columnwidth]{figures/placeholder}
-  \caption{.}
-  \label{f:heursticvsmilp} 
-  \end{subfigure}
-  \caption{Heuristic Approach vs. MILP-based Approach on Single-Query. }
-\end{figure}
 
 
+  \begin{figure}[h]
+  \centering
+    \vspace*{-.2in}
+    \begin{subfigure}[t]{.23\textwidth}
+    \includegraphics[width = .9\columnwidth]{figures/heuristictime}
+    \vspace*{-.1in}
+    \caption{Performance of Heuristic Approach vs. \sys.}
+    \label{f:heuristic_time} 
+    \end{subfigure}
+    \begin{subfigure}[t]{.23\textwidth}
+    \includegraphics[width = .9\columnwidth]{figures/heuristicacc}
+    \vspace*{-.1in}
+    \caption{Accuracy of Heuristic Approach vs. \sys.}
+    \label{f:heuristic_acc} 
+    \end{subfigure}
+    \vspace*{-.1in}
+    \caption{Heuristic Approach vs. \sys on Single-Query. }
+  \end{figure}
+  
