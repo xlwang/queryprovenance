@@ -119,7 +119,6 @@ example, $b$ and $z$ are undetermined integer and real valued variables, respect
 whereas $x$ is determined to be $1$.  The objective function is $b+z$, 
 resulting in the optimal solution $b = z = 1$.
 
-{\footnotesize
 \[
 \begin{array}{l l l}
 minimize      & b + z\\
@@ -130,7 +129,6 @@ minimize      & b + z\\
               &z &\ge 0\\
 \end{array}
 \]
-}
 
 
 To achieve this translation,
@@ -151,19 +149,16 @@ as detailed below.
 
 First, we can rewrite the query as a conditional statement:
 
-{\footnotesize
 \[
 \begin{array}{l l l}
 t_3^{new}.rate &= 30              &\mathrm{if}\ t_3^{old}.income > 85700 \\
                &= t_3^{old}.rate  &\mathrm{otherwise} \\
 \end{array}
 \]
-}
 
 By instantiating a variable $p$ to stand for the conditional predicate,
 the statement can be rewritten as:
 
-{\footnotesize
 \[
 \begin{array}{l l l}
 t_3^{new}.rate &= 30              &\mathrm{if}\ p \\
@@ -171,14 +166,12 @@ t_3^{new}.rate &= 30              &\mathrm{if}\ p \\
 p              &= t_3^{old}.income > 85700
 \end{array}
 \]
-}
 
 This is equivalent to the following linearized form.
 In addition, we add constraints on the starting and ending value for the $rate$ attribute:
 If $t_3^{new}.rate$ was specified in $\mathcal{C}$, then the provided value
 is used instead of the value in the database:
 
-{\footnotesize
 \[
 \begin{array}{l l l}
 t_3^{new}.rate &= 30\times p + t_3^{old}.rate\times (1-p)\\
@@ -187,7 +180,6 @@ t_3^{old}.rate &= 30 \\
 t_3^{new}.rate &= 25
 \end{array}
 \]
-}
 
 In the above formulation, all variables are determined and is trivially
 solvable.  Instead, we replace
@@ -195,7 +187,6 @@ the constaints $30$ and $85700$ with undetermined variables $v_1$ and $v_2$,
 so that solving the constraints will reassign those query constants 
 to new values that result in the desired value for $t_3^{new}.rate$.  
 
-{\footnotesize
 \[
 \begin{array}{l l l}
 t_3^{new}.rate &= v_1\times p + t_3^{old}.rate\times (1-p)\\
@@ -206,7 +197,6 @@ v_1            &\in [minval, maxval]\\
 v_2            &\in [minval, maxval]\\
 \end{array}
 \]
-}
 
 Extending this process to all tuples and all queries in the log 
 describes the naive encoding procedure that solves the
@@ -214,10 +204,35 @@ describes the naive encoding procedure that solves the
 However, the size of the resulting constraint problem increases 
 at a rate of $O(|D|\times |Q|\times \mathrm{\#attributes})$, rendering
 it infeasible for all but the smallest databases and query logs.
-\sys uses additional optimizations not presented in this paper 
-to scale to large query log and database sizes.  In fact, for common
-transaction benchmarks, \sys can propose a solution within several seconds
+
+
+\sys uses four additional optimizations not presented in this paper 
+to scale to large query log and database sizes.  The first three are
+called {\it Slicing} optimizations that reduce each of the components in the problem size:
+{\it Query-slicing}; {\it Attribute-slicing}; {\it Tuple-slicing}. 
+MILP solvers typically (though not guaranteed) take a much longer time as the size of the MILP problem increases, thus
+each of the slicing techniques server to reduce the problem and speed up the solver time.
+
+The final optimization serves to reduce the number of undetermined variables that the MILP solver must
+provide a solution for.  The cost of the solver, in our experiments, increases exponentially with the number of 
+undetermined variables.  To this end, \sys uses an incremental algorithm that tries to fix the queries in the query
+log one at a time.
+
+With these optimizations, for common transaction benchmarks, \sys can propose a solution within several seconds
 for thousands of queries and tuples.
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

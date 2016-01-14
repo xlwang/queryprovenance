@@ -1,3 +1,20 @@
+# Dec 1
+
+* attribute slicing may work if
+  * lots of attributes, not that many relevant attributes (skew)
+  * run a test on table with more attributes
+* skewness
+  * weird curves with skewness, solve time dips and then increases
+  * it may be because of varying number of complaints, so xl will fix those and run the experiments again
+  * as the skew increases, the problem is harder to solve since limited number of attributes so everything is related to each other
+  * when it's uniform, the cost goes up as well, but it may be because there are slightly more complaints, so need to retest
+* relative update queries are done, need to generate plots
+* xl completely regenerates MILP problem for every query in incremental case
+  * this is terrible idea, want to incrementally update the problem
+* the slicing algorithms don't seem to have an effect on performance
+* we are perfectly parallelizable wrt solver time
+  * worth discussing
+
 # Paper editing
 
 The paper is pretty good!  I am reasonably happy with the experiments section, though it needs to expalin the results better.
