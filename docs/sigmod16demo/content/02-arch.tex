@@ -1,0 +1,23 @@
+\section{{\large\textbf{\sys}}: architecture}
+
+
+\begin{figure}[t]
+    \centering
+        \includegraphics[scale=0.35]{figures/architecture}
+    \caption{\sys processes data anomalies in the form of complaints and analyzes logged query histories to identify the causes of error. In the heart of the system, transformation algorithms express the diagnosis problem as a mixed integer program, and optimization modules ensure that the MIP programs can be evaluated efficiently.}
+    \label{fig:architecture}
+\end{figure}
+
+Figure~\ref{fig:architecture} shows \sys's major components.  \sys takes as input 
+a query log containing UPDATE, INSERT and DELETE queries, the database, along with a
+set of identified data errors (called {\it complaints}).  These complaints pairs
+of tuple ids of tuples that are wrong, along with an estimate of their correct values (e.g., $30$ or $30\%$ higher).
+\sys uses this information to trace the causes of the errors and output the most likely set of 
+queries in the log ({\it diagnoses}), along with proposed {\it repairs} of these queries.
+
+To achieve this, \sys first performs an optional outlier removal step to deal with potential
+false positives in the complaints.  Then the {\it MILP Encoding} component transforms the
+query diagnosis problem into a Mixed Integer Linear Program (MILP) that is further optimized
+through slicing and incremental repair techniques, before being sent
+to an industrial MILP solver.  The output of the solver constitutes solutions to the query diagnosis
+problem.
