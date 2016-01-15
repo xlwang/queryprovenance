@@ -53,7 +53,7 @@
 \begin{document}
 
 % for 
-\title{{Demonstration of \LARGE\textbf{\sys}}: Error diagnosis in query histories}
+\title{{\sys}: Demonstrating error diagnosis in query histories}
 
 \numberofauthors{3}
 \author{
@@ -80,18 +80,18 @@
 }
 
 \begin{abstract}
-Data-driven applications rely on the correctness of their data to
-function properly and effectively. Errors in data can be incredibly
-costly and disruptive, leading to loss of revenue, incorrect
-conclusions, and misguided policy decisions. While data cleaning tools
-can purge datasets of many errors before the data is used,
-applications and users interacting with the data can introduce new
-errors. Subsequent valid updates can obscure these errors and
-propagate them through the dataset causing more discrepancies. Even
-when some of these discrepancies are discovered, they are often
-corrected superficially, on a case-by-case basis, further obscuring
-the true underlying cause, and making detection of the remaining
-errors harder.
+
+An increasing number of applications in all aspects of society rely on
+data. Despite the long line of research in data cleaning and repairs,
+data correctness has been an elusive goal. Errors in the data can be
+extremely disruptive, and are detrimental to the effectiveness and
+proper function of data-driven applications. Even when data is
+cleaned, new errors can be introduced by applications and users who
+interact with the data. Subsequent valid updates can obscure these
+errors and propagate them through the dataset causing more
+discrepancies. Any discovered errors tend to be corrected
+superficially, on a case-by-case basis, further obscuring the true
+underlying cause, and making detection of the remaining errors harder.
 
 In this demo proposal, we outline the design of \sys, a framework that derives explanations
 and repairs for discrepancies in relational data based on potential errors in
