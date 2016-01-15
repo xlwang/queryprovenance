@@ -71,7 +71,7 @@ In more restricted domains, data explanation finds predicates to exclude from qu
 This problem is challenging because an error introduced by a query can be masked by, or propogated throughout the database,
 by subsequent queries, This alludes to several factors that make even identifying problematic queries dificult:
 
-\begin{description}[leftmargin=*, topsep=0mm, itemsep=0mm]
+\begin{enumerate}[leftmargin=*, topsep=0mm, itemsep=0mm]
 
   \item {\bf Butterfly Effect: } 
   An error in even a single query can affect a large number of records, as documented in several real-world
@@ -94,7 +94,7 @@ by subsequent queries, This alludes to several factors that make even identifyin
   Any combination of these error types may be present in the current state of the database,
   and although they may not be obviously related to each other, they must be addressed in a holistic manner.  
 
-\end{description}
+\end{enumerate}
 
 
 In this demo proposal, we outline the design of \sys, a framework that derives explanations
