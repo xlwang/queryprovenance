@@ -23,12 +23,26 @@ Mistakes in such queries can introduce errors that spread throughout the databas
 Consider the following salary management example:
 
 \begin{example}[Salary Update Error]\label{ex:telco}
-A manager updates the tax rate to $30\%$ for high income employees that earn more than $\$87500$.
-She submits this through a form in the salary accounting application, and due to keyboard slip, incorrectly types $\$85700$
-for the income threshold.  Later queries that insert new paychecks, compute tax calculations,
-aggregate department salaries end up propogating this error throughout other records in the database, leading to
-employee dissatifaction.
+  A manager updates the tax rate to $30\%$ for high income employees that earn more than $\$87500$.
+  She submits this through a form in the salary accounting application, 
+  but due to keyboard slip, incorrectly types $\$85700$ for the income threshold.  
+  Later queries that insert new paychecks, compute tax calculations,
+  aggregate department salaries end up propogating this error throughout other records in the database, leading to
+  employee dissatifaction.  Figure~\ref{fig:example} illustrates a concrete example where $Q_1$, $Q_2$, and $Q_3$ are executed on an 
+  initial salary database $D_0$.  The error in $Q_1$ that incorrectly sets some of the tax rates is propogated to other fields in the table.
 \end{example}
+
+\begin{figure}[t]
+    \centering
+        \includegraphics[width=0.45\textwidth]{figures/example}
+    \caption{$Q_1$ updates the tax rate for high income employees using an incorrect predicate.  
+      The error is propogated by $Q_2$ to the $pay$ field in the database.
+      Finally, a benign insert query $Q_3$ inserts correct salary information. 
+      The final database state contains a mixture of incorrect and correct salary data.
+    }
+    \label{fig:example}
+\end{figure}
+
 
 In this example, by the time errors in the database have been detected, 
 perhaps by employees that report their encorrect paystubs, it is difficult 
@@ -57,29 +71,30 @@ In more restricted domains, data explanation finds predicates to exclude from qu
 This problem is challenging because an error introduced by a query can be masked by, or propogated throughout the database,
 by subsequent queries, This alludes to several factors that make even identifying problematic queries dificult:
 
-\begin{enumerate}
-\item {\bf Butterfly Effect: } 
-An error in even a single query can affect a large number of records, as documented in several real-world
-cases~\cite{Yates10, Grady13, sakalerrors}.  However, even if a single record is incorrect,
-its value may be used as part of the \texttt{WHERE} or \texttt{SET} clauses of 
-subsequent valid queries that introduce additional errors that are seemingly unrelated.
+\begin{description}[leftmargin=*, topsep=0mm, itemsep=0mm]
 
-\item {\bf Partial Information:}  We often cannot rely on processes that can identify all possible
-errors in the database -- for example, not all employees will complain about their incorrect paystubs.  
-More likely, we only have access to a subset of the data errors, and must use them to extrapolate 
-the queries that afflicted the entire set of errors.  A diagnostic tool that can reduce
-the entire transaction log to the most likely candidate queries and propose fixes
-is needed to make this process managable.
+  \item {\bf Butterfly Effect: } 
+  An error in even a single query can affect a large number of records, as documented in several real-world
+  cases~\cite{Yates10, Grady13, sakalerrors}.  However, even if a single record is incorrect,
+  its value may be used as part of the \texttt{WHERE} or \texttt{SET} clauses of 
+  subsequent valid queries that introduce additional errors that are seemingly unrelated.
+
+  \item {\bf Partial Information:}  We often cannot rely on processes that can identify all possible
+  errors in the database -- for example, not all employees will complain about their incorrect paystubs.  
+  More likely, we only have access to a subset of the data errors, and must use them to extrapolate 
+  the queries that afflicted the entire set of errors.  A diagnostic tool that can reduce
+  the entire transaction log to the most likely candidate queries and propose fixes
+  is needed to make this process managable.
 
 
-\item {\bf Multiple Types of Errors:} 
-An erroneous query can cause multiple types of data errors.  For example, a record that should not exist may have been accidentally inserted, or conversely a record that 
-should exist was unintentionally deleted.  Similarly, attribute values may be incorrectly updated,
-updated when they should not have been, or not updated when they should have.  
-Any combination of these error types may be present in the current state of the database,
-and although they may not be obviously related to each other, they must be addressed in a holistic manner.  
+  \item {\bf Multiple Types of Errors:} 
+  An erroneous query can cause multiple types of data errors.  For example, a record that should not exist may have been accidentally inserted, or conversely a record that 
+  should exist was unintentionally deleted.  Similarly, attribute values may be incorrectly updated,
+  updated when they should not have been, or not updated when they should have.  
+  Any combination of these error types may be present in the current state of the database,
+  and although they may not be obviously related to each other, they must be addressed in a holistic manner.  
 
-\end{enumerate}
+\end{description}
 
 
 In this demo proposal, we outline the design of \sys, a framework that derives explanations

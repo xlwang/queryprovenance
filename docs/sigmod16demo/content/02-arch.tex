@@ -1,12 +1,12 @@
 \section{{\large\textbf{\sys}}: architecture}
 
-
-\begin{figure}[t]
+\begin{figure}[h]
     \centering
         \includegraphics[scale=0.35]{figures/architecture}
     \caption{\sys processes data anomalies in the form of complaints and analyzes logged query histories to identify the causes of error. In the heart of the system, transformation algorithms express the diagnosis problem as a mixed integer program, and optimization modules ensure that the MIP programs can be evaluated efficiently.}
     \label{fig:architecture}
 \end{figure}
+
 
 Figure~\ref{fig:architecture} shows \sys's major components.  \sys takes as input 
 a query log containing UPDATE, INSERT and DELETE queries, the database, along with a

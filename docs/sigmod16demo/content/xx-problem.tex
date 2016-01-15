@@ -1,51 +1,51 @@
 %!TEX root = ../main.tex
 
-\section{Problem Description and Solution Sketch}
+\section{Problem and Solution Sketch}
 \label{sec:abstractions}
 
-In this section, we introduce a running example inspired from the use-case of
-Example~\ref{ex:taxes}, and sketch the problem description as well as our
-MILP-based solution.
+% In this section, we introduce a running example inspired from the use-case of
+% Example~\ref{ex:taxes}, and sketch the problem description as well as our
+% MILP-based solution.
 
-\input{content/example}
-\ewu{will change example to match salary story in intro}
 
-\begin{example}\label{ex:taxes2}
-    
-Figure~\ref{fig:example} demonstrates an example tax bracket adjustment in the
-spirit of Example~\ref{ex:taxes}. The adjustment sets the tax rate to 30\% for
-income levels above \$87,500, and is implemented by query $q_1$. A digit
-transposition mistake in the query, results in an incorrect tax rate for tuples
-$t_3$ and $t_4$. Query $q_2$ that calculates the amount owed based on the corresponding
-tax rate and income propagates the error to other fields. The mistake is
-further obscured by query $q_3$, which inserts a tuple with slightly higher
-income than $t_3$ and $t_4$ and the correct (lower) tax rate.
 
-\end{example}
+% \begin{example}\label{ex:taxes2}
+%     
+% Figure~\ref{fig:example} demonstrates an example tax bracket adjustment in the
+% spirit of Example~\ref{ex:taxes}. The adjustment sets the tax rate to 30\% for
+% income levels above \$87,500, and is implemented by query $q_1$. A digit
+% transposition mistake in the query, results in an incorrect tax rate for tuples
+% $t_3$ and $t_4$. Query $q_2$ that calculates the amount owed based on the corresponding
+% tax rate and income propagates the error to other fields. The mistake is
+% further obscured by query $q_3$, which inserts a tuple with slightly higher
+% income than $t_3$ and $t_4$ and the correct (lower) tax rate.
 % 
-While traditional data cleaning techniques seek to identify and correct the
-erroneous values in the table \emph{Taxes} directly, our goal is to diagnose
-the problem, and understand the reasons for these errors. In this case, the
-reason for the data errors is the incorrect predicate value in query $q_1$.
+% \end{example}
+% % 
+% While traditional data cleaning techniques seek to identify and correct the
+% erroneous values in the table \emph{Taxes} directly, our goal is to diagnose
+% the problem, and understand the reasons for these errors. In this case, the
+% reason for the data errors is the incorrect predicate value in query $q_1$.
 
-In this paper, we assume that we know \emph{some} errors in the dataset, and
-that these errors were caused by erroneous updates. The errors may be
-obtained in different ways: traditional data cleaning tools may identify
-discrepancies in the data (e.g., a tuple with lower income has higher tax
-rate), or errors can be reported directly from users (e.g., customers
-reporting discrepancies to customer service). \emph{Our goal is not to correct
-the errors directly in the data, but to analyze them as a ``symptom'' and provide a
-diagnosis.} The diagnosis can produce a targeted treatment: knowing how the
-errors were introduced guides the proper way to trace and resolve them.
+% In this paper, we assume that we know \emph{some} errors in the dataset, and
+% that these errors were caused by erroneous updates. The errors may be
+% obtained in different ways: traditional data cleaning tools may identify
+% discrepancies in the data (e.g., a tuple with lower income has higher tax
+% rate), or errors can be reported directly from users (e.g., customers
+% reporting discrepancies to customer service). \emph{Our goal is not to correct
+% the errors directly in the data, but to analyze them as a ``symptom'' and provide a
+% diagnosis.} The diagnosis can produce a targeted treatment: knowing how the
+% errors were introduced guides the proper way to trace and resolve them.
 
 
 
-\begin{figure}[t]
-    \centering
-        \includegraphics[scale=0.35]{figures/logs}
-    \caption{}
-    \label{fig:logs}
-\end{figure}
+% \begin{figure}[t]
+%     \centering
+%         \includegraphics[scale=0.35]{figures/logs}
+%     \caption{}
+%     \label{fig:logs}
+%     \vspace*{-.2in}
+% \end{figure}
 
 
 \subsection{Problem Outline}
