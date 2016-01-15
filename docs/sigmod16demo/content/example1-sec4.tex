@@ -1,56 +1,29 @@
 
-Due to space constraints, we will walk through an example of how the query
-\texttt{UPDATE Taxes SET rate = 30 WHERE income > 85700}, when applied to 
-$t_3^{old}$ to produce $t_3^{new}$, is translated into a set of constraints
-as detailed below.
+\begin{example}[Salary Update Error]\label{ex:telco}
+  A manager updates the tax rate to $30\%$ for high income employees that earn more than $\$87500$.
+  She submits this through a form in the salary accounting application, 
+  but due to keyboard slip, incorrectly types $\$85700$ for the income threshold.  
+  Later queries that insert new paychecks, compute tax calculations,
+  aggregate department salaries end up propogating this error throughout other records in the database, leading to
+  employee dissatifaction.  Figure~\ref{fig:example} illustrates a concrete example where $Q_1$, $Q_2$, and $Q_3$ are executed on an 
+  initial salary database $D_0$.  The error in $Q_1$ that incorrectly sets some of the tax rates is propogated to other fields in the table.
+\end{example}
 
-First, we can rewrite the query as a conditional statement:
+\begin{figure}[t]
+    \centering
+        \includegraphics[width=0.45\textwidth]{figures/example}
+    \caption{$Q_1$ updates the tax rate for high income employees using an incorrect predicate.  
+      The error is propogated by $Q_2$ to the $pay$ field in the database.
+      Finally, a benign insert query $Q_3$ inserts correct salary information. 
+      The final database state contains a mixture of incorrect and correct salary data.
+    }
+    \label{fig:example}
+\end{figure}
 
-\[
-\begin{array}{l l l}
-t_3^{new}.rate &= 30              &\mathrm{if}\ t_3^{old}.income > 85700 \\
-               &= t_3^{old}.rate  &\mathrm{otherwise} \\
-\end{array}
-\]
 
-By instantiating a variable $p$ to stand for the conditional predicate,
-the statement can be rewritten as:
-
-\[
-\begin{array}{l l l}
-t_3^{new}.rate &= 30              &\mathrm{if}\ p \\
-               &= t_3^{old}.rate  &\mathrm{if}\ 1-p\\
-p              &= t_3^{old}.income > 85700
-\end{array}
-\]
-
-This is equivalent to the following linearized form.
-In addition, we add constraints on the starting and ending value for the $rate$ attribute:
-If $t_3^{new}.rate$ was specified in $\mathcal{C}$, then the provided value
-is used instead of the value in the database:
-
-\[
-\begin{array}{l l l}
-t_3^{new}.rate &= 30\times p + t_3^{old}.rate\times (1-p)\\
-p              &= t_3^{old}.income > 85700\\
-t_3^{old}.rate &= 30 \\
-t_3^{new}.rate &= 25
-\end{array}
-\]
-
-In the above formulation, all variables are determined and is trivially
-solvable.  Instead, we replace
-the constaints $30$ and $85700$ with undetermined variables $v_1$ and $v_2$,
-so that solving the constraints will reassign those query constants 
-to new values that result in the desired value for $t_3^{new}.rate$.  
-
-\[
-\begin{array}{l l l}
-t_3^{new}.rate &= v_1\times p + t_3^{old}.rate\times (1-p)\\
-p              &= t_3^{old}.income > v_2\\
-t_3^{old}.rate &= 30 \\
-t_3^{new}.rate &= 25 \\
-v_1            &\in [minval, maxval]\\
-v_2            &\in [minval, maxval]\\
-\end{array}
-\]
+In this example, by the time errors in the database have been detected, 
+perhaps by employees that report their encorrect paystubs, it is difficult 
+to both identify all of the other errors in the database, and to trace these errors back to the erroneous query to correct it.
+This example can occur in any data processing systems where manual input is used to generate queries that modify the database --
+this could be in the form of adhoc queries executed by a system administrator, or web-based forms that construct queries based
+on user input, or even stored procedures that use human input to fill the parameter values.

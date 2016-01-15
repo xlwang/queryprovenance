@@ -17,15 +17,14 @@ that use existing techniques.
 Figures~\ref{f:demo1} and~\ref{f:demo2} show screenshots of the initial and results pages.
 Each step is annotated with a circled number, which we detail below.
 
-\noindent {\bf Step 1 (Select Dataset):} Participants may first choose from a dropdown menu containing
+\noindent {\bf Step 1:} Participants may first choose from a dropdown menu containing
 a number of transaction workload generators from the benchmarks in OLTPBench~\cite{oltpbench}.
 Since most transactional benchmarks focus on point update queries, we additionally include a 
 synthetic workload generator that includes range updates, as well as insert and delete queries.
 The text box on the right side allows users to additionally specify the number of queries to generate
 in the workload.  
 
-\noindent {\bf Step 2 (Corrupt the Query Log):} 
-Once the workload generator is specified, the Query Log component of the interface
+\noindent {\bf Step 2:} Once the workload generator is specified, the Query Log component of the interface
 renders a scrollable list containing all of the queries.  When users select a query in the log,
 the interface shows the query in an editable popup so that users can edit the queries, thus introducing errors
 into the workload.  For example, in the figure, the user has edited query $Q_2$ by changing the \texttt{SET}
