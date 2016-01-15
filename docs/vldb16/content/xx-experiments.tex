@@ -337,9 +337,9 @@ tuples, which results in $1$ or $2$ complaints on average.  In this case, the tu
 reduce the total number of constraints for almost every setting to less than $100$.   \xlw{Rewrite needed after experiment is done. }
 
 \begin{figure}[h]
+\label{f:benchmark} 
 \centering
   \includegraphics[width = .75\columnwidth]{figures/benchmark_time}
-  \label{f:benchmark} 
   \vspace*{-.2in}
   \caption{Performance on Benchmarks \xlw{tpcc not done yet for 2000 queries. }}
   \vspace*{-.1in}
@@ -366,7 +366,7 @@ reduce the total number of constraints for almost every setting to less than $10
     \end{subfigure}
     \caption{Comparison of Optimizations. \xlw{first exp need to rerun. }}
   \end{figure*}
-  
+\iffalse  
   \begin{figure*}[h]
     \centering
     \begin{subfigure}[t]{.3\textwidth}
@@ -387,7 +387,6 @@ reduce the total number of constraints for almost every setting to less than $10
       \caption{Query Complexity (Where Size).}
       \label{f:where_time} 
     \end{subfigure}
-    \iffalse 
     \\
     \begin{subfigure}[t]{.3\textwidth}
       \includegraphics[width = .99\columnwidth]{figures/dbsize_acc}
@@ -407,10 +406,10 @@ reduce the total number of constraints for almost every setting to less than $10
       \caption{Query Complexity (Where Size) vs F1-score.}
       \label{f:where_acc} 
     \end{subfigure}
-    \fi
+    
     \caption{Scalability Experiments (Performance)}
   \end{figure*}
-
+\fi
 
 \subsection{Synthetic Experiments}
 \label{sec:experiments:synth}
@@ -508,15 +507,34 @@ Figure~\ref{f:skew_time} shows that the performance is weakly related to the ske
   \begin{figure*}[h]
     \vspace*{-.1in}
     \centering
-    \begin{subfigure}[t]{.3\textwidth}
-    \includegraphics[width = .99\columnwidth]{figures/skew_time}
-    \caption{Skew vs Time}
-    \label{f:skew_time} 
+     \begin{subfigure}[t]{.3\textwidth}
+      \includegraphics[width = .99\columnwidth]{figures/dbsize_time}
+      \vspace*{-.1in}
+      \caption{Database Size.}
+      \label{f:dbsize_time} 
+    \end{subfigure}
+        \begin{subfigure}[t]{.3\textwidth}
+      \includegraphics[width = .99\columnwidth]{figures/pointrelv_time}
+      \vspace*{-.1in}
+      \caption{Query Complexity (Query Type).}
+      \label{f:qidx_time} 
     \end{subfigure}
     \begin{subfigure}[t]{.3\textwidth}
     \includegraphics[width = .99\columnwidth]{figures/noise_fn_time}
     \caption{Time vs False Negative}
     \label{f:falsenegative_time} 
+    \end{subfigure} 
+    \\
+    \begin{subfigure}[t]{.3\textwidth}
+    \includegraphics[width = .99\columnwidth]{figures/skew_time}
+    \caption{Skew vs Time}
+    \label{f:skew_time} 
+    \end{subfigure}
+	\begin{subfigure}[t]{.3\textwidth}
+      \includegraphics[width = .99\columnwidth]{figures/where_time}
+      \vspace*{-.1in}
+      \caption{Query Complexity (Where Size).}
+      \label{f:where_time} 
     \end{subfigure}
     \begin{subfigure}[t]{.3\textwidth}
     \includegraphics[width = .99\columnwidth]{figures/noise_fn_acc}
