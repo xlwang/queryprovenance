@@ -57,36 +57,19 @@ $A_i,\ldots,A_m$, though this restriction is not a requirement for \sys.
 Let $D_i = q_i(\ldots q_1(D_0))$ be the the database state output after executing queries $q_1$ though $q_i$ on $D_0$.
 Thus, the final database state is simply the application of the query log to
 the initial state: $D_n = Q(D_0)$.
-We assume that \texttt{UPDATE} and \texttt{DELETE} queries consist of conjunctive range clauses
-of the form $A_j\ op\ C$, where $op \in \{=, >, <, \le, \ge, \ne\}$ and $C$ is a constant value,
-and that \texttt{SET} clauses of the form $A_j\ =\ C$.
+We assume that \texttt{UPDATE} and \texttt{DELETE} queries consist of conjunctive\xlw{or disjunctive range clauses
+of the form $\langle A_j\ op\ ?\rangle$, where $op \in \{=, >, <, \le, \ge, \ne\}$ and $?$ is a constant value,
+and that \texttt{SET} clauses of the form $\langle A_j\ =\ A_i\ +\ ? \rangle$(relative update) or $\langle A_j\ =\ ?\rangle$ (constant update)}.
 
 Queries in $Q$ are possibly erroneous and introduce errors in the data.  We assume there is 
 a true sequence of queries $Q^* = \{q^*_1,\ldots,q^*_n\}$ that generate a true sequence of database states
 $\{D_0, D^*_1,\ldots,D^*_n\}$.  The true query log and database states are unknown, and our goal is to 
-find and correct errors in $Q$ to retrieve the correct database state $D^*_n$>
+find and correct errors in $Q$ to retrieve the correct database state $D^*_n$.
 
 To do so, \sys takes as input a set of identified or user-reported
 data errors, or a {\it complaint set} denoted as $\mathcal{C}$. 
-A complaint $c$ corresponds to a tuple in $D^*_n$ along with its true attribute value assignments. 
-For example, Figure~\ref{} shows several complaints. $c_1 = (t_3, \{rate=25, owed=21500\})$ and 
-$c_2 = (t_4, \{rate=25, owed=21625\})$ show that tuples $t_3$ and $t_4$ 
-have incorrect values for attributes {\it rate} and {\it owed}.
-A complaint can also model addition or removal of tuples. 
-For example, $c = (\bot, t^*)$ means that $t^*$ should be added to the database, 
-while $c = (t_i, \bot)$ denotes that $t_i$ should be removed.
-
-Our goal is to derive a diagnosis as a log repair
-$Q'=\{q_1',\dots, q_n'\}$, such that
-$Q'(D_0)=D_n^* $. In this work, we focus on errors produced
-by incorrect parameters in queries, so our repairs focus on altering
-query constants rather than query structure. Therefore, each query
-$q_i'\in Q'$ has the same structure as $q_i$
-(e.g., the same number of predicates and the same variables in the \texttt{WHERE} clause), 
-but possibly different parameters. For example, a good log repair for the
-example of Figure~\ref{fig:example} is
-$Q'=\{q_1',q_2,q_3\}$, where $q_1'$=\texttt{UPDATE Taxes
-SET rate = 30 WHERE income >= 87500}.
+A complaint $c$ corresponds to a tuple in $D^*_n$ along with its true attribute value assignments.  
+\input{content/example2-sec3}
 
 
 \subsubsection*{Problem definition}
