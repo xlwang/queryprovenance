@@ -9,7 +9,7 @@ that use existing techniques.
 
 \begin{figure}[h]
 \centering
-  \includegraphics[width = .75\columnwidth]{figures/demo1}
+  \includegraphics[width = .75\columnwidth]{figures/demo1_exp2}
   \caption{Users select and introduce errors to benchmark query workloads.}
   \label{f:demo1} 
 \end{figure}
@@ -17,30 +17,35 @@ that use existing techniques.
 Figures~\ref{f:demo1} and~\ref{f:demo2} show screenshots of the initial and results pages.
 Each step is annotated with a circled number, which we detail below.
 
-\noindent {\bf Step 1:} Participants may first choose from a dropdown menu containing
+\noindent {\bf Step 1 (Select Dataset):} Participants may first choose from a dropdown menu containing
 a number of transaction workload generators from the benchmarks in OLTPBench~\cite{oltpbench}.
 Since most transactional benchmarks focus on point update queries, we additionally include a 
 synthetic workload generator that includes range updates, as well as insert and delete queries.
 The text box on the right side allows users to additionally specify the number of queries to generate
 in the workload.  
 
-\noindent {\bf Step 2:} Once the workload generator is specified, the Query Log component of the interface
-renders a scrollable list containing all of the queries.  When users select a query in the log,
-the interface shows the query in an editable popup so that users can edit the queries, thus introducing errors
-into the workload.  For example, in the figure, the user has edited query $Q_2$ by changing the \texttt{SET}
-clause from $tax = 35$ to $tax = 45$.
+\noindent {\bf Step 2 (Corrupt the Query Log):} 
+Once the workload generator is specified, the Query Log component of the interface
+renders a scrollable list containing all of the queries.  Users can either let the system to 
+inject errors randomly by clicking the ``Random Error'' button or manually add errors. 
+To introduce errors, the interface allows users to select any editable query in the log and shows the 
+selected query in an editable popup so that users can edit the queries.  
+For example, in the figure, the user has edited query $Q_2$ by changing the \texttt{SET}
+clause from $income = 1.1 * income$ to $income = 1.5 * income$. 
 
-\noindent {\bf Step 3:} The modified query cause the state of the database at the end of the workload
+\noindent {\bf Step 3 (Form a Complaint Set):} 
+The modified query cause the state of the database at the end of the workload
 to differ from the result of the original workload.  The candidate complaints table lists the tuples
 that are different and highlights the attribute values in those tuples as red text.  For instance,
-$t_1.rate$ and $t_1.owed$ are both errors introduced by the modified query.  Users can select individual
+$t_1.tax$, $t_1.income$ and $t_1.pay$ are all errors introduced by the modified query. 
+ Users can select individual
 attribute values or entire tuples to add to the complaint set that is used as input to the \sys algorithms.  
 When she is satisfied, the user clicks \texttt{Run QueryFix} to execute the \sys and alternative algorithms
 
 
 \begin{figure}[h]
 \centering
-  \includegraphics[width = .85\columnwidth]{figures/demo2}
+  \includegraphics[width = .85\columnwidth]{figures/demo2_exp2}
   \caption{Comparisons between proposed fixes.}
   \label{f:demo2} 
 \end{figure}

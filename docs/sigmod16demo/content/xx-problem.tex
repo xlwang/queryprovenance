@@ -106,7 +106,10 @@ Briefly, a linear program is a minimization problem consisting of
 a set of constraints in the form of linear equations, along with
 an objective function that is minimized; an MILP is a linear program
 where only a subset of the undetermined variables are required to
-be integers, while the rest are real valued.  For example, in the following
+be integers, while the rest are real valued.  
+
+\iffalse
+For example, in the following
 example, $b$ and $z$ are undetermined integer and real valued variables, respectively,
 whereas $x$ is determined to be $1$.  The objective function is $b+z$, 
 resulting in the optimal solution $b = z = 1$.
@@ -121,11 +124,12 @@ minimize      & b + z\\
               &z &\ge 0\\
 \end{array}
 \]
-
+\fi
 
 To achieve this translation,
 we model each query as a linear equation that computes the output
-tuple values from the inputs and to transform the equation into a
+tuple values from the inputs (\xlw{or previous database state}) 
+and to transform the equation into a
 set of of linear constraints. In addition, the constant values in
 the queries are parameterized into a set of undetermined variables,
 while the database state is encoded as constraints on the initial
@@ -133,62 +137,10 @@ and final tuple values. Finally, the undetermined variables are
 used to construct an objective function that prefers value assignments
 that minimize both the amount that the queries change and the number
 of non-complaint tuples that are affected.
-
-Due to space constraints, we will walk through an example of how the query
-\texttt{UPDATE Taxes SET rate = 30 WHERE income > 85700}, when applied to 
-$t_3^{old}$ to produce $t_3^{new}$, is translated into a set of constraints
-as detailed below.
-
-First, we can rewrite the query as a conditional statement:
-
-\[
-\begin{array}{l l l}
-t_3^{new}.rate &= 30              &\mathrm{if}\ t_3^{old}.income > 85700 \\
-               &= t_3^{old}.rate  &\mathrm{otherwise} \\
-\end{array}
-\]
-
-By instantiating a variable $p$ to stand for the conditional predicate,
-the statement can be rewritten as:
-
-\[
-\begin{array}{l l l}
-t_3^{new}.rate &= 30              &\mathrm{if}\ p \\
-               &= t_3^{old}.rate  &\mathrm{if}\ 1-p\\
-p              &= t_3^{old}.income > 85700
-\end{array}
-\]
-
-This is equivalent to the following linearized form.
-In addition, we add constraints on the starting and ending value for the $rate$ attribute:
-If $t_3^{new}.rate$ was specified in $\mathcal{C}$, then the provided value
-is used instead of the value in the database:
-
-\[
-\begin{array}{l l l}
-t_3^{new}.rate &= 30\times p + t_3^{old}.rate\times (1-p)\\
-p              &= t_3^{old}.income > 85700\\
-t_3^{old}.rate &= 30 \\
-t_3^{new}.rate &= 25
-\end{array}
-\]
-
-In the above formulation, all variables are determined and is trivially
-solvable.  Instead, we replace
-the constaints $30$ and $85700$ with undetermined variables $v_1$ and $v_2$,
-so that solving the constraints will reassign those query constants 
-to new values that result in the desired value for $t_3^{new}.rate$.  
-
-\[
-\begin{array}{l l l}
-t_3^{new}.rate &= v_1\times p + t_3^{old}.rate\times (1-p)\\
-p              &= t_3^{old}.income > v_2\\
-t_3^{old}.rate &= 30 \\
-t_3^{new}.rate &= 25 \\
-v_1            &\in [minval, maxval]\\
-v_2            &\in [minval, maxval]\\
-\end{array}
-\]
+\input{content/example2-sec32}
+Note that the initial range $[minval, maxval]$ of the 
+undetermined variables are usually defined based on
+the valid range of the corresponding attribute(s). 
 
 Extending this process to all tuples and all queries in the log 
 describes the naive encoding procedure that solves the
