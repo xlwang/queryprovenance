@@ -3,47 +3,83 @@
 \section{Introduction}
 \label{s:intro}
 
-data quality and errors are an issue.
-examples are why it's an issue.
+Data errors are a perrenial, expensive, and time consuming problem that afflict the vast majority of data-driven applications.
+For example, errors in detail price data are estimated to cost US consumers \$2.5 billion each year~\cite{Fan2008}.
+In aggregate, data errors are estimated to cost the US economy >\$600 billion per year~\cite{eckerson2002}.
+Meanwhile, it is estimated that a significant fraction of time performing data analysis --
+up to 80\%~\cite{kandel2012} -- is devoted to cleaning and
+wrangling~\cite{kandel2011wrangler} the data into a structured and sufficiently clean form to use in downstream applications.
 
-Exsiting techniques are data centric.
-Detection, prevention, filtering, cleaning solutions.
-ETL.
+In response, both industry and academia has focused on data cleaning solutions to mitigate this problem.
+ETL-type systems~\cite{systemt,informatica} focus on cleansing the data before it is loaded into the database
+using a set of pre-defined rules; outlier and anomaly detection algorithms~\cite{} are used to identify errors
+in the database after the data has been loaded; while recent approaches use downstream applications
+such as interactive visualizations, application queries, or data-products to facilitate error detection and correction algorithms.
+In each of these cases, the focus of error diagnosis and cleaning has been {\it data centric}, in the sense that
+the process is meant to identify and directly fix data values.
 
-However, this is a limittion, because they ignore a common source of errors -- user generated qureies.
-Adhoc queries.
-Even stored procedures are suseptible through web based interfaces that fill in procedure parameters.  Think SAP
+Despite these efforts, they largely ignored an important source of data errors -- data modification {\it queries}.
+Mistakes in such queries can introduce errors that spread throughout the database due to subsequent update queries.
+Consider the following salary management example:
 
-Consider an example representative of a large wireless carrier: call center example.
+\begin{example}[Salary Update Error]\label{ex:telco}
+A manager updates the tax rate to $30\%$ for high income employees that earn more than $\$87500$.
+She submits this through a form in the salary accounting application, and due to keyboard slip, incorrectly types $\$85700$
+for the income threshold.  Later queries that insert new paychecks, compute tax calculations,
+aggregate department salaries end up propogating this error throughout other records in the database, leading to
+employee dissatifaction.
+\end{example}
 
-Consider another interactive data analysis example.  User executes queries that update different portions of her database.  Then after visualizing, finds problematic data.
-Although she knows the correct values, she ran multiple queries.  Which one does she need to fix?
+In this example, by the time errors in the database have been detected, 
+perhaps by employees that report their encorrect paystubs, it is difficult 
+to both identify all of the other errors in the database, and to trace these errors back to the erroneous query to correct it.
+This example can occur in any data processing systems where manual input is used to generate queries that modify the database --
+this could be in the form of adhoc queries executed by a system administrator, or web-based forms that construct queries based
+on user input, or even stored procedures that use human input to fill the parameter values.
 
-This source is challenging because an error introduced by a query can be masked by subsequent queries,
-or propagated throughout the database by subsequent queries.  This alludes to several factors that make
-even identifying problematic queries dificult:
+Although existing data-centric cleaning techniques may help identify and correct these reported errors directly, 
+this is suboptimal because it treats the symptom -- the errors in the current database state -- rather than the anomalous
+queries that are the underlying cause.  In practice, only a subset of the paystub errors will be reported, thus fixing
+the reported errors on a case-by-case basis will more likely than not obscure the root problem, making it more difficult to
+find both the erroneous query and the other affected data.  
+Furthermore, a data-centry approach must fix {\it all errors} -- a unfixed value such as the incorrect tax rate
+may continue to introduce errors in the database due to future queries that 
+e.g., insert incorrectly computed paychecks based on the unfixed tax rate.
+
+For these reasons, traditional data cleaning approaches may be helpful for finding errors in the data, but are
+not designed to diagnose causes of the errors when they are rooted in incorrect queries.
+There has been some work, but not directly for this problme.  
+Integrety constraints.
+Certificate-based verification.
+Structural sources of mistakes, but not identify the specific faulty query and how it is wrong.
+In more restricted domains, data explanation finds predicates to exclude from qureies, but only work for a single, simple  aggregation query.
+
+This problem is challenging because an error introduced by a query can be masked by, or propogated throughout the database,
+by subsequent queries, This alludes to several factors that make even identifying problematic queries dificult:
 
 \begin{enumerate}
-\item {\bf butterfly effect: } An error in a handful of records in the past can cascade and affect many records that are seemingly unrelated
+\item {\bf Butterfly Effect: } 
+An error in even a single query can affect a large number of records, as documented in several real-world
+cases~\cite{Yates10, Grady13, sakalerrors}.  However, even if a single record is incorrect,
+its value may be used as part of the \texttt{WHERE} or \texttt{SET} clauses of 
+subsequent valid queries that introduce additional errors that are seemingly unrelated.
 
-\item {\bf partial information:}  not all customers will call in to complain and complaints may not be complete
+\item {\bf Partial Information:}  We often cannot rely on processes that can identify all possible
+errors in the database -- for example, not all employees will complain about their incorrect paystubs.  
+More likely, we only have access to a subset of the data errors, and must use them to extrapolate 
+the queries that afflicted the entire set of errors.  A diagnostic tool that can reduce
+the entire transaction log to the most likely candidate queries and propose fixes
+is needed to make this process managable.
 
-\item {\bf multiple types of errors:} Record was modified/inserted/deleted incorrectly
-Record should have been changed, was not changed
+
+\item {\bf Multiple Types of Errors:} 
+An erroneous query can cause multiple types of data errors.  For example, a record that should not exist may have been accidentally inserted, or conversely a record that 
+should exist was unintentionally deleted.  Similarly, attribute values may be incorrectly updated,
+updated when they should not have been, or not updated when they should have.  
+Any combination of these error types may be present in the current state of the database,
+and although they may not be obviously related to each other, they must be addressed in a holistic manner.  
 
 \end{enumerate}
-
-Solving this would be good.  It can identify systemitc sources of errors. 
-
-
-\begin{figure}[t]
-    \centering
-        \includegraphics[scale=0.35]{figures/logs}
-    \caption{}
-    \label{fig:logs}
-\end{figure}
-
-
 
 
 In this demo proposal, we outline the design of \sys, a framework that derives explanations
@@ -52,14 +88,14 @@ the queries that operated on the data, and describe how users will use \sys
 in a demonstration scenario. 
 In contrast to existing approaches in data
 cleaning that aim to detect and correct errors in the data directly, the goal
-of \sys is to identify errors in the queries that introduced errors in the
-data. These diagnoses both \emph{explain} how errors were introduced to a
+of \sys is to identify  the problematic queries that introduced errors into the
+database. These diagnoses both \emph{explain} how errors were introduced to a
 dataset, and also lead to the identification of additional discrepancies in
 the data that would have otherwise remained undetected.
-Participants will be able to select from a number of 
-transactional benchmarks, introduce errors into the queries that are executed,
-and compare the fixes to the queries proposed by \sys as well as existing alternative algorithms
-such as decision trees.
+Participants will be able to 
+select from a number of transactional benchmarks to generate a query workload,
+introduce errors into the queries that are executed,
+and compare the fixes to the queries proposed by \sys as well as existing alternative algorithms such as decision trees.
 
 
 
@@ -117,32 +153,32 @@ such as decision trees.
 % 
 % \end{example}
 
-\begin{example}[Tax bracket adjustment]\label{ex:taxes}
-    
-Tax brackets, which determine tax rates for different income levels, are
-often adjusted. Accounting firms implement these changes to their
-databases by appropriately updating the tax rates of their customers. Mistakes
-in these update queries (e.g., Figure~\ref{fig:example}) result in errors in
-the tax rates and computed taxes. 
-
-\end{example}
-
-
-In this application, data errors are typically reported to a
-customer service department, which does not have the resources nor the
-capability to investigate the errors more broadly. Instead, errors are
-resolved on a case-by-case basis. In practice, customer service only deals
-with a small portion of the actual errors. Once these errors are resolved,
-there will still be a large number of incorrect records that were not
-identified. The goal of \sys is to identify the query or queries that caused
-the errors, propose corrections to those queries, and use the modified queries
-to identify other errors.
-
-Diagnosing data errors stemming from incorrect updates is fundamentally
-challenging: the search space of possible mistakes and fixes is large, and the
-amount of information (number of known errors) may be limited. The problem has
-the following important characteristics that render traditional data cleaning
-methods unsuitable:
+% \begin{example}[Tax bracket adjustment]\label{ex:taxes}
+%     
+% Tax brackets, which determine tax rates for different income levels, are
+% often adjusted. Accounting firms implement these changes to their
+% databases by appropriately updating the tax rates of their customers. Mistakes
+% in these update queries (e.g., Figure~\ref{fig:example}) result in errors in
+% the tax rates and computed taxes. 
+% 
+% \end{example}
+% 
+% 
+% In this application, data errors are typically reported to a
+% customer service department, which does not have the resources nor the
+% capability to investigate the errors more broadly. Instead, errors are
+% resolved on a case-by-case basis. In practice, customer service only deals
+% with a small portion of the actual errors. Once these errors are resolved,
+% there will still be a large number of incorrect records that were not
+% identified. The goal of \sys is to identify the query or queries that caused
+% the errors, propose corrections to those queries, and use the modified queries
+% to identify other errors.
+% 
+% Diagnosing data errors stemming from incorrect updates is fundamentally
+% challenging: the search space of possible mistakes and fixes is large, and the
+% amount of information (number of known errors) may be limited. The problem has
+% the following important characteristics that render traditional data cleaning
+% methods unsuitable:
 
 
 
