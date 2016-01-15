@@ -3,23 +3,27 @@
 \section{Introduction}
 \label{s:intro}
 
-Data errors are a perrenial, expensive, and time consuming problem that afflict the vast majority of data-driven applications.
-For example, errors in detail price data are estimated to cost US consumers \$2.5 billion each year~\cite{Fan2008}.
-In aggregate, data errors are estimated to cost the US economy >\$600 billion per year~\cite{eckerson2002}.
-Meanwhile, it is estimated that a significant fraction of time performing data analysis --
-up to 80\%~\cite{kandel2012} -- is devoted to cleaning and
-wrangling~\cite{kandel2011wrangler} the data into a structured and sufficiently clean form to use in downstream applications.
+Data errors are a pervasive, expensive, and time consuming problem
+that afflicts the vast majority of data-driven applications. For
+example, errors in retail price data cost US consumers \$2.5 billion
+each year~\cite{Fan2008}. In aggregate, studies estimate data errors
+to cost the US economy more than \$600 billion per
+year~\cite{eckerson2002}. Therefore, it is not surprising that a
+significant fraction of time in data analysis --- up to
+80\%~\cite{kandel2012} --- is devoted to cleaning and
+wrangling~\cite{kandel2011wrangler} the data into a structured and
+sufficiently clean form to use in downstream applications.
 
 In response, both industry and academia has focused on data cleaning solutions to mitigate this problem.
-ETL-type systems~\cite{systemt,informatica} focus on cleansing the data before it is loaded into the database
+ETL-type systems~\cite{systemt, informatica} focus on cleansing the data before it is loaded into the database
 using a set of pre-defined rules; outlier and anomaly detection algorithms~\cite{} are used to identify errors
 in the database after the data has been loaded; while recent approaches use downstream applications
 such as interactive visualizations, application queries, or data-products to facilitate error detection and correction algorithms.
 In each of these cases, the focus of error diagnosis and cleaning has been {\it data centric}, in the sense that
 the process is meant to identify and directly fix data values.
 
-Despite these efforts, they largely ignored an important source of data errors -- data modification {\it queries}.
-Mistakes in such queries can introduce errors that spread throughout the database due to subsequent update queries.
+These efforts have largely ignored an important source of data errors --- data modification {\it queries}.
+Mistakes in such queries can introduce errors that spread throughout the database due to subsequent, possibly correct updates.
 Consider the following salary management example:
 
 % change example
@@ -27,43 +31,44 @@ Consider the following salary management example:
 %\input{content/example2}
 
 Although existing data-centric cleaning techniques may help identify and correct these reported errors directly, 
-this is suboptimal because it treats the symptom -- the errors in the current database state -- rather than the anomalous
+this is suboptimal because it treats the symptom --- the errors in the current database state --- rather than the anomalous
 queries that are the underlying cause.  In practice, only a subset of the paystub errors will be reported, thus fixing
-the reported errors on a case-by-case basis will more likely than not obscure the root problem, making it more difficult to
+the reported errors on a case-by-case basis will likely obscure the root problem, making it more difficult to
 find both the erroneous query and the other affected data.  
-Furthermore, a data-centry approach must fix {\it all errors} -- a unfixed value such as the incorrect tax rate
-may continue to introduce errors in the database due to future queries that 
-e.g., insert incorrectly computed paychecks based on the unfixed tax rate.
+Furthermore, a data-centric approach must repair \emph{all errors} --- a non-repaired value such as the incorrect tax rate
+may continue to introduce errors in the database through future queries 
+(e.g., inserting incorrectly computed paychecks based on the still-incorrect tax rate).
 
+\alex{Leaving this paragraph to Eugene.}
 For these reasons, traditional data cleaning approaches may be helpful for finding errors in the data, but are
 not designed to diagnose causes of the errors when they are rooted in incorrect queries.
 There has been some work, but not directly for this problem.  
 \ewu{fill in with related work}
-Integrety constraints.
+Integrity constraints.
 Certificate-based verification.
 Structural sources of mistakes, but not identify the specific faulty query and how it is wrong.
-In more restricted domains, data explanation finds predicates to exclude from qureies, but only work for a single, simple  aggregation query.
+In more restricted domains, data explanation finds predicates to exclude from queries, but only work for a single, simple  aggregation query.
 
-This problem is challenging because an error introduced by a query can be masked by, or propogated throughout the database,
-by subsequent queries, This alludes to several factors that make even identifying problematic queries dificult:
+Query-centric cleaning and repair is challenging because an error introduced by a query can be obscured by, or propagated throughout the database
+by subsequent queries. This alludes to several factors that make even identifying problematic queries difficult:
 
 \begin{enumerate}[leftmargin=*, topsep=0mm, itemsep=0mm]
 
-  \item {\bf Butterfly Effect: } 
+  \item \textbf{Butterfly fffect: } 
   An error in even a single query can affect a large number of records, as documented in several real-world
-  cases~\cite{Yates10, Grady13, sakalerrors}.  However, even if a single record is incorrect,
+  cases~\cite{Yates10, Grady13, sakalerrors}.  Even if a single record is incorrect,
   its value may be used as part of the \texttt{WHERE} or \texttt{SET} clauses of 
   subsequent valid queries that introduce additional errors that are seemingly unrelated.
 
-  \item {\bf Partial Information:}  We often cannot rely on processes that can identify all possible
-  errors in the database -- for example, not all employees will complain about their incorrect paystubs.  
+  \item \textbf{Partial information:}  In most practical settings, we cannot assume that we can identify all
+  errors in the database --- for example, not all employees will complain about their incorrect paystubs.  
   More likely, we only have access to a subset of the data errors, and must use them to extrapolate 
-  the queries that afflicted the entire set of errors.  A diagnostic tool that can reduce
+  the queries that affected a possibly larger set of data.  A diagnostic tool that can reduce
   the entire transaction log to the most likely candidate queries and propose fixes
-  is needed to make this process managable.
+  is needed to make this process manageable.
 
 
-  \item {\bf Multiple Types of Errors:} 
+  \item \textbf{Multiple types of errors:} 
   An erroneous query can cause multiple types of data errors.  For example, a record that should not exist may have been accidentally inserted, or conversely a record that 
   should exist was unintentionally deleted.  Similarly, attribute values may be incorrectly updated,
   updated when they should not have been, or not updated when they should have.  
