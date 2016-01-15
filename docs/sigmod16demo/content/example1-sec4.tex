@@ -1,7 +1,6 @@
-%!TEX root = ../main.tex
-{\color{blue}
+
 \begin{example}[Salary Update Error]\label{ex:telco}
-  A manager updates the tax amount with $30\%$ tax rate for high income employees that earn more than $\$87500$.
+  A manager updates the tax rate to $30\%$ for high income employees that earn more than $\$87500$.
   She submits this through a form in the salary accounting application, 
   but due to keyboard slip, incorrectly types $\$85700$ for the income threshold.  
   Later queries that insert new paychecks, compute tax calculations,
@@ -12,9 +11,8 @@
 
 \begin{figure}[t]
     \centering
-        \includegraphics[width=0.45\textwidth]{figures/example2}
-    \caption{$Q_1$ updates the tax amount with $30\%$ tax rate 
-      for high income employees using an incorrect predicate.  
+        \includegraphics[width=0.45\textwidth]{figures/example}
+    \caption{$Q_1$ updates the tax rate for high income employees using an incorrect predicate.  
       The error is propogated by $Q_2$ to the $pay$ field in the database.
       Finally, a benign insert query $Q_3$ inserts correct salary information. 
       The final database state contains a mixture of incorrect and correct salary data.
@@ -29,4 +27,3 @@ to both identify all of the other errors in the database, and to trace these err
 This example can occur in any data processing systems where manual input is used to generate queries that modify the database --
 this could be in the form of adhoc queries executed by a system administrator, or web-based forms that construct queries based
 on user input, or even stored procedures that use human input to fill the parameter values.
-}
