@@ -50,13 +50,13 @@ When she is satisfied, the user clicks \texttt{Run QueryFix} to execute the \sys
   \label{f:demo2} 
 \end{figure}
 
-\noindent {\bf Step 4:}  The result page lists the original query ID and text at the top.  The ID 
+\noindent {\bf Step 4 (View Log Repairs):}  The result page lists the original query ID and text at the top.  The ID 
 is important because some proposed fixes may identify an incorrect query.  Below the original query,
 the interface shows each of the proposed fixes as columns.  For example, Figure~\ref{f:demo2} shows 
 that both the \sys and alternative fixes identified the correct query $Q_2$, however \sys only took $0.2$ seconds
 to run, and correctly fixed $Q_2$, whereas the alternative took $5$ sec and proposed an incorrect fix.
 
-\noindent {\bf Step 5:} The bottom tables show the effects of the fixes on the complaints from
+\noindent {\bf Step 5 (Validate Repairs):} The bottom tables show the effects of the fixes on the complaints from
 step 3.  Correctly fixed attribute values are highlighted in blue, unfixed errors are shown as red text, while incorrectly
 fixed values are highlighted with a red background.  Finally, it is possible for proposed fixes to 
 {\it introduce} new errors, which are shown as entire rows that are highlighted with a red background.
