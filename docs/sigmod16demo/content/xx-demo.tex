@@ -29,17 +29,18 @@ renders a scrollable list containing all of the queries.  Users can either let t
 inject errors randomly by clicking the ``Random Error'' button or manually add errors. 
 To introduce errors, the interface allows users to select any editable query in the log and shows the 
 selected query in an editable popup so that users can edit the queries.  
-For example, in the figure, the user has edited query $Q_2$ by changing the \texttt{SET}
-clause from $income = 1.1 * income$ to $income = 1.5 * income$. 
+For example, in the figure, the user has edited query $Q_2$ and reduced the threshold from 
+$income < 10,000$ to $income < 100$.
+%For example, in the figure, the user has edited query $Q_2$ by changing the \texttt{SET}
+%clause from $income = 1.1 * income$ to $income = 1.5 * income$. 
 
 \noindent {\bf Step 3 (Form a Complaint Set):} 
 The modified query cause the state of the database at the end of the workload
 to differ from the result of the original workload.  The candidate complaints table lists the tuples
 that are different and highlights the attribute values in those tuples as red text.  For instance,
 $t_1.tax$, $t_1.income$ and $t_1.pay$ are all errors introduced by the modified query. 
- Users can select individual
-attribute values or entire tuples to add to the complaint set that is used as input to the \sys algorithms.  
-When she is satisfied, the user clicks \texttt{Run QueryFix} to execute the \sys and alternative algorithms.
+Users can select individual attribute values or entire tuples to add to the complaint set that is used as input to the \sys algorithms.  
+When she is satisfied, the user clicks \texttt{Run QFix} to execute the \sys and alternative algorithms.
 
 
 \begin{figure}[t]
@@ -53,7 +54,8 @@ When she is satisfied, the user clicks \texttt{Run QueryFix} to execute the \sys
 is important because some proposed fixes may identify an incorrect query.  Below the original query,
 the interface shows each of the proposed fixes as columns.  For example, Figure~\ref{f:demo2} shows 
 that both the \sys and alternative fixes identified the correct query $Q_2$, however \sys only took $0.2$ seconds
-to run, and correctly fixed $Q_2$, whereas the alternative took $5$ sec and proposed an incorrect fix.
+to run, and correctly fixed $Q_2$, whereas the alternative took $10$ sec, 
+incorrectly selected $Q_5$, and proposed an incorrect fix.
 
 \noindent {\bf Step 5 (Validate Repairs):} The bottom tables show the effects of the fixes on the complaints from
 step 3.  Correctly fixed attribute values are highlighted in blue, unfixed errors are shown as red text, while incorrectly
