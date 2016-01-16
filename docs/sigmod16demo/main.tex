@@ -76,7 +76,6 @@
 
 {
 \maketitle
-\vspace*{-.5in}
 }
 
 \begin{abstract}
@@ -93,10 +92,12 @@ discrepancies. Any discovered errors tend to be corrected
 superficially, on a case-by-case basis, further obscuring the true
 underlying cause, and making detection of the remaining errors harder.
 
-In this demo proposal, we outline the design of \sys, a framework that derives explanations
-and repairs for discrepancies in relational data based on potential errors in
-the queries that operated on the data, and describe how users will use \sys
-in a demonstration scenario.  Participants will be able to select from a number of 
+In this demo proposal, we outline the design of \sys, a {\it query-centric}
+framework that derives explanations and repairs for discrepancies in 
+relational data based on potential errors in the queries that operated on the data. 
+This is a marked departure from traditional {\it data-centric} techniques that directly fix the data.
+We then describe how users will use \sys in a demonstration scenario. 
+Participants will be able to select from a number of 
 transactional benchmarks, introduce errors into the queries that are executed,
 and compare the fixes to the queries proposed by \sys as well as existing alternative algorithms
 such as decision trees.

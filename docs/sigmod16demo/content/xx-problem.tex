@@ -53,13 +53,13 @@
 We assume a query log $Q$ containing a sequence of update, insert and delete queries 
 $q_1, \ldots q_n$  that have been executed on an initial database state $D_0$.  
 For simplicity, we assume that the database is a single relation with attributes 
-$A_i,\ldots,A_m$, though this restriction is not a requirement for \sys.
+$A_i,\ldots,A_m$, though this single-relation restriction is not a requirement for \sys.
 Let $D_i = q_i(\ldots q_1(D_0))$ be the the database state output after executing queries $q_1$ though $q_i$ on $D_0$.
 Thus, the final database state is simply the application of the query log to
-the initial state: $D_n = Q(D_0)$.
-We assume that \texttt{UPDATE} and \texttt{DELETE} queries consist of conjunctive\xlw{or disjunctive range clauses
-of the form $\langle A_j\ op\ ?\rangle$, where $op \in \{=, >, <, \le, \ge, \ne\}$ and $?$ is a constant value,
-and that \texttt{SET} clauses of the form $\langle A_j\ =\ A_i\ +\ ? \rangle$(relative update) or $\langle A_j\ =\ ?\rangle$ (constant update)}.
+the initial state: $D_n = Q(D_0) = q_n(\ldots q_1(D_0))$.
+We assume that \texttt{UPDATE} and \texttt{DELETE} queries use predicates composed of conjunctive and disjunctive range clauses
+of the form $\langle A_j\ op\ ?\rangle$, where $op \in \{=, >, <, \le, \ge, \ne\}$ and $?$ is a constant value.
+We also assume that \texttt{SET} clauses are of the form $\langle A_j\ =\ A_i\ +\ ? \rangle$ (relative update) or $\langle A_j\ =\ ?\rangle$ (constant update).
 
 Queries in $Q$ are possibly erroneous and introduce errors in the data.  We assume there is 
 a true sequence of queries $Q^* = \{q^*_1,\ldots,q^*_n\}$ that generate a true sequence of database states
@@ -93,7 +93,7 @@ and leads to a correct database state $D_n^*$.
 More informally, we seek the minimum changes to the log $\mathcal{Q}$
 that would result in a clean database state $D_n^*$. Obviously, a
 challenge is that $D_n^*$ is unknown, unless we know that the
-complaint set is complete. 
+complaint set contains all of, and only, true complaints. 
 
 
 \subsection{Solution Sketch}
@@ -128,8 +128,8 @@ minimize      & b + z\\
 
 To achieve this translation,
 we model each query as a linear equation that computes the output
-tuple values from the inputs (\xlw{or previous database state}) 
-and to transform the equation into a
+tuple values from the inputs or previous database state,
+and transforms the equation into a
 set of of linear constraints. In addition, the constant values in
 the queries are parameterized into a set of undetermined variables,
 while the database state is encoded as constraints on the initial
@@ -139,8 +139,9 @@ that minimize both the amount that the queries change and the number
 of non-complaint tuples that are affected.
 \input{content/example2-sec32}
 Note that the initial range $[minval, maxval]$ of the 
-undetermined variables are usually defined based on
-the valid range of the corresponding attribute(s). 
+undetermined variables could be defined based on
+the valid range of the corresponding attribute(s), or, as a heuristic,
+based on the empirical distribute of the attribute values in the database. 
 
 Extending this process to all tuples and all queries in the log 
 describes the naive encoding procedure that solves the
@@ -153,7 +154,7 @@ it infeasible for all but the smallest databases and query logs.
 \sys uses four additional optimizations not presented in this paper 
 to scale to large query log and database sizes.  The first three are
 called {\it Slicing} optimizations that reduce each of the components in the problem size:
-{\it Query-slicing}; {\it Attribute-slicing}; {\it Tuple-slicing}. 
+{\it Tuple-slicing}; {\it Query-slicing}; {\it Attribute-slicing}. 
 MILP solvers typically (though not guaranteed) take a much longer time as the size of the MILP problem increases, thus
 each of the slicing techniques server to reduce the problem and speed up the solver time.
 
