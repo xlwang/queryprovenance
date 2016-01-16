@@ -1,5 +1,4 @@
 %!TEX root = ../main.tex
-{\color{blue}
 \begin{example}[Salary Update Error]\label{ex:telco}
   A manager updates the employees' financial records to set the tax rate to $30\%$ for high income employees who earn more than $\$87500$.
   She submits the update through a form in the salary accounting application, 
@@ -13,12 +12,13 @@
 \begin{figure}[t]
     \centering
         \includegraphics[width=0.45\textwidth]{figures/example2}
-    \caption{$Q_1$ updates the tax amount with $30\%$ tax rate 
+    \caption{\small $Q_1$ updates the tax amount with $30\%$ tax rate 
       for high income employees using an incorrect predicate.  
       The error is propogated by $Q_2$ to the $pay$ field in the database.
       Finally, a benign insert query $Q_3$ inserts correct salary information. 
       The final database state contains a mixture of incorrect and correct salary data.
     }
+    \vspace*{-.2in}
     \label{fig:example}
 \end{figure}
 
@@ -33,4 +33,3 @@ web-based forms that construct queries based on user input, stored
 procedures that use human input to fill the parameter values, or even
 queries with automatically generated parameters if there is a chance of
 errors in the code or data used for the parameter generation.
-}

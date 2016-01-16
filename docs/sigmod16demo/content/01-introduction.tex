@@ -15,10 +15,12 @@ wrangling~\cite{kandel2011wrangler} the data into a structured and
 sufficiently clean form to use in downstream applications.
 
 In response, both industry and academia has focused on data cleaning solutions to mitigate this problem.
-ETL-type systems~\cite{systemt, informatica} focus on cleansing the data before it is loaded into the database
-using a set of pre-defined rules; outlier and anomaly detection algorithms~\cite{} are used to identify errors
+ETL-type systems~\cite{krishnamurthy2009systemt, thomsen2005survey} focus on cleansing the data before it is loaded into the database
+using a set of pre-defined rules; outlier and anomaly detection
+ algorithms~\cite{chandola2007outlier} are used to identify errors
 in the database after the data has been loaded; while recent approaches use downstream applications
-such as interactive visualizations, application queries, or data-products to facilitate error detection and correction algorithms.
+such as interactive visualizations~\cite{kandel2011wrangler}, application queries~\cite{krishnan2015sampleclean}, or 
+data-products to facilitate error detection and correction algorithms.
 In each of these cases, the focus of error diagnosis and cleaning has been {\it data centric}, in the sense that
 the process is meant to identify and directly fix data values.
 
@@ -39,17 +41,20 @@ Furthermore, a data-centric approach must repair \emph{all errors} --- a non-rep
 may continue to introduce errors in the database through future queries 
 (e.g., inserting incorrectly computed paychecks based on the still-incorrect tax rate).
 
-\alex{Leaving this paragraph to Eugene.}
 For these reasons, traditional data cleaning approaches may be helpful for finding errors in the data, but are
 not designed to diagnose causes of the errors when they are rooted in incorrect queries.
-There has been some work, but not directly for this problem.  
-\ewu{fill in with related work}
-Integrity constraints.
-Certificate-based verification.
-Structural sources of mistakes, but not identify the specific faulty query and how it is wrong.
-In more restricted domains, data explanation finds predicates to exclude from queries, but only work for a single, simple  aggregation query.
+There has been some work along a similar spirit, but not directly for this problem.  
+For example, integrity constraint-based methods~\cite{Khoussainova2006} reject some improper
+updates if the data will fall outside predefined ranges.
+Certificate-based verification~\cite{Chen2011} handles a broader class of erroneous queries,
+but relies on asking users queries prior to executing the update, which renders application-generated
+updates infeasible.
+Several techniques have proposed diagnoses that describe structural sources of errors
+either in the form of predicates most correlated with the errors~\cite{Wu13}
+or common components of a workflow that caused the errors~\cite{wang2015}, but at the level
+of query identification.
 
-Query-centric cleaning and repair is challenging because an error introduced by a query can be obscured by, or propagated throughout the database
+Ultimately, query-centric cleaning and repair is challenging because an error introduced by a query can be obscured by, or propagated throughout the database
 by subsequent queries. This alludes to several factors that make even identifying problematic queries difficult:
 
 \begin{enumerate}[leftmargin=*, topsep=0mm, itemsep=0mm]
