@@ -14,7 +14,7 @@ Figure~\ref{fig:architecture} shows \sys's major components.  \sys takes as inpu
 a query log containing UPDATE, INSERT and DELETE queries, the database, along with a
 set of identified data errors (called {\it complaints}).  These complaints are pairs
 of tuple id of tuples that are wrong, along with an estimate of their correct values 
-(e.g., $21500$ as tax attribute value for tuple $t_3$ in Example~\ref{ex:telco}).
+(e.g., $21500$ as tuple $t_3$'s tax value in Example~\ref{ex:telco}).
 \sys uses this information to trace the causes of the errors and output the most likely set of 
 queries in the log ({\it diagnoses}), along with proposed {\it repairs} of these queries.
 

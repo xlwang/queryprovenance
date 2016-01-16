@@ -67,8 +67,8 @@ $\{D_0, D^*_1,\ldots,D^*_n\}$.  The true query log and database states are unkno
 find and correct errors in $Q$ to retrieve the correct database state $D^*_n$.
 
 To do so, \sys takes as input a set of identified or user-reported
-data errors, or a {\it complaint set} denoted as $\mathcal{C}$. 
-A complaint $c$ corresponds to a tuple in $D^*_n$ along with its true attribute value assignments.  
+data errors, called a {\it complaint set} and denoted as $\mathcal{C}$. 
+A complaint $c \in \mathcal{C}$ corresponds to a tuple in $D_n$ along with its true attribute value assignments.  
 \input{content/example2-sec3}
 
 
@@ -90,7 +90,7 @@ and leads to a correct database state $D_n^*$.
     \end{itemize}
 \end{definition}
 
-More informally, we seek the minimum changes to the log $\mathcal{Q}$
+Informally, we seek the minimum changes to the log $\mathcal{Q}$
 that would result in a clean database state $D_n^*$. Obviously, a
 challenge is that $D_n^*$ is unknown, unless we know that the
 complaint set contains all of, and only, true complaints. 
@@ -156,15 +156,15 @@ to scale to large query log and database sizes.  The first three are
 called {\it Slicing} optimizations that reduce each of the components in the problem size:
 {\it Tuple-slicing}; {\it Query-slicing}; {\it Attribute-slicing}. 
 MILP solvers typically (though not guaranteed) take a much longer time as the size of the MILP problem increases, thus
-each of the slicing techniques server to reduce the problem and speed up the solver time.
+each of the slicing techniques reduces the problem and speeds up the solver time.
 
 The final optimization serves to reduce the number of undetermined variables that the MILP solver must
 provide a solution for.  The cost of the solver, in our experiments, increases exponentially with the number of 
 undetermined variables.  To this end, \sys uses an incremental algorithm that tries to fix the queries in the query
 log one at a time.
 
-With these optimizations, for common transaction benchmarks, \sys can propose a solution within several seconds
-for thousands of queries and tuples.
+These optimizations enable \sys to propose a solution within several seconds for thousands of 
+queries and tuples on common transaction benchmarks in OLTPBench~\cite{oltpbench}.
 
 
 

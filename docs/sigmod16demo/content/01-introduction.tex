@@ -8,24 +8,24 @@ that afflicts the vast majority of data-driven applications. For
 example, errors in retail price data cost US consumers \$2.5 billion
 each year~\cite{Fan2008}. In aggregate, studies estimate data errors
 to cost the US economy more than \$600 billion per
-year~\cite{eckerson2002}. Therefore, it is not surprising that a
-significant fraction of time in data analysis --- up to
-80\%~\cite{kandel2012} --- is devoted to cleaning and
+year~\cite{eckerson2002}. Despite the costliness of data errors, 
+studies have found that a significant fraction of time in data analysis 
+--- up to 80\%~\cite{kandel2012} --- is devoted to cleaning and
 wrangling~\cite{kandel2011wrangler} the data into a structured and
 sufficiently clean form to use in downstream applications.
 
-In response, both industry and academia has focused on data cleaning solutions to mitigate this problem.
+In response, both industry and academia have focused on data cleaning solutions to mitigate this problem.
 ETL-type systems~\cite{krishnamurthy2009systemt, thomsen2005survey} focus on cleansing the data before it is loaded into the database
 using a set of pre-defined rules; outlier and anomaly detection
  algorithms~\cite{chandola2007outlier} are used to identify errors
 in the database after the data has been loaded; while recent approaches use downstream applications
-such as interactive visualizations~\cite{kandel2011wrangler}, application queries~\cite{krishnan2015sampleclean}, or 
+such as interactive visualizations~\cite{kandel2011wrangler,Wu13}, application queries~\cite{krishnan2015sampleclean}, or 
 data-products to facilitate error detection and correction algorithms.
 In each of these cases, the focus of error diagnosis and cleaning has been {\it data centric}, in the sense that
 the process is meant to identify and directly fix data values.
 
-These efforts have largely ignored an important source of data errors --- data modification {\it queries}.
-Mistakes in such queries can introduce errors that spread throughout the database due to subsequent, possibly correct updates.
+These efforts have largely ignored an important source of errors --- {\it queries}.
+Mistakes in queries can introduce errors that spread throughout the database due to subsequent, possibly correct updates.
 Consider the following salary management example:
 
 % change example
@@ -51,7 +51,7 @@ but relies on asking users queries prior to executing the update, which renders 
 updates infeasible.
 Several techniques have proposed diagnoses that describe structural sources of errors
 either in the form of predicates most correlated with the errors~\cite{Wu13}
-or common components of a workflow that caused the errors~\cite{wang2015}, but at the level
+or common components of a workflow that caused the errors~\cite{wang2015}, but not at the level
 of query identification.
 
 Ultimately, query-centric cleaning and repair is challenging because an error introduced by a query can be obscured by, or propagated throughout the database
