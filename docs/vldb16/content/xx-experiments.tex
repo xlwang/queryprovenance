@@ -149,7 +149,7 @@ This subsection describes the query and data generation process in greater detai
 
 \stitle{Synthetic:} \label{sec:syntheticgen}
 We generate an initial database of $N_D$ random tuples.  
-The schema contains $N_a=5$ attributes $a_1\ldots a_5$, whose values are
+The schema contains $N_a=10$ attributes $a_1\ldots a_10$, whose values are
 picked from $V_d$ uniformly at random, along with a primary key $id$.
 We then generate a sequence of $N_q$ \texttt{UPDATE} queries~\footnote{\scriptsize We focus on
 \texttt{UPDATE} only query logs because they are the {\it predominant} cost 
@@ -168,7 +168,8 @@ only workloads to illustrate the differenc.} where
 \xlw{
 $X \& Y$ represents the \texttt{UPDATE} query type. $X$ represents the set clause type which can be either constant update ($Constant$) or
 relative update ($Relative$). Similarly, $Y$ represents the where clause type that can be either point update ($Poing$) or
-range update ($Range$)}. Note that the default setting of \texttt{UPDATE} query is $Constant/Range$.
+range update ($Range$)}. Note that the 
+we default focus on \texttt{UPDATE} queries with non-key predicates on range(s) and constant SET clauses.
 
 The \texttt{SET} clause sets the attribute to a random constant value in $V_d$ and 
 the \texttt{WHERE} clauses form a conjunction.  
@@ -186,12 +187,13 @@ The \texttt{WHERE} clauses in \texttt{DELETE} queries are generated in an identi
 \stitle{TPC-C:} We use the data and query workload over the {\it ORDER} table in TPC-C~\cite{tpcc}.  
 We generated a database at scale 1 with one warehouse, and kept the queries that modify the
 {\it ORDER} table. The initial table contains 6000 tuples and we ultimately generated a log with
-2000 queries, where $940$ are \texttt{UPDATE}s and the rest are \texttt{INSERT}s.
+2000 queries, where $1837$ are \texttt{INSERT}s and the rest are \texttt{UPDATE}s. 
 
 \stitle{TATP:} TATP workload simulates the 
 caller location system. We generate a database from {\it SUBSCRIBER} table
 with 5000 tuples and $2000$ \texttt{UPDATE} queries.\\
-Both TPC-C and TATP setups were generated using the OLTP-bench project~\cite{difallah2013oltp}.
+Both TPC-C and TATP setups were generated using the OLTP-bench project~\cite{difallah2013oltp}. 
+We corrupt up to -1500 queries to the most recent query.  
 }
 
 
@@ -279,36 +281,36 @@ We then establish the difficulty of repairing \texttt{UPDATE} workloads as compa
 
 
 \stitle{Multiple Corrupt Queries:}
-In this experiment, we compare the \xlw{non-incremental algorithm} with four types of algorithms
+In this experiment, we compare the exhaustive algorithm (no-opt) against 
+each slicing optimization individually($tuple, attr, query, all$), and all of them together with four types of algorithms. 
 $\sys_S$, where $S \in \{t, q, a, tqa\}$.  We use the default settings with $1000$ tuples and
 $50$ \texttt{update} queries.  We corrupt every tenth query starting from oldest query $q_0$,
 up to $q_{40}$.  For example, when we corrupt $3$ queries, we corrupt $q_{0,10,20}$.
-We find that the number of corruptions greatly affects both the scalabality (Figure~\ref{f:multi_time}) 
-and the accuracy (Figure~\ref{f:multi_acc}) of the algorithms.  Specifically, as the number increases,
+We find that the number of queries greatly affects both the scalabality (Figure~\ref{f:multi_time}) 
+and the accuracy (Figure~\ref{f:multi_acc}) of the algorithms. Specifically, as the number increases,
 the number of possible assignments of the MILP parameters increases exponentially and the solver often takes
 longer than our experimental time limit of $1000$ seconds and returns an infeasibility error.  
-This is a predominant reason why the accuracy degrades past $3$ corruptions.  For example, 
-when $4$ queries are corrupted and we ignore the infeasible executions, the average execution time is $300$ seconds
-and the precision and recall are greater than $0.94$.  Unfortunately, with \xlw{$5$ corruptions (50 queries)}, 
+This is a predominant reason why the accuracy degrades past $30$ queries.  For example, 
+when $40$ queries are involved (with $4$ corruptions) 
+and we ignore the infeasible executions, the average execution time is $300$ seconds
+and the precision and recall are greater than $0.94$.  Unfortunately, with $50$ queries ($5$ corruptions),
 all runs exceed the time limit.
 
 \stitle{Single Query Optimization:}
 \xlw{
 In this experiment, we evaluate the efficacy of the incremental repair algorithm (Section~\ref{sec:incremental})
-in the special case when only one query has been corrupted. We first compare the incremental algorithm $\sys_{inc-1}$ 
-with or without
-tuple slicing optimization, Figure~\ref{f:singlequeryinc_time} highlights the scalability limitation of the incremental 
-algorithm without tuple slicing: with 50 queries $\sys_{inc-1}$ could easily runs exceed the 1000 seconds.  
-We further compare the incremental algorithm with 4 different 
-incremental step sizes $\sys_{t, S}$, where $S \in \{inc-1, inc-2, inc-4, inc-8\}$. 
-Figure~\ref{f:singlequeryinc_acc} shows a significant drop in accuracy as we increase the incremental step since 
-the failure rate of the MILP problem is positive proportional to the incremental step.}
+in the special case when only one query has been corrupted. We compare 
+incremental without tuple slicing (basic, $no-opt$) against with tuple slicing at different batching levels of 1, 2, 8 ($1,2,8$). 
+Figure~\ref{f:singlequeryinc_time} highlights the scalability limitation of the incremental 
+algorithm without tuple slicing: with 50 queries $\sys_{inc-1}$ could easily runs exceed the 1000 seconds.   
+In addition, Figure~\ref{f:singlequeryinc_acc} also shows a significant drop in accuracy as we increase the incremental level since 
+the failure rate of the MILP problem is positive proportional to the incremental level.}
 
 
 \stitle{Query Type Experiment:}\label{sec:indelup}
 \xlw{
 Our final preliminary experiment evaluates the incremental, tuple-slicing algorithm 
-$\sys_{t,inc-1}$ on insert, delete, or update-only workloads.
+$\sys$ on insert, delete, or update-only workloads.
 We increase the number of queries from $1$ to $200$ and corrupt the oldest query in the log.  
 Figure~\ref{f:indelup_time} shows that while the cost of repairing insert workloads
 remains relatively constaint, the cost for delete-only and update-only workloads increase as 
@@ -321,21 +323,21 @@ have severe scalability limitations due to the large number of undetermined valu
 since MILP constraint solving is a known NP-hard problem.
 In contrast, we find that the incremental algorithms are more effective at scaling to larger query log sizes.  
 Furthermore, we show that \texttt{UPDATE}-only workloads are significantly more expensive to repair than other 
-query types. \xlw{Based on the result, we consider 
-algorithm $\sys_{t,inc-1}$ as default setting in the rest of the experiment and we only consider \texttt{UPDATE}-only workload in synthetic experiments in Section~\ref{sec:experiments:synth}}. 
+query types. \xlw{Based on the result, we consider incremental
+algorithm $\sys$ with tuple slicing as default setting in the rest of the experiment and we only consider \texttt{UPDATE}-only workload in synthetic experiments in Section~\ref{sec:experiments:synth}}. 
 }
 
 
 \subsection{Benchmark}
 \label{sec:experiments:benchmark}
-Figure~\ref{f:benchmark} plots the performance of the incremental and optimized algorithm ($\sys_{t,inc-1}$)
-on both benchmark applications.  In both workloads, the latency to derive a repair was consistenly less
-than $5$ seconds, and for TPC-C, on the order of milliseconds.  The precision and recall measures were
+Figure~\ref{f:benchmark} plots the performance of the incremental and optimized algorithm ($\sys$)
+on TPC-C and TATP benchmark applications.  In both workloads, the latency to derive a repair efficiently,
+and for TPC-C, on the order of milliseconds where all corrupted queries are \texttt{INSERT}s. 
+The precision and recall measures were
 $1$ both all settings.   One reason for the good performance is due to the fact that the benchmark queries
 are pre-dominantly point update queries.  In this setting, each tuples affects a very small set of 
 tuples, which results in $1$ or $2$ complaints on average.  In this case, the tuple and query slicing algorithms
-reduce the total number of constraints for almost every setting to less than $100$.   \xlw{Rewrite needed after experiment is done. }
-
+reduce the total number of constraints for almost every setting to less than $100$. 
 \begin{figure}[h]
 \label{f:benchmark} 
 \centering
