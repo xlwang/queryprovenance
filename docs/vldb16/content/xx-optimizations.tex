@@ -8,7 +8,7 @@ that it exhaustively encodes the combination of all tuples in the database and a
 in the query log.  In this approach, the number of constraints (as well as undetermined variables) 
 grows quadratically with respect to the database and the query log.
 Figure~\ref{fig:querysize_vs_time} shows a simple scalability experiment, where we generated increasingly 
-larger query logs for a database of $1000$ tuples, encoded the problem using $\naive$ (red bars), 
+larger query logs for a database of $1000$ tuples, encoded the problem using \naive (red bars), 
 and solved the problem using a MILP-solver (CPLEX in our experiments).
 We find that the solver time increases exponentially as the number of encoded queries increases --
 at a log size of $80$, the solver failed to produce an answer within $1000$ seconds --
@@ -98,7 +98,7 @@ In Figure~\ref{fig:groups}(a), the dirty and truth intervals overlap, thus the n
 within the overlapping region are correctly modified by the dirty interval.  
 In this case, the proposed repair correctly contains the non-complaint tuples and the algorithm is successful.
 %We call these non-complaint tuples {\it safe}.
-In contrast, Figure~\ref{fig:groups}(b) highlights a case where \naive generalized incorrectly.
+In contrast, Figure~\ref{fig:groups}(b) highlights a case where this aggressive approach generalized incorrectly.
 The dirty and clean intervals are non-overlapping, so the non-complaint tuple shown is not modified by $q$ (otherwise it would be a complaint!). This tuple is incorrectly included in the repaired interval, \emph{because the MILP formulation does not constrain its value}.
 Note that in both of these cases, the objective function will ensure that the repair
 does not over-generalize the upper bound towards the right because that strictly increases the objective function.
@@ -338,7 +338,6 @@ causal read-write chain to the \emph{complaint attributes} must be linearized, w
 % set.  
 
 % Algorithm~\ref{alg:fullimpact} describes how $\mathcal{F}(q_i)$ can be computed:
-\vspace*{-.1in}
 \begin{algorithm}[t]
 \scriptsize
 \caption{$FullImpact$ algorithm for finding $\mathcal{F}(q)$.}

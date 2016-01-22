@@ -2,21 +2,61 @@
 
 \section{Related Work}
 \label{s:related}
+\sys tackles the problem of diagnosis and repair in relational query
+histories (query logs). It does not aim to correct errors in the data
+directly, but rather to find the underlying reason for reported errors
+in the queries that operated on the data. This is in contrast to
+traditional data 
+cleaning~\cite{dallachiesa2013nadeef,Abiteboul99,Koudas2006,Galhardas2000
+} which oftentimes focuses on identifying and correcting data
+``in-place.''. \sys also differs from another aspect of data cleaning which 
+focuses on providing repairs for the
+identified errors~\cite{Fan2008b, ChuIP13, Beskales2010, Cong2007}.
+In fact, by analyzing the process that generate the errors. 
+\sys detects and repairs systemic 
+errors even if they have not been explicitly identified.
 
+The concept of exploring systemic reasons and patterns for errors has been
+applied in tools ~\cite{GolabKKS10, wang2015} that 
+generate feature sets or patterns of attributes that characterize
+errors. However, such techniques are oblivious to
+the actual queries that operated on the data, and they do not provide
+particular fixes. 
+
+%% Query revisions for why-not
+The topic of query revisions has been studied in the context of
+why-not explanations~\cite{Chapman2009, tran2010conquer,tzompanaki14semi } and explaining query ouputs ~\cite{GebalyAGKS14,Wu13,Roy2014}. 
+But all these approaches are
+limited to selection predicates of \texttt{SELECT} queries, and they
+only typically consider one query at a time.
+
+Finally, as \sys traces errors in the queries that manipulate data, it
+has connections to the field of \emph{data and workflow provenance}.
+our algorithms build on several formalisms introduced by work in this
+domain. These formalisms express why a particular data item appears in
+a query result, or how that query result was produced in relation to
+input data~\cite{BunemanKT01,GKT07-semirings, CheneyCT09, CuiWW00
+}.
+
+
+\iffalse  
 % data cleaning
 \sys tackles the problem of diagnosis and repair in relational query
 histories (query logs). It does not aim to correct errors in the data
 directly, but rather to find the underlying reason for reported errors
 in the queries that operated on the data. This is in contrast to
-traditional data cleaning~\cite{dallachiesa2013nadeef, rahm00, Raman01, Kalashnikov06,
-Fan2008b} which focuses on identifying and correcting data
+traditional data 
+cleaning~\cite{dallachiesa2013nadeef, rahm00, Raman01, Kalashnikov06, Fan2008b
+} which focuses on identifying and correcting data
 ``in-place.'' Identifying and correcting errors is an important, and
 rightfully well-studied problem. Existing literature has supplied a
 variety of tools to capture errors originating from data
-integration~\cite{Abiteboul99, Batini1986, Rahm2001, ParentS98},
-recognizing the same entities in data~\cite{Koudas2006,
-GruenheidDS14}, identifying true facts among conflicting
-data~\cite{yin2008truth, DN09, ltm2012}, and language support for
+integration~\cite{Abiteboul99%, Batini1986, Rahm2001, ParentS98
+},
+recognizing the same entities in data~\cite{Koudas2006, GruenheidDS14
+}, identifying true facts among conflicting
+data~\cite{yin2008truth, DN09, ltm2012
+}, and language support for
 cleaning~\cite{Galhardas2000}. All of these techniques are
 complimentary to our work. Their goal is to identify which data is
 correct and which data is incorrect, but they don't look for the
@@ -30,10 +70,14 @@ itself.
 An aspect of data cleaning focuses on providing repairs for the
 identified errors~\cite{ChuIP13}. Tools in this domain have targeted
 different methods and interactions for providing fixes, ranging from
-functional dependencies~\cite{Fan2008b, ChuIP13} and
-rules~\cite{Beskales2010, Cong2007} and functional
-dependencies~\cite{Fan2008b, ChuIP13}, to interactive methods that
-solicit user feedback~\cite{Yakout, Raman01}. As with the other data
+functional dependencies~\cite{Fan2008b, ChuIP13
+} and
+rules~\cite{Beskales2010, Cong2007
+} and functional
+dependencies~\cite{Fan2008b, ChuIP13
+}, to interactive methods that
+solicit user feedback~\cite{Yakout, Raman01
+}. As with the other data
 cleaning approaches, all these techniques again operate on the data
 directly. In contrast, \sys analyzes errors in the data to diagnose
 and repair errors in queries that operated on the data. Thus, \sys
@@ -44,7 +88,8 @@ have not been explicitly identified.
 
 %% Data auditor and Data XRay
 Closer to exploring systemic reasons and patterns for errors are
-techniques such as Data Auditor~\cite{Golab2008, GolabKKS10} and Data
+techniques such as Data Auditor~\cite{GolabKKS10, Golab2008
+} and Data
 X-Ray~\cite{wang2015}. Both tools tools identify features, which can
 be selected from the tuple attributes, that best summarize or describe
 groups of tuples (or specifically errors). While these tools can
@@ -84,16 +129,17 @@ Suciu~\cite{Roy2014} extended explanations with a formal framework
 that handles complex SQL queries and database schemas involving
 multiple relations and functional dependencies, but again their focus
 is on \texttt{SELECT} workloads, rather than evolving datasets, and
-they often target specific application domains~\cite{Khoussainova2012,
-Thirumuruganathan2012, Das2011, Fabbri2011, Bender14}.
+they often target specific application domains~\cite{Khoussainova2012, Thirumuruganathan2012, Das2011, Fabbri2011, Bender14
+}.
 
 Finally, as \sys traces errors in the queries that manipulate data, it
 has connections to the field of \emph{data and workflow provenance}.
 our algorithms build on several formalisms introduced by work in this
 domain. These formalisms express why a particular data item appears in
 a query result, or how that query result was produced in relation to
-input data~\cite{BunemanKT01,GKT07-semirings, CheneyCT09, CuiWW00}.
-
+input data~\cite{BunemanKT01,GKT07-semirings, CheneyCT09, CuiWW00
+}.
+\fi
 % Studying and explaining
 % data outcome has been studied in many aspects:
 % \cite{GebalyAGKS14}

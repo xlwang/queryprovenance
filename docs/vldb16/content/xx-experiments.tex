@@ -296,8 +296,7 @@ and the precision and recall are greater than $0.94$.  Unfortunately, with $50$ 
 all runs exceed the time limit.
 
 \stitle{Single Query Optimization:}
-In this experiment, we evaluate the efficacy of the naive and 
-incremental repair algorithm (Section~\ref{sec:incremental})
+In this experiment, we evaluate the efficacy \sys with tuple slicing and incremental optimization
 in the special case when only one query has been corrupted. We compare 
 incremental without tuple slicing ($no-opt$) against with tuple slicing at 
 different batching levels of 1, 2, 8 ($1,2,8$). 
@@ -326,34 +325,7 @@ query types. Based on the result, we consider incremental
 algorithm $\sys$ with tuple slicing as default setting in the rest of the experiment and we only consider \texttt{UPDATE}-only workload in synthetic experiments in Section~\ref{sec:experiments:synth}. 
 }
 
-
-\subsection{Benchmark}
-\label{sec:experiments:benchmark}
-\begin{figure}[h]
-\centering
-  \includegraphics[width = .75\columnwidth]{figures/benchmark_time}
-  \vspace*{-.2in}
-  \caption{Performance on Benchmarks}
-  \label{f:tpcctatp} 
-  \vspace*{-.1in}
-\end{figure}
-Figure~\ref{f:tpcctatp} plots the performance of the incremental and optimized algorithm ($\sys$)
-on TPC-C and TATP benchmark applications.  In both workloads, the latency to derive a repair efficiently,
-and for TPC-C, on the order of milliseconds where all corrupted queries are \texttt{INSERT}s. 
-The precision and recall measures were
-$1$ both all settings.   One reason for the good performance is due to the fact that the benchmark queries
-are pre-dominantly point insert or update queries.  In this setting, each tuples affects a very small set of 
-tuples, which results in $1$ or $2$ complaints on average.  In this case, the tuple and query slicing algorithms
-reduce the total number of constraints for almost every setting to less than $100$.
-
-
-{\it Takeaway: many workloads in practice are dominated by point update queries.  In these settings,
- \sys is very effective at reducing the number of constraints and can derive repairs in nearly
- interactive latencies.}
-
-
-
-  \begin{figure*}[h]
+ \begin{figure*}[h]
     \vspace*{-.1in}
     \centering
     \begin{subfigure}[t]{.45\textwidth}
@@ -371,6 +343,31 @@ reduce the total number of constraints for almost every setting to less than $10
     \vspace*{-.1in}
     \caption{Comparison of Optimizations. \xlw{first graph partially done. }}
   \end{figure*}
+  
+\subsection{Benchmark}
+\label{sec:experiments:benchmark}
+
+Figure~\ref{f:tpcctatp} plots the performance of the incremental and optimized algorithm ($\sys$)
+on TPC-C and TATP benchmark applications.  In both workloads, the latency to derive a repair efficiently,
+and for TPC-C, on the order of milliseconds where all corrupted queries are \texttt{INSERT}s. 
+The precision and recall measures were
+$1$ both all settings.   One reason for the good performance is due to the fact that the benchmark queries
+are pre-dominantly point insert or update queries.  In this setting, each tuples affects a very small set of 
+tuples, which results in $1$ or $2$ complaints on average.  In this case, the tuple and query slicing algorithms
+reduce the total number of constraints for almost every setting to less than $100$.
+
+
+{\it Takeaway: many workloads in practice are dominated by point update queries.  In these settings,
+ \sys is very effective at reducing the number of constraints and can derive repairs in nearly
+ interactive latencies.}
+\begin{figure}[h]
+\centering
+  \includegraphics[width = .75\columnwidth]{figures/benchmark_time}
+  \vspace*{-.2in}
+  \caption{Performance on Benchmarks}
+  \label{f:tpcctatp} 
+  \vspace*{-.1in}
+\end{figure}
 \iffalse  
   \begin{figure*}[h]
     \centering

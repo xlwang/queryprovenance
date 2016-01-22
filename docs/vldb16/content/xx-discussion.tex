@@ -10,26 +10,18 @@ analyze query logs to trace reported errors to the queries that
 introduced them. This allows us in turn to identify additional errors
 in the data that may have been missed and gone unreported.
 
-Our basic algorithm, \naive, uses non-trivial transformation rules to
-encode information from the data and the query log as a mixed integer
-linear program. Further, we introduce three optimizations that reduce
-the size of the problem across three dimensions: tuples, queries, and
-attributes, without compromising the accuracy of the produced
-solution. In addition, we propose a performance optimization that
-analyzes a single query at a time. Our experiments show that this
+We proposed a basic algorithm, \naive, that uses non-trivial transformation rules to
+encode information from the data and the query log as a MILP problem. We further improve 
+the \naive algorithm by two types of optimizations: slicing-based optimizations that reduce problem
+size without compromising the accuracy and 
+incremental optimization that analyzes a single query at a time. 
+Our experiments show that the latter
 optimization can achieve significant scaling gains for single-query
 errors, without significant reduction in accuracy.
 
 To the best of our knowledge, \sys is the first approach to diagnosis
 and repair of errors in queries. Obviously, correcting such errors in
-practice poses additional challenges. For example, query errors that
-occurred far in the past are more challenging to correct in practice,
-even after they have been identified, as rolling back the effects of
-old transactions can have cascading implications. Investigating system
-solutions that can facilitate such rollback actions or maintain more
-detailed state through a dataset's evolution can help \sys operate
-more efficiently and effectively.
-
+practice poses additional challenges. 
 The current version of \sys focuses on linear functions, so it may not
 be able to encode complex updates that involve non-linear
 computations. Future versions can target extended models and solvers
