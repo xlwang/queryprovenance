@@ -341,7 +341,7 @@ algorithm $\sys$ with tuple slicing as default setting in the rest of the experi
     \label{f:attr100} 
     \end{subfigure}
     \vspace*{-.1in}
-    \caption{Comparison of Optimizations. \xlw{first graph partially done. }}
+    \caption{Comparison of Optimizations.}
   \end{figure*}
   
 \subsection{Benchmark}
@@ -449,6 +449,49 @@ Motivated by our preliminary results, we focus on \texttt{UPDATE}-only query log
 $10$ attributes and $1k$ attributes in the table. As the performance of \sys with different optimizations appears 
 identical when $N_a = 10$, we will only show results of \sys with tuple slicing optimization in the rest of the 
 experiments. 
+  \begin{figure*}[h]
+    \vspace*{-.1in}
+    \centering
+     \begin{subfigure}[t]{.3\textwidth}
+      \includegraphics[width = .99\columnwidth]{figures/dbsize_time}
+      \vspace*{-.2in}
+      \caption{Database Size.}
+      \label{f:dbsize_time} 
+    \end{subfigure}
+        \begin{subfigure}[t]{.3\textwidth}
+      \includegraphics[width = .99\columnwidth]{figures/pointrelv_time}
+      \vspace*{-.2in}
+      \caption{Query Complexity (Query Type).}
+      \label{f:qidx_time} 
+    \end{subfigure}
+    \begin{subfigure}[t]{.3\textwidth}
+    \includegraphics[width = .99\columnwidth]{figures/noise_fn_time}
+    \vspace*{-.2in}
+    \caption{Time vs False Negative}
+    \label{f:falsenegative_time} 
+    \end{subfigure} 
+    \\
+    \begin{subfigure}[t]{.3\textwidth}
+    \includegraphics[width = .99\columnwidth]{figures/skew_time}
+    \vspace*{-.2in}
+    \caption{Skew vs Time}
+    \label{f:skew_time} 
+    \end{subfigure}
+	\begin{subfigure}[t]{.3\textwidth}
+      \includegraphics[width = .99\columnwidth]{figures/where_time}
+      \vspace*{-.2in}
+      \caption{Query Complexity (Where Size).}
+      \label{f:where_time} 
+    \end{subfigure}
+    \begin{subfigure}[t]{.3\textwidth}
+    \includegraphics[width = .99\columnwidth]{figures/noise_fn_acc}
+    \vspace*{-.2in}
+    \caption{F1-score vs False Negative}
+    \label{f:falsenegative_acc} 
+    \end{subfigure}
+    \vspace*{-.1in}
+    \caption{Skew and False Negative experiments. }
+  \end{figure*}
 
 
 \iffalse 
@@ -507,53 +550,6 @@ we observe a clear decreasing trend in Figure~\ref{f:skew_time} as we increase t
 % increase. This is also due to the fact that increasing skewness also
 % increase the query dependency, which, in turn, increase the searching
 % space in the MILP problem.
- 
-  \begin{figure*}[h]
-    \vspace*{-.1in}
-    \centering
-     \begin{subfigure}[t]{.3\textwidth}
-      \includegraphics[width = .99\columnwidth]{figures/dbsize_time}
-      \vspace*{-.2in}
-      \caption{Database Size.}
-      \label{f:dbsize_time} 
-    \end{subfigure}
-        \begin{subfigure}[t]{.3\textwidth}
-      \includegraphics[width = .99\columnwidth]{figures/pointrelv_time}
-      \vspace*{-.2in}
-      \caption{Query Complexity (Query Type).}
-      \label{f:qidx_time} 
-    \end{subfigure}
-    \begin{subfigure}[t]{.3\textwidth}
-    \includegraphics[width = .99\columnwidth]{figures/noise_fn_time}
-    \vspace*{-.2in}
-    \caption{Time vs False Negative}
-    \label{f:falsenegative_time} 
-    \end{subfigure} 
-    \\
-    \begin{subfigure}[t]{.3\textwidth}
-    \includegraphics[width = .99\columnwidth]{figures/skew_time}
-    \vspace*{-.2in}
-    \caption{Skew vs Time}
-    \label{f:skew_time} 
-    \end{subfigure}
-	\begin{subfigure}[t]{.3\textwidth}
-      \includegraphics[width = .99\columnwidth]{figures/where_time}
-      \vspace*{-.2in}
-      \caption{Query Complexity (Where Size) \xlw{not done yet}.}
-      \label{f:where_time} 
-    \end{subfigure}
-    \begin{subfigure}[t]{.3\textwidth}
-    \includegraphics[width = .99\columnwidth]{figures/noise_fn_acc}
-    \vspace*{-.2in}
-    \caption{F1-score vs False Negative}
-    \label{f:falsenegative_acc} 
-    \end{subfigure}
-    \vspace*{-.1in}
-    \caption{Skew and False Negative experiments. }
-  \end{figure*}
-
-
-
 
 
 \stitle{Incomplete Complaint Sets:}
