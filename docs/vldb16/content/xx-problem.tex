@@ -59,7 +59,8 @@ use them to define the diagnosis problem.
 
 \noindent
 \emph{Query log ($\mathcal{Q}$):}
-We define a query log as an ordered sequence of \texttt{UPDATE}, \texttt{INSERT}, and
+We define a query log that update the database 
+as an ordered sequence of \texttt{UPDATE}, \texttt{INSERT}, and
 \texttt{DELETE} queries $\mathcal{Q}=\{q_1,\dots,q_n\}$, that have
 operated on a database $D$. In the rest of the paper, we use the term
 \emph{update queries}, or just \emph{queries}, to refer to any of the queries in $\mathcal(Q)$,
@@ -86,6 +87,7 @@ The conditional function $\sigma_q(t)$ is a boolean function that represents the
     &\mu_{q_2}(t)=(t.rate, t.income, \frac{t.income\cdot t.rate}{100})\\
     &\sigma_{q_2}(t)=\texttt{true}
 \end{align*} 
+Note that in this paper, we only consider query without sub-query or aggregation. 
 % 
 % As an insertion query, $q_3$ has $\sigma_{q_3}(t)=\texttt{false}$ and $t_{new}=(25, 85800, 21450)$.
 % \ewu{why does it return false?  should it only be true if input is $\bot$?}
@@ -199,18 +201,19 @@ that would result in a clean database state $D_n^*$. Obviously, a
 challenge is that $D_n^*$ is unknown, unless we know that the
 complaint set is complete. 
 
-In Section~\ref{sec:sol}, we describe our basic method \naive, which
+In Section~\ref{sec:sol}, we describe our basic method $\sys_{naive}$, 
+which
 uses a constraint programming formulation that expresses this
-diagnosis problem as a mixed integer linear program (MILP). We justify
-using this constraint formulation as opposed to methods, such as
-classification, that can analyze one query at a time in
-Section~\ref{sec:heuristic}. We show that the latter, heuristic
-approach is flawed, and one needs to encode the constraints in the
-entire log. In Section~\ref{sec:opt}, we present several optimization
-techniques that extend our basic method, allowing \sys to (1)~handle
+diagnosis problem as a mixed integer linear program (MILP). 
+% We justify
+% using this constraint formulation as opposed to methods, such as
+%classification, that can analyze one query at a time in Section~\ref{sec:heuristic}. We show that the latter, heuristic
+% approach is flawed, and one needs to encode the constraints in the entire log.
+In Section~\ref{sec:opt}, we present several optimization
+techniques that extend our naive method, allowing \sys to (1)~handle
 cases of incomplete information (incomplete complaint set), and
-(2)~scale to large data and log sizes. Specifically, our incremental
-repair method (\incremental, Section~\ref{sec:incremental}), can
+(2)~scale to large data and log sizes. Specifically, the proposed \sys algorithm with incremental
+repair optimization (Section~\ref{sec:incremental}), can
 handle $10\times$ compared to the basic MILP approach.
 
 

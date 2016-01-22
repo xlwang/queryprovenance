@@ -3,7 +3,7 @@
 \section{A MILP-based Solution}
 \label{sec:sol}
 
-In this section, we introduce \naive, an exhaustive solver-based approach to 
+In this section, we introduce $\sys_{naive}$, an exhaustive solver-based approach to 
 resolve the errors reflected in the complaint set.
 This approach constructs a mixed-integer linear 
 programming (MILP) problem by linearizing and parameterizing the 
@@ -164,10 +164,9 @@ slight abuse of notation:
 \begin{align}
 \label{eq:x}
 x_{q_i, t} = \sigma_{q_i}(t)
+\vspace*{-0.1in}
 \end{align}
 }
- 
-
 Next, we introduce real-valued variables for the attributes of $t$.
 We express the updated value
 of an attribute using semi-modules, borrowing from the models of
@@ -195,8 +194,6 @@ $\mu_{q_i}(t).A_j$; if $t$ does not satisfy the conditional function
 ($x_{q_i, t}=0$), then $t'.A_j$ takes the value $t.A_j$.
 In our running example, the rate value of a tuple $t$ after query $q_1$ would be expressed as:
 $t'.rate = x_{q_1, t}\otimes 30 + (1-x_{q_1, t})\otimes t.rate $
-
-
 Equation~\eqref{eq:linearization} does not yet provide a linear
 representation of the corresponding constraint, as it contains
 multiplication of variables. To linearize this expression, we adapt a
@@ -226,9 +223,8 @@ Now, Equation~\eqref{eq:linearization} becomes linear:
 t.A_j' = u.A_j + v.A_j
 \end{align}
 }
-
-
 \smallskip
+
 \noindent
 \texttt{INSERT:}
 An insert query adds a new tuple $t_{new}$ to the database.  If the query were 
@@ -347,7 +343,7 @@ $\mathcal{Q}^*$.
 
 
 \begin{algorithm}[t]
-\caption{\naive (MILP formulation).}
+\caption{$\sys_{naive}$ (MILP formulation).}
 \label{alg:basic}
 \scriptsize
 \begin{algorithmic}[1]
