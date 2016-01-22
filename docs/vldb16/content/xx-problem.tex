@@ -10,10 +10,19 @@ formalize the diagnosis problem.
 
 % \ewu{Add text to say false positive complaints are an orthogonal problem.}
 
-\input{content/example}
+\input{content/example2}
 
 \begin{example}\label{ex:taxes2}
-    
+Figure~\ref{fig:example} demonstrates an example tax bracket adjustment in the
+spirit of Example~\ref{ex:taxes}. The adjustment sets the tax rate to 30\% for
+income levels above \$87,500, and is implemented by query $q_1$. A digit
+transposition mistake in the query, results in an incorrect owed amount for tuples
+$t_3$ and $t_4$. Query $q_2$, which inserts a tuple with slightly higher
+income than $t_3$ and $t_4$ and the correct (lower) tax rate, obscures this mistake.
+This mistake is further propagated by query $q_3$, which calculates the pay 
+check amount based on the corresponding
+tax rate and income. 
+\iffalse    
 Figure~\ref{fig:example} demonstrates an example tax bracket adjustment in the
 spirit of Example~\ref{ex:taxes}. The adjustment sets the tax rate to 30\% for
 income levels above \$87,500, and is implemented by query $q_1$. A digit
@@ -22,9 +31,9 @@ $t_3$ and $t_4$. Query $q_2$ that calculates the amount owed based on the corres
 tax rate and income propagates the error to other fields. The mistake is
 further obscured by query $q_3$, which inserts a tuple with slightly higher
 income than $t_3$ and $t_4$ and the correct (lower) tax rate.
-
+\fi
 \end{example}
-% 
+\vspace*{-0.07in}
 While traditional data cleaning techniques seek to identify and correct the
 erroneous values in the table \emph{Taxes} directly, our goal is to diagnose
 the problem, and understand the reasons for these errors. In this case, the
@@ -82,11 +91,19 @@ We model \texttt{UPDATE} and \texttt{DELETE} queries as follows:
 In this definition, the modifier function $\mu_q(t)$ represents the query's update equations, and it transforms a tuple by either deleting it ($\mu_q(t)=\bot$) or changing the values of some of its attributes.
 The conditional function $\sigma_q(t)$ is a boolean function that represents the query's condition predicates.  In the example of Figure~\ref{fig:example}:
 \begin{align*}
+    &\mu_{q_1}(t)=(t.income, t.income*0.3, t.pay)\\
+    &\sigma_{q_1}(t)=(t.income\ge 85700)\\
+    &\mu_{q_3}(t)=(t.income, t.owed, t.income-t.owed)\\
+    &\sigma_{q_2}(t)=\texttt{true}
+\end{align*} 
+\iffalse
+\begin{align*}
     &\mu_{q_1}(t)=(30, t.income, t.owed)\\
     &\sigma_{q_1}(t)=(t.income\ge 85700)\\
     &\mu_{q_2}(t)=(t.rate, t.income, \frac{t.income\cdot t.rate}{100})\\
     &\sigma_{q_2}(t)=\texttt{true}
 \end{align*} 
+\fi
 Note that in this paper, we only consider query without sub-query or aggregation. 
 % 
 % As an insertion query, $q_3$ has $\sigma_{q_3}(t)=\texttt{false}$ and $t_{new}=(25, 85800, 21450)$.
@@ -138,8 +155,10 @@ below:
 
 In the example of Figure~\ref{fig:example}, two complaints are reported on the final database state $D_3$: 
 $c_1: t_3\mapsto t_3^*$ and
-$c_2: t_4\mapsto t_4^*$, where $t_3^*=(25,86000,21500)$
-and $t_4^*=(25,86500,21625)$.  For both these cases, each complaint denotes a value correction for a tuple in $D_3$.  Complaints can also model the addition or removal of tuples: $c: \bot\mapsto t^*$ means that $t^*$ should be added to the database, whereas $c: t\mapsto \bot$
+$c_2: t_4\mapsto t_4^*$, 
+where $t_3^*=(86000,21500,64500)$ and $t_4^*=(86500,21625,64875)$. 
+%where $t_3^*=(25,86000,21500)$ and $t_4^*=(25,86500,21625)$.  
+For both these cases, each complaint denotes a \textbf{value correction} for a tuple in $D_3$.  Complaints can also model the \textbf{addition} or \textbf{removal} of tuples: $c: \bot\mapsto t^*$ means that $t^*$ should be added to the database, whereas $c: t\mapsto \bot$
 means that $t$ should be removed from the database.
 
 
@@ -178,7 +197,7 @@ $q_i^*\in\mathcal{Q}^*$, $q_i^*$ has the same structure as $q_i$
 but possibly different parameters. For example, a good log repair for the
 example of Figure~\ref{fig:example} is
 $\mathcal{Q}^*=\{q_1^*,q_2,q_3\}$, where $q_1^*$=\texttt{UPDATE Taxes
-SET rate = 30 WHERE income >= 87500}.
+SET owed=income*0.3 WHERE income >= 87500}.
 
 
 \subsubsection*{Problem definition}
@@ -201,7 +220,7 @@ that would result in a clean database state $D_n^*$. Obviously, a
 challenge is that $D_n^*$ is unknown, unless we know that the
 complaint set is complete. 
 
-In Section~\ref{sec:sol}, we describe our basic method $\sys_{naive}$, 
+In Section~\ref{sec:sol}, we describe our basic method \naive, 
 which
 uses a constraint programming formulation that expresses this
 diagnosis problem as a mixed integer linear program (MILP). 
