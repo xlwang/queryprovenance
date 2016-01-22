@@ -492,6 +492,7 @@ experiments.
     \vspace*{-.1in}
     \caption{Skew and False Negative experiments. }
   \end{figure*}
+  \vspace*{-0.1in}
 
 
 \iffalse 
@@ -523,11 +524,11 @@ easier to solve than relative update because of two reasons: 1. constraints we c
 \stitle{Scalability - Query Complexity (where clause size):}
 Our final scalability experiment (Figures~\ref{f:where_time})
 varies the complexity of the update queries by increasing the number of predicates in the \texttt{WHERE} clause, 
-while keeping the overall selectivity constant.  \xlw{ NEED TO REWRITE AFTER experiment done. 
+while keeping the overall selectivity constant. In addition, we force the complaint set size within the same range for each corrupt query index. From Figure~\ref{f:where_time}, we found that larger predicate size increases the cost in solving a problem. This is expected as when there are more predicates, the number of constraints and variables in the MILP problem also increase, which further increase the problem complexity.
 %We find that the performance improves as the number of predicates increases.
 %This counter-intuitive result is due to the reduction in the complaint set size as the complexity increases. 
 %Again, we omit the accuracy result as \sys exhibit above 0.996 average F1 score in all settings. 
-}
+
 
 \stitle{Skew:} We now study the effects of attribute skew on the algorithms.
 We vary the skew parameter from $0$ (uniform) to $1e-7, 0.5, 1$. When $s=1$, nearly every attribute is on $A_0$.

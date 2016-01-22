@@ -25,6 +25,7 @@ this experiment illustrates the limitations of the na\"ive approach.
     \caption{Log size vs. execution time on synthetic setup. }
     \label{fig:querysize_vs_time}
 \end{figure}
+\vspace*{-0.1in}
 
 To resolve this limitation, we explored three classes of \emph{slicing} optimizations that seek to
 reduce the number of tuples, queries, and attributes that are encoded in the MILP problem.
@@ -108,8 +109,9 @@ does not over-generalize the upper bound towards the right because that strictly
 On the other hand, over-generalizing the lower bound towards the dirty interval
 is expected because it decreases the Manhattan distance between the repaired and corrupted lower bounds,
 which are parameters in the objective function. Therefore, to perform tuple slicing successfully, we need to reduce the repaired interval and exclude those non-complaint tuples in case (b).  
+\smallskip
 
-\noindent\textit{Step 2 (Refine Initial Repair):}
+\noindent\textit{Step 2 (Refine Initial Repair):} \\
 Although there are many possible mechanisms to refine the initial repair (e.g., incrementally shrinking
 the repaired interval until the non-complaint tuples are all excluded), 
 the straightforward approaches are not effective when multiple corrupt 
