@@ -179,12 +179,12 @@ been used in literature to model hypothetical data
 updates~\cite{tiresias}.
 
 Given a query $q_i$ and tuple $t$, we express the value of attribute $A_j$ in the updated tuple $t'$ as follows:
- {\scriptsize
+{\scriptsize
 \begin{align}
 \label{eq:linearization}
 t'.A_j = x_{q_i, t}\otimes \mu_{q_i}(t).A_j + (1-x_{q_i, t})\otimes t.A_j 
 \end{align} 
- }
+}
 In this expression, the $\otimes$ operation corresponds to regular
 multiplication, but we maintain the $\otimes$ notation to indicate
 that it is a semi-module multiplication by scalars. This expression
@@ -193,7 +193,8 @@ function ($x_{q_i, t}=1$), then $t'.A_j$ takes the value
 $\mu_{q_i}(t).A_j$; if $t$ does not satisfy the conditional function
 ($x_{q_i, t}=0$), then $t'.A_j$ takes the value $t.A_j$.
 In our running example, the rate value of a tuple $t$ after query $q_1$ would be expressed as:
-$t'.rate = x_{q_1, t}\otimes 30 + (1-x_{q_1, t})\otimes t.rate $
+$t'.owed = x_{q_1, t}\otimes (t.income*0.3) + (1-x_{q_1, t})\otimes t.owed$.
+%$t'.rate = x_{q_1, t}\otimes 30 + (1-x_{q_1, t})\otimes t.rate $
 Equation~\eqref{eq:linearization} does not yet provide a linear
 representation of the corresponding constraint, as it contains
 multiplication of variables. To linearize this expression, we adapt a
@@ -223,10 +224,9 @@ Now, Equation~\eqref{eq:linearization} becomes linear:
 t.A_j' = u.A_j + v.A_j
 \end{align}
 }
-\smallskip
 
-\noindent
-\texttt{INSERT:}
+\vspace*{-0.1in}
+\noindent\texttt{INSERT:}
 An insert query adds a new tuple $t_{new}$ to the database.  If the query were 
 corrupted, then the inserted values need repair. We use a binary variable $x$ to model whether the query is correct.  Each attribute of the newly inserted tuple ($t'.A_j$) may take one of two values: the value specified by the insertion query ($t_{new}.A_j$) if the query is correct ($x=1$), or an undetermined value ($u.A_j$) if the query is incorrect ($x=0$).  Thus, similar with Equation~\eqref{eq:linearization}, we write:
  {\scriptsize

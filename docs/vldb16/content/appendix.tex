@@ -2,6 +2,45 @@
 
 \appendix
 
+\section{Heuristic Approaches}
+\label{sec:heuristic}
+
+In this
+section, we examine alternative, simpler models that process a single
+query at a time, and demonstrate why they are insufficient.
+\noindent
+\textbf{WHERE repairs through classification:}
+The \texttt{WHERE} clause of an update query is equivalent to a
+rule-based binary classifier that splits tuples into two groups:
+(1)~tuples that satisfy the conditions in the \texttt{WHERE} clause
+and (2)~tuples that do not. Thus, by training a classifier,
+such as decision trees \cite{quinlan1987} to learn
+the correct classification rules rules for the \texttt{WHERE} clause.
+
+\noindent
+\textbf{SET repairs:}
+This alternative approach constructs 
+a simple linear system of equations to solve the parameters in the \texttt{SET}
+when errors persist after fixing the \texttt{WHERE} clause:
+For each expression in the \texttt{SET} clause we create a
+linear equation, using unknown variables to represent any parameters
+in the \texttt{SET} expression. 
+  \begin{figure}[h]
+  \centering
+    \includegraphics[width = .8\columnwidth]{figures/heuristicacc}
+    \vspace*{-.1in}
+    \caption{Heuristic Approach vs. \sys on Single-Query. }
+    \label{f:heuristic_acc} 
+  \end{figure}
+The na\"ive approach that we just described is heuristic in nature. It
+is simple and fast, but it can only process a single incorrect query. As shown in
+Figure~\ref{f:heuristic_acc}, the F-1 score of na\"ive heuristic approach is less 
+than 0.6 while \sys maintain high accuracy in solving single query problem with
+above 0.9 F-1 score across all database sizes. 
+
+  
+
+\xlw{CUT FROM THIS POINT}
 \section{Effect of Index of Corrupted Query}
 \label{app:qidx}
 
@@ -85,33 +124,4 @@ time cost compare to \milptuple. \\
 Based on these observations, we only include the performance of \milpadvtuple and \milpadvall
 in the rest of the experiments. 
 
-
-\section{Heuristic Approaches}
 \input{content/xx-decisiontree}
-In this section, we compare \heurstic and \milpall on query log with size 1. 
-We use \textbf{Synthetic} data generator (Section~\ref{sec:syntheticgen}) 
-to generate a initial table with 1000 tuples and one 
-\texttt{UPDATE} query with range update. 
-We further adjust the range (\# of tuples modified by the query) 
-from 5 tuples to 500 tuples. 
-
-
-
-  \begin{figure}[h]
-  \centering
-    \begin{subfigure}[t]{.23\textwidth}
-    \includegraphics[width = .9\columnwidth]{figures/heuristictime}
-    \vspace*{-.1in}
-    \caption{Performance of Heuristic Approach vs. \sys.}
-    \label{f:heuristic_time} 
-    \end{subfigure}
-    \begin{subfigure}[t]{.23\textwidth}
-    \includegraphics[width = .9\columnwidth]{figures/heuristicacc}
-    \vspace*{-.1in}
-    \caption{Accuracy of Heuristic Approach vs. \sys.}
-    \label{f:heuristic_acc} 
-    \end{subfigure}
-    \vspace*{-.1in}
-    \caption{Heuristic Approach vs. \sys on Single-Query. }
-  \end{figure}
-  

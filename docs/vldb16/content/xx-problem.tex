@@ -233,8 +233,14 @@ techniques that extend our naive method, allowing \sys to (1)~handle
 cases of incomplete information (incomplete complaint set), and
 (2)~scale to large data and log sizes. Specifically, the proposed \sys algorithm with incremental
 repair optimization (Section~\ref{sec:incremental}), can
-handle $10\times$ compared to the basic MILP approach.
+handle $10\times$ compared to the basic MILP approach. 
 
+Although we emphasis on solving the query logs with multiple queries, 
+an alternative approach, which leveraging on classification tools and linear system equations for 
+fixing the WHERE/SET clauses, applies for simpler scenario where the query log only contains one query. 
+In Appendix~\ref{sec:heuristic}, we provide detailed description and experimental comparison 
+for this alternative approach and demonstrate that it is not compatible with the \sys even in this
+scenario. 
 
 % \begin{figure}[t]
 % \centering

@@ -13,12 +13,12 @@ and solved the problem using a MILP-solver (CPLEX in our experiments).
 We find that the solver time increases exponentially as the number of encoded queries increases --
 at a log size of $80$, the solver failed to produce an answer within $1000$ seconds --
 due to the exponential increase in the number of possible states for the increasing number of undetermined variables.
-In contrast, the blue bar illustrates the near-constant performance of a similarly encoded MILP problem that 
-{\it only parameterizes the constants of the oldest query in the log}.
+In contrast, the blue bar illustrates the near-constant performance of a similarly encoded but optimized MILP problem. 
+% {\it only parameterizes the constants of the oldest query in the log}.
 Although the empirical solver performance varies widely depending on the specific problem, 
 this experiment illustrates the limitations of the na\"ive approach.
 
-\begin{figure}[t]
+\begin{figure}[h]
     \centering
         \includegraphics[width=0.35\textwidth]{figures/qsize_time_badscale}
     \caption{Log size vs. execution time on synthetic setup. }
@@ -64,50 +64,52 @@ only tuples modified by the fixed queries
 
 \subsection{Reducing Tuples (Tuple Slicing)}
 \label{sec:opt:tbsize}
-
-% \ewu{Assume reader is clear that we are only repairing WHERE clause range predicates}
-Our first optimization, \emph{tuple slicing}, aggressively reduces the problem size by only encoding those 
-tuples in the complaint set $\mathcal{C}$ (Algorithm~\ref{alg:basic} line $2$ 
-is replaced with \texttt{for each t in $\mathcal{C}$}). Each tuple necessitates
-the linearization of the entire query log, thus, only encoding the complaint tuples minimizes the 
-size of the problem with respect to the relevant tuples.
-Although this optimization is guaranteed to resolve $\mathcal{C}$, the problem may overfit 
-and not generalize to the entire database.
-Specifically, there are problem settings where the repaired range predicate in a query's \texttt{WHERE} clause is a superset of 
-the true range predicate, and introduces new errors by affecting tuples not originally part of  the complaint set.
-
 \begin{figure}[t]
     \centering
     \includegraphics[width=0.35\textwidth]{figures/2nditerationgroups}
     \vspace*{-.2in}
-    \caption{Graphical depiction of the group 2 and group 3. }
+    \caption{Graphical depiction of succeed\&failed repairs. Each solid and empty circle represents a complaint and non-complaint tuple.
+Each thick line represents the interval of query $q$'s range predicate: 
+dirty is the incorrect interval in the corrupted query,
+truth is the correct interval in the true query, 
+and repair is the interval returned by the solver.}
     \label{fig:groups}
     \vspace*{-.2in}
 \end{figure}
 
-Figure~\ref{fig:groups} depicts two examples that highlight this issue.
-Each solid and empty circle represents a complaint and non-complaint tuple, respectively.
-Each thick line represents the interval of query $q$'s range predicate: 
-dirty is the incorrect interval in the corrupted query,
-truth is the correct interval in the true query, 
-and repair is the interval returned by the solver.
-Recall that we do not have access to the truth interval, and our goal is to reproduce the 
-truth interval given $\mathcal{C}$ (solid circles) and the corrupted query.
-% 
-In Figure~\ref{fig:groups}(a), the dirty and truth intervals overlap, thus the non-complaint tuples 
-within the overlapping region are correctly modified by the dirty interval.  
-In this case, the proposed repair correctly contains the non-complaint tuples and the algorithm is successful.
-%We call these non-complaint tuples {\it safe}.
-In contrast, Figure~\ref{fig:groups}(b) highlights a case where this aggressive approach generalized incorrectly.
+% \ewu{Assume reader is clear that we are only repairing WHERE clause range predicates}
+Our first optimization, \emph{tuple slicing}, applies a two steps process to reduce the 
+problem size without sacrificing accuracy: it
+first aggressively reduces
+the problem size by only encoding tuples in the complaint set and then refines the log repair 
+through a separate but much smaller MILP problem. 
+\noindent\textit{Step 1 (Generate Initial Repair):} \\
+The first step of  \emph{tuple slicing} 
+aggressively reduces the problem size by only encoding those 
+tuples in the complaint set $\mathcal{C}$ (Algorithm~\ref{alg:basic} line $2$
+is replaced with \texttt{for each t in $\mathcal{C}$}). 
+Each tuple necessitates
+the linearization of the entire query log, thus, only encoding the complaint tuples minimizes the 
+size of the problem with respect to the relevant tuples. This aggressive optimization is guaranteed to resolve $\mathcal{C}$ , thus it sometimes helps
+fixing query logs magnitude faster without hurting the accuracy: For example, in Figure~\ref{fig:groups}(a), the dirty and truth intervals overlap, thus the non-complaint tuples 
+within the overlapping region are correctly modified by the dirty interval. 
+(Recall that we do not have access to the truth interval, and our goal is to reproduce the 
+truth interval given $\mathcal{C}$ (solid circles) and the corrupted query.) 
+In this case, the proposed repair correctly contains the non-complaint tuples and the algorithm is successful.\\
+\indent However, sometimes the problem may overfit 
+and not generalize to the entire database.
+Specifically, there are problem settings where the repaired range predicate in a query's \texttt{WHERE} clause is a superset of the true range predicate, and introduces new errors by affecting tuples not originally part of  the complaint set. 
+Figure~\ref{fig:groups}(b) highlights such a case where this aggressive approach generalized incorrectly.
 The dirty and clean intervals are non-overlapping, so the non-complaint tuple shown is not modified by $q$ (otherwise it would be a complaint!). This tuple is incorrectly included in the repaired interval, \emph{because the MILP formulation does not constrain its value}.
-Note that in both of these cases, the objective function will ensure that the repair
+
+\indent Note that in both of these cases, the objective function will ensure that the repair
 does not over-generalize the upper bound towards the right because that strictly increases the objective function.
 On the other hand, over-generalizing the lower bound towards the dirty interval
 is expected because it decreases the Manhattan distance between the repaired and corrupted lower bounds,
-which are parameters in the objective function.
+which are parameters in the objective function. Therefore, to perform tuple slicing successfully, we need to reduce the repaired interval and exclude those non-complaint tuples in case (b).  
 
-Therefore, to perform tuple slicing successfully, we need to reduce the repaired interval and exclude those non-complaint tuples in case (b).  
-Although there are many possible mechanisms to achieve this (e.g., incrementally shrinking
+\noindent\textit{Step 2 (Refine Initial Repair):}
+Although there are many possible mechanisms to refine the initial repair (e.g., incrementally shrinking
 the repaired interval until the non-complaint tuples are all excluded), 
 the straightforward approaches are not effective when multiple corrupt 
 queries have been repaired because they don't take the query interactions into account.
