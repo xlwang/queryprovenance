@@ -329,14 +329,6 @@ algorithm $\sys$ with tuple slicing as default setting in the rest of the experi
 
 \subsection{Benchmark}
 \label{sec:experiments:benchmark}
-Figure~\ref{f:tpcctatp} plots the performance of the incremental and optimized algorithm ($\sys$)
-on TPC-C and TATP benchmark applications.  In both workloads, the latency to derive a repair efficiently,
-and for TPC-C, on the order of milliseconds where all corrupted queries are \texttt{INSERT}s. 
-The precision and recall measures were
-$1$ both all settings.   One reason for the good performance is due to the fact that the benchmark queries
-are pre-dominantly point insert or update queries.  In this setting, each tuples affects a very small set of 
-tuples, which results in $1$ or $2$ complaints on average.  In this case, the tuple and query slicing algorithms
-reduce the total number of constraints for almost every setting to less than $100$.
 \begin{figure}[h]
 \centering
   \includegraphics[width = .75\columnwidth]{figures/benchmark_time}
@@ -345,6 +337,15 @@ reduce the total number of constraints for almost every setting to less than $10
   \label{f:tpcctatp} 
   \vspace*{-.1in}
 \end{figure}
+Figure~\ref{f:tpcctatp} plots the performance of the incremental and optimized algorithm ($\sys$)
+on TPC-C and TATP benchmark applications.  In both workloads, the latency to derive a repair efficiently,
+and for TPC-C, on the order of milliseconds where all corrupted queries are \texttt{INSERT}s. 
+The precision and recall measures were
+$1$ both all settings.   One reason for the good performance is due to the fact that the benchmark queries
+are pre-dominantly point insert or update queries.  In this setting, each tuples affects a very small set of 
+tuples, which results in $1$ or $2$ complaints on average.  In this case, the tuple and query slicing algorithms
+reduce the total number of constraints for almost every setting to less than $100$.
+
 
 {\it Takeaway: many workloads in practice are dominated by point update queries.  In these settings,
  \sys is very effective at reducing the number of constraints and can derive repairs in nearly
@@ -476,10 +477,8 @@ number of complaints also increases.  We have found that the performance of the 
 increases the size of the MILP problem).  This is verified by the fact that the number of constraints and variables increase linearly with the database size, which further affect the solving cost.
 
 \stitle {Scalability - Query Complexity (update type): }
-Figure~\ref{f:qidx_time} compares the performance of \sys in solving three types \texttt{UPDATE}-only workloads: {\it Constant/Point, Constant/Range, Relative/Range} while increase the number of queries \sys need to solve from $1$ to $250$ (by adjusting the corrupt query index). We found that \sys solves \texttt{UPDATE} with point updates much faster
-than with range updates since point updates greatly reduce the searching space of the MILP problem. 
-We also observe that \texttt{UPDATE}-only workloads with constant update is 
-easier to solve than relative update. There are two reasons: 1. constraints we constructed for the constant update are simpler than relative update due to the set clause structure; 2. the size of complaints in constant updates is oftentimes smaller than relative updates as the affected tuples always expands in the latter case. 
+Figure~\ref{f:qidx_time} compares the performance of \sys in solving three types \texttt{UPDATE}-only workloads: {\it Constant/Point, Constant/Range, Relative/Range} while increase the number of queries \sys need to solve from $1$ to $250$ (by adjusting the corrupt query index). We found that \sys solves \texttt{UPDATE} with point predicates is easier to solve than range predicates and constant update is 
+easier to solve than relative update because of two reasons: 1. constraints we constructed for the constant update are simpler than relative update due to the set clause structure; 2. the size of complaints in constant updates is oftentimes smaller than relative updates as the affected tuples always expands in the latter case. 
 
 \stitle{Scalability - Query Complexity (where clause size):}
 Our final scalability experiment (Figures~\ref{f:where_time})
