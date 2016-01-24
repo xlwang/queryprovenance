@@ -8,6 +8,7 @@ that it exhaustively encodes the combination of all tuples in the database and a
 in the query log.  In this approach, the number of constraints (as well as undetermined variables) 
 grows quadratically with respect to the database and the query log.
 \ewu{Actually encoding all queries or only oldest query as undetermined variables.  The latter motivates the incremental optimiation in Section~\ref{sec:incremental}}
+\ewu{Alternative: Just talk about red bars.  Blue bars discussed in incremental section}
 Figure~\ref{fig:querysize_vs_time} shows a simple scalability experiment, where we generated increasingly 
 larger query logs for a database of $1000$ tuples, encoded the problem using \naive (red bars), 
 and solved the problem using a MILP-solver (CPLEX in our experiments).
@@ -71,11 +72,13 @@ only tuples modified by the fixed queries
     \centering
     \includegraphics[width=0.35\textwidth]{figures/2nditerationgroups}
     \vspace*{-.2in}
-    \caption{Graphical depiction of succeed\&failed repairs. Each solid and empty circle represents a complaint and non-complaint tuple.
-Each thick line represents the interval of query $q$'s range predicate: 
-dirty is the incorrect interval in the corrupted query,
-truth is the correct interval in the true query, 
-and repair is the interval returned by the solver.}
+    \caption{
+      Graphical depiction of correct (a) and over-generalized (b) repairs.
+      Solid and empty circles represent complaint and non-complaint tuples.
+      Each thick line represents the interval of query $q$'s range predicate.
+      Dirty: incorrect interval in corrupted query;
+      truth: correct interval in true query;
+      repair: interval returned by the solver.}
     \label{fig:groups}
     \vspace*{-.2in}
 \end{figure}
@@ -86,45 +89,67 @@ problem size without sacrificing accuracy: it
 first aggressively reduces
 the problem size by only encoding tuples in the complaint set and then refines the log repair 
 through a second but much smaller MILP problem. 
-\noindent\textit{Step 1 (Initial Repair Step):} \\
+\noindent\textbf{Step 1 (Initial Repair Step):} 
 The first step of  \emph{tuple slicing} 
 aggressively reduces the problem size by only encoding those 
 tuples in the complaint set $\mathcal{C}$ (Algorithm~\ref{alg:basic} line $2$
 is replaced with \texttt{for each t in $\mathcal{C}$}). 
 Each tuple necessitates
 the linearization of the entire query log, thus, only encoding the complaint tuples minimizes the 
-size of the problem with respect to the relevant tuples. This aggressive optimization is guaranteed to resolve $\mathcal{C}$ , thus it sometimes helps
-fixing query logs magnitude faster without hurting the accuracy: For example, in Figure~\ref{fig:groups}(a), the dirty and truth intervals overlap, thus the non-complaint tuples 
-within the overlapping region are correctly modified by the dirty interval. 
-(Recall that we do not have access to the truth interval, and our goal is to reproduce the 
-truth interval given $\mathcal{C}$ (solid circles) and the corrupted query.) 
-In this case, the proposed repair correctly contains the non-complaint tuples and the algorithm is successful.\\
-\indent However, sometimes the problem may overfit 
-and not generalize to the entire database.
-Specifically, there are problem settings where the repaired range predicate in a query's \texttt{WHERE} clause is a superset of the true range predicate, and introduces new errors by affecting tuples not originally part of  the complaint set. 
-Figure~\ref{fig:groups}(b) highlights such a case where this aggressive approach generalized incorrectly.
-The dirty and clean intervals are non-overlapping, so the non-complaint tuple shown is not modified by $q$ (otherwise it would be a complaint!). This tuple is incorrectly included in the repaired interval, \emph{because the MILP formulation does not constrain its value}.
+size of the problem with respect to the relevant tuples. 
+\ewu{Too Verbose?}
+This optimization is guaranteed to resolve $\mathcal{C}$, thus depending on the properties of the non-complaint records, it can generate correct repairs
+an order of magnitude faster without hurting the accuracy. 
+In Figure~\ref{fig:groups}(a),
+the solver will guarantee a repair interval that excludes the two left-most complaints, includes the two right-most complaints,
+and minimizes the difference between the dirty and repaired intervals (due to the objective function).
+This effectively pushes the repair's lower-bound towards that of the dirty interval.
+This is a case where such a solution is correct, because the dirty and truth intervals overlap.
+(Recall that we do not have access to the truth interval, and our goal is to reproduce the truth interval given $\mathcal{C}$ (solid circles) and the corrupted query.) 
 
-\indent Note that in both of these cases, the objective function will ensure that the repair
+However, this approach can also cause the repair to be a {\it superset} of the truth interval, and affect tuples not part of the complaint set
+Figure~\ref{fig:groups}(b) highlights such a case where the dirty and truth intervals are non-overlapping, and the non-complaint record between them has been incorrectly included in the repair interval---{\it because the MILP problem did not include the non-complaint.}
+% where this aggressive approach generalized incorrectly.
+% The dirty and clean intervals are non-overlapping, so the non-complaint tuple shown is not modified by $q$ (otherwise it would be a complaint!). This tuple is incorrectly included in the repaired interval, 
+% \emph{because the MILP formulation does not constrain its value}.
+
+
+% For example, in Figure~\ref{fig:groups}(a), the dirty and truth intervals overlap, thus the non-complaint tuples 
+% within the overlapping region are correctly modified by the dirty interval. 
+% In this case, the proposed repair correctly contains the non-complaint tuples and the algorithm is successful.\\
+% \indent However, sometimes the problem may overfit 
+% and not generalize to the entire database.
+% Specifically, there are problem settings where the repaired range predicate in a query's \texttt{WHERE} clause is a superset of the true range 
+% predicate, and introduces new errors by affecting tuples not originally part of  the complaint set. 
+% Figure~\ref{fig:groups}(b) highlights such a case where this aggressive approach generalized incorrectly.
+% The dirty and clean intervals are non-overlapping, so the non-complaint tuple shown is not modified by $q$ (otherwise it would be a complaint!). This tuple is incorrectly included in the repaired interval, \emph{because the MILP formulation does not constrain its value}.
+
+\indent In both of these cases, the objective function will ensure that the repair
 does not over-generalize the upper bound towards the right because that strictly increases the objective function.
-On the other hand, over-generalizing the lower bound towards the dirty interval
-is expected because it decreases the Manhattan distance between the repaired and corrupted lower bounds,
-which are parameters in the objective function. Therefore, to perform tuple slicing successfully, we need to reduce the repaired interval and exclude those non-complaint tuples in case (b).  
+%On the other hand, over-generalizing the lower bound towards the dirty interval
+%is expected because it decreases the Manhattan distance between the repaired and corrupted lower bounds,
+%which are parameters in the objective function. 
+Therefore, our main concern is to refine the repair interval to exclude those non-complaint tuples in case (b).
+Note that in the case of incomplete complaint sets, the user may opt to no execute the refinement step if she believes
+that the non-complaint records are indeed in error.
+
+%, to perform tuple slicing successfully, we need to reduce the repaired interval and exclude those non-complaint tuples in case (b).  
 \smallskip
 
-\noindent\textit{Step 2 (Refinement Step):} \\
+\noindent\textbf{Step 2 (Refinement Step):} 
 Although there are many possible mechanisms to refine the initial repair (e.g., incrementally shrinking
 the repaired interval until the non-complaint tuples are all excluded), 
 the straightforward approaches are not effective when multiple corrupt 
 queries have been repaired because they don't take the query interactions into account.
 
 Instead, we solve this using a second, significantly smaller, MILP problem.   
-Let $\mathcal{Q}^*_{sub}$ be the set of repaired queries from the  initial MILP formulation with tuple slicing.
-We identify the set of non-complaint tuples $\mathcal{NC}$ that are now included in a repaired \texttt{WHERE} clause predicate, as in Figure~\ref{fig:groups}(b). We construct a new MILP by linearizing the log over $\mathcal{C}^+ = \mathcal{C} \cup \mathcal{NC}$, but we set the values of all variables not in $\mathcal{Q}^*_{sub}$ to their corresponding assignment from the initial MILP solution
-This ensures that only repaired query parameters can
-be perturbed, which vastly reduces the number of undetermined variables in the problem.
-Second, we modify the objective function to only penalize the number of non-complaint tuples 
-$t \in \mathcal{C}^+$ that are matched by the queries in $q \in \mathcal{Q}^*_{sub}$.
+Let $\mathcal{Q}^*_{rep}$ be the set of repaired queries from the  initial MILP formulation with tuple slicing;
+$\mathcal{NC}$ be the set of non-complaint tuples now matching the repaired \texttt{WHERE} clauses, as in Figure~\ref{fig:groups}(b);
+and $\mathcal{C}^+ = \mathcal{C} \cup \mathcal{NC}$.
+We create a new MILP using $\mathcal{C}^+$ as the complaint set, and fix the values of all queries not in $\mathcal{Q}^*_{rep}$ to their assignment in the solution from the first step.
+This ensures that only repaired query parameters can be perturbed, which vastly reduces the number of undetermined variables in the problem.
+We further modify the objective function to only penalize the number of non-complaint tuples 
+$t \in \mathcal{C}^+$  that are matched by the queries in $q \in \mathcal{Q}^*_{sub}$.
 These selections are represented by the binary variable $x_{q, t}$, thus the updated objective function
 is $\sum_{q \in \mathcal{Q}^*_{sub}} \sum_{t \in \mathcal{NC}} x_{q,t}$.
 
@@ -132,7 +157,7 @@ is $\sum_{q \in \mathcal{Q}^*_{sub}} \sum_{t \in \mathcal{NC}} x_{q,t}$.
 % We use this same mechanism to address incomplete complaint sets.
 In our experiments, we find that this second MILP iteration adds
 minimal overhead ($0.1-0.5\%$) with respect to the initial MILP
-problem, making \tslice and effective method to improve the performance of the basic approach, without compromising accuracy.
+problem, making \tslice an effective method to improve the performance of the basic approach, without compromising accuracy.
 
 % \ewu{Need to clarify that the solver is a black box, who knows what goes on there.  Maybe where we introduce MILP-solvers}
 % \xlw{The number of noncomplaints differs case by case. }
@@ -294,8 +319,9 @@ problem, making \tslice and effective method to improve the performance of the b
 In practice, many of the queries in the query log could not have affected the \emph{complaint attributes} (defined below). For example, if $q_{N-1}$ and $q_{N}$ 
 only read and wrote attribute $A_1$, then they could not have contributed to an error in $A_2$.  
 However, if $q_{N}$  wrote $A_2$, then either or both queries may have caused the error. 
-In short, if we model a query as a set of attribute read and write operations, those that form a 
-causal read-write chain to the \emph{complaint attributes} must be linearized, whereas others can be ignored.  This is the foundation of our \emph{query-slicing} optimization.
+In short, if we model a query as a set of attribute read and write operations, those 
+not part of the causal read-write chain to the \emph{complaint attributes} can be ignored.
+This is the foundation of our \emph{query-slicing} optimization.
 
 % The exhaustive parameterization of all queries in the query log, as described
 % in the basic approach, is typically unnecessary because many queries in the log
@@ -390,7 +416,7 @@ Given $Rel\mathcal{(Q)}$, the relevant attributes can be defined as:
 $Rel\mathcal{(A)} = \cup_{q_i \in Rel\mathcal{Q}} (\mathcal{F}(q_i)\cup \mathcal{P}(q_i))$
 \aslice uses \emph{attribute slicing} to only encode constraints for attributes in $Rel\mathcal{(A)}$.
 This type of slicing should be more effective for wide tables and query logs that focus a small subset of the attributes, such as TPC-C style transaction workloads. 
-However, our experiments on synthetic workloads show that this optimization is not useful in many settings, and most improvements are achieved by slicing on the tuple and query dimensions.
+\ewu{BAD TEXT!!!: However, our experiments on synthetic workloads show that this optimization is not useful in many settings, and most improvements are achieved by slicing on the tuple and query dimensions.}
 
 
 
@@ -417,14 +443,14 @@ However, our experiments on synthetic workloads show that this optimization is n
 
 Even with the slicing optimizations, the number of undetermined variables can remain high in many cases, resulting in slow runtime for the MILP solver.  As we saw in
 Figure~\ref{fig:querysize_vs_time}, the solver runtime increases exponentially
-as the log size (and thus the number of variables) increases (red bars).
-In contrast, we find that the scalability is significantly better when only a \emph{single query}
-is parameterized, despite linearizing the same number of queries (light blue bars).
+as the log size (and thus the number of undetermined variables) increases (red bars).
+In contrast, the light blue bars show that the scalability is significantly better when only a \emph{single query}
+is parameterized, despite the same number of linearized queries.
 
 These results suggest that it is \emph{faster} to run a separate MILP problem for each 
-suffix of the query log (e.g., $q_i, q_{i+1}\ldots, q_n$) where only $q_i$'s constraints contain
+suffix of the query log (e.g., $\{ q_i\ldots, q_n | i \in [1, n] \}$) where only $q_i$'s constraints contain
 undetermined variables, rather than encode and parameterize the entire log.
-\incremental (Algorithm~\ref{alg:incalg}) handles cases where the log contains a single corrupted query (or the search focuses on a single repair),
+This approach, described as \incremental in Algorithm~\ref{alg:incalg}, applies when searching for a single corrupted query or repair.
 The algorithm linearizes the entire log, incorporating any slicing optimizations, but parameterizes a single query at a time, moving from the most recent to the oldest.
 The algorithm calls a modified version of \naive,
 which takes an extra parameter $q_i$.  The modified algorithm only parameterizes $q_i$, 
@@ -434,6 +460,8 @@ and fixes the values for the parameters for the rest of the queries in $\mathcal
 
 
 \incremental prioritizes repairs for complaints that are due to more recent corruptions.
-We believe this is a natural property to expect in practice, and our experiments demonstrate $10\times$
-more scalability compared to the naive exhaustive approach, in terms of number of queries in the query log, as the exhaustive algorithm simply fails beyond a certain log size.
+Given that the exhaustive algorithm simply fails beyond a small log size, we believe this is a natural and pragmatic assumption to use, and results in 
+a $10\times$ scalability improvement.
+% We believe this is a natural property to expect in practice, and our experiments demonstrate $10\times$
+% more scalability compared to the naive exhaustive approach, in terms of number of queries in the query log, as the exhaustive algorithm simply fails beyond a small log size.
 
