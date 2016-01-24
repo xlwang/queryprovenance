@@ -453,11 +453,12 @@ Our approach, described as \incremental in Algorithm~\ref{alg:incalg}, focuses o
 It does so by linearizing the full query log, including any slicing optimizations, but only parameterizes and repairs a single query at a time.
 This procedure is applied from the most recent query, attempts to repair it, and continues to the next most recent query if a repair is not generated.
 The algorithm internally calls a modified version of \naive that takes an extra parameter $q_i$.  
-The modifived \naive  only parameterizes $q_i$, and fixes the values for all other parameters. % the parameters for the rest of the queries in $\mathcal{Q}$.
+The modified \naive  only parameterizes $q_i$, and fixes the values for all other parameters. % the parameters for the rest of the queries in $\mathcal{Q}$.
 
 \incremental prioritizes repairs for complaints that are due to more recent corruptions.
 Given that the exhaustive algorithm simply fails beyond a small log size, we believe this is a natural and pragmatic assumption to use, and results in 
 a $10\times$ scalability improvement.
+Our experiments additionally evaluate variations of the incremental algorithm that parameterize blocks of $k$ consecutive queries, and show that it is impractical from both a performance and accuracy perspective.
 
 % generates a problem for each suffix of the query log (e.g., $\{ q_i\ldots, q_n | i \in [1, n] \}$) where only $q_i$'s constraints contain undetermined variables.
 % We focus on the case where there is a single corrupted query single query case \ewu{BECAUSE XXXX.}
