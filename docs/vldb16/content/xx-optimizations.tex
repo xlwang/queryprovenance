@@ -415,8 +415,8 @@ In addition to removing irrelevant queries, we additionally avoid encoding irrel
 Given $Rel\mathcal{(Q)}$, the relevant attributes can be defined as:
 $Rel\mathcal{(A)} = \cup_{q_i \in Rel\mathcal{Q}} (\mathcal{F}(q_i)\cup \mathcal{P}(q_i))$
 \aslice uses \emph{attribute slicing} to only encode constraints for attributes in $Rel\mathcal{(A)}$.
-This type of slicing should be more effective for wide tables and query logs that focus a small subset of the attributes, such as TPC-C style transaction workloads. 
-\ewu{BAD TEXT!!!: However, our experiments on synthetic workloads show that this optimization is not useful in many settings, and most improvements are achieved by slicing on the tuple and query dimensions.}
+We find that this type of slicing can be effective for wide tables along with queries that focus on a small subset of attributes, such as TPC-C style transaction workloads. 
+% \ewu{BAD TEXT!!!: However, our experiments on synthetic workloads show that this optimization is not useful in many settings, and most improvements are achieved by slicing on the tuple and query dimensions.}
 
 
 
