@@ -7,6 +7,7 @@ A large drawback of our basic MILP transformation (Section~\ref{sec:sol}) is
 that it exhaustively encodes the combination of all tuples in the database and all queries
 in the query log.  In this approach, the number of constraints (as well as undetermined variables) 
 grows quadratically with respect to the database and the query log.
+\ewu{Actually encoding all queries or only oldest query as undetermined variables.  The latter motivates the incremental optimiation in Section~\ref{sec:incremental}}
 Figure~\ref{fig:querysize_vs_time} shows a simple scalability experiment, where we generated increasingly 
 larger query logs for a database of $1000$ tuples, encoded the problem using \naive (red bars), 
 and solved the problem using a MILP-solver (CPLEX in our experiments).
@@ -80,12 +81,12 @@ and repair is the interval returned by the solver.}
 \end{figure}
 
 % \ewu{Assume reader is clear that we are only repairing WHERE clause range predicates}
-Our first optimization, \emph{tuple slicing}, applies a two steps process to reduce the 
+Our first optimization, \emph{tuple slicing}, applies a two step process to reduce the 
 problem size without sacrificing accuracy: it
 first aggressively reduces
 the problem size by only encoding tuples in the complaint set and then refines the log repair 
-through a separate but much smaller MILP problem. 
-\noindent\textit{Step 1 (Generate Initial Repair):} \\
+through a second but much smaller MILP problem. 
+\noindent\textit{Step 1 (Initial Repair Step):} \\
 The first step of  \emph{tuple slicing} 
 aggressively reduces the problem size by only encoding those 
 tuples in the complaint set $\mathcal{C}$ (Algorithm~\ref{alg:basic} line $2$
@@ -111,7 +112,7 @@ is expected because it decreases the Manhattan distance between the repaired and
 which are parameters in the objective function. Therefore, to perform tuple slicing successfully, we need to reduce the repaired interval and exclude those non-complaint tuples in case (b).  
 \smallskip
 
-\noindent\textit{Step 2 (Refine Initial Repair):} \\
+\noindent\textit{Step 2 (Refinement Step):} \\
 Although there are many possible mechanisms to refine the initial repair (e.g., incrementally shrinking
 the repaired interval until the non-complaint tuples are all excluded), 
 the straightforward approaches are not effective when multiple corrupt 
