@@ -9,13 +9,12 @@ It is estimated to cost the US economy more than \$600 billion
 per year~\cite{eckerson2002} and erroneous price data in retail databases
 alone cost the US consumers \$2.5 billion each year~\cite{Fan2008}. Although data
 cleaning tools can purge many errors from a dataset before downstream 
-applications use the data, databases are constantly changing as applications
+applications use the data, datasets can frequently change as applications
 and users execute queries that modify the data.
-Mistakes in these queries can introduce errors that spread through the database
-due to subsequent update queries; 
-by the time errors are detected, it is difficult to trace those errors back to the 
-erroneous query and correct it.
-Identifying and correcting errors in the data directly is suboptimal: it treats the symptom,
+Mistakes in these queries can introduce errors to the data, and these
+errors can propagate to more data by subsequent update queries.
+By the time errors are detected, their origin has often been obscured and it is very difficult identify the offending query and correct it.
+Identifying and correcting errors in the data directly is suboptimal, as it targets the symptom,
 rather than the underlying cause. Fixing the manifested data errors on a
 case-by-case basis often obscures the root of the problem and other data that may have been
 affected. Therefore, traditional data cleaning approaches are not well-suited
@@ -181,7 +180,7 @@ following contributions:
 \begin{figure}[t]
     \centering
         \includegraphics[scale=0.35]{figures/architecture}
-    \caption{\sys processes data anomalies in the form of complaints and analyzes logged query histories to identify the causes of error. In the heart of the system, transformation algorithms express the diagnosis problem as a mixed integer program, and optimization modules ensure that the MIP programs can be evaluated efficiently.}
+    \caption{\sys processes data anomalies in the form of complaints and analyzes logged query histories to identify the causes of error. In the heart of the system, transformation algorithms express the diagnosis problem as a mixed integer linear program (MILP), and optimization modules ensure that the MILP programs can be evaluated efficiently.}
     \label{fig:architecture}
 \end{figure}
 
