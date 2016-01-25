@@ -3,7 +3,7 @@
 \section{Optimizing the Basic Approach}
 \label{sec:opt}
 
-A large drawback of our basic MILP transformation (Section~\ref{sec:sol}) is
+One of the large drawbacks of our \emph{basic} MILP transformation (Section~\ref{sec:sol}) is
 that it exhaustively encodes the combination of all tuples in the database and all queries
 in the query log.  In this approach, the number of constraints (as well as undetermined variables) 
 grows quadratically with respect to the database and the query log.
@@ -11,7 +11,7 @@ grows quadratically with respect to the database and the query log.
 \ewu{Alternative: Just talk about red bars.  Blue bars discussed in incremental section}
 \xlw{I double checked the result, blue bar is $inc_1$ plus tuple slicing. So I keep the description for blue bar here as optimized QFix.}
 Figure~\ref{fig:querysize_vs_time} shows a simple scalability experiment, where we generated increasingly 
-larger query logs for a database of $1000$ tuples, encoded the problem using $basic$ (red bars), 
+larger query logs for a database of $1000$ tuples, encoded the problem using \emph{basic} (red bars), 
 and solved the problem using a MILP-solver (CPLEX in our experiments).
 We find that the solver time increases exponentially as the number of encoded queries increases --
 at a log size of $80$, the solver failed to produce an answer within $1000$ seconds --
@@ -19,7 +19,14 @@ due to the exponential increase in the number of possible states for the increas
 In contrast, the blue bar illustrates the near-constant performance of a similarly encoded but optimized MILP problem. 
 % {\it only parameterizes the constants of the oldest query in the log}.
 Although the empirical solver performance varies widely depending on the specific problem, 
-this experiment illustrates the limitations of the na\"ive approach.
+this experiment illustrates the limitations of the \emph{basic} approach. \xlw{Another major drawback of the \emph{basic} approach is that it requires full complaint sets as it encodes every tuple in the database. As a result, when we have an incomplete complaint set, the \emph{basic} approach could easily get infeasible return and fail to solve the problem. We will discuss noise handling in more detail in Section~\ref{sec:noise}.  }
+
+
+To resolve these limitation, we explored three classes of \emph{slicing} optimizations that seek to
+reduce the number of tuples, queries, and attributes that are encoded in the MILP problem. 
+In addition, we propose an incremental algorithm that exploits the single bar performance observed
+in the above scalability experiment, which both improves the scalability and the repair latency
+when the corrupted query is recent.  
 
 \begin{figure}[h]
     \centering
@@ -29,14 +36,6 @@ this experiment illustrates the limitations of the na\"ive approach.
     \label{fig:querysize_vs_time}
 \end{figure}
 \vspace*{-0.1in}
-
-To resolve this limitation, we explored three classes of \emph{slicing} optimizations that seek to
-reduce the number of tuples, queries, and attributes that are encoded in the MILP problem.
-In addition, we propose an incremental algorithm that exploits the single bar performance observed
-in the above scalability experiment, which both improves the scalability and the repair latency
-when the corrupted query is recent.  
-
-
 
 
 % In the previous section, we introduce the basic approach to derive
@@ -85,7 +84,7 @@ only tuples modified by the fixed queries
 \end{figure}
 
 % \ewu{Assume reader is clear that we are only repairing WHERE clause range predicates}
-Our first optimization, \emph{tuple slicing}, applies a two step process to reduce the 
+Our first optimization, \emph{tuple-slicing}, applies a two step process to reduce the 
 problem size without sacrificing accuracy: it
 first aggressively reduces
 the problem size by only encoding tuples in the complaint set and then refines the log repair 
@@ -108,7 +107,7 @@ This effectively pushes the repair's lower-bound towards that of the dirty inter
 This is a case where such a solution is correct, because the dirty and truth intervals overlap.
 (Recall that we do not have access to the truth interval, and our goal is to reproduce the truth interval given $\mathcal{C}$ (solid circles) and the corrupted query.) 
 
-However, this approach can also cause the repair to be a {\it superset} of the truth interval, and affect tuples not part of the complaint set
+However, this approach can also cause the repair to be a {\it superset} of the truth interval, and affect tuples not part of the complaint set.
 Figure~\ref{fig:groups}(b) highlights such a case where the dirty and truth intervals are non-overlapping, and the non-complaint record between them has been incorrectly included in the repair interval---{\it because the MILP problem did not include the non-complaint.}
 % where this aggressive approach generalized incorrectly.
 % The dirty and clean intervals are non-overlapping, so the non-complaint tuple shown is not modified by $q$ (otherwise it would be a complaint!). This tuple is incorrectly included in the repaired interval, 
@@ -145,20 +144,20 @@ queries have been repaired because they don't take the query interactions into a
 
 Instead, we solve this using a second, significantly smaller, MILP problem.   
 Let $\mathcal{Q}^*_{rep}$ be the set of repaired queries from the  initial MILP formulation with tuple slicing;
-$\mathcal{NC}$ be the set of non-complaint tuples now matching the repaired \texttt{WHERE} clauses, as in Figure~\ref{fig:groups}(b);
-and $\mathcal{C}^+ = \mathcal{C} \cup \mathcal{NC}$.
-We create a new MILP using $\mathcal{C}^+$ as the complaint set, and fix the values of all queries not in $\mathcal{Q}^*_{rep}$ to their assignment in the solution from the first step.
-This ensures that only repaired query parameters can be perturbed, which vastly reduces the number of undetermined variables in the problem.
+$\mathcal{NC}$ be the set of non-complaint tuples now matching the repaired \texttt{WHERE} clauses, as in Figure~\ref{fig:groups}(b); and $\mathcal{C}^+ = \mathcal{C} \cup \mathcal{NC}$..
+\xlw{
+We create a new MILP using $\mathcal{C}^+$ as the complaint set, and fix binary variable $x_{q,t}$ for complaint tuples $t \in \mathcal{C}$ and the values of all queries not in $\mathcal{Q}^*_{rep}$ to their assignment in the solution from the first step.
+This not only ensures the quality of the refined log repair but also guarantees that only repaired query parameters can be perturbed, which vastly reduces the number of undetermined variables in the problem.
 We further modify the objective function to only penalize the number of non-complaint tuples 
-$t \in \mathcal{C}^+$  that are matched by the queries in $q \in \mathcal{Q}^*_{sub}$.
+$t \in \mathcal{NC}$  that are matched by the queries in $q \in \mathcal{Q}^*_{sub}$.
 These selections are represented by the binary variable $x_{q, t}$, thus the updated objective function
-is $\sum_{q \in \mathcal{Q}^*_{sub}} \sum_{t \in \mathcal{NC}} x_{q,t}$.
+is $\sum_{q \in \mathcal{Q}^*_{sub}} \sum_{t \in \mathcal{NC}} x_{q,t}$.}
 
 % % \alex{I don't think this is true; it doesn't interfere with incomplete complaints, but it is not a mechanism to solve them.}
 % We use this same mechanism to address incomplete complaint sets.
 In our experiments, we find that this second MILP iteration adds
 minimal overhead ($0.1-0.5\%$) with respect to the initial MILP
-problem, making \tslice an effective method to improve the performance of the basic approach, without compromising accuracy.
+problem, making \emph{tuple-slicing} optimization an effective method to improve the performance of the \emph{basic} approach, without compromising accuracy.
 
 % \ewu{Need to clarify that the solver is a black box, who knows what goes on there.  Maybe where we introduce MILP-solvers}
 % \xlw{The number of noncomplaints differs case by case. }
@@ -279,7 +278,7 @@ problem, making \tslice an effective method to improve the performance of the ba
 \if{0}
   \subsubsection{A Naive but Flawed approach}
   \ewu{Better explained as: CPLEX searches through an exponential space of all possible combinations of MILP variables.  In a chunked approach, the solution of each chunk is one out of a potentially arbitrary number of possible solutions, thus it is easy to pick an incorrect one}
-  A natural idea to optimize the basic approach is 
+  A natural idea to optimize the \emph{basic} approach is 
   to \textbf{chunk the query log} into
   smaller, fixed size pieces and then solve each piece at a time: starting
   from the most recent piece, the system linearizes and parameterizes queries 
@@ -373,7 +372,7 @@ This is the foundation of our \emph{query-slicing} optimization.
 % Algorithm~\ref{alg:fullimpact} describes how $\mathcal{F}(q_i)$ can be computed:
 \begin{algorithm}[t]
 \scriptsize
-\caption{$FullImpact$ algorithm for finding $\mathcal{F}(q)$.}
+\caption{$FullImpact:$ Algorithm for finding $\mathcal{F}(q)$.}
 \label{alg:fullimpact}
 \begin{algorithmic}[2]
 \REQUIRE {$\mathcal{Q}$, $q_i$}
@@ -406,37 +405,36 @@ the single query must have caused errors in all of the complaint attributes.  Th
 for this important problem setting. 
 Finally, we use $Rel\mathcal{(Q)}$ to denote the set of relevant
 queries that are candidates for repair. Our \emph{query slicing}
-optimization, \qslice, linearizes only the queries in
+optimization linearizes only the queries in
 $Rel\mathcal{(Q)}$, rather than the entire log, resulting in
-smaller problems than \naive, without any loss of accuracy.
+smaller problems than the \emph{basic} approach without any loss of accuracy.
 
 \subsection{Reducing Attributes (Attribute Slicing)}
 
 In addition to removing irrelevant queries, we additionally avoid encoding irrelevant attributes.
 Given $Rel\mathcal{(Q)}$, the relevant attributes can be defined as:
 $Rel\mathcal{(A)} = \cup_{q_i \in Rel\mathcal{Q}} (\mathcal{F}(q_i)\cup \mathcal{P}(q_i))$
-\aslice uses \emph{attribute slicing} to only encode constraints for attributes in $Rel\mathcal{(A)}$.
-We find that this type of slicing can be effective for wide tables along with queries that focus on a small subset of attributes, such as TPC-C style transaction workloads. 
+We propose \emph{attribute slicing} optimization that only encodes constraints for attributes in $Rel\mathcal{(A)}$.
+We find that this type of slicing can be effective for wide tables along with queries that focus on a small subset of attributes. 
 % \ewu{BAD TEXT!!!: However, our experiments on synthetic workloads show that this optimization is not useful in many settings, and most improvements are achieved by slicing on the tuple and query dimensions.}
 
 
-
-
-\subsection{Single Query Incremental Repairs}\label{sec:incremental}
+\subsection{Incremental Repairs}\label{sec:incremental}
+\xlw{
 
 \begin{algorithm}[t]
-\caption{\incremental algorithm. 
+\caption{$Inc:$ The incremental algorithm. 
 }
 \scriptsize
 \label{alg:incalg}
 \begin{algorithmic}[2]
-\REQUIRE {$Rel\mathcal{(Q)}, \mathcal{D}_j, \mathcal{D}_n, \mathcal{C}$}
-\STATE Sort $Rel\mathcal{(Q)}$ from most to least recent
-\FOR {each $q_i \in Rel\mathcal{(Q)}$}
-  \STATE $\mathcal{Q}_{suffix}$ = $\{q_j | j \ge i \wedge q_j \in Rel\mathcal{(Q)}\}$
-  \STATE $\mathcal{Q}^*$ $\leftarrow$ $QueryFix_{exh,param}(\mathcal{Q}_{suffix}, \mathcal{D}_j, \mathcal{D}_n, \mathcal{C}, q_i)$
+\REQUIRE {$Q, \mathcal{D}_j, \mathcal{D}_n, \mathcal{C}, k$}
+\STATE Sort $Q$ from most to least recent
+\FOR {each $q_i...q_{i+k} \in Q$}
+  \STATE $\mathcal{Q}_{suffix}$ = $\{q_j | j \ge i \}$ % \wedge q_j \in Rel\mathcal{(Q)}\}$
+  \STATE $\mathcal{Q}^*$ $\leftarrow$ $Basic_{params}(\mathcal{Q}_{suffix}, \mathcal{D}_j, \mathcal{D}_n, \mathcal{C}, \{q_i, q_{i+k}\})$
   \IF {$\mathcal{Q}^* \neq \emptyset$}
-    \STATE Return $q_i^* \in \mathcal{Q}^*$
+    \STATE Return $\mathcal{Q}^*$
   \ENDIF
 \ENDFOR
 \end{algorithmic}
@@ -447,19 +445,19 @@ As we saw in
 Figure~\ref{fig:querysize_vs_time}, the solver runtime increases exponentially
 as the log size (and thus the number of undetermined variables) increases (red bars).
 In contrast, the light blue bars show that the scalability is significantly better when only a \emph{single query}
-is parameterized, despite the same number of linearized queries.
+is parameterized, despite the same number of linearized queries. 
 These results suggest that it is \emph{faster} to run many small MILP problems than a single large one, and motivates our incremental algorithm.
 
-Our approach, described as \incremental in Algorithm~\ref{alg:incalg}, focuses on the case where there is a single corrupted query to repair.
-It does so by linearizing the full query log, including any slicing optimizations, but only parameterizes and repairs a single query at a time.
-This procedure is applied from the most recent query, attempts to repair it, and continues to the next most recent query if a repair is not generated.
-The algorithm internally calls a modified version of \naive that takes an extra parameter $q_i$.  
-The modified \naive  only parameterizes $q_i$, and fixes the values for all other parameters. % the parameters for the rest of the queries in $\mathcal{Q}$.
+Our \emph{$inc_k$} approach, described as $Inc$ in Algorithm~\ref{alg:incalg}, focuses on the case where there is a single corrupted query to repair.
+It does so by linearizing the full query log, including any slicing optimizations, but only parameterizes and repairs queries in batches such that there's only $k$ undetermined queries at a time. We call $k$ as the batching level in the incremental algorithm. 
+This procedure is applied from the $k$ most recent queries, attempts to repair them, and continues to the next $k$ most recent query if a repair is not generated.
+The algorithm internally calls a modified version of \emph{basic} approach that takes extra parameters $\{q_i, q_{i+k}\}$.  
+The modified \emph{basic} approach only parameterizes $\{q_i, q_{i+k}\}$, and fixes the values for all other parameters. % the parameters for the rest of the queries in $\mathcal{Q}$.
 
-\incremental prioritizes repairs for complaints that are due to more recent corruptions.
-Given that the exhaustive algorithm simply fails beyond a small log size, we believe this is a natural and pragmatic assumption to use, and results in 
+The incremental approach prioritizes repairs for complaints that are due to more recent corruptions.
+Given that the \emph{basic} algorithm simply fails beyond a small log size, we believe this is a natural and pragmatic assumption to use, and results in 
 a $10\times$ scalability improvement.
-Our experiments additionally evaluate variations of the incremental algorithm that parameterize blocks of $k$ consecutive queries, and show that it is impractical from both a performance and accuracy perspective.
+Our experiments further evaluate different batching level $k$ in the incremental algorithm and show that it is impractical from both a performance and accuracy to have $k$ greater than 1 in fixing single error problems.}
 
 % generates a problem for each suffix of the query log (e.g., $\{ q_i\ldots, q_n | i \in [1, n] \}$) where only $q_i$'s constraints contain undetermined variables.
 % We focus on the case where there is a single corrupted query single query case \ewu{BECAUSE XXXX.}
