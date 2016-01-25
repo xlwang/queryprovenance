@@ -522,14 +522,15 @@ The more recent corruption ($200$) is executed in nearly constant time as the da
 
 \stitle {Query Type: }
 So far, we have focused on \texttt{UPDATE} queries with constant set clauses and range predicates.  Figure~\ref{f:qidx_time} compares the other types of \texttt{UPDATE} queries: 
-{\it Constant/Point, Constant/Range}, and {\it Relative/Range}. We also vary the size of the query log, while corrupting $q_1$ \ewu{IS THIS CORRECT?}.
+{\it Constant/Point, Constant/Range}, and {\it Relative/Range}. We also vary the size of the query log, while corrupting $q_1$.
 %while increase the number of queries \sys need to solve from $1$ to $250$ (by adjusting the corrupt query index). 
-As expected, point predicates and constant set clauses are easier to solve.  We believe there are two reasons:
-1. constraints we constructed for the constant set clauses are simpler than relative update due to the set clause structure \ewu{this is a tautalogy.  Explain more why they are simpler}; 
-2. the size of complaints \ewu{a complaint is a record, so what does size of complaints mean?} in constant \sout{updates} set clauses is oftentimes smaller than relative updates as the affected tuples always expands in the latter case \ewu{This explanation is confusing.  What does "always expands" mean.  Need more detailed explanaation}. 
+\xlw{
+As expected, point predicates are easier to solve than range predicates and constant set clauses are easier to solve than relative set clauses. The reason for the first observation is obvious since the cost for searching all valid values is far cheaper than searching all valid ranges. For the latter observation, we believe there are two reasons:
+1. constant set clauses disconnect tuple values from query to query whereas relative set clauses maintain this connection. Thus, the searching space for the relative set clauses is often bigger than the constant one; 
+2. since relative set clauses maintain the tuple value connection, their complaint set sizes are normally larger than constant set clauses for the same corrupt index: In relative set clauses, incorrectness always inherits from previous database state and could infects other tuples, however, this is less likely to happen for constant set clauses.
+}
 % We found that \sys solves \texttt{UPDATE} with point predicates is easier to solve than range predicates and constant update is 
 % easier to solve than relative update because of two reasons: 
-
 \stitle{Query Predicate Dimensionality:}
 Figure~\ref{f:where_time} varies the dimensionality of the update queries by increasing the number of predicates in the \texttt{WHERE} clause, while keeping the overall selectivity constant. 
 In addition, we force the complaint set size within the same range for each corrupt query index \ewu{same range for each index may be confusing for the reader.  This only makes sense if we told readers up front that the complaint set size matters to performance, which is why we fix it.  }. 
