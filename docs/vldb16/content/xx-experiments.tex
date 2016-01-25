@@ -527,14 +527,11 @@ So far, we have focused on \texttt{UPDATE} queries with constant set clauses and
 \xlw{
 As expected, point predicates are easier to solve than range predicates and constant set clauses are easier to solve than relative set clauses. The reason for the first observation is obvious since the cost for searching all valid values is far cheaper than searching all valid ranges. For the latter observation, we believe there are two reasons:
 1. constant set clauses disconnect tuple values from query to query whereas relative set clauses maintain this connection. Thus, the searching space for the relative set clauses is often bigger than the constant one; 
-2. since relative set clauses maintain the tuple value connection, their complaint set sizes are normally larger than constant set clauses for the same corrupt index: In relative set clauses, incorrectness always inherits from previous database state and could infects other tuples, however, this is less likely to happen for constant set clauses.
-}
-% We found that \sys solves \texttt{UPDATE} with point predicates is easier to solve than range predicates and constant update is 
-% easier to solve than relative update because of two reasons: 
+2. since relative set clauses maintain the tuple value connection, their complaint set sizes are normally larger than constant set clauses for the same corrupt index: In relative set clauses, incorrectness always inherits from previous database state and could infects other tuples, however, this is less likely to happen for constant set clauses.}
+
 \stitle{Query Predicate Dimensionality:}
-Figure~\ref{f:where_time} varies the dimensionality of the update queries by increasing the number of predicates in the \texttt{WHERE} clause, while keeping the overall selectivity constant. 
-In addition, we force the complaint set size within the same range for each corrupt query index \ewu{same range for each index may be confusing for the reader.  This only makes sense if we told readers up front that the complaint set size matters to performance, which is why we fix it.  }. 
-From Figure~\ref{f:where_time}, we found that larger predicate size\ewu{does larger size mean larger interval, or more attributes? use constintent terms} increases the cost in solving a problem. 
+Figure~\ref{f:where_time} varies the dimensionality of the update queries by increasing the number of predicates in the \texttt{WHERE} clause, while keeping the overall selectivity constant.
+From Figure~\ref{f:where_time}, we found that more predicates increases the cost in solving a problem. 
 This is expected as when there are more predicates, the number of constraints and variables in the MILP problem also increase, which further increase the problem complexity.
 %We find that the performance improves as the number of predicates increases.
 %This counter-intuitive result is due to the reduction in the complaint set size as the complexity increases. 
@@ -543,12 +540,12 @@ This is expected as when there are more predicates, the number of constraints an
 
 \stitle{Skew:} We now study the effects of attribute skew on the algorithms.
 We vary the skew parameter from $0$ (uniform) to $1e-7, 0.5$, and $1$. When $s=1$, nearly every attribute is $A_0$.
-Different skewness factors change the dependencies of queries in the log \ewu{reference earlier section that defines query dependencies}, which further affects the performance \sout{the cost in solving the problem}: 
-\ewu{is it higher?  or larger?  is query dependency a set or a value?} higher query dependency helps pruning the searching space and thus makes the problem easier to solve. 
-High query dependency could be achieved by increasing the skewness factor and the number of queries from most recent to the corrupted query \ewu{how?  explain.  Not obvious to reader}, thus
-we observe a clear decreasing trend in Figure~\ref{f:skew_time} as we increase the skewness factor on corrupt index equals to $50$. 
-However, when the corruption is more recent (corrupt index equals to $200$), this trend \sout{can be hardly seen} is less significant.
-
+\xlw{
+Higher skewness factor increases the update frequency of certain attributes, which further increases the number of constraints on these attributes. With more constraints, the searching space get reduced and thus the problem becomes easier to solve. The update frequency of an attribute is a combined result of the skewness factor and the number of queries in the problem: one would only observe the (frequency) difference when there are enough number of queries. 
+Thus
+we observe a clear decreasing trend in Figure~\ref{f:skew_time} as we increase the skewness factor on corrupt index equals to $50$ ($250$ queries from the most recent one). 
+However, when the corruption is more recent (corrupt index equals to $200$, $50$ queries to the most recent one), this trend \sout{can be hardly seen} is less significant.
+}
 
 % 
 % Our hypothesis is that higher skew results in a larger number of relevant queries, thus limiting the effectiveness of query slicing.
@@ -571,7 +568,8 @@ However, when the corruption is more recent (corrupt index equals to $200$), thi
 Our final experiment (Figures~\ref{f:falsenegative_time} and~\ref{f:falsenegative_acc}) varies the fase positive rate in incomplete complaint sets.
 We increase the rate from $0$ ($0\%$ missing in the complaint set) to $.75$ ($75\%$ are missing).  
 We find that reducing the size of the submitted complaint set naturally improves the repair performance,
-however the repair quality, both precision and recall in Figure~\ref{f:falsenegative_acc}, may suffer if the corruption occured in a very old query.
+however the repair quality, both precision and recall in Figure~\ref{f:falsenegative_acc}, may suffer if the corruption occured in a very old query. \xlw{This is expected since \sys targets on fixing complaints that are reported, thus with 
+incomplete complaint, \sys may failed to fix false negative complaints and this results in low recall. Meanwhile, with missing complaints, \sys may end up with repairs that resolve all the reported complaints but indeed overfix correct tuples and this results in low precision. } 
 \ewu{Do we have a good reason why?}
 
 
