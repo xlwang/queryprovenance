@@ -176,7 +176,7 @@ the subscripts $t,q,a$ represent the
 application of tuple, query and attribute slicing optimizations and $inc-x$ represents 
 the incremental query repairs with step size {\it x}.
 For example, $\sys_{tq,inc-1}$ uses both tuple and query slicing along with incremental repair with step size 1.}
-\xlw{I removed the stop early and search all description here. Could be added later, current updated experiment do not contain results for this. }
+\xlw{I removed the stop early and search all description here. Could be added later, current updated experiment do not contain results for this. }\ewu{Clearly define to the reader what "QFix" is.  It's used all over the place and not clear what it means.}
 \fi
 Performance is measured as wall clock
 time between submitting a query log and the system terminating after retrieving a valid repair.  
@@ -188,7 +188,7 @@ Our reported metrics are the average across 20 runs.
 We describe the experimental parameters in the context of the datasets and workloads below.
 \subsubsection{Datasets and Workloads}
 
-\ewu{Clearly define to the reader what "QFix" is.  It's used all over the place and not clear what it means.}
+
 This subsection describes the query and data generation process in greater detail.
 
 \stitle{Synthetic:} \label{sec:syntheticgen}
@@ -304,17 +304,17 @@ all runs exceed the time limit and return infeasibility.
 \stitle{Single Query Optimization:}
 In this experiment, we evaluate the efficacy \sys with tuple slicing and incremental optimization
 in the special case when only one query has been corrupted. \xlw{We compare 
-\incremental without tuple slicing ($inc\_1$) against tuple slicing at 
-different batching levels of 1, 2, 8 ($inc\_1-tuple; inc\_2-tuple, inc\_8-tuple$). Recall from Section~\ref{sec:incremental}, choosing $k$ batching level, we parameterize $k$ consecutive queries in batch from the most recent query until finding a valid fix.} \ewu{batching has not been introduced at all.  Need to describe in optimizations section and remind reader what it is here}. 
+\incremental without tuple slicing ($inc_1$) against tuple slicing at 
+different batching levels of 1, 2, 8 ($inc_1-tuple; inc_2-tuple, inc_8-tuple$). Recall from Section~\ref{sec:incremental}, choosing $k$ batching level, we parameterize $k$ consecutive queries in batch from the most recent query until finding a valid fix.} \ewu{batching has not been introduced at all.  Need to describe in optimizations section and remind reader what it is here}. 
 Figure~\ref{f:singlequeryinc_time} highlights the scalability limitation of the incremental 
-algorithm without tuple slicing: with 50 queries $inc1$ could easily runs exceed the 1000 seconds.   
+algorithm without tuple slicing: with 50 queries $inc_1$ could easily runs exceed the 1000 seconds.   
 In addition, Figure~\ref{f:singlequeryinc_acc} also shows a significant drop in accuracy as we increase the batching level from $1$ 
-to $2$ as the failure rate of the MILP problem is positive proportional to the incremental batch level.
+to $2$ as the failure rate of the MILP problem is positive proportional to the incremental batch level. 
 
 
 \stitle{Query Type Experiment:}\label{sec:indelup}
 Our final preliminary experiment evaluates the incremental algorithm with tuple slicing optimization 
-($inc1-tuple$) on \texttt{INSERT}, \texttt{DELETE}, or \texttt{UPDATE}-only workloads.
+($inc_1-tuple$) on \texttt{INSERT}, \texttt{DELETE}, or \texttt{UPDATE}-only workloads.
 We increase the number of queries from $1$ to $200$ and corrupt the oldest query in the log.  
 Figure~\ref{f:indelup_time} shows that while the cost of repairing \texttt{insert} workloads
 remains relatively constant, the cost for \texttt{delete}-only and \texttt{update}-only workloads increase as 
@@ -328,7 +328,7 @@ since MILP constraint solving is a known NP-hard problem.
 In contrast, we find that the incremental algorithms \ewu{with batch size of 1: emphasize it's single query incremental} are more effective at scaling to larger query log sizes.  
 Furthermore, we show that \texttt{UPDATE}-only workloads are significantly more expensive to repair than other 
 query types. Based on the result, we consider incremental
-algorithm at batching level 1 with tuple slicing optimization ($inc1-tuple$) as default setting in the rest of the experiment. In addition, we only consider \texttt{UPDATE}-only workload in synthetic experiments in Section~\ref{sec:experiments:synth}. 
+algorithm at batching level 1 with tuple slicing optimization ($inc_1-tuple$) as default setting in the rest of the experiment. In addition, we only consider \texttt{UPDATE}-only workload in synthetic experiments in Section~\ref{sec:experiments:synth}. 
 }
 
  \begin{figure*}[h]
@@ -421,14 +421,10 @@ reduce the total number of constraints for almost every setting to less than $10
 
 \subsection{Synthetic Incremental Experiments}
 \label{sec:experiments:synth}
-We now perform a detailed evaluation of the incremental algorithm.
+We now perform a detailed evaluation of the incremental algorithm (batching level 1).
 We divide these experiments into two groups: the first evaluates the difference slicing-based 
 optimizations under different settings; the latter fixes the set of optimizations and varies workload and dataset parameters.
-\sout{We divide these experiments into four groups: comparison on slicing-based optimizations;  
-performance of \sys with different scalability; performance of \sys with different
-query log skew factor; and performance of \sys in handling false negative noise. }
 Note that we don't show accuracy figures for experiments with a $\ge 0.99$ F1-score.
-The default \texttt{UPDATE} query uses the \textit{Constant} set clause and \textit{Range} where clause. \ewu{Why is the type of UPDATE query described here, but not in other subsections??  Didn't the setup section already say this?}
 
 \subsubsection{Comparing Optimizations}
 
@@ -439,13 +435,14 @@ in Figure~\ref{f:attr}, when the number of attribute in a table is small, e.g., 
 performance of \sys with or without query slicing or attribute slicing optimizations 
 appears identical. However, as we gradually increase the number of attribute, the benefit
 of query slicing or attribute slicing become much more significant. 
-In particular, applying all slicing optimizations ($all$) is $40\times$ faster than \sys with only tuple-slicing 
-optimization \ewu{You can just say tuple-slicing instead of \sys with only tuple-slicing.  It's obvious in context} ($tuple only$) when there are 500 attribute in the table.  
+In particular, applying all slicing optimizations ($inc_1-all$) is $40\times$ faster than \sys with only tuple-slicing 
+optimization ($inc_1-tuple$) when there are 500 attribute in the table.  
 
 \stitle{Database Size:}
-We further \sout{evaluate the performance of \sys by} increasing the database size $N_D \in \{100,500, 1k, 5k\}$ while keeping the number of attributes fixed at $N_a = 100$. 
-As shown in Figure~\ref{f:attr100}, \sout{\sys with} all optimizations 
-($all$) shows constant percentage of gain as the database size increases \ewu{What does this sentence mean?  gain over what?}.
+We further increasing the database size $N_D \in \{100,500, 1k, 5k\}$ while keeping the number of attributes fixed at $N_a = 100$. 
+\xlw{
+As shown in Figure~\ref{f:attr100}, approach with all optimizations ($inc_1-all$)
+shows constant percentage of efficiency gain over with only tuple-slicing optimization as the database size increases.} \ewu{What does this sentence mean?  gain over what?}.
 
 \subsubsection{Sensitivity to Data and Workload Factors}
 
@@ -518,12 +515,10 @@ All algorithms exhibit near perfect F1-scores.
 
 
 \stitle{Database Size:}
-Figure~\ref{f:dbsize_time} varies the database size from $100$ to $100$k tuples\sout{ while setting the other parameters to their default settings}.
+Figure~\ref{f:dbsize_time} varies the database size from $100$ to $100$k tuples \xlw{while setting the $V_d$ proportionally and other parameters to default in order to maintain the same query selectivity across different database sizes}.
 For simplicity, we plot the performance and accuracy of corruptions at two query indexes: $50$ and $200$.
-The more recent corruption ($200$) is executed in nearly constant time as the database size increases, with a perfect F1-score.
-\ewu{This is false.  The graph shows almost a decrease in cost!!! FIX the rest of this paragraph!} In contrast, the older corruption increases in cost as the database size increases.  One reason is because as the database size increases, the
-number of complaints also increases.  We have found that the performance of the solver in dependent on the number of complaints (which
-increases the size of the MILP problem).  This is verified by the fact that the number of constraints and variables increase linearly with the database size, which further affect the solving cost.
+The more recent corruption ($200$) is executed in nearly constant time as the database size increases, with a perfect F1-score. \xlw{Meanwhile, as we increase the database size, \sys achieves near constant time cost after database size greater than 1k. The reason is as we maintain the same query selectivity, the number of complaints maintains roughly the same when database size increases. And the performance of the solver in dependent on the number of complaints. However, small database size may increase the randomness in query selectivity, thus we observe different time cost when database size is 100. 
+}
 
 \stitle {Query Type: }
 So far, we have focused on \texttt{UPDATE} queries with constant set clauses and range predicates.  Figure~\ref{f:qidx_time} compares the other types of \texttt{UPDATE} queries: 
