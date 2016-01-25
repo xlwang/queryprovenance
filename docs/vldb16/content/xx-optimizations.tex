@@ -9,8 +9,9 @@ in the query log.  In this approach, the number of constraints (as well as undet
 grows quadratically with respect to the database and the query log.
 \ewu{Actually encoding all queries or only oldest query as undetermined variables.  The latter motivates the incremental optimiation in Section~\ref{sec:incremental}}
 \ewu{Alternative: Just talk about red bars.  Blue bars discussed in incremental section}
+\xlw{I double checked the result, blue bar is $inc_1$ plus tuple slicing. So I keep the description for blue bar here as optimized QFix.}
 Figure~\ref{fig:querysize_vs_time} shows a simple scalability experiment, where we generated increasingly 
-larger query logs for a database of $1000$ tuples, encoded the problem using \naive (red bars), 
+larger query logs for a database of $1000$ tuples, encoded the problem using $basic$ (red bars), 
 and solved the problem using a MILP-solver (CPLEX in our experiments).
 We find that the solver time increases exponentially as the number of encoded queries increases --
 at a log size of $80$, the solver failed to produce an answer within $1000$ seconds --
