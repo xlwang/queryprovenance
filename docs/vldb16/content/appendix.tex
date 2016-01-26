@@ -11,16 +11,17 @@ from the beginning to the end of the log is necessary; in this
 section, we examine alternative, simpler models that process a single
 query at a time, and demonstrate why they are insufficient 
 theoretically and experimentally.
+  
   \begin{figure*}[t]
   \centering
-  \begin{subfigure} [t]{.3\textwidth}
+    \begin{subfigure} [t]{.3\textwidth}
     \includegraphics[width = .99\columnwidth]{figures/heuristicacc}
     \vspace*{-.25in}
     \caption{Comparison on Accuracy. }
     \vspace*{-.1in}
     \label{f:heuristic_acc} 
     \end{subfigure}
-      \begin{subfigure} [t]{.3\textwidth}
+    \begin{subfigure} [t]{.3\textwidth}
     \includegraphics[width = .99\columnwidth]{figures/heuristictime}
     \vspace*{-.25in}
     \caption{Comparison on Performance. }
@@ -115,53 +116,49 @@ the reality is that one
 has to model all constraints and transformations through the entire
 log history. In addition, even with single query, though more efficient than \sys, 
 the heuristic alternative can hardly achieve near satisfiable accuracy. 
+  
 
-\iffalse
-In this
-section, we examine alternative, simpler models that process a single
-query at a time, and demonstrate why they are insufficient.
+\section{Solving Time for the Solver}
+\label{app:solvtime}
+In this section, we study factors that influence the MILP solver solving time. In this paper, we
+use CPLEX ~\cite{cplex2014v12} as a black box to solve the problems. We carefully studied
+the behavior of the solver found that the following factors may contribute to the solver 
+solving time: number of complaints, number of queries, and number of constraints. \\
 
-\noindent
-\textbf{WHERE repairs through classification:}
-The \texttt{WHERE} clause of an update query is equivalent to a
-rule-based binary classifier that splits tuples into two groups:
-(1)~tuples that satisfy the conditions in the \texttt{WHERE} clause
-and (2)~tuples that do not. Thus, by training a classifier,
-such as decision trees \cite{quinlan1987} to learn
-the correct classification rules rules for the \texttt{WHERE} clause.
-
-\noindent
-\textbf{SET repairs:}
-This alternative approach constructs 
-a simple linear system of equations to solve the parameters in the \texttt{SET}
-when errors persist after fixing the \texttt{WHERE} clause:
-For each expression in the \texttt{SET} clause we create a
-linear equation, using unknown variables to represent any parameters
-in the \texttt{SET} expression. 
-  \begin{figure}[h]
+  
+  \begin{figure*}[t]
   \centering
-    \includegraphics[width = .6\columnwidth]{figures/heuristicacc}
+    \begin{subfigure} [t]{.3\textwidth}
+    \includegraphics[width = .99\columnwidth]{figures/num_compl_time}
+    \vspace*{-.25in}
+    \caption{Cplex time vs. \# of compl. }
     \vspace*{-.1in}
-    \caption{Heuristic Approach vs. \sys on Single-Query. }
     \label{f:heuristic_acc} 
-  \end{figure}
-  \vspace*{-0.1in}
-  
-The na\"ive approach that we just described is heuristic in nature. It
-is simple and fast, but it can only process a single incorrect query. As shown in
-Figure~\ref{f:heuristic_acc}, the F-1 score of na\"ive heuristic approach is less 
-than 0.6 while \sys maintain high accuracy in solving single query problem with
-above 0.9 F-1 score across all database sizes. 
-\fi
-  
+    \end{subfigure}
+    \begin{subfigure} [t]{.3\textwidth}
+    \includegraphics[width = .99\columnwidth]{figures/num_queries_time}
+    \vspace*{-.25in}
+    \caption{Cplex time vs. \# of queries.}
+    \vspace*{-.1in}
+    \label{f:heuristic_time} 
+    \end{subfigure}
+    \begin{subfigure} [t]{.3\textwidth}
+    \includegraphics[width = .99\columnwidth]{figures/num_cons_time}
+    \vspace*{-.25in}
+    \caption{Cplex time vs. \# of constraints. }
+    \vspace*{-.1in}
+    \label{f:heuristic_time} 
+    \end{subfigure}
+   \caption{Solving Time for Cplex. }
+   \vspace*{-.1in}
+  \end{figure*}
+
 \section{Effect of Index of Corrupted Query}
 \label{app:qidx}
 
 A key parameter for our experiments is the location of the corrupted query ($idx$).  
-\alex{Have we discussed anywhere yet that we focus on single errors?}
 This parameter determines the number of queries \sys must consider when searching for a fix,
 and affects the size of the complaint set.  
-\alex{It won't be clear to the reader how this relates to the size of the complaint set.}
 Both of these characteristics directly impact \sys's 
 runtime performance. For this reason, it is undesirable to randomly pick and corrupt queries
 throughout the query log, as the performance and accuracy results may not be comparable. 
@@ -237,5 +234,3 @@ time cost compare to \milptuple. \\
 Based on these observations, we only include the performance of \milpadvtuple and \milpadvall
 in the rest of the experiments. 
 
-\section{Solving time for the solver}
-\label{app:solvtime}

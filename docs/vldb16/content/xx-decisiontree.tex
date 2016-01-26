@@ -90,3 +90,41 @@ optimizations to our initial approach that make scaling to large data
 and log sizes feasible. 
 % \red{Add graph comparing naive and d-trees here.}
 
+
+\iffalse
+In this
+section, we examine alternative, simpler models that process a single
+query at a time, and demonstrate why they are insufficient.
+
+\noindent
+\textbf{WHERE repairs through classification:}
+The \texttt{WHERE} clause of an update query is equivalent to a
+rule-based binary classifier that splits tuples into two groups:
+(1)~tuples that satisfy the conditions in the \texttt{WHERE} clause
+and (2)~tuples that do not. Thus, by training a classifier,
+such as decision trees \cite{quinlan1987} to learn
+the correct classification rules rules for the \texttt{WHERE} clause.
+
+\noindent
+\textbf{SET repairs:}
+This alternative approach constructs 
+a simple linear system of equations to solve the parameters in the \texttt{SET}
+when errors persist after fixing the \texttt{WHERE} clause:
+For each expression in the \texttt{SET} clause we create a
+linear equation, using unknown variables to represent any parameters
+in the \texttt{SET} expression. 
+  \begin{figure}[h]
+  \centering
+    \includegraphics[width = .6\columnwidth]{figures/heuristicacc}
+    \vspace*{-.1in}
+    \caption{Heuristic Approach vs. \sys on Single-Query. }
+    \label{f:heuristic_acc} 
+  \end{figure}
+  \vspace*{-0.1in}
+  
+The na\"ive approach that we just described is heuristic in nature. It
+is simple and fast, but it can only process a single incorrect query. As shown in
+Figure~\ref{f:heuristic_acc}, the F-1 score of na\"ive heuristic approach is less 
+than 0.6 while \sys maintain high accuracy in solving single query problem with
+above 0.9 F-1 score across all database sizes. 
+\fi
