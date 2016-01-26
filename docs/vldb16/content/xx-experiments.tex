@@ -62,11 +62,6 @@
     \vspace*{-.1in}
     \caption{Preliminary Experiments.}
   \end{figure*}
-% \ewu{Should say this somewhere: 
-% Updates are often a small fractice of a query workload -- typically $10\%$~\cite{} in most benchmarks --
-% thus in practice \sys can work for much larger workloads.  In the experiments, we filtered the workloads to 
-% only look at modification queries, and specifically UPDATE queries which are hard.
-% }
 
 
 In this section, we carefully study the performance and accuracy
@@ -165,16 +160,6 @@ We then add noise to the complaint set by removing (partial) true complaints to 
 Finally, we execute the evaluated algorithms on the complaints and compare the fixed
 query log with the true query log, as well as the fixed and true
 final database states to measure performance and accuracy metrics.
-\iffalse
-We compare the following algorithms: 
-\xlw{$\sys_{S \subseteq \{t,q,a,inc-x\}}$, where $S$ 
-defines the set of optimizations present in the algorithm: 
-the subscripts $t,q,a$ represent the
-application of tuple, query and attribute slicing optimizations and $inc-x$ represents 
-the incremental query repairs with step size {\it x}.
-For example, $\sys_{tq,inc-1}$ uses both tuple and query slicing along with incremental repair with step size 1.}
-\xlw{I removed the stop early and search all description here. Could be added later, current updated experiment do not contain results for this. }\ewu{Clearly define to the reader what "QFix" is.  It's used all over the place and not clear what it means.}
-\fi
 Performance is measured as wall clock
 time between submitting a complaint set and the system terminating after retrieving a valid repair.  
 Accuracy is measured as repair's precision (percentage of repaired tuples that were correctly fixed), 
@@ -207,7 +192,8 @@ and a WHERE clause can either be a $Point$ predicate on a key, or a $Range$ pred
  SET Clause:                WHERE Clause:
   Constant: SET (a_i=?), ..   Point: WHERE a_j=? & ..
   Relative: SET (a_i=a_i+?)   Range: WHERE a_j in [?,?+r] & ..\end{verbatim} }
-where \verb|?| is a randomly generated value and \verb|r|\ewu{what do we actually set r to?} is the size of the range predicate. 
+where \verb|?| is a randomly generated value and \verb|r| is the size of the range predicate. 
+We set \verb|r|'s default to $2$, so query selectivity is $2\%$.
 Note that a range predicate where \texttt{r = 0} is distinct from a $Point$ predicate due to the non-key attribute.
 The \texttt{WHERE} clauses in \texttt{DELETE} queries are generated in an identical fashion, while
 \texttt{INSERT} queries insert values picked uniformly at random from $V_d$.
@@ -301,8 +287,14 @@ different batching levels of 1, 2, 8 ($inc_1-tuple; inc_2-tuple, inc_8-tuple$).
 Recall from Section~\ref{sec:incremental} that $inc_k$ parameterizes $k$ consecutive queries in each batch until a repair is found.
 Figure~\ref{f:singlequeryinc_time} highlights the scalability limitation of the incremental 
 algorithm without tuple-slicing: with 50 queries $inc_1$  easily exceeds the 1000s limit.   
-The tuple-slicing scales significantly better (up to \ewu{INSERT A NUMBER}$\times$ faster), however
-batching above $k=1$ severely degrades the \ewu{REPAIR ACCURACY OR INFEASIBILITY RATE AND WHY??? "failure rate" is ambiguous.}.
+The tuple-slicing scales significantly better (nearly $200\times$ faster), however
+the accuracy severely degrades when $k>1$.  
+The primary reason is because of infeasibility errors---the MILP problem is much harder, and fails to find a repair.  
+This is highlighted by the symmetry between the precision and recall curves.  
+A secondary reason is beause the refinement step of  tuple slicing may not generate a fully correct repair and generalize incorrectly.
+This is why the precision curve is lower than the recall curve for $inc_8-tuple$
+
+
 
 
 \stitle{Query Type:}\label{sec:indelup}
@@ -360,9 +352,6 @@ Based on these results, we focus on the incremental algorithm $inc_1$ and the mo
 
 
 
-
-
-
 \subsection{Synthetic Incremental Experiments}
 \label{sec:experiments:synth}
 %We now perform a detailed evaluation of the incremental algorithm (batching level 1).
@@ -373,31 +362,33 @@ Note that omit accuracy figures when the F1-score is $\ge 0.99$.
 \subsubsection{Comparing Optimizations}
 
 \stitle{Varying \# Attributes}
-We first evaluate \sys and its optimizations by increasing the number of attribute ($N_a \in [10, 500]$) with $N_D = 100$\ewu{100 or 1000?}. 
-As shown in Figure~\ref{f:attr}, when the number of attribute in a table is small (e.g., 10) all algorithms appear identical. 
-However, increasing the number of attribute exhibits a larger benefit for query and attribute slicing (\ewu{Mention avg reduction in number of constraints in the problem compared to tuple only}).
+We first evaluate \sys and its optimizations by increasing the number of attribute ($N_a \in [10, 500]$) with $N_D = 100$.
+As shown in Figure~\ref{f:attr}, when the number of attribute in a table is small (e.g., $N_a=10$) all algorithms appear identical. 
+However, increasing the number of attribute exhibits a larger benefit for query and attribute slicing (up to $6.8\times$ reduction compared to tuple-slicing).
 When the table is wide ($N_a = 500$), applying all optimizations ($inc_1-all$) is $40\times$ faster than \emph{tuple-slicing} alone.  
 
 \stitle{Database Size:}
 We increase the database size ($N_D \in [100,5000]$) while keeping the number of attributes fixed at $N_a = 100$.
-We also vary $V_d$ in order to ensure that the cardinality of each query remains constant as the database increases in size.
-This is used to ensure the size of the complaint set does not affect the experimental results.
+In order to keep the query output cardinality constant, we correspondingly increase the range of attribute values $V_d$.
 Figure~\ref{f:attr100} shows that the cost predominantly grows when the corruption happens in an old query ($idx = 50$).
-\ewu{why does the cost increase while the next experiment is flat??}
-The large number of attributes in the schema enables the query and attribute optimizations to have a large effect.
-In fact, combining all three optimizations improves the latency by $2\times$ in the worst case, and up to $4\times$ in the best.
-\xlw{
-In Figure~\ref{f:attr100}, we see that the time cost grows as database size increases for approach with only \emph{tuple-slicing} optimization. This is because we increase the range $[0, V_d]$ of each attribute in order to keep the same query selectivity as database size increases. Thus, the searching space of the problem also grows and so does the execution time. However, \emph{attribute-slicing} helps reducing the impact as it only encodes relevant attributes. As a result, we observe a much slower time cost growing rate for algorithm with \emph{attribute-slicing} optimization. Overall, we observe that approach with all optimizations ($inc_1-all$)
-shows more than $50\%$ efficiency gain over with only tuple-slicing optimization as the database size increases. Note that the impact of attribute ranges $[0, V_d]$ also relevant to number of attribute in the table, it would not increase the searching space (or time cost) as significant as for problems with fewer attributes (e.g., 10). 
+The increase in cost despite the tuple-slicing optimization is because the because \ewu{XXX}.
+We find that the large number of attributes allows query and attribute slicing to have a large effect on the performance.
+In fact, combining all three optimizations improves the latency by $2\times$ in the worst case, and up to $4\times$ in the best case.
 
-} \ewu{What does this sentence mean?  gain over what?}.
+% \ewu{why does the cost increase while the next experiment is flat??}
+% The large number of attributes in the schema enables the query and attribute optimizations to have a large effect.
+% \xlw{
+% In Figure~\ref{f:attr100}, we see that the time cost grows as database size increases for approach with only \emph{tuple-slicing} optimization. This is because we increase the range $[0, V_d]$ of each attribute in order to keep the same query selectivity as database size increases. Thus, the searching space of the problem also grows and so does the execution time. However, \emph{attribute-slicing} helps reducing the impact as it only encodes relevant attributes. As a result, we observe a much slower time cost growing rate for algorithm with \emph{attribute-slicing} optimization. Overall, we observe that approach with all optimizations ($inc_1-all$)
+% shows more than $50\%$ efficiency gain over with only tuple-slicing optimization as the database size increases. Note that the impact of attribute ranges $[0, V_d]$ also relevant to number of attribute in the table, it would not increase the searching space (or time cost) as significant as for problems with fewer attributes (e.g., 10). 
+% }
 
 \subsubsection{Sensitivity to Data and Workload Factors}
 
-In the following set of synthetic experiments, we \ewu{focus on a single \sys setting---incremental with tuple-slicing---} and
+The following set of synthetic experiments focus on a single \sys setting---incremental with tuple-slicing---and
 individually vary numerous database and workload parameters in order to tease apart the algorithm performance.  
-These include factors such as query complexity, log size $N_q$, database size $N_D$) and the skew of the query predicates.
+These include factors such as query complexity, log size $N_q$, database size $N_D$ and the skew of the query predicates.
 We focus on a narrow table setting that contains $N_a = 10$ attributes, and a single corrupt query in the query log.
+
 % Motivated by our preliminary results, we focus on \texttt{UPDATE}-only query logs with a single corruption with
 % $10$ attributes and $1k$ attributes in the table. As the performance of \sys with different optimizations appears 
 % identical when $N_a = 10$, we will only show results of \sys with tuple slicing optimization in the rest of the 
@@ -463,24 +454,39 @@ All algorithms exhibit near perfect F1-scores.
 
 
 \stitle{Database Size:}
-Figure~\ref{f:dbsize_time} varies the database size from $100$ to $100$k tuples \xlw{while setting the $V_d$ proportionally and other parameters to default in order to maintain the same query selectivity across different database sizes}.
-For simplicity, we plot the performance and accuracy of corruptions at two query indexes: $50$ and $200$.
-The more recent corruption ($200$) is executed in nearly constant time as the database size increases, with a perfect F1-score. \xlw{Meanwhile, as we increase the database size, \sys achieves near constant time cost after database size greater than 1k. The reason is as we maintain the same query selectivity, the number of complaints maintains roughly the same when database size increases. And the performance of the solver in dependent on the number of complaints. However, small database size may increase the randomness in query selectivity, thus we observe different time cost when database size is 100. 
-}
+Figure~\ref{f:dbsize_time} varies the database size from $100$ to $100,000$ tuples, and fixes query output cardinality and complaint set size in the same way as the previous scalability experiment.
+%For simplicity, we plot the performance and accuracy of corruptions at two query indexes: $50$ and $200$.
+In contrast to the previous experiment, the scalabality curve is nearly flat for both corruption query indices due to the smaller number of attributes.  
+Recall that the size of the MILP problem increases multiplicatively with the number of tuples and attributes.  
+Thus reducing number of attributes in combination with tuple-slicing effectively contrains the size of the MILP problem.
+The more recent corruption at $q_{200}$ is executed in nearly constant time as the database size increases, with a perfect F1-score. 
+The performance is more variable at smaller database sizes due to
+
+% \xlw{Meanwhile, as we increase the database size, \sys achieves near constant time cost after database size greater than 1k. 
+% The reason is as we maintain the same query selectivity, the number of complaints maintains roughly the same when database size increases. 
+% And the performance of the solver in dependent on the number of complaints. 
+% However, small database size may increase the randomness in query selectivity, thus we observe different time cost when database size is 100. 
+% }
 
 \stitle {Query Type: }
-So far, we have focused on \texttt{UPDATE} queries with constant set clauses and range predicates.  Figure~\ref{f:qidx_time} compares the other types of \texttt{UPDATE} queries: 
-{\it Constant/Point, Constant/Range}, and {\it Relative/Range}. We also vary the size of the query log, while corrupting $q_1$.
-%while increase the number of queries \sys need to solve from $1$ to $250$ (by adjusting the corrupt query index). 
-\xlw{
-As expected, point predicates are easier to solve than range predicates and constant set clauses are easier to solve than relative set clauses. The reason for the first observation is obvious since the cost for searching all valid values is far cheaper than searching all valid ranges. For the latter observation, we believe there are two reasons:
-1. constant set clauses disconnect tuple values from query to query whereas relative set clauses maintain this connection. Thus, the searching space for the relative set clauses is often bigger than the constant one; 
-2. since relative set clauses maintain the tuple value connection, their complaint set sizes are normally larger than constant set clauses for the same corrupt index: In relative set clauses, incorrectness always inherits from previous database state and could infects other tuples, however, this is less likely to happen for constant set clauses.}
+So far, we have focused on \texttt{UPDATE} queries with constant set clauses and range predicates.  
+Figure~\ref{f:qidx_time} individually varies each clause and compares against {\it Constant/Point} and {\it Relative/Range} queries. 
+The x-axis varies the query log size and corrupts the oldest query $q_1$. \ewu{is this correct?}
+We find that point predicates and constant set clauses are easier to solve than range predicates and relative set clauses, respectively.
+The reason for the former pair is because range predicates double the number of undetermined variables as compared to point queries.  
+In addition, point queries are on key attributes, thus further reduces the possible search space.  
+We believe the latter pair is because the constant set clauses break the causal relationship between input and output records for the overwritten values.
+This both simplifies the difficulty of the constraint problem, and reduces the total number of constraints.\ewu{XL verify the "reduces total number" text!}
+
+% constant set clauses disconnect tuple values from query to query whereas relative set clauses maintain this connection. Thus, the searching space for the relative set clauses is often bigger than the constant one; 
+% 2. since relative set clauses maintain the tuple value connection, their complaint set sizes are normally larger than constant set clauses for the same corrupt index: In relative set clauses, incorrectness always inherits from previous database state and could infects other tuples, however, this is less likely to happen for constant set clauses.}
 
 \stitle{Query Predicate Dimensionality:}
-Figure~\ref{f:where_time} varies the dimensionality of the update queries by increasing the number of predicates in the \texttt{WHERE} clause, while keeping the overall selectivity constant.
-From Figure~\ref{f:where_time}, we found that more predicates increases the cost in solving a problem. 
-This is expected as when there are more predicates, the number of constraints and variables in the MILP problem also increase, which further increase the problem complexity.
+Figure~\ref{f:where_time} varies the dimensionality of the update queries by increasing the number of predicates in the \texttt{WHERE} clause, while keeping the query cardinality constant.
+The cost increases with the dimensionality because each additional predicate is translated into a new set of constraints and undetermined variables, increasing the problem complexity.
+% From Figure~\ref{f:where_time}, we found that more predicates increases the cost in solving a problem. 
+% This is expected as when there are more predicates, the number of constraints and variables in the MILP problem also increase, which further increase the problem complexity.
+
 %We find that the performance improves as the number of predicates increases.
 %This counter-intuitive result is due to the reduction in the complaint set size as the complexity increases. 
 %Again, we omit the accuracy result as \sys exhibit above 0.996 average F1 score in all settings. 
@@ -489,11 +495,12 @@ This is expected as when there are more predicates, the number of constraints an
 \stitle{Skew:} We now study the effects of attribute skew on the algorithms.
 We increase the skew parameter from $0$ (uniform) to $1$ (nearly every attribute is $A_0$) 
 and find a reduction in latency (Figure~\ref{f:skew_time}).
-We believe the reason is because increasing the skew focuses the query predicates over a smaller set of attributes, 
+We believe the reason is because increasing the skew focuses the query predicates over a smaller set of logical attributes, 
 and increases the number of constraints placed on each of the logical attributes used in the query log.  
 Each of these constraints reduces the search space of allowable values for that attribute, and thus simplifies the MILP problem.
-\ewu{this confuses me and doesnt' make sense.  Alexandra?}
+This result suggests that \sys may be well suited for many transaction systems that naturally exhibit query skew.
 Note that the overall number of constraints in the problem is the same, only their distribution over the query attributes has changed.
+
 
 % \xlw{
 % Higher skewness factor increases the update frequency of certain attributes, which further increases the number of constraints on these attributes. With more constraints, the searching space get reduced and thus the problem becomes easier to solve. The update frequency of an attribute is a combined result of the skewness factor and the number of queries in the problem: one would only observe the (frequency) difference when there are enough number of queries. 
@@ -526,7 +533,7 @@ We find that reducing the size of the submitted complaint set naturally improves
 however the repair quality, both precision and recall in Figure~\ref{f:falsenegative_acc}, may suffer if the corruption occured in a very old query. 
 This is expected because \sys targets reported complaints, thus unreported complaints may easily be missed and lead to low recall.
 In addition, despite the refinement step of tuple-slicing, the repair may over generalize and ''fix`` the wrong records, leading to low precision.
-\ewu{Can we hand look at some of the results and make a qualitative description of if the results are "good" or not?}
+%\ewu{Can we hand look at some of the results and make a qualitative description of if the results are "good" or not?}
 
 
 %   \begin{figure}[h!]
@@ -549,12 +556,9 @@ In addition, despite the refinement step of tuple-slicing, the repair may over g
 \smallskip
 
 \textit{Takeaways: we find that the performance of the different repair algorithm 
-heavily depends on the property of the property of the datasets and the 
-number of complaints in the complaint set. Attribute and query slicing show significant gain for 
-datasets with large number of attributes. And the proposed \sys algorithm is able to solve hard problems
-(with ~$200$ \texttt{UPDATE} queries) in reasonable amount of time. }
-% \stitle{Incremental Results}
-% INcremental algorithm, incremental results
+heavily depends on the property of the datasets and queries. Attribute and query slicing show significant gain for 
+datasets with large number of attributes and \sys is able to solve hard problems
+(with ~$200$ \texttt{UPDATE}-only queries) in seconds or minutes---particular if the error is recent. }
 
 
 
@@ -571,19 +575,13 @@ datasets with large number of attributes. And the proposed \sys algorithm is abl
 \subsection{Benchmarks}
 \label{sec:experiments:benchmark}
 
-Figure~\ref{f:tpcctatp} plots the performance of the \sys (incremental, tuple slicing)
-on TPC-C and TATP benchmark applications.  In both workloads, \sys derives repairs efficiently.
-And for TPC-C, \sys solves the problem on the order of milliseconds where all corrupted queries are \texttt{INSERT}s. 
-The precision and recall measures were
-$1$ both all settings.   One reason for the good performance is due to the fact that the benchmark queries
-are pre-dominantly point \texttt{INSERT} or \texttt{UPDATE} queries.  In this setting, each tuples affects a very small set of 
-tuples, which results in $1$ or $2$ complaints on average.  In this case, the tuple and query slicing algorithms
-reduce the total number of constraints for almost every setting to less than $100$.
+Figure~\ref{f:tpcctatp} plots the performance of the incremental algorithm using tuple-slicing on the TPC-C and TATP benchmark applications.  
+The key reason is that each query affects a small set of records and leads to a very small complaint set---$1$ or $2$ on average.
+In addition, tuple and query slicing can aggressively reduce the total number of constraints to a very small number---often less than $100$ in total.
+Furthermore for TPC-C, the queries are predominantly \texttt{INSERT} queries, which \sys can solve within milliseconds.
 
-
-{\it Takeaway: many workloads in practice are dominated by point \texttt{UPDATE} queries.  In these settings,
- \sys is very effective at reducing the number of constraints and can derive repairs in nearly
- interactive latencies.}
+{\it Takeaway: many workloads in practice are dominated by \texttt{INSERT} and point \texttt{UPDATE} queries.  
+  In these settings, \sys is very effective at reducing the number of constraints and can derive repairs with near-interactive latencies.}
 \begin{figure}[h]
 \centering
   \includegraphics[width = .75\columnwidth]{figures/benchmark_time}
