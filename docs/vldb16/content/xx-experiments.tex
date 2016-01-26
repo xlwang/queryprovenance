@@ -60,7 +60,7 @@
     \label{f:indelup_acc} 
     \end{subfigure}
     \vspace*{-.1in}
-    \caption{Preliminary Experiments.}
+    \caption{Preliminary experiments.}
   \end{figure*}
 
 
@@ -322,17 +322,17 @@ Based on these results, we focus on the incremental algorithm $inc_1$ and the mo
     \begin{subfigure}[t]{.45\textwidth}
     \includegraphics[width = .99\columnwidth]{figures/attr_time}
     \vspace*{-.1in}
-    \caption{\# of Attribute vs. Time}
+    \caption{\# of Attributes vs Time.}
     \label{f:attr} 
     \end{subfigure}
     \begin{subfigure}[t]{.45\textwidth}
     \includegraphics[width = .99\columnwidth]{figures/attr100_time}
     \vspace*{-.1in}
-    \caption{Database Size vs. Time ($N_a = 100$)}
+    \caption{Database size vs time ($N_a = 100$)}
     \label{f:attr100} 
     \end{subfigure}
     \vspace*{-.1in}
-    \caption{Comparison of Optimizations.}
+    \caption{Comparison of optimizations.}
   \end{figure*}
   
 
@@ -371,7 +371,8 @@ When the table is wide ($N_a = 500$), applying all optimizations ($inc_1-all$) i
 We increase the database size ($N_D \in [100,5000]$) while keeping the number of attributes fixed at $N_a = 100$.
 In order to keep the query output cardinality constant, we correspondingly increase the range of attribute values $V_d$.
 Figure~\ref{f:attr100} shows that the cost predominantly grows when the corruption happens in an old query ($idx = 50$).
-The increase in cost despite the tuple-slicing optimization is because the because \ewu{XXX}.
+The increase in cost despite the tuple-slicing optimization is an artifact of increasing $V_d$, which increases the space of possible value assignment for each undetermined variable.
+In fact, the number of constraints remains constant as the database increases, illustrating tuple-slicing's effectiveness.
 We find that the large number of attributes allows query and attribute slicing to have a large effect on the performance.
 In fact, combining all three optimizations improves the latency by $2\times$ in the worst case, and up to $4\times$ in the best case.
 
@@ -382,6 +383,57 @@ In fact, combining all three optimizations improves the latency by $2\times$ in 
 % shows more than $50\%$ efficiency gain over with only tuple-slicing optimization as the database size increases. Note that the impact of attribute ranges $[0, V_d]$ also relevant to number of attribute in the table, it would not increase the searching space (or time cost) as significant as for problems with fewer attributes (e.g., 10). 
 % }
 
+% Motivated by our preliminary results, we focus on \texttt{UPDATE}-only query logs with a single corruption with
+% $10$ attributes and $1k$ attributes in the table. As the performance of \sys with different optimizations appears 
+% identical when $N_a = 10$, we will only show results of \sys with tuple slicing optimization in the rest of the 
+% experiments. 
+  \begin{figure*}[h]
+    \hspace*{-.1in}
+    \centering
+     \begin{subfigure}[t]{.33\textwidth}
+      \includegraphics[width = .99\columnwidth]{figures/dbsize_time}
+      %\vspace*{-.1in}
+      \caption{Database size vs time.}
+      \label{f:dbsize_time} 
+    \end{subfigure}
+    \begin{subfigure}[t]{.33\textwidth}
+      \includegraphics[width = .99\columnwidth]{figures/pointrelv_time}
+      %\vspace*{-.1in}
+      \caption{Performance of different query types.}
+      \label{f:qidx_time} 
+    \end{subfigure}
+    \begin{subfigure}[t]{.33\textwidth}
+      \includegraphics[width = .99\columnwidth]{figures/noise_fn_time}
+      %\vspace*{-.1in}
+      \caption{False negatives vs time.}
+      \label{f:falsenegative_time} 
+    \end{subfigure} 
+    \\
+    \hspace*{-.1in}
+    \vspace*{.2in}
+    \begin{subfigure}[t]{.33\textwidth}
+      \includegraphics[width = .99\columnwidth]{figures/skew_time}
+      \vspace*{-.2in}
+      \caption{Skew vs Time.}
+      \label{f:skew_time} 
+    \end{subfigure}
+    \begin{subfigure}[t]{.33\textwidth}
+      \includegraphics[width = .99\columnwidth]{figures/where_time}
+      \vspace*{-.2in}
+      \caption{Query dimensionality vs time.}
+      \label{f:where_time} 
+    \end{subfigure}
+    \begin{subfigure}[t]{.33\textwidth}
+      \includegraphics[width = .99\columnwidth]{figures/noise_fn_acc}
+      \vspace*{-.2in}
+      \caption{False negatives vs F1-score.}
+      \label{f:falsenegative_acc} 
+    \end{subfigure}
+    \vspace*{-.1in}
+    \caption{Sensitivity to data and workload factors. }
+  \end{figure*}
+
+
 \subsubsection{Sensitivity to Data and Workload Factors}
 
 The following set of synthetic experiments focus on a single \sys setting---incremental with tuple-slicing---and
@@ -389,78 +441,31 @@ individually vary numerous database and workload parameters in order to tease ap
 These include factors such as query complexity, log size $N_q$, database size $N_D$ and the skew of the query predicates.
 We focus on a narrow table setting that contains $N_a = 10$ attributes, and a single corrupt query in the query log.
 
-% Motivated by our preliminary results, we focus on \texttt{UPDATE}-only query logs with a single corruption with
-% $10$ attributes and $1k$ attributes in the table. As the performance of \sys with different optimizations appears 
-% identical when $N_a = 10$, we will only show results of \sys with tuple slicing optimization in the rest of the 
-% experiments. 
-  \begin{figure*}[h]
-    \vspace*{-.1in}
-    \centering
-     \begin{subfigure}[t]{.3\textwidth}
-      \includegraphics[width = .99\columnwidth]{figures/dbsize_time}
-      \vspace*{-.2in}
-      \caption{Database Size.}
-      \label{f:dbsize_time} 
-    \end{subfigure}
-        \begin{subfigure}[t]{.3\textwidth}
-      \includegraphics[width = .99\columnwidth]{figures/pointrelv_time}
-      \vspace*{-.2in}
-      \caption{Query Complexity (Query Type).}
-      \label{f:qidx_time} 
-    \end{subfigure}
-    \begin{subfigure}[t]{.3\textwidth}
-    \includegraphics[width = .99\columnwidth]{figures/noise_fn_time}
-    \vspace*{-.2in}
-    \caption{Time vs False Negative}
-    \label{f:falsenegative_time} 
-    \end{subfigure} 
-    \\
-    \begin{subfigure}[t]{.3\textwidth}
-    \includegraphics[width = .99\columnwidth]{figures/skew_time}
-    \vspace*{-.2in}
-    \caption{Skew vs Time}
-    \label{f:skew_time} 
-    \end{subfigure}
-	\begin{subfigure}[t]{.3\textwidth}
-      \includegraphics[width = .99\columnwidth]{figures/where_time}
-      \vspace*{-.2in}
-      \caption{Query Complexity (Where Size).}
-      \label{f:where_time} 
-    \end{subfigure}
-    \begin{subfigure}[t]{.3\textwidth}
-    \includegraphics[width = .99\columnwidth]{figures/noise_fn_acc}
-    \vspace*{-.2in}
-    \caption{F1-score vs False Negative}
-    \label{f:falsenegative_acc} 
-    \end{subfigure}
-    \vspace*{-.1in}
-    \caption{Skew and False Negative experiments. }
-  \end{figure*}
-  \vspace*{-0.1in}
-
 
 \iffalse 
-\stitle{Scalability - Log Size:}
-Figures~\ref{f:logsize_time} and~\ref{f:logsize_acc} increase the query log size (each subplot) between $50, 100, 500$ and $1000$.
-We compared the baseline $\sys_{t,inc}^{1st}$ with addition attribute, query or both slicing optimizations.
-For readibility purposes, we have normalized the x-axis to show the distance of the corrupted query from the most recent query in the log
-(e.g., $x=50$ denotes that $q_{N-50}$ was corrupted).
-As expectied, the cost increases as the corruption is older in the query log since more queries need to be tested before the
-true corruption is encountered.  There algorithms all execute at roughly the same performance, though there is a slight advantage to
-using the query-slicing optimization. The optimization reduces the time to linearize the query log by roughly $20\%$, however
-the CPLEX solver time contributes to over half the total time so the improvement is difficult to see.
-All algorithms exhibit near perfect F1-scores.
+  \stitle{Scalability - Log Size:}
+  Figures~\ref{f:logsize_time} and~\ref{f:logsize_acc} increase the query log size (each subplot) between $50, 100, 500$ and $1000$.
+  We compared the baseline $\sys_{t,inc}^{1st}$ with addition attribute, query or both slicing optimizations.
+  For readibility purposes, we have normalized the x-axis to show the distance of the corrupted query from the most recent query in the log
+  (e.g., $x=50$ denotes that $q_{N-50}$ was corrupted).
+  As expectied, the cost increases as the corruption is older in the query log since more queries need to be tested before the
+  true corruption is encountered.  There algorithms all execute at roughly the same performance, though there is a slight advantage to
+  using the query-slicing optimization. The optimization reduces the time to linearize the query log by roughly $20\%$, however
+  the CPLEX solver time contributes to over half the total time so the improvement is difficult to see.
+  All algorithms exhibit near perfect F1-scores.
 \fi
 
 
 \stitle{Database Size:}
 Figure~\ref{f:dbsize_time} varies the database size from $100$ to $100,000$ tuples, and fixes query output cardinality and complaint set size in the same way as the previous scalability experiment.
 %For simplicity, we plot the performance and accuracy of corruptions at two query indexes: $50$ and $200$.
-In contrast to the previous experiment, the scalabality curve is nearly flat for both corruption query indices due to the smaller number of attributes.  
+In contrast to the previous experiment, the scalabality curve is nearly flat for both corruption query indices due to the smaller number of attributes, which reduces the effect of increasding $V_d$.  
 Recall that the size of the MILP problem increases multiplicatively with the number of tuples and attributes.  
 Thus reducing number of attributes in combination with tuple-slicing effectively contrains the size of the MILP problem.
 The more recent corruption at $q_{200}$ is executed in nearly constant time as the database size increases, with a perfect F1-score. 
-The performance is more variable at smaller database sizes due to
+The performance is more variable at smaller database sizes due to variability in the true query selectivity due to randomness in the data and query generator.
+This leads to more variability in the size of the resulting complaint set, which increases the size of the encoded problem.
+Since the solver scales exponentially with the problem size, this leads to the performance spike when the database is small.
 
 % \xlw{Meanwhile, as we increase the database size, \sys achieves near constant time cost after database size greater than 1k. 
 % The reason is as we maintain the same query selectivity, the number of complaints maintains roughly the same when database size increases. 
@@ -471,7 +476,7 @@ The performance is more variable at smaller database sizes due to
 \stitle {Query Type: }
 So far, we have focused on \texttt{UPDATE} queries with constant set clauses and range predicates.  
 Figure~\ref{f:qidx_time} individually varies each clause and compares against {\it Constant/Point} and {\it Relative/Range} queries. 
-The x-axis varies the query log size and corrupts the oldest query $q_1$. \ewu{is this correct?}
+The x-axis varies the index of the corrupted query between $q_1$ and $q_249$.
 We find that point predicates and constant set clauses are easier to solve than range predicates and relative set clauses, respectively.
 The reason for the former pair is because range predicates double the number of undetermined variables as compared to point queries.  
 In addition, point queries are on key attributes, thus further reduces the possible search space.  
