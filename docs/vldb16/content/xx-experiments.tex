@@ -20,46 +20,46 @@
 
 
   \begin{figure*}[h]
+  \hspace*{-.1in}
   \centering
-    \vspace*{-.2in}
-    \begin{subfigure}[t]{.3\textwidth}
+    \begin{subfigure}[t]{.33\textwidth}
     \includegraphics[width = .99\columnwidth]{figures/multi_time}
     \vspace*{-.25in}
     \caption{Performance for multiple corruptions.}
     \label{f:multi_time} 
     \end{subfigure}
-    \begin{subfigure}[t]{.3\textwidth}
+    \begin{subfigure}[t]{.33\textwidth}
     \includegraphics[width = .99\columnwidth]{figures/incrementalcompare_time}
     \vspace*{-.25in}
     \caption{Performance for single corruption.}
     \label{f:singlequeryinc_time} 
     \end{subfigure}
-    \begin{subfigure}[t]{.3\textwidth}
+    \begin{subfigure}[t]{.33\textwidth}
     \includegraphics[width = .99\columnwidth]{figures/indelup_time}
     \vspace*{-.25in}
     \caption{Performance for different query types.}
     \label{f:indelup_time} 
     \end{subfigure}
     \\
-    \begin{subfigure}[t]{.3\textwidth}
+    \hspace*{-.1in}
+    \begin{subfigure}[t]{.33\textwidth}
     \includegraphics[width = .99\columnwidth]{figures/multi_pr}
     \vspace*{-.25in}
     \caption{Accuracy for multiple corruptions.}
     \label{f:multi_acc} 
     \end{subfigure}
-    \begin{subfigure}[t]{.3\textwidth}
+    \begin{subfigure}[t]{.33\textwidth}
     \includegraphics[width = .99\columnwidth]{figures/incrementalcompare_acc}
     \vspace*{-.25in}
     \caption{Accuracy for single corruption.}
     \label{f:singlequeryinc_acc} 
     \end{subfigure}
-    \begin{subfigure}[t]{.3\textwidth}
+    \begin{subfigure}[t]{.33\textwidth}
     \includegraphics[width = .99\columnwidth]{figures/indelup_pr}
     \vspace*{-.25in}
     \caption{Accuracy for different query types.}
     \label{f:indelup_acc} 
     \end{subfigure}
-    \vspace*{-.1in}
     \caption{Preliminary experiments.}
   \end{figure*}
 
@@ -228,9 +228,9 @@ We introduce a single corruption, and vary corrupted query's index from the most
 \stitle{Corrupting Queries:} We corrupt query $q_i$ by replacing it with a randomly
 generated query of the same type based on the procedures described above.
 To standardize our procedures, we selected a fixed set of indexes $idx$
-that are used in all experiments. \ewu{The technical report~\cite{} describes the corruption process in more detail.} 
-%Appendix~\ref{app:qidx} presents
-%experiments that justify the rationale behind our selection.
+that are used in all experiments. 
+% xxx
+% \ewu{The technical report~\cite{} describes the corruption process in more detail.} 
 
 
 
@@ -319,13 +319,13 @@ Based on these results, we focus on the incremental algorithm $inc_1$ and the mo
  \begin{figure*}[h]
     \vspace*{-.1in}
     \centering
-    \begin{subfigure}[t]{.45\textwidth}
+    \begin{subfigure}[t]{.49\textwidth}
     \includegraphics[width = .99\columnwidth]{figures/attr_time}
     \vspace*{-.1in}
     \caption{\# of Attributes vs Time.}
     \label{f:attr} 
     \end{subfigure}
-    \begin{subfigure}[t]{.45\textwidth}
+    \begin{subfigure}[t]{.49\textwidth}
     \includegraphics[width = .99\columnwidth]{figures/attr100_time}
     \vspace*{-.1in}
     \caption{Database size vs time ($N_a = 100$)}
@@ -359,15 +359,15 @@ We divide these experiments into two groups: the first evaluates the different s
 the latter algorithm and varies workload and dataset parameters.
 Note that omit accuracy figures when the F1-score is $\ge 0.99$.
 
-\subsubsection{Comparing Optimizations}
+\noindent\textbf{Comparing Optimizations}
 
-\stitle{Varying \# Attributes}
+\emph{Varying \# Attributes:}
 We first evaluate \sys and its optimizations by increasing the number of attribute ($N_a \in [10, 500]$) with $N_D = 100$.
 As shown in Figure~\ref{f:attr}, when the number of attribute in a table is small (e.g., $N_a=10$) all algorithms appear identical. 
 However, increasing the number of attribute exhibits a larger benefit for query and attribute slicing (up to $6.8\times$ reduction compared to tuple-slicing).
 When the table is wide ($N_a = 500$), applying all optimizations ($inc_1-all$) is $40\times$ faster than \emph{tuple-slicing} alone.  
 
-\stitle{Database Size:}
+\emph{Database Size:}
 We increase the database size ($N_D \in [100,5000]$) while keeping the number of attributes fixed at $N_a = 100$.
 In order to keep the query output cardinality constant, we correspondingly increase the range of attribute values $V_d$.
 Figure~\ref{f:attr100} shows that the cost predominantly grows when the corruption happens in an old query ($idx = 50$).
@@ -392,19 +392,19 @@ In fact, combining all three optimizations improves the latency by $2\times$ in 
     \centering
      \begin{subfigure}[t]{.33\textwidth}
       \includegraphics[width = .99\columnwidth]{figures/dbsize_time}
-      %\vspace*{-.1in}
+      \vspace*{-.25in}
       \caption{Database size vs time.}
       \label{f:dbsize_time} 
     \end{subfigure}
     \begin{subfigure}[t]{.33\textwidth}
       \includegraphics[width = .99\columnwidth]{figures/pointrelv_time}
-      %\vspace*{-.1in}
+      \vspace*{-.25in}
       \caption{Performance of different query types.}
       \label{f:qidx_time} 
     \end{subfigure}
     \begin{subfigure}[t]{.33\textwidth}
       \includegraphics[width = .99\columnwidth]{figures/noise_fn_time}
-      %\vspace*{-.1in}
+      \vspace*{-.25in}
       \caption{False negatives vs time.}
       \label{f:falsenegative_time} 
     \end{subfigure} 
@@ -429,12 +429,12 @@ In fact, combining all three optimizations improves the latency by $2\times$ in 
       \caption{False negatives vs F1-score.}
       \label{f:falsenegative_acc} 
     \end{subfigure}
-    \vspace*{-.1in}
+    \vspace*{-.25in}
     \caption{Sensitivity to data and workload factors. }
   \end{figure*}
 
 
-\subsubsection{Sensitivity to Data and Workload Factors}
+\noindent\textbf{Sensitivity to Data and Workload Factors}
 
 The following set of synthetic experiments focus on a single \sys setting---incremental with tuple-slicing---and
 individually vary numerous database and workload parameters in order to tease apart the algorithm performance.  
@@ -456,7 +456,7 @@ We focus on a narrow table setting that contains $N_a = 10$ attributes, and a si
 \fi
 
 
-\stitle{Database Size:}
+\emph{Database Size:}
 Figure~\ref{f:dbsize_time} varies the database size from $100$ to $100,000$ tuples, and fixes query output cardinality and complaint set size in the same way as the previous scalability experiment.
 %For simplicity, we plot the performance and accuracy of corruptions at two query indexes: $50$ and $200$.
 In contrast to the previous experiment, the scalabality curve is nearly flat for both corruption query indices due to the smaller number of attributes, which reduces the effect of increasding $V_d$.  
@@ -473,7 +473,7 @@ Since the solver scales exponentially with the problem size, this leads to the p
 % However, small database size may increase the randomness in query selectivity, thus we observe different time cost when database size is 100. 
 % }
 
-\stitle {Query Type: }
+\emph{Query Type: }
 So far, we have focused on \texttt{UPDATE} queries with constant set clauses and range predicates.  
 Figure~\ref{f:qidx_time} individually varies each clause and compares against {\it Constant/Point} and {\it Relative/Range} queries. 
 The x-axis varies the index of the corrupted query between $q_1$ and $q_249$.
@@ -486,7 +486,7 @@ This both simplifies the difficulty of the constraint problem, and reduces the t
 % constant set clauses disconnect tuple values from query to query whereas relative set clauses maintain this connection. Thus, the searching space for the relative set clauses is often bigger than the constant one; 
 % 2. since relative set clauses maintain the tuple value connection, their complaint set sizes are normally larger than constant set clauses for the same corrupt index: In relative set clauses, incorrectness always inherits from previous database state and could infects other tuples, however, this is less likely to happen for constant set clauses.}
 
-\stitle{Query Predicate Dimensionality:}
+\emph{Query Predicate Dimensionality:}
 Figure~\ref{f:where_time} varies the dimensionality of the update queries by increasing the number of predicates in the \texttt{WHERE} clause, while keeping the query cardinality constant.
 The cost increases with the dimensionality because each additional predicate is translated into a new set of constraints and undetermined variables, increasing the problem complexity.
 % From Figure~\ref{f:where_time}, we found that more predicates increases the cost in solving a problem. 
@@ -497,7 +497,7 @@ The cost increases with the dimensionality because each additional predicate is 
 %Again, we omit the accuracy result as \sys exhibit above 0.996 average F1 score in all settings. 
 
 
-\stitle{Skew:} We now study the effects of attribute skew on the algorithms.
+\emph{Skew:} We now study the effects of attribute skew on the algorithms.
 We increase the skew parameter from $0$ (uniform) to $1$ (nearly every attribute is $A_0$) 
 and find a reduction in latency (Figure~\ref{f:skew_time}).
 We believe the reason is because increasing the skew focuses the query predicates over a smaller set of logical attributes, 
@@ -531,7 +531,7 @@ Note that the overall number of constraints in the problem is the same, only the
 % space in the MILP problem.
 
 
-\stitle{Incomplete Complaint Sets:}
+\emph{Incomplete Complaint Sets:}
 Our final experiment (Figures~\ref{f:falsenegative_time} and~\ref{f:falsenegative_acc}) varies the fase positive rate in incomplete complaint sets.
 We increase the rate from $0$ ($0\%$ missing in the complaint set) to $.75$ ($75\%$ are missing).  
 We find that reducing the size of the submitted complaint set naturally improves the repair performance,
