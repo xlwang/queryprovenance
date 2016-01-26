@@ -279,7 +279,7 @@ workloads as compared to other query types.
 \stitle{Multiple Corrupt Queries:}
 In this experiment, we compare the basic algorithm ($basic$) against 
 each slicing optimization individually($basic-tuple, basic-attr, basic-query$) and all of them together ($basic-all$).  
-We use the default settings with $N_D = 1000$ tuples and a sequence of \texttt{update} queries.
+We use the default settings with $N_D = 1000$ tuples and a sequence of \texttt{UPDATE} queries.
 We generate query logs in 5 different sizes $N_q\in \{10, 20, 30, 40, 50\}$ and corrupt 
 every tenth query starting from oldest query $q_1$,
 up to $q_{41}$.  For example, when the $N_q = {30}$, we corrupt 3 queries: $q_{1,11,21}$. 
@@ -293,18 +293,19 @@ and we ignore the infeasible executions, the average execution time is $300$ sec
 and the precision and recall are greater than $0.94$.  Unfortunately, with $50$ queries ($5$ corruptions),
 all runs exceed the time limit and return infeasibility.
 
-\stitle{Single Query Optimization:}
+\stitle{Single Corrupt Query:}
 In this experiment, we evaluate the efficacy \sys with tuple slicing and incremental optimization
-in the special case when only one query has been corrupted. \xlw{We compare 
-\incremental without tuple slicing ($inc_1$) against tuple slicing at 
-different batching levels of 1, 2, 8 ($inc_1-tuple; inc_2-tuple, inc_8-tuple$). Recall from Section~\ref{sec:incremental}, choosing $k$ batching level, we parameterize $k$ consecutive queries in batch from the most recent query until finding a valid fix.} \ewu{batching has not been introduced at all.  Need to describe in optimizations section and remind reader what it is here}. 
+in the special case when one query has been corrupted in a much larger query log. 
+We compare \incremental without tuple slicing ($inc_1$) against tuple slicing at 
+different batching levels of 1, 2, 8 ($inc_1-tuple; inc_2-tuple, inc_8-tuple$). 
+Recall from Section~\ref{sec:incremental} that $inc_k$ parameterizes $k$ consecutive queries in each batch until a repair is found.
 Figure~\ref{f:singlequeryinc_time} highlights the scalability limitation of the incremental 
-algorithm without tuple slicing: with 50 queries $inc_1$ could easily runs exceed the 1000 seconds.   
-In addition, Figure~\ref{f:singlequeryinc_acc} also shows a significant drop in accuracy as we increase the batching level from $1$ 
-to $2$ as the failure rate of the MILP problem is positive proportional to the incremental batch level. 
+algorithm without tuple-slicing: with 50 queries $inc_1$  easily exceeds the 1000s limit.   
+The tuple-slicing scales significantly better (up to \ewu{INSERT A NUMBER}$\times$ faster), however
+batching above $k=1$ severely degrades the \ewu{REPAIR ACCURACY OR INFEASIBILITY RATE AND WHY??? "failure rate" is ambiguous.}.
 
 
-\stitle{Query Type Experiment:}\label{sec:indelup}
+\stitle{Query Type:}\label{sec:indelup}
 Our final preliminary experiment evaluates the incremental algorithm with tuple slicing optimization 
 ($inc_1-tuple$) on \texttt{INSERT}, \texttt{DELETE}, or \texttt{UPDATE}-only workloads.
 We increase the number of queries from $1$ to $200$ and corrupt the oldest query in the log.  
@@ -314,13 +315,12 @@ the corruption happens earlier in the query log---and a much faster rate for \te
 The F1 score for all settings is nearly 1 (Figure~\ref{f:indelup_acc}).
 
 
-{\it Takeaways: we find that the basic \sys algorithms, even when using the slicing-based optimizations,
-have severe scalability limitations due to the large number of undetermined values -- this is not surprising
+{\it Takeaways: we find that \texttt{basic}, even with slicing optimizations,
+has severe scalability limitations due to the large number of undetermined values -- this is not surprising
 since MILP constraint solving is a known NP-hard problem.
-In contrast, we find that the incremental algorithms \ewu{with batch size of 1: emphasize it's single query incremental} are more effective at scaling to larger query log sizes.  
-Furthermore, we show that \texttt{UPDATE}-only workloads are significantly more expensive to repair than other 
-query types. Based on the result, we consider incremental
-algorithm at batching level 1 with tuple slicing optimization ($inc_1-tuple$) as default setting in the rest of the experiment. In addition, we only consider \texttt{UPDATE}-only workload in synthetic experiments in Section~\ref{sec:experiments:synth}. 
+In contrast, the incremental algorithms can scale to larger query log sizes, however only a batch size of $k=1$ can retain high repair quality.
+Furthermore, we show that \texttt{UPDATE}-only workloads are significantly more expensive to repair than other query types. 
+%Based on the result, we consider incremental algorithm at batching level 1 with tuple slicing optimization ($inc_1-tuple$) as default setting in the rest of the experiment. In addition, we only consider \texttt{UPDATE}-only workload in synthetic experiments in Section~\ref{sec:experiments:synth}. 
 }
 
  \begin{figure*}[h]
