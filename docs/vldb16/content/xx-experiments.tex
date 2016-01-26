@@ -70,29 +70,26 @@
 
 
 In this section, we carefully study the performance and accuracy
-characteristics of the basic MILP-based repair algorithm, as well as 
-slicing-based optimizations that improve the latency of the system
-, and an incremental algorithm for single query corruptions that
-further improves the latency. 
+characteristics of the basic MILP-based repair algorithm, 
+slicing-based optimizations that improve the latency of the system, 
+and the incremental algorithm for single query corruptions. 
 %and 
 %the multi-pass tuple-slicing algorithm that tolerates incomplete complaint sets with minimal loss in accuracy.
-Our goals in the evaluation is to understand these trade-offs in
+Our goal is to understand these trade-offs in
 controlled synthetic scenarios, as well as study the effectiveness
 in typical database query workloads based on widely used benchmarks.
-\xlw{
-By default, we set \sys as the incremental approach with tuple slicing optimization ($inc_1-tuple$) as it fixes our default synthetic query logs and benchmark workloads with minimum time cost and near perfect accuracy.
-}
+% \xlw{ By default, we set \sys as the incremental approach with tuple slicing optimization ($inc_1-tuple$) as it fixes our default synthetic query logs and benchmark workloads with minimum time cost and near perfect accuracy.  }
 
 
 To this end, our experiments are organized as follows: First, 
 we compare the basic and incremental MILP algorithm against the different optimizations 
-to highlight the value of different optimizations.  We then compare the
-repair costs of \texttt{INSERT}, \texttt{DELETE}, or \texttt{UPDATE}-only query logs 
+to highlight the value of different optimizations and the limitatios of the basic approach.  
+We then compare the repair costs of \texttt{INSERT}, \texttt{DELETE}, or \texttt{UPDATE}-only query logs 
 and find that the latter query type is by far the most complicated and costly to repair.
 For the subsequent experiments, we focus solely on \texttt{UPDATE}-only synthetic workloads 
 to understand how \sys responds to different query logs and databases.  
-We further evaluate the efficacy on real-world databases transaction benchmarks,
-TPC-C and TATP. Finally, we evaluate \sys on a series of query logs with different properties. 
+We end with an evaluation using established database transaction benchmarks from OLTP-bench~\cite{difallah2013oltp},
+TPC-C~\cite{tpcc} and TATP~\cite{tatp}. 
 All experiments were run on 12x2.66 GHz  machines with 16GB RAM running CentOS release 6.6.
 
 
@@ -158,7 +155,7 @@ All experiments were run on 12x2.66 GHz  machines with 16GB RAM running CentOS r
 
 
 
-Each of our experiments follows a consistent procedure. 
+Each of our experiments follows a similar procedure. 
 We generate a sequence of queries using a synthetic query generator or 
 the benchmark program, and corrupt the query log as described below. 
 We then execute the original and corrupt query logs on an initial (possibly empty) database,
@@ -179,44 +176,42 @@ For example, $\sys_{tq,inc-1}$ uses both tuple and query slicing along with incr
 \xlw{I removed the stop early and search all description here. Could be added later, current updated experiment do not contain results for this. }\ewu{Clearly define to the reader what "QFix" is.  It's used all over the place and not clear what it means.}
 \fi
 Performance is measured as wall clock
-time between submitting a query log and the system terminating after retrieving a valid repair.  
-We also measure the repair's precision (percentage of repaired tuples that were correctly fixed), 
+time between submitting a complaint set and the system terminating after retrieving a valid repair.  
+Accuracy is measured as repair's precision (percentage of repaired tuples that were correctly fixed), 
 the recall (the percentage of the full complaint set that was repaired), 
 and the F1 measure (the harmonic mean of precision and recall).
 Our reported metrics are the average across 20 runs.
-%Finally, Table~\ref{t:params} summarizes the key parameters that we vary throughout our experiments.  
 We describe the experimental parameters in the context of the datasets and workloads below.
+%Finally, Table~\ref{t:params} summarizes the key parameters that we vary throughout our experiments.  
+
+
 \subsubsection{Datasets and Workloads}
 
 
-This subsection describes the query and data generation process in greater detail.
+%This subsection describes the query and data generation process in greater detail.
 
 \stitle{Synthetic:} \label{sec:syntheticgen}
 We generate an initial database of $N_D$ random tuples.  
-The schema contains $N_a$ attributes $a_1\ldots a_{i}$, whose values are integers
-picked from $[0, V_d]$ uniformly at random, along with a primary key $id$. 
-We then generate a sequence of $N_q$ \texttt{UPDATE} queries~\footnote{\scriptsize We focus on
-\texttt{UPDATE} only query logs because they are the {\it predominant} cost 
-in a query log.  Experiment~\ref{sec:indelup} compares \texttt{INSERT}, \texttt{DELETE} and \texttt{UPDATE}
-only workloads to illustrate the difference.} in the format (SET and WHERE clauses) described as below. The default
-setting for these parameters are: $N_D = 1000, N_a = 10, V_d = 200, N_q = 300$.
+The schema contains a primary key $id$ along with $N_a$ attributes $a_1\ldots a_{N_a}$, whose values are integers picked from $[0, V_d]$ uniformly at random.
+We then generate a sequence of $N_q$ queries.
+The default setting for these parameters are: $N_D = 1000, N_a = 10, V_d = 200, N_q = 300$.
+% ~\footnote{\scriptsize We focus on \texttt{UPDATE} only query logs because they are the {\it predominant} cost in a query log.  Experiment~\ref{sec:indelup} compares \texttt{INSERT}, \texttt{DELETE} and \texttt{UPDATE} only workloads to illustrate the difference.} 
+% in the format (SET and WHERE clauses) described as below. 
 % UPDATE SET X,.. WHERE Y ...
+
+
+\noindent \texttt{UPDATE} queries are defined by a SET clause that assigns an attribute a $Constant$ or $Relative$ value,
+and a WHERE clause can either be a $Point$ predicate on a key, or a $Range$ predicate on non-key attributes:
 {\scriptsize
 \begin{verbatim}
-  SET Clause:
-   Constant: SET (a_i = ?),..
-   Relative: SET (a_i = a_i + ?)
-  WHERE Clause:
-   Point:    WHERE a_j = ? AND ...
-   Range:    WHERE a_j in [?, ?+r] AND ... 
-\end{verbatim}
-}
-where \verb|?| is a randomly generated value and \verb|r| is the size of the range predicate. \\
-\noindent \texttt{UPDATE} queries are composed of a combination of a SET clause 
-can assign an attribute a $Constant$ or $Relative$ values (as shown above),
-and a WHERE clause can either be a $Point$ predicate on a key, or a $Range$ predicate on non-key attributes.  
+ SET Clause:                WHERE Clause:
+  Constant: SET (a_i=?), ..   Point: WHERE a_j=? & ..
+  Relative: SET (a_i=a_i+?)   Range: WHERE a_j in [?,?+r] & ..\end{verbatim} }
+where \verb|?| is a randomly generated value and \verb|r|\ewu{what do we actually set r to?} is the size of the range predicate. 
 Note that a range predicate where \texttt{r = 0} is distinct from a $Point$ predicate due to the non-key attribute.
-By default, we generate queries with non-key range predicates and constant set clauses.
+The \texttt{WHERE} clauses in \texttt{DELETE} queries are generated in an identical fashion, while
+\texttt{INSERT} queries insert values picked uniformly at random from $V_d$.
+By default, we generate \texttt{UPDATE} queries with non-key range predicates and constant set clauses.
 
 % $X \& Y$ represents the \texttt{UPDATE} query type. $X$ represents the set clause type which can be either constant update ($Constant$) or
 % relative update ($Relative$). Similarly, $Y$ represents the where clause type that can be either point update ($Point$) or
@@ -227,30 +222,27 @@ By default, we generate queries with non-key range predicates and constant set c
 % the \texttt{WHERE} clauses form a conjunction.  
 % The $set$ parameter controls whether the \texttt{UPDATE} queries set attributes to random constant values ({\it const}),  
 % or relative values ({\it rel}) by incrementing by a random, possibly negative, value.  
+
 In addition, the skew parameter $s$ determines the distribution attributes referenced in the \texttt{WHERE} and \texttt{SET} clauses.  
-Each attribute in a query is picked from either a uniform distribution when $s=0$ or a zipfian distribution.
+Each attribute in a query is picked from either a uniform distribution when $s=0$ or a zipfian distribution with exponent $s$.
 This allows our experiments to vary between a uniform distribution, where each attribute is
-equally likely to be picked, and a skewed distribution where nearly all attributes are the same. \\
-The \texttt{WHERE} clauses in \texttt{DELETE} queries are generated in an identical fashion, while
-\texttt{INSERT} queries insert values picked uniformly at random from $V_d$.
+equally likely to be picked, and a skewed distribution where nearly all attributes are the same. 
 
-\stitle{TPC-C:} We use the data and query workload over the {\it ORDER} table in TPC-C~\cite{tpcc}.  
-We generated a database at scale 1 with one warehouse, and kept the queries that modify the
-{\it ORDER} table. The initial table contains 6000 tuples and we ultimately generated a log with
-2000 queries, where $1837$ are \texttt{INSERT}s and the rest are \texttt{UPDATE}s. 
-
-\stitle{TATP:} TATP workload simulates the 
-caller location system. We generate a database from {\it SUBSCRIBER} table
-with 5000 tuples and $2000$ \texttt{UPDATE} queries.\\
-Both TPC-C and TATP setups were generated using the OLTP-bench project~\cite{difallah2013oltp}. 
-We corrupt up to 1500 queries ahead of the most recent query.  
+\stitle{Benchmarks: } We use the TPC-C~\cite{tpcc} and TATP~\cite{tatp} benchmarks.
+The former generates the {\it ORDER} table at scale 1 with one warehouse, and uses the queries that modify the {\it ORDER} table. 
+We execute a log of 2000 queries over an initial table containing 6000 tuples.  
+$1837$ queries are \texttt{INSERT}s and the rest are \texttt{UPDATE}s. 
+The latter TATP workload simulates the caller location system. 
+We generate a database from {\it SUBSCRIBER} table with 5000 tuples and $2000$ \texttt{UPDATE} queries.
+Both setups were generated using the OLTP-bench~\cite{difallah2013oltp}. 
+We introduce a single corruption, and vary corrupted query's index from the most recent query $q_N$ to $q_{N-1500}$.
 
 
 
 \stitle{Corrupting Queries:} We corrupt query $q_i$ by replacing it with a randomly
 generated query of the same type based on the procedures described above.
 To standardize our procedures, we selected a fixed set of indexes $idx$
-that are used in all experiments.  
+that are used in all experiments. \ewu{The technical report~\cite{} describes the corruption process in more detail.} 
 %Appendix~\ref{app:qidx} presents
 %experiments that justify the rationale behind our selection.
 
@@ -350,74 +342,6 @@ algorithm at batching level 1 with tuple slicing optimization ($inc_1-tuple$) as
     \caption{Comparison of Optimizations.}
   \end{figure*}
   
-\subsection{Benchmarks \ewu{Move to last exp}}
-\label{sec:experiments:benchmark}
-
-Figure~\ref{f:tpcctatp} plots the performance of the \sys (incremental, tuple slicing)
-on TPC-C and TATP benchmark applications.  In both workloads, \sys derives repairs efficiently.
-And for TPC-C, \sys solves the problem on the order of milliseconds where all corrupted queries are \texttt{INSERT}s. 
-The precision and recall measures were
-$1$ both all settings.   One reason for the good performance is due to the fact that the benchmark queries
-are pre-dominantly point \texttt{INSERT} or \texttt{UPDATE} queries.  In this setting, each tuples affects a very small set of 
-tuples, which results in $1$ or $2$ complaints on average.  In this case, the tuple and query slicing algorithms
-reduce the total number of constraints for almost every setting to less than $100$.
-
-
-{\it Takeaway: many workloads in practice are dominated by point \texttt{UPDATE} queries.  In these settings,
- \sys is very effective at reducing the number of constraints and can derive repairs in nearly
- interactive latencies.}
-\begin{figure}[h]
-\centering
-  \includegraphics[width = .75\columnwidth]{figures/benchmark_time}
-  \vspace*{-.2in}
-  \caption{Performance on Benchmarks}
-  \label{f:tpcctatp} 
-  \vspace*{-.1in}
-\end{figure}
-\iffalse  
-  \begin{figure*}[h]
-    \centering
-    \begin{subfigure}[t]{.3\textwidth}
-      \includegraphics[width = .99\columnwidth]{figures/dbsize_time}
-      \vspace*{-.1in}
-      \caption{Database Size.}
-      \label{f:dbsize_time} 
-    \end{subfigure}
-        \begin{subfigure}[t]{.3\textwidth}
-      \includegraphics[width = .99\columnwidth]{figures/pointrelv_time}
-      \vspace*{-.1in}
-      \caption{Query Complexity (Query Type).}
-      \label{f:qidx_time} 
-    \end{subfigure}
-    \begin{subfigure}[t]{.3\textwidth}
-      \includegraphics[width = .99\columnwidth]{figures/where_time}
-      \vspace*{-.1in}
-      \caption{Query Complexity (Where Size).}
-      \label{f:where_time} 
-    \end{subfigure}
-    \\
-    \begin{subfigure}[t]{.3\textwidth}
-      \includegraphics[width = .99\columnwidth]{figures/dbsize_acc}
-      \vspace*{-.1in}
-      \caption{Database Size vs F1-score. }
-      \label{f:dbsize_acc} 
-    \end{subfigure}
-        \begin{subfigure}[t]{.3\textwidth}
-      \includegraphics[width = .99\columnwidth]{figures/pointrelv_acc}
-      \vspace*{-.1in}
-      \caption{Query Complexity (Query Type) vs F1-score.}
-      \label{f:qidx_acc} 
-    \end{subfigure}
-    \begin{subfigure}[t]{.3\textwidth}
-      \includegraphics[width = .99\columnwidth]{figures/where_acc}
-      \vspace*{-.1in}
-      \caption{Query Complexity (Where Size) vs F1-score.}
-      \label{f:where_acc} 
-    \end{subfigure}
-    
-    \caption{Scalability Experiments (Performance)}
-  \end{figure*}
-\fi
 
 \subsection{Synthetic Incremental Experiments}
 \label{sec:experiments:synth}
@@ -541,13 +465,20 @@ This is expected as when there are more predicates, the number of constraints an
 
 
 \stitle{Skew:} We now study the effects of attribute skew on the algorithms.
-We vary the skew parameter from $0$ (uniform) to $1e-7, 0.5$, and $1$. When $s=1$, nearly every attribute is $A_0$.
-\xlw{
-Higher skewness factor increases the update frequency of certain attributes, which further increases the number of constraints on these attributes. With more constraints, the searching space get reduced and thus the problem becomes easier to solve. The update frequency of an attribute is a combined result of the skewness factor and the number of queries in the problem: one would only observe the (frequency) difference when there are enough number of queries. 
-Thus
-we observe a clear decreasing trend in Figure~\ref{f:skew_time} as we increase the skewness factor on corrupt index equals to $50$ ($250$ queries from the most recent one). 
-However, when the corruption is more recent (corrupt index equals to $200$, $50$ queries to the most recent one), this trend \sout{can be hardly seen} is less significant.
-}
+We increase the skew parameter from $0$ (uniform) to $1$ (nearly every attribute is $A_0$) 
+and find a reduction in latency (Figure~\ref{f:skew_time}).
+We believe the reason is because increasing the skew focuses the query predicates over a smaller set of attributes, 
+and increases the number of constraints placed on each of the logical attributes used in the query log.  
+Each of these constraints reduces the search space of allowable values for that attribute, and thus simplifies the MILP problem.
+\ewu{this confuses me and doesnt' make sense.  Alexandra?}
+Note that the overall number of constraints in the problem is the same, only their distribution over the query attributes has changed.
+
+% \xlw{
+% Higher skewness factor increases the update frequency of certain attributes, which further increases the number of constraints on these attributes. With more constraints, the searching space get reduced and thus the problem becomes easier to solve. The update frequency of an attribute is a combined result of the skewness factor and the number of queries in the problem: one would only observe the (frequency) difference when there are enough number of queries. 
+% Thus
+% we observe a clear decreasing trend in Figure~\ref{f:skew_time} as we increase the skewness factor on corrupt index equals to $50$ ($250$ queries from the most recent one). 
+% However, when the corruption is more recent (corrupt index equals to $200$, $50$ queries to the most recent one), this trend \sout{can be hardly seen} is less significant.
+% }
 
 % 
 % Our hypothesis is that higher skew results in a larger number of relevant queries, thus limiting the effectiveness of query slicing.
@@ -570,9 +501,10 @@ However, when the corruption is more recent (corrupt index equals to $200$, $50$
 Our final experiment (Figures~\ref{f:falsenegative_time} and~\ref{f:falsenegative_acc}) varies the fase positive rate in incomplete complaint sets.
 We increase the rate from $0$ ($0\%$ missing in the complaint set) to $.75$ ($75\%$ are missing).  
 We find that reducing the size of the submitted complaint set naturally improves the repair performance,
-however the repair quality, both precision and recall in Figure~\ref{f:falsenegative_acc}, may suffer if the corruption occured in a very old query. \xlw{This is expected since \sys targets on fixing complaints that are reported, thus with 
-incomplete complaint, \sys may failed to fix false negative complaints and this results in low recall. Meanwhile, with missing complaints, \sys may end up with repairs that resolve all the reported complaints but indeed overfix correct tuples and this results in low precision. } 
-\ewu{Do we have a good reason why?}
+however the repair quality, both precision and recall in Figure~\ref{f:falsenegative_acc}, may suffer if the corruption occured in a very old query. 
+This is expected because \sys targets reported complaints, thus unreported complaints may easily be missed and lead to low recall.
+In addition, despite the refinement step of tuple-slicing, the repair may over generalize and ''fix`` the wrong records, leading to low precision.
+\ewu{Can we hand look at some of the results and make a qualitative description of if the results are "good" or not?}
 
 
 %   \begin{figure}[h!]
@@ -614,4 +546,73 @@ datasets with large number of attributes. And the proposed \sys algorithm is abl
 
 
 
+\subsection{Benchmarks}
+\label{sec:experiments:benchmark}
+
+Figure~\ref{f:tpcctatp} plots the performance of the \sys (incremental, tuple slicing)
+on TPC-C and TATP benchmark applications.  In both workloads, \sys derives repairs efficiently.
+And for TPC-C, \sys solves the problem on the order of milliseconds where all corrupted queries are \texttt{INSERT}s. 
+The precision and recall measures were
+$1$ both all settings.   One reason for the good performance is due to the fact that the benchmark queries
+are pre-dominantly point \texttt{INSERT} or \texttt{UPDATE} queries.  In this setting, each tuples affects a very small set of 
+tuples, which results in $1$ or $2$ complaints on average.  In this case, the tuple and query slicing algorithms
+reduce the total number of constraints for almost every setting to less than $100$.
+
+
+{\it Takeaway: many workloads in practice are dominated by point \texttt{UPDATE} queries.  In these settings,
+ \sys is very effective at reducing the number of constraints and can derive repairs in nearly
+ interactive latencies.}
+\begin{figure}[h]
+\centering
+  \includegraphics[width = .75\columnwidth]{figures/benchmark_time}
+  \vspace*{-.2in}
+  \caption{Performance on Benchmarks}
+  \label{f:tpcctatp} 
+  \vspace*{-.1in}
+\end{figure}
+
+\iffalse  
+  \begin{figure*}[h]
+    \centering
+    \begin{subfigure}[t]{.3\textwidth}
+      \includegraphics[width = .99\columnwidth]{figures/dbsize_time}
+      \vspace*{-.1in}
+      \caption{Database Size.}
+      \label{f:dbsize_time} 
+    \end{subfigure}
+        \begin{subfigure}[t]{.3\textwidth}
+      \includegraphics[width = .99\columnwidth]{figures/pointrelv_time}
+      \vspace*{-.1in}
+      \caption{Query Complexity (Query Type).}
+      \label{f:qidx_time} 
+    \end{subfigure}
+    \begin{subfigure}[t]{.3\textwidth}
+      \includegraphics[width = .99\columnwidth]{figures/where_time}
+      \vspace*{-.1in}
+      \caption{Query Complexity (Where Size).}
+      \label{f:where_time} 
+    \end{subfigure}
+    \\
+    \begin{subfigure}[t]{.3\textwidth}
+      \includegraphics[width = .99\columnwidth]{figures/dbsize_acc}
+      \vspace*{-.1in}
+      \caption{Database Size vs F1-score. }
+      \label{f:dbsize_acc} 
+    \end{subfigure}
+        \begin{subfigure}[t]{.3\textwidth}
+      \includegraphics[width = .99\columnwidth]{figures/pointrelv_acc}
+      \vspace*{-.1in}
+      \caption{Query Complexity (Query Type) vs F1-score.}
+      \label{f:qidx_acc} 
+    \end{subfigure}
+    \begin{subfigure}[t]{.3\textwidth}
+      \includegraphics[width = .99\columnwidth]{figures/where_acc}
+      \vspace*{-.1in}
+      \caption{Query Complexity (Where Size) vs F1-score.}
+      \label{f:where_acc} 
+    \end{subfigure}
+    
+    \caption{Scalability Experiments (Performance)}
+  \end{figure*}
+\fi
 
