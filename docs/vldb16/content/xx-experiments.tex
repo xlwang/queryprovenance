@@ -320,6 +320,7 @@ has severe scalability limitations due to the large number of undetermined value
 since MILP constraint solving is a known NP-hard problem.
 In contrast, the incremental algorithms can scale to larger query log sizes, however only a batch size of $k=1$ can retain high repair quality.
 Furthermore, we show that \texttt{UPDATE}-only workloads are significantly more expensive to repair than other query types. 
+Based on these results, we focus on the incremental algorithm $inc_1$ and the more difficult \texttt{UPDATE}-only workloads.
 %Based on the result, we consider incremental algorithm at batching level 1 with tuple slicing optimization ($inc_1-tuple$) as default setting in the rest of the experiment. In addition, we only consider \texttt{UPDATE}-only workload in synthetic experiments in Section~\ref{sec:experiments:synth}. 
 }
 
@@ -343,27 +344,48 @@ Furthermore, we show that \texttt{UPDATE}-only workloads are significantly more 
   \end{figure*}
   
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 \subsection{Synthetic Incremental Experiments}
 \label{sec:experiments:synth}
-We now perform a detailed evaluation of the incremental algorithm (batching level 1).
-We divide these experiments into two groups: the first evaluates the difference slicing-based 
-optimizations under different settings; the latter fixes the set of optimizations and varies workload and dataset parameters.
-Note that we don't show accuracy figures for experiments with a $\ge 0.99$ F1-score.
+%We now perform a detailed evaluation of the incremental algorithm (batching level 1).
+We divide these experiments into two groups: the first evaluates the different slicing optimizations under different settings; 
+the latter algorithm and varies workload and dataset parameters.
+Note that omit accuracy figures when the F1-score is $\ge 0.99$.
 
 \subsubsection{Comparing Optimizations}
 
 \stitle{Varying \# Attributes}
-We first evaluate \sys and its optimizations by increasing the number of attribute ($N_a$)
-in the table from $10$ to $50, 100, 500$ with $N_D = 100$. As shown 
-in Figure~\ref{f:attr}, when the number of attribute in a table is small, e.g., 10, 
-performance of \sys with or without query slicing or attribute slicing optimizations 
-appears identical. However, as we gradually increase the number of attribute, the benefit
-of query slicing or attribute slicing become much more significant. 
-In particular, applying all slicing optimizations ($inc_1-all$) is $40\times$ faster than \sys with only \emph{tuple-slicing} 
-optimization ($inc_1-tuple$) when there are 500 attribute in the table.  
+We first evaluate \sys and its optimizations by increasing the number of attribute ($N_a \in [10, 500]$) with $N_D = 100$\ewu{100 or 1000?}. 
+As shown in Figure~\ref{f:attr}, when the number of attribute in a table is small (e.g., 10) all algorithms appear identical. 
+However, increasing the number of attribute exhibits a larger benefit for query and attribute slicing (\ewu{Mention avg reduction in number of constraints in the problem compared to tuple only}).
+When the table is wide ($N_a = 500$), applying all optimizations ($inc_1-all$) is $40\times$ faster than \emph{tuple-slicing} alone.  
 
 \stitle{Database Size:}
-We further increasing the database size $N_D \in \{100,500, 1k, 5k\}$ while keeping the number of attributes fixed at $N_a = 100$ and roughly the same selectivity. 
+We increase the database size ($N_D \in [100,5000]$) while keeping the number of attributes fixed at $N_a = 100$.
+We also vary $V_d$ in order to ensure that the cardinality of each query remains constant as the database increases in size.
+This is used to ensure the size of the complaint set does not affect the experimental results.
+Figure~\ref{f:attr100} shows that the cost predominantly grows when the corruption happens in an old query ($idx = 50$).
+\ewu{why does the cost increase while the next experiment is flat??}
+The large number of attributes in the schema enables the query and attribute optimizations to have a large effect.
+In fact, combining all three optimizations improves the latency by $2\times$ in the worst case, and up to $4\times$ in the best.
 \xlw{
 In Figure~\ref{f:attr100}, we see that the time cost grows as database size increases for approach with only \emph{tuple-slicing} optimization. This is because we increase the range $[0, V_d]$ of each attribute in order to keep the same query selectivity as database size increases. Thus, the searching space of the problem also grows and so does the execution time. However, \emph{attribute-slicing} helps reducing the impact as it only encodes relevant attributes. As a result, we observe a much slower time cost growing rate for algorithm with \emph{attribute-slicing} optimization. Overall, we observe that approach with all optimizations ($inc_1-all$)
 shows more than $50\%$ efficiency gain over with only tuple-slicing optimization as the database size increases. Note that the impact of attribute ranges $[0, V_d]$ also relevant to number of attribute in the table, it would not increase the searching space (or time cost) as significant as for problems with fewer attributes (e.g., 10). 
