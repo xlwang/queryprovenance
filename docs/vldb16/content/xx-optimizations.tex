@@ -162,16 +162,13 @@ queries have been repaired because they don't take the query interactions into a
 
 Instead, we solve this using a second, significantly smaller, MILP problem.   
 Let $\mathcal{Q}^*_{rep}$ be the set of repaired queries from the  initial MILP formulation with tuple slicing;
-$\mathcal{NC}$ be the set of non-complaint tuples now matching the repaired \texttt{WHERE} clauses, as in Figure~\ref{fig:groups}(b); and $\mathcal{C}^+ = \mathcal{C} \cup \mathcal{NC}$..
-\ewu{Wasn't clear from your text what we do -- this is my understanding.}
-\ewu{
-  We create a new MILP using $\mathcal{C}^+$ as the complaint set.  
-  The key is to only parameterize the repaired clauses from Step 1 as constraints with undetermined variables.
-  The variables for all other tuples and queries are fixed to their assigned values from Step 1.
-  In this way, we {\it refine} the solutions from the previous step while incorporating knowledge about complaints in $\mathcal{NC}$, 
-  Finally, we use a new objective function that minimizes the number of non-complaint tuples 
-  $t \in \mathcal{NC}$ that are matched by the solution.
-}
+$\mathcal{NC}$ be the set of non-complaint tuples now matching the repaired \texttt{WHERE} clauses, as in Figure~\ref{fig:groups}(b); and $\mathcal{C}^+ = \mathcal{C} \cup \mathcal{NC}$.
+We create a new MILP using $\mathcal{C}^+$ as the complaint set.  
+The key is to only parameterize the repaired clauses from Step 1 as constraints with undetermined variables.
+The variables for all other tuples and queries are fixed to their assigned values from Step 1.
+In this way, we {\it refine} the solutions from the previous step while incorporating knowledge about complaints in $\mathcal{NC}$, 
+Finally, we use a new objective function that minimizes the number of non-complaint tuples 
+$t \in \mathcal{NC}$ that are matched by the solution.
 
 % initialize and fix all variables  and fix binary variable $x_{q,t}$ for complaint tuples $t \in \mathcal{C}$ and the values of all queries not in $\mathcal{Q}^*_{rep}$ to their assignment in the solution from the first step.
 % This not only ensures the quality of the refined log repair but also guarantees that only repaired query parameters can be perturbed, which vastly reduces the number of undetermined variables in the problem.
