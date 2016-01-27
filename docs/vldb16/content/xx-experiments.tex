@@ -194,10 +194,10 @@ and a WHERE clause can either be a $Point$ predicate on a key, or a $Range$ pred
  SET Clause:                WHERE Clause:
   Constant: SET (a_i=?), ..   Point: WHERE a_j=? & ..
   Relative: SET (a_i=a_i+?)   Range: WHERE a_j in [?,?+r] & ..\end{verbatim} }
-where \verb|?| is a randomly generated value and \verb|r| is the size of the range predicate. 
-We set \verb|r|'s default to $2$, so query selectivity is $2\%$.
+where \verb|?|$\in [0, V_d]$ is random and \verb|r| is the size of the range predicate. 
+Query selectivity is by default $2\%$ (\verb|r|$=2$).
 Note that a range predicate where \texttt{r = 0} is distinct from a $Point$ predicate due to the non-key attribute.
-The \texttt{WHERE} clauses in \texttt{DELETE} queries are generated in an identical fashion, while
+The WHERE clauses in \texttt{DELETE} queries are generated in an identical fashion, while
 \texttt{INSERT} queries insert values picked uniformly at random from $V_d$.
 By default, we generate \texttt{UPDATE} queries with non-key range predicates and constant set clauses.
 
@@ -307,9 +307,9 @@ This is why the precision curve is lower than the recall curve for $inc_8-tuple$
 Our final preliminary experiment evaluates the incremental algorithm with tuple slicing optimization 
 ($inc_1-tuple$) on \texttt{INSERT}, \texttt{DELETE}, or \texttt{UPDATE}-only workloads.
 We increase the number of queries from $1$ to $200$ and corrupt the oldest query in the log.  
-Figure~\ref{f:indelup_time} shows that while the cost of repairing \texttt{insert} workloads
-remains relatively constant, the cost for \texttt{delete}-only and \texttt{update}-only workloads increase as 
-the corruption happens earlier in the query log---and a much faster rate for \texttt{update} queries.
+Figure~\ref{f:indelup_time} shows that while the cost of repairing \texttt{INSERT} workloads
+remains relatively constant, the cost for \texttt{DELETE}-only and \texttt{UPDATE}-only workloads increase as 
+the corruption happens earlier in the query log---and a much faster rate for \texttt{UPDATE} queries.
 The F1 score for all settings is nearly 1 (Figure~\ref{f:indelup_acc}).
 
 \smallskip
