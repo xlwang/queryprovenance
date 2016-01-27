@@ -1,0 +1,305 @@
+
+\section{A MILP-based Solution}
+\label{sec:sol}
+
+In this section, we introduce a \emph{basic} solver-based approach to 
+resolve the errors reflected in the complaint set.
+This approach constructs a mixed-integer linear 
+programming (MILP) problem by linearizing and parameterizing the 
+corrupted query log over the tuples in the database. 
+Briefly, an MILP is a linear program where only a subset of the undetermined variables
+are required to be integers, while the rest are real valued.
+
+Our general strategy is to model each query as a linear equation 
+that computes the output tuple values from the inputs and to transform the
+equation into a set of of linear constraints.   
+In addition, the constant values in the queries are parameterized
+into a set of undetermined variables, while the database state is encoded 
+as constraints on the initial and final tuple values.
+Finally, the undetermined variables are used to construct an objective function
+that prefers value assignments that minimize both the amount that the queries change and
+the number of non-complaint tuples that are affected. 
+
+The rest of this section will first describe the process of linearizing a single query
+and translating it into a set of constraints.  We then extend the process to the entire
+query log and finally define the objective function.
+Subsequent sections introduce optimizations that both
+improve the speed and quality of the results, as well as harness the trade-off between the two. 
+
+
+
+
+
+
+
+
+\subsection{Encoding a Single Query}
+\label{sec:linearize}
+
+\if{0}
+  We model a query $q_i$ as a conditional function $f_{q_i}(t)$ that takes as input a tuple $t$
+  and returns its next state $t'$.  $f_{q_i}$ is applied to each 
+  tuple $t \in \mathcal{D}_{i-1} \cup \{\bcancel{t}\}$ in the input relation along with a special
+  non-existant tuple $\bcancel{t}$. \ewu{maybe fold this into the data model.}
+  By treating the query as a function, we are able to encode its effects into a set
+  of linear inequality constraints.  We call this process the linearization and 
+  parameterization of a query.
+
+  \begin{definition} [Conditional Function]
+  \label{def:cond}
+    The conditional function for query $q$ is:
+    \[
+      f_{q_i}(t)= 
+      \begin{cases}
+      f_{q_i.\mu} (t) ,& \text{if } f_{q_i.\sigma} (t)\\
+      t,              & \text{otherwise}
+      \end{cases}
+  \]
+  where the \textit{update function} $f_{q_i.\mu}$ models a set of \textit{update equation(s)};
+  and the \textit{condition function} $f_{q_i.\sigma}$ models a set of \textit{logical expression(s)} in 
+  disjunctive or conjunctive form.
+  \end{definition} 
+
+
+
+  Conditional functions can describe the common classes of update queries:
+  \begin{enumerate}
+  \item \texttt{UPDATE}: $f_{q_i.\mu}(t)$, $f_{q_i.\sigma}(t)$ model the \texttt{SET}
+        and \texttt{WHERE} clauses.  For example, $f_{q_i.\mu}(<t.a, t.b>) = <t.a + 1, 2>$ and
+        $f_{q_i.\sigma}(t) = (t.a > 20)$ corresponds to the query 
+        \texttt{UPDATE D SET a = a + 1, b = 2 WHERE a > 20}.
+
+  \item \texttt{INSERT}: $f_{q_i.\mu}(t)$ returns the inserted tuple, while 
+        $f_{q_i.\sigma}(t) = (t = \bcancel{t})$ evaluates to true when it is executed over
+        the special nonexistant tuple.
+
+  \item \texttt{DELETE}: $f_{q_i.\mu}(t) = \bcancel{t}$ returns a nonexistant tuple whenever
+        the predicate encoded in $f_{q_i.\sigma}(t)$ evaluates to true.
+        For example, the query \texttt{DELETE FROM T WHERE a < 20} represents 
+        $f_{q_i.\sigma}(t) = (t.a < 20)$.
+        
+  \end{enumerate}
+
+  Finally, we parameterize $q_i$ by replacing all numeric constants in the
+  conditional function with undetermined variables.   Consider the conditional
+  function for \texttt{UPDATE} above: the constants $1$, $2$ in $f_{q_i.\mu}$
+  as well as $20$ in $f_{q_i.\sigma}$ will be transformed into undetermined
+  variables \texttt{v1, v2, v3} that are solved by the MILP solver.
+
+\fi
+
+
+
+
+MILP problems express constraints as a set of linear inequalities. Our
+task is to derive such a mathematical representation for each query in
+$\mathcal{Q}$. Starting with the functional representation of a
+query (Section~\ref{sec:models}), we describe how each query type,
+\texttt{UPDATE}, \texttt{INSERT}, and \texttt{DELETE}, can be
+transformed into a set of linear constraints over a tuple $t$ and an
+attribute value $A_j$.
+
+
+
+\smallskip
+\noindent
+\texttt{UPDATE:}
+Recall from Section~\ref{sec:models} that query $q_i$ can be modeled
+as the combination of a modifier function $\mu_{q_i}(t)$ and
+conditional function $\sigma_{q_i}(t)$. First, we introduce a binary
+variable $x_{q_i, t}$ to indicate whether $t$ satisfies the
+conditional function of $q_i$: $x_{q_i, t}=1$ if
+$\sigma_{q_i}(t)=\texttt{true}$ and $x_{q_i, t}=0$ otherwise. In a
+slight abuse of notation:
+{\scriptsize
+\begin{align}
+\label{eq:x}
+x_{q_i, t} = \sigma_{q_i}(t)
+\vspace*{-0.1in}
+\end{align}
+}
+Next, we introduce real-valued variables for the attributes of $t$.
+We express the updated value
+of an attribute using semi-modules, borrowing from the models of
+provenance for aggregate operations~\cite{Amsterdamer2011}. A
+semi-module consists of a commutative semi-ring, whose elements are
+scalars, a commutative monoid whose elements are vectors, and a
+multiplication-by-scalars operation that takes a scalar $x$ and a
+vector $u$ and returns a vector $x \otimes u$. A similar formalism has
+been used in literature to model hypothetical data
+updates~\cite{tiresias}.
+
+Given a query $q_i$ and tuple $t$, we express the value of attribute $A_j$ in the updated tuple $t'$ as follows:
+{\scriptsize
+\begin{align}
+\label{eq:linearization}
+t'.A_j = x_{q_i, t}\otimes \mu_{q_i}(t).A_j + (1-x_{q_i, t})\otimes t.A_j 
+\end{align} 
+}
+In this expression, the $\otimes$ operation corresponds to regular
+multiplication, but we maintain the $\otimes$ notation to indicate
+that it is a semi-module multiplication by scalars. This expression
+models the action of the update: If $t$ satisfies the conditional
+function ($x_{q_i, t}=1$), then $t'.A_j$ takes the value
+$\mu_{q_i}(t).A_j$; if $t$ does not satisfy the conditional function
+($x_{q_i, t}=0$), then $t'.A_j$ takes the value $t.A_j$.
+In our running example, the rate value of a tuple $t$ after query $q_1$ would be expressed as:
+$t'.owed = x_{q_1, t}\otimes (t.income*0.3) + (1-x_{q_1, t})\otimes t.owed$.
+Equation~\eqref{eq:linearization} does not yet provide a linear
+representation of the corresponding constraint, as it contains
+multiplication of variables. To linearize this expression, we adapt a
+method from~\cite{tiresias}: We introduce two variables $u.A_j$ and
+$v.A_j$ to represent the two terms of
+Equation~\eqref{eq:linearization}: $u.A_j=x_{q_i, t}\otimes
+\mu_{q_i}(t).A_j$ and $v.A_j=(1-x_{q_i, t})\otimes t.A_j$. Assuming a
+number $M$ as the upper bound of the domain of $t.A_j$, we get the
+following constraints:
+{\scriptsize
+\begin{align}
+\label{eq:uv}
+u.A_j &\leq \mu_{q_i}(t).A_j   &v.A_j &\leq t.A_j &\nonumber\\
+u.A_j &\leq x_{q_i, t}M        &v.A_j &\leq (1-x_{q_i, t})M &\\
+u.A_j &\geq \mu_{q_i}(t).A_j - (1-x_{q_i, t})M  \phantom{aa}
+&v.A_j &\geq t.A_j - x_{q_i, t}M &\nonumber
+\end{align}
+}
+The set of conditions on $u.A_j$ ensure that $u.A_j = \mu_{q_i}(t).A_j$ if $x_{q_i, t}=1$, and $0$ otherwise. Similarly, 
+the conditions on $v.A_j$ ensure that $v.A_j = t.A_j$ if $x_{q_i, t}=0$, and $0$ otherwise.  
+Now, Equation~\eqref{eq:linearization} becomes linear:
+ {\scriptsize
+\begin{align}
+\label{eq:tnew}
+t.A_j' = u.A_j + v.A_j
+\end{align}
+}
+
+\vspace*{-0.1in}
+\noindent\texttt{INSERT:}
+An insert query adds a new tuple $t_{new}$ to the database.  If the query were 
+corrupted, then the inserted values need repair. We use a binary variable $x$ to model whether the query is correct.  Each attribute of the newly inserted tuple ($t'.A_j$) may take one of two values: the value specified by the insertion query ($t_{new}.A_j$) if the query is correct ($x=1$), or an undetermined value ($u.A_j$) if the query is incorrect ($x=0$).  Thus, similar with Equation~\eqref{eq:linearization}, we write:
+ {\scriptsize
+\begin{eqnarray}
+\label{eq:insert}
+t'.A_j = x \otimes t_{new}.A_j + (1-x) \otimes v.A_j 
+\end{eqnarray}
+ }
+
+
+\smallskip
+\noindent
+\texttt{DELETE:}
+A delete query removes a set of tuples from the database.  
+Since the MILP problem doesn't have a way to express a non-existant value, 
+we encode a deleted tuple by setting its attributes to a value
+outside of the attribute domain $M^+$.  In this way, subsequent conditional functions
+on the attribute will return false, so it will not have an effect on subsequent queries encoded
+in the MILP problem:
+ {\scriptsize
+\begin{eqnarray}
+\label{eq:delete}
+t'.A_j &=& x_{q_i, t} \otimes M^+ + (1-x_{q_i, t}) \otimes t.A_j \\
+x_{q_i, t} &=& \sigma_{q_i}(t)\nonumber 
+\end{eqnarray}
+ }
+This expression is further linearized using the same method as Equation~\eqref{eq:uv}.
+
+\smallskip
+\noindent
+\textbf{Putting it all together.}
+The constraints defined in Equations \eqref{eq:x}--\eqref{eq:delete}
+form the main structure of the MILP problem for a single attribute
+$A_j$ of a single tuple $t$. To linearize a query $q_i$ one needs to
+apply this procedure to all attributes and tuples. This process is
+denoted as $Linearize(q, t)$ in Algorithm~\ref{alg:basic}. Our MILP
+formulation includes three types of variables: the binary variables
+$x_{q_i, t}$, the real-valued attribute values (e.g., $u.A_j$), and
+the real-valued constants in $\mu_{q_i}$ and $\sigma_{q_i}$. All these
+variables are undetermined and need to be assigned values by a MILP
+solver.
+
+
+Next, we describe how to extend this encoding to the entire query log,
+and how to incorporate an objective function encouraging solutions
+that minimize the overall changes to the query log.
+
+
+
+
+
+
+
+\subsection{Encoding and Repairing the Query Log}
+\label{sec:milp}
+
+We proceed to describe the procedure (Algorithm~\ref{alg:basic}) that encodes 
+the full query log into a MILP problem, and solves the MILP problem to derive $\mathcal{Q}^*$.
+The algorithm takes as input the query log $\mathcal{Q}$, 
+the initial and final (dirty) database states 
+$\mathcal{D}_{0, n}$, and the complaint set $\mathcal{C}$, and outputs a fixed query 
+log $\mathcal{Q}^*$.  
+
+We first call \textit{Linearize} on each tuple in $\mathcal{D}_0$ and
+each query in $\mathcal{Q}$, and add the result to a set of
+constraints \textit{milp\_cons}. The function \textit{AssignVals} adds
+constraints to set the values of the inputs to $q_0$ and the outputs
+of $q_n$ to their respective values in $\mathcal{D}_0$ and
+$\mathcal{T}_\mathcal{C}(\mathcal{D}_n)$. Additional constraints
+account for the fact that the output of query $q_i$ is the input of
+$q_{i+1}$ (\textit{ConnectQueries}). This function simply equates $t'$
+from the linearized result for $q_i$ to the $t$ input for the
+linearized result of $q_{i+1}$.
+
+Finally, \emph{EncodeObjective} augments the program with an objective
+function that models the distance function between the original query
+log and the log repair ($d(\mathcal{Q},\mathcal{Q}^*)$). In the
+following section we describe our model for the distance function,
+though other models are also possible. Once the MILP solver returns a
+variable assignment, \textit{ConvertQLog} updates the constants in the
+query log based on this assignment, and constructs the fixed query log
+$\mathcal{Q}^*$.
+
+
+
+
+
+\begin{algorithm}[t]
+\caption{$Basic:$ The MILP-based approach.}
+\label{alg:basic}
+\scriptsize
+\begin{algorithmic}[1]
+\REQUIRE {$\mathcal{Q}, D_0, D_n, \mathcal{C}$}
+\STATE $milp\_cons \leftarrow \emptyset$
+\FOR {each $t$ in $R$}
+\FOR {each $q$ in $\mathcal{Q}$}
+\STATE $milp\_cons \leftarrow milp\_cons \cup Linearize(q, t)$
+\ENDFOR
+\STATE $milp\_cons \leftarrow milp\_cons \cup AssignVals(D_0.t, D_n.t, \mathcal{C})$
+\FOR {each $i$ in $\{0,\ldots,N-1\}$}
+\STATE $milp\_cons \leftarrow milp\_cons \cup ConnectQueries(q_i, q_{i+1})$
+\ENDFOR
+\ENDFOR 
+\STATE $milp\_obj \leftarrow EncodeObjective(milp\_cons, \mathcal{Q})$
+\STATE $solved\_vals \leftarrow MILPSolver(milp\_cons, milp\_obj)$
+\STATE $\mathcal{Q}^* \leftarrow ConvertQLog(Q, solved\_vals)$
+\STATE Return $\mathcal{Q}^*$
+\end{algorithmic}
+\end{algorithm}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

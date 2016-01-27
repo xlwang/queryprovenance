@@ -1,0 +1,36 @@
+
+\section{Summary and discussion}
+
+In this paper, we presented \sys, a framework for diagnosing and
+repairing data errors in the queries that operate on the data.
+Datasets are typically dynamic; so even if a dataset starts clean,
+updates on the data can introduce new errors. With \sys, we can
+analyze query logs to trace reported errors to the queries that
+introduced them. This allows us in turn to identify additional errors
+in the data that may have been missed and gone unreported.
+
+We proposed a basic algorithm, \naive, that uses non-trivial transformation rules to
+encode information from the data and the query log as a MILP problem. We further improve 
+the \naive algorithm by two types of optimizations: slicing-based optimizations that reduce problem
+size without compromising the accuracy and 
+incremental optimization that analyzes a single query at a time. 
+Our experiments show that the latter
+optimization can achieve significant scaling gains for single-query
+errors, without significant reduction in accuracy.
+
+To the best of our knowledge, \sys is the first approach to diagnosis
+and repair of errors in queries. Obviously, correcting such errors in
+practice poses additional challenges. 
+The current version of \sys focuses on linear functions, so it may not
+be able to encode complex updates that involve non-linear
+computations. Future versions can target extended models and solvers
+to represent richer scenarios. Finally, in our future work, we plan to
+investigate additional methods of scaling the constraint analysis, as
+well as techniques that can adapt the benefits of single-query
+analysis to errors in multiple queries.
+
+
+
+
+
+

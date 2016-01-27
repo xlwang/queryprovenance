@@ -1,0 +1,110 @@
+\include{header}
+
+
+\newcommand{\papertext}[1]{#1}
+\newcommand{\techreport}[1]{#1}
+
+\newcommand{\xxx}[1]{{\fontsize{13pt}{13pt}\selectfont\textcolor{red}{#1}}}
+\newcommand{\codesize}{\fontsize{7}{8}}
+\newcommand{\stitle}[1]{\vspace{0.5em}\noindent\textbf{#1}}
+\newcommand{\calF}[0]{$\cal{F}$}
+
+\newcommand{\ind}{\hspace{\algorithmicindent}}
+
+\newcommand{\deprecate}[1]{\noindent{\color{light-gray}{#1}}}
+
+\newcommand{\prob}{{\sc Log-Corruption}\xspace}
+\newcommand{\exact}{{\sc EXACTSOL}\xspace}
+\newcommand{\qfix}{{\sc SingleQueryFix}\xspace}
+\newcommand{\density}{{\sc DENSITY}\xspace}
+
+
+\newcommand{\milpall}{\textsc{MILP-NAIVE}\xspace}
+\newcommand{\milptuple}{\textsc{MILP-COMPL}\xspace}
+\newcommand{\milptuplestopearly}{\textsc{MILP-COMPL-STOPEARLY}\xspace}
+\newcommand{\milpadvtuple}{\textsc{MILP-ADV-TUPLE}\xspace}
+\newcommand{\milpadvall}{\textsc{MILP-ADV-ALL}\xspace}
+\newcommand{\heurstic}{\textsc{HEURISTIC}\xspace}
+
+\pagenumbering{arabic}
+
+\makeatletter
+\def\maketag@@@#1{\hbox{\m@th\normalfont\normalsize#1}}
+\DeclareRobustCommand*\textsubscript[1]{
+          \@textsubscript{\selectfont#1}}
+        \def\@textsubscript#1{
+          {\m@th\ensuremath{_{\mbox{\fontsize\sf@size\z@#1}}}}}
+\makeatother
+
+\newcommand{\sysname}{\textsc{QueryFix}}
+\newcommand{\sys}{QFix\xspace}
+\newcommand{\naive}{\emph{basic} approach\xspace}
+\newcommand{\tslice}{\sys-{\it tuple}\xspace}
+\newcommand{\qslice}{\sys-{\it query}\xspace}
+\newcommand{\aslice}{\sys-{\it attr}\xspace}
+\newcommand{\incremental}{\sys-{\it inc}\xspace}
+
+\begin{document}
+
+\title{{\LARGE\textbf{\sys}}: Diagnosing errors through query histories}
+
+ 
+\numberofauthors{3}
+ \author{
+  \alignauthor Xiaolan Wang\\
+    \affaddr{School of Computer Science}\\
+    \affaddr{University of Massachusetts}\\
+    \email{xlwang@cs.umass.edu}\\
+  \alignauthor Alexandra Meliou\\
+  \affaddr{School of Computer Science}\\
+    \affaddr{University of Massachusetts}\\
+    \email{ameli@cs.umass.edu}\\
+  \alignauthor Eugene Wu\\
+    \affaddr{Computer Science}\\
+    \affaddr{Columbia University}\\
+    \email{ewu@cs.columbia.edu}\\
+}
+
+
+
+
+\maketitle
+
+\begin{abstract}
+Data-driven applications rely on the correctness of their data to
+function properly and effectively. Errors in data can be incredibly
+costly and disruptive, leading to loss of revenue, incorrect
+conclusions, and misguided policy decisions. While data cleaning tools
+can purge datasets of many errors before the data is used,
+applications and users interacting with the data can introduce new
+errors. Subsequent valid updates can obscure these errors and
+propagate them through the dataset causing more discrepancies. Even
+when some of these discrepancies are discovered, they are often
+corrected superficially, on a case-by-case basis, further obscuring
+the true underlying cause, and making detection of the remaining
+errors harder.
+
+In this paper, we propose \sys, a framework that derives explanations
+and repairs for discrepancies in relational data, by analyzing the
+effect of queries that operated on the data and identifying potential
+mistakes in those queries. \sys is flexible, handling scenarios where
+only a subset of the true discrepancies is known, and robust to
+different types of update workloads. We make four important
+contributions: (a) we formalize the problem of diagnosing the causes
+of data errors based on the queries that operated on the dataset; (b)
+we develop exact methods for deriving diagnoses and fixes for
+identified errors using state-of-the-art tools; (c) we present several
+optimizations techniques that improve our basic approach without
+compromising accuracy, and (d) we leverage a tradeoff between accuracy
+and performance to scale diagnosis to large datasets and query logs,
+while achieving near-optimal results. We demonstrate the effectiveness
+of \sys through extensive evaluation over real-world and synthetic
+data.
+
+\end{abstract}
+
+\input{scaffold}
+
+
+
+\end{document}

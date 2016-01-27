@@ -1,0 +1,189 @@
+\relax 
+\citation{eckerson2002}
+\citation{Fan2008}
+\citation{wang2015}
+\citation{Khoussainova2006}
+\citation{Chen2011}
+\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}}
+\newlabel{s:intro}{{1}{1}}
+\newlabel{ex:telco}{{1}{1}}
+\citation{Yates10,Grady13,sakalerrors}
+\newlabel{ex:taxes}{{2}{2}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces QFix\xspace  processes data anomalies in the form of complaints and analyzes logged query histories to identify the causes of error. In the heart of the system, transformation algorithms express the diagnosis problem as a mixed integer linear program (MILP), and optimization modules ensure that the MILP programs can be evaluated efficiently.\relax }}{2}}
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{fig:architecture}{{1}{2}}
+\@writefile{toc}{\contentsline {section}{\numberline {2}{\relax \fontsize  {12}{14\p@ }\selectfont  \textbf  {QFix\xspace  }}: architecture}{2}}
+\@writefile{toc}{\contentsline {section}{\numberline {3}Modeling abstractions}{2}}
+\newlabel{sec:abstractions}{{3}{2}}
+\newlabel{ex:taxes2}{{3}{2}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces A recent change in tax rate brackets calls for a tax rate of 30\% for those with income above \$87500. The accounting department issues query $q_1$ to implement the new policy, but the predicate of the WHERE clause condition transposed two digits of the income value. \relax }}{3}}
+\newlabel{fig:example}{{2}{3}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Summary of notations used in the paper. \relax }}{3}}
+\newlabel{tbl:notation}{{3}{3}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Error modeling}{3}}
+\newlabel{sec:model}{{3.1}{3}}
+\newlabel{sec:models}{{3.1}{3}}
+\citation{Amsterdamer2011}
+\citation{tiresias}
+\newlabel{def:problem}{{5}{4}}
+\@writefile{toc}{\contentsline {section}{\numberline {4}A MILP-based Solution}{4}}
+\newlabel{sec:sol}{{4}{4}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Encoding a Single Query}{4}}
+\newlabel{sec:linearize}{{4.1}{4}}
+\newlabel{eq:x}{{1}{4}}
+\citation{tiresias}
+\newlabel{eq:linearization}{{2}{5}}
+\newlabel{eq:uv}{{3}{5}}
+\newlabel{eq:tnew}{{4}{5}}
+\newlabel{eq:insert}{{5}{5}}
+\newlabel{eq:delete}{{6}{5}}
+\@writefile{loa}{\contentsline {algocf}{\numberline {1}{\ignorespaces $Basic:$ The MILP-based approach.\relax }}{5}}
+\newlabel{alg:basic}{{1}{5}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Encoding and Repairing the Query Log}{5}}
+\newlabel{sec:milp}{{4.2}{5}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}The Objective Function}{5}}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Optimizing the Basic Approach}{6}}
+\newlabel{sec:opt}{{5}{6}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Log size vs. execution time over 1000 records. \relax }}{6}}
+\newlabel{fig:querysize_vs_time}{{4}{6}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Reducing Tuples (Tuple Slicing)}{6}}
+\newlabel{sec:opt:tbsize}{{5.1}{6}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces  Graphical depiction of correct (a) and over-generalized (b) repairs. Solid and empty circles represent complaint and non-complaint tuples. Each thick line represents the interval of query $q$'s range predicate. Dirty: incorrect interval in corrupted query; truth: correct interval in true query; repair: interval returned by the solver.\relax }}{6}}
+\newlabel{fig:groups}{{5}{6}}
+\@writefile{loa}{\contentsline {algocf}{\numberline {2}{\ignorespaces $FullImpact:$ Algorithm for finding $\mathcal  {F}(q)$.\relax }}{7}}
+\newlabel{alg:fullimpact}{{2}{7}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Reducing Queries (Query-Slicing)}{7}}
+\newlabel{sec:opt:query}{{5.2}{7}}
+\@writefile{loa}{\contentsline {algocf}{\numberline {3}{\ignorespaces $Inc_k:$ The incremental algorithm. \relax }}{7}}
+\newlabel{alg:incalg}{{3}{7}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}Reducing Attributes (Attribute Slicing)}{7}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.4}Incremental Repairs}{7}}
+\newlabel{sec:incremental}{{5.4}{7}}
+\@writefile{toc}{\contentsline {section}{\numberline {6}Noisy Complaint Sets}{7}}
+\newlabel{sec:noise}{{6}{7}}
+\citation{difallah2013oltp}
+\citation{tpcc}
+\citation{tatp}
+\citation{cplex2014v12}
+\citation{tpcc}
+\citation{tatp}
+\citation{difallah2013oltp}
+\@writefile{toc}{\contentsline {section}{\numberline {7}Experiments}{8}}
+\newlabel{sec:experiments}{{7}{8}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.1}Experimental Setup}{8}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {7.1.1}Datasets and Workloads}{8}}
+\newlabel{sec:syntheticgen}{{7.1.1}{8}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.2}Preliminaries}{8}}
+\newlabel{f:multi_time}{{6a}{9}}
+\newlabel{sub@f:multi_time}{{a}{9}}
+\newlabel{f:singlequeryinc_time}{{6b}{9}}
+\newlabel{sub@f:singlequeryinc_time}{{b}{9}}
+\newlabel{f:indelup_time}{{6c}{9}}
+\newlabel{sub@f:indelup_time}{{c}{9}}
+\newlabel{f:multi_acc}{{6d}{9}}
+\newlabel{sub@f:multi_acc}{{d}{9}}
+\newlabel{f:singlequeryinc_acc}{{6e}{9}}
+\newlabel{sub@f:singlequeryinc_acc}{{e}{9}}
+\newlabel{f:indelup_acc}{{6f}{9}}
+\newlabel{sub@f:indelup_acc}{{f}{9}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Preliminary experiments.\relax }}{9}}
+\newlabel{sec:indelup}{{7.2}{9}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.3}Synthetic Incremental Experiments}{9}}
+\newlabel{sec:experiments:synth}{{7.3}{9}}
+\newlabel{f:attr}{{7a}{10}}
+\newlabel{sub@f:attr}{{a}{10}}
+\newlabel{f:attr100}{{7b}{10}}
+\newlabel{sub@f:attr100}{{b}{10}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Comparison of optimizations.\relax }}{10}}
+\citation{dallachiesa2013nadeef,rahm00,Raman01,Kalashnikov06,Fan2008b}
+\citation{Abiteboul99}
+\citation{Koudas2006,GruenheidDS14}
+\citation{yin2008truth,DN09,ltm2012}
+\citation{Galhardas2000}
+\citation{ChuIP13}
+\citation{Fan2008b,ChuIP13}
+\citation{Beskales2010,Cong2007}
+\citation{Fan2008b,ChuIP13}
+\citation{Yakout,Raman01}
+\citation{GolabKKS10,Golab2008}
+\citation{wang2015}
+\citation{tenCate2015}
+\citation{Chapman2009}
+\citation{tran2010conquer}
+\citation{tzompanaki14semi}
+\newlabel{f:dbsize_time}{{8a}{11}}
+\newlabel{sub@f:dbsize_time}{{a}{11}}
+\newlabel{f:qidx_time}{{8b}{11}}
+\newlabel{sub@f:qidx_time}{{b}{11}}
+\newlabel{f:falsenegative_time}{{8c}{11}}
+\newlabel{sub@f:falsenegative_time}{{c}{11}}
+\newlabel{f:skew_time}{{8d}{11}}
+\newlabel{sub@f:skew_time}{{d}{11}}
+\newlabel{f:where_time}{{8e}{11}}
+\newlabel{sub@f:where_time}{{e}{11}}
+\newlabel{f:falsenegative_acc}{{8f}{11}}
+\newlabel{sub@f:falsenegative_acc}{{f}{11}}
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces Sensitivity to data and workload factors. \relax }}{11}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.4}Benchmarks}{11}}
+\newlabel{sec:experiments:benchmark}{{7.4}{11}}
+\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces Performance on benchmarks\relax }}{11}}
+\newlabel{f:tpcctatp}{{9}{11}}
+\@writefile{toc}{\contentsline {section}{\numberline {8}Related Work}{11}}
+\newlabel{s:related}{{8}{11}}
+\citation{GebalyAGKS14}
+\citation{Wu13}
+\citation{Roy2014}
+\citation{Khoussainova2012,Thirumuruganathan2012,Das2011,Fabbri2011,Bender14}
+\citation{BunemanKT01,GKT07-semirings,CheneyCT09,CuiWW00}
+\bibstyle{abbrv}
+\bibdata{main}
+\bibcite{tpcc}{1}
+\bibcite{Abiteboul99}{2}
+\bibcite{Amsterdamer2011}{3}
+\bibcite{Bender14}{4}
+\bibcite{Beskales2010}{5}
+\bibcite{BunemanKT01}{6}
+\bibcite{Chapman2009}{7}
+\bibcite{Chen2011}{8}
+\bibcite{CheneyCT09}{9}
+\bibcite{ChuIP13}{10}
+\bibcite{Cong2007}{11}
+\bibcite{cplex2014v12}{12}
+\bibcite{CuiWW00}{13}
+\bibcite{dallachiesa2013nadeef}{14}
+\bibcite{Das2011}{15}
+\bibcite{difallah2013oltp}{16}
+\bibcite{DN09}{17}
+\bibcite{eckerson2002}{18}
+\bibcite{Fabbri2011}{19}
+\bibcite{Fan2008}{20}
+\bibcite{Fan2008b}{21}
+\bibcite{Galhardas2000}{22}
+\bibcite{GebalyAGKS14}{23}
+\bibcite{Golab2008}{24}
+\bibcite{GolabKKS10}{25}
+\@writefile{toc}{\contentsline {section}{\numberline {9}Summary and discussion}{12}}
+\@writefile{toc}{\contentsline {section}{\numberline {10}References}{12}}
+\bibcite{Grady13}{26}
+\bibcite{GKT07-semirings}{27}
+\bibcite{GruenheidDS14}{28}
+\bibcite{Kalashnikov06}{29}
+\bibcite{Khoussainova2006}{30}
+\bibcite{Khoussainova2012}{31}
+\bibcite{Koudas2006}{32}
+\bibcite{tiresias}{33}
+\bibcite{rahm00}{34}
+\bibcite{Raman01}{35}
+\bibcite{Roy2014}{36}
+\bibcite{sakalerrors}{37}
+\bibcite{tenCate2015}{38}
+\bibcite{Thirumuruganathan2012}{39}
+\bibcite{tran2010conquer}{40}
+\bibcite{tzompanaki14semi}{41}
+\bibcite{wang2015}{42}
+\bibcite{tatp}{43}
+\bibcite{Wu13}{44}
+\bibcite{Yakout}{45}
+\bibcite{Yates10}{46}
+\bibcite{yin2008truth}{47}
+\bibcite{ltm2012}{48}
