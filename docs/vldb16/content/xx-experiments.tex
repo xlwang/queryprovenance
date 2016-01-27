@@ -405,7 +405,7 @@ As a result, combining all three optimizations improves the latency by $2\times$
     \begin{subfigure}[t]{.33\textwidth}
       \includegraphics[width = .99\columnwidth]{figures/pointrelv_time}
       \vspace*{-.25in}
-      \caption{Performance of different query types.}
+      \caption{Performance of diff. query clause types.}
       \label{f:qidx_time} 
     \end{subfigure}
     \begin{subfigure}[t]{.33\textwidth}
@@ -479,7 +479,7 @@ Since the solver scales exponentially with the problem size, this leads to the p
 % However, small database size may increase the randomness in query selectivity, thus we observe different time cost when database size is 100. 
 % }
 
-\emph{Query Type: }
+\emph{Query Clause Type: }
 So far, we have focused on \texttt{UPDATE} queries with constant set clauses and range predicates.  
 Figure~\ref{f:qidx_time} individually varies each clause and compares against {\it Constant/Point} and {\it Relative/Range} queries. 
 The x-axis varies the index of the corrupted query between $q_1$ and $q_{249}$.
