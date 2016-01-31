@@ -5,9 +5,11 @@
 % \ewu{we really need to emphasize that this is a HARD problem!!}
 
 Poor data quality is a hard and persistent problem.  
+\xlw{Review1 complained about these citations. } {\color{red}
 It is estimated to cost the US economy more than \$600 billion
 per year~\cite{eckerson2002} and erroneous price data in retail databases
-alone cost the US consumers \$2.5 billion each year~\cite{Fan2008}. Although data
+alone cost the US consumers \$2.5 billion each year~\cite{Fan2008}}. 
+Although data
 cleaning tools can purge many errors from a dataset before downstream 
 applications use the data, datasets can frequently change as applications
 and users execute queries that modify the data.
@@ -30,7 +32,8 @@ focus for data management research, handling new errors, introduced during
 regular database interactions, has received little attention. Most work in
 this direction focuses on \emph{guarding against} erroneous updates. For
 example, integrity constraints~\cite{Khoussainova2006} reject some improper
-updates, but only if the data falls outside rigid, predefined ranges.
+updates (\xlw{for ordered attributes}), 
+but only if the data falls outside rigid, predefined ranges.
 Certificate-based verification~\cite{Chen2011} is less rigid, but it is
 impractical and non-scalable as it requires users to answer challenge
 questions before allowing the updates, and it is not applicable to updates
@@ -41,10 +44,10 @@ In this paper, we present \sys, a \emph{diagnosis and repair} framework for data
 caused by erroneous updates. In contrast to existing approaches in data
 cleaning that aim to detect and correct errors in the data directly, the goal
 of \sys is to identify errors in the queries that introduced errors in the
-data. These diagnoses both \emph{explain} how errors were introduced to a
-dataset, and also lead to the identification of additional discrepancies in
-the data that would have otherwise remained undetected.
-
+data. These diagnoses \emph{explain} how errors were introduced to a
+dataset, \xlw{\emph{fix} errors from source, 
+and also potentially lead to the identification of additional discrepancies in
+the data that would have otherwise remained undetected.}
 
 \begin{example}[Wireless discount policies]\label{ex:telco}
 
@@ -74,23 +77,16 @@ the tax rates and computed taxes.
 
 \end{example}
 
-
-In these application scenarios, data errors are typically reported to a
+\xlw{In these application scenarios, data errors are typically reported to a
 customer service department, which does not have the resources nor the
 capability to investigate the errors more broadly. Instead, errors are
-resolved on a case-by-case basis. In practice, customer service only deals
-with a small portion of the actual errors. Once these errors are resolved,
-there will still be a large number of incorrect records that were not
-identified. The goal of \sys is to identify the query or queries that caused
-the errors, propose corrections to those queries, and use the modified queries
-to identify other errors.
-
-Diagnosing data errors stemming from incorrect updates is fundamentally
-challenging: the search space of possible mistakes and fixes is large, and the
-amount of information (number of known errors) may be limited. The problem has
-the following important characteristics that render traditional data cleaning
-methods unsuitable:
-
+resolved on a case-by-case basis. 
+The goal of \sys is to identify the query or queries that caused
+the errors, propose corrections to those queries, and use the modified queries to
+prevent introducing more errors and identify unreported errors.
+This problem has the following important characteristics that render 
+traditional base-by-case fixing \sout{traditional data cleaning} 
+unsuitable:}
 
 
 \begin{description}[leftmargin=*, topsep=0mm, itemsep=0mm]
@@ -120,6 +116,16 @@ methods unsuitable:
     
 \end{description}
 % 
+\xlw{In fact, \sys is different with and serves as a complement of
+traditional data cleaning methods.
+Instead of identifying errors, 
+\sys targets on diagnosing, explaining, and fixing errors from the root by
+leveraging reported or detected errors that acquired from 
+users or traditional data cleaning techniques. }
+
+Diagnosing data errors stemming from incorrect updates is fundamentally
+challenging: the search space of possible mistakes and fixes is large, and the
+amount of information (number of known errors) may be limited. 
 \sys addresses these challenges by analyzing the queries that operated on a
 dataset in an efficient and scalable manner. More concretely, we make the
 following contributions:
@@ -140,7 +146,8 @@ following contributions:
     histories of updates that operated on the data. Given a set of 
     \emph{complaints} as representations of data discrepancies in the current
     state of a dataset, \sys identifies the queries in the log that require the  minimal
-    amount of changes that would resolve all of the complaints (Section~\ref{sec:abstractions}).
+    amount of changes (to the original query log) 
+    that would resolve all of the complaints (Section~\ref{sec:abstractions}).
       
     \item We provide an exact error-diagnosis solution through a non-trivial
     transformation of the problem to a mixed integer linear program (MILP) that
@@ -168,11 +175,17 @@ following contributions:
     % safely ignored (Section~\ref{???}).
     
     \item We experimentally evaluate the effectiveness and efficiency of our
-    methods against real-world and synthetic datasets and query logs. 
+    methods against \sout{real-world} benchmark and synthetic datasets and query logs. 
     (Section~\ref{sec:experiments}). 
 \end{itemize}
 
-
+\xlw{
+\sys is the first system (to our knowledge) that tries to diagnose and fix errors from query
+history. It solves standard types of queries that could be found in most of the common benchmarks 
+effectively and efficiently when enough accurate information is provided. However, \sys may fail 
+in some complex scenarios when there are hard queries (e.g, queries with sub-query, join, and aggregation), 
+or inaccurate reported errors (e.g., false positives). 
+}
 
 \section{{\large\textbf{\sys}}: architecture}
 

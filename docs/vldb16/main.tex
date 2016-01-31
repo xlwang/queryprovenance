@@ -125,10 +125,11 @@ mistakes in those queries. \sys is flexible, handling scenarios where
 only a subset of the true discrepancies is known, and robust to
 different types of update workloads. We make four important
 contributions: (a) we formalize the problem of diagnosing the causes
-of data errors based on the queries that operated on the dataset; (b)
+of data errors based on the queries that operated on \xlw{and introduced
+errors to} the dataset; (b)
 we develop exact methods for deriving diagnoses and fixes for
 identified errors using state-of-the-art tools; (c) we present several
-optimizations techniques that improve our basic approach without
+optimization techniques that improve our basic approach without
 compromising accuracy, and (d) we leverage a tradeoff between accuracy
 and performance to scale diagnosis to large datasets and query logs,
 while achieving near-optimal results. We demonstrate the effectiveness
