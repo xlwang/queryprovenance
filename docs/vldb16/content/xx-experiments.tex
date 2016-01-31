@@ -62,7 +62,9 @@
     \caption{Accuracy for different query types.}
     \label{f:indelup_acc} 
     \end{subfigure}
+    \vspace*{-.15in}
     \caption{Preliminary experiments.}
+    \vspace*{-.15in}
   \end{figure*}
 
 
@@ -260,6 +262,26 @@ that are used in all experiments.
 % \end{figure}
 
 \subsection{Preliminaries}
+
+ \begin{figure*}[ht]
+    \vspace*{-.1in}
+    \centering
+    \begin{subfigure}[t]{.49\textwidth}
+    \includegraphics[width = .99\columnwidth]{figures/attr_time}
+    \vspace*{-.1in}
+    \caption{\# of attributes vs time.}
+    \label{f:attr} 
+    \end{subfigure}
+    \begin{subfigure}[t]{.49\textwidth}
+    \includegraphics[width = .99\columnwidth]{figures/attr100_time}
+    \vspace*{-.1in}
+    \caption{Database size vs time ($N_a = 100$)}
+    \label{f:attr100} 
+    \end{subfigure}
+    \vspace*{-.15in}
+    \caption{Comparison of optimizations.}
+    \vspace*{-.15in}
+  \end{figure*}
 The following set of experiments are designed to establish the rationale for 
 the settings in the subsequent experiments.  
 Specifically, we compare different slicing-based optimizations of the basic approach
@@ -323,42 +345,6 @@ Based on these results, we focus on the incremental algorithm $inc_1$ and the mo
 %Based on the result, we consider incremental algorithm at batching level 1 with tuple slicing optimization ($inc_1-tuple$) as default setting in the rest of the experiment. In addition, we only consider \texttt{UPDATE}-only workload in synthetic experiments in Section~\ref{sec:experiments:synth}. 
 }
 
- \begin{figure*}[h]
-    \vspace*{-.1in}
-    \centering
-    \begin{subfigure}[t]{.49\textwidth}
-    \includegraphics[width = .99\columnwidth]{figures/attr_time}
-    \vspace*{-.1in}
-    \caption{\# of attributes vs time.}
-    \label{f:attr} 
-    \end{subfigure}
-    \begin{subfigure}[t]{.49\textwidth}
-    \includegraphics[width = .99\columnwidth]{figures/attr100_time}
-    \vspace*{-.1in}
-    \caption{Database size vs time ($N_a = 100$)}
-    \label{f:attr100} 
-    \end{subfigure}
-    \vspace*{-.1in}
-    \caption{Comparison of optimizations.}
-  \end{figure*}
-  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 \subsection{Synthetic Incremental Experiments}
 \label{sec:experiments:synth}
 %We now perform a detailed evaluation of the incremental algorithm (batching level 1).
@@ -394,7 +380,7 @@ As a result, combining all three optimizations improves the latency by $2\times$
 % $10$ attributes and $1k$ attributes in the table. As the performance of \sys with different optimizations appears 
 % identical when $N_a = 10$, we will only show results of \sys with tuple slicing optimization in the rest of the 
 % experiments. 
-  \begin{figure*}[h]
+  \begin{figure*}[ht]
     \hspace*{-.1in}
     \centering
      \begin{subfigure}[t]{.33\textwidth}
@@ -438,6 +424,7 @@ As a result, combining all three optimizations improves the latency by $2\times$
     \end{subfigure}
     \vspace*{-.25in}
     \caption{Sensitivity to data and workload factors. }
+    \vspace*{-.15in}
   \end{figure*}
 
 

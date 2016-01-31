@@ -134,7 +134,7 @@ would have occurred if there had been no errors in the queries.
 The true database states are unknown; our goal is to find and correct the errors in $\mathcal{Q}$ and retrieve the correct database state $D_n^*$.
 
 For ease of exposition, in the remainder of the paper we assume that the
-database contains a single relation with attributes $A_i,\ldots,A_m$,
+database contains a single relation with attributes $A_1,\ldots,A_m$,
 but the single table is not a requirement in our framework.
 
 
@@ -220,6 +220,15 @@ that would result in a clean database state $D_n^*$. Obviously, a
 challenge is that $D_n^*$ is unknown, unless we know that the
 complaint set is complete. 
 
+\subsubsection*{Scope of application}
+\xlw{
+In this paper, we assume queries are standard queries with no sub-query, aggregation and join. 
+More specifically, we support queries with linear SET/WHERE clauses in order to transform them as
+linear constraints. There can be multiple set expressions in the SET clause or multiple where predicates 
+in \textit{conjunction/disjunction} format in the WHERE clause. In Section~\ref{sec:experiments:synth}, 
+we evaluate \sys in fixing \texttt{UPDATE} query with adaptable predicate sizes. 
+}
+
 In Section~\ref{sec:sol}, we describe our basic method, 
 which
 uses a constraint programming formulation that expresses this
@@ -236,14 +245,13 @@ cases of incomplete information (incomplete complaint set), and
 repair and tuple slicing optimization (Section~\ref{sec:incremental}), can
 handle $10\times$ compared to the basic MILP approach. 
 
-\iffalse
 Although we emphasis on solving the query logs with multiple queries, 
 an alternative approach, which leveraging on classification tools and linear system equations for 
 fixing the WHERE/SET clauses, applies for simpler scenario where the query log only contains one query. 
-In Appendix~\ref{sec:heuristic}, we provide detailed description and experimental comparison 
+In the Appendix A of ~\cite{qfixarxiv}, we provide detailed description and experimental comparison 
 for this alternative approach and demonstrate that it is not compatible with the \sys even in the simple 
 single query scenario.
-\fi 
+
 
 % \begin{figure}[t]
 % \centering
