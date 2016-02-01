@@ -221,37 +221,39 @@ challenge is that $D_n^*$ is unknown, unless we know that the
 complaint set is complete. 
 
 \subsubsection*{Scope of application}
-\xlw{
-In this paper, we assume queries are standard queries with no sub-query, aggregation and join. 
-More specifically, we support queries with linear SET/WHERE clauses in order to transform them as
-linear constraints. There can be multiple set expressions in the SET clause or multiple where predicates 
-in \textit{conjunction/disjunction} format in the WHERE clause. In Section~\ref{sec:experiments:synth}, 
-we evaluate \sys in fixing \texttt{UPDATE} query with adaptable predicate sizes. 
+\ewu{
+In this paper, we assume basic DML queries with no sub-queries, aggregations nor joins. 
+We support SET expressions that set an attribute to the linear combination of attributes
+WHERE clauses can be composed of conjunctions and disjunctions of predicates, where predicates
+can compare linear combinations of attributes.
+Section~\ref{sec:experiments:synth} evaluates \sys while varying the number of predicates in the WHERE clause.
+}
+
+% Specifically, we support queries with linear SET/WHERE clauses in order to transform them as
+% linear constraints. There can be multiple set expressions in the SET clause or multiple where predicates 
+% in \textit{conjunction/disjunction} format in the WHERE clause. 
 
 In Section~\ref{sec:sol}, we describe our basic method, 
 which
 uses a constraint programming formulation that expresses this
 diagnosis problem as a mixed integer linear program (MILP). 
-% We justify
-% using this constraint formulation as opposed to methods, such as
-%classification, that can analyze one query at a time in Section~\ref{sec:heuristic}. We show that the latter, heuristic
-% approach is flawed, and one needs to encode the constraints in the entire log.
-In Section~\ref{sec:opt}, we present several optimization
+Section~\ref{sec:opt} presents several optimization
 techniques that extend the basic method, allowing \sys to 
-(1)~handle
-cases of incomplete information (incomplete complaint set), and
-(2)~scale to large data and log sizes. Specifically, the proposed \sys algorithm with incremental
-repair and tuple slicing optimization (Section~\ref{sec:incremental}), can
-handle $10\times$ compared to the basic MILP approach. 
+(1)~handle cases of incomplete information (incomplete complaint set), and
+(2)~scale to large data and log sizes. 
+Specifically, the fully optimized, incremental algorithm (Section~\ref{sec:incremental}), can
+handle query logs with hundreds of queries within minutes, while the performance of the basic approach collapses by $50$ queries.
 
-Although we emphasis on solving the query logs with multiple queries, 
-an alternative approach, which leveraging on classification tools and linear system equations for 
-fixing the WHERE/SET clauses, applies for simpler scenario where the query log only contains one query. 
-In the Appendix A of ~\cite{qfixarxiv}, we provide detailed description and experimental comparison 
-for this alternative approach and demonstrate that it is not compatible with the \sys even in the simple 
-single query scenario.
+Due to space considerations, we leave out a discussion of alternative approaches that use e.g., classification tools and linear systems of equations.
+These approaches are limited to a a query log containing a single query, and are discussed and evaluated in more detail in our technical report~\cite{qfixarxiv}.
 
-}
+% Although we emphasis on solving the query logs with multiple queries, 
+% an alternative approach, which leveraging on classification tools and linear system equations for 
+% fixing the WHERE/SET clauses, applies for simpler scenario where the query log only contains one query. 
+% In the Appendix A of ~\cite{qfixarxiv}, we provide detailed description and experimental comparison 
+% for this alternative approach and demonstrate that it is not compatible with the \sys even in the simple 
+% single query scenario.
+
 
 % \begin{figure}[t]
 % \centering
