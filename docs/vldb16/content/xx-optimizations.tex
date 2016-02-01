@@ -88,21 +88,7 @@ only tuples modified by the fixed queries
 
 \subsection{Tuple Slicing: Reducing Tuples}
 \label{sec:opt:tbsize}
-\begin{figure}[t]
-    \centering
-    % \vspace*{-.1in}
-    \includegraphics[width=0.35\textwidth]{figures/2nditerationgroups}
-    \vspace*{-.2in}
-    \caption{
-      Graphical depiction of correct (a) and over-generalized (b) repairs.
-      Solid and empty circles represent complaint and non-complaint tuples.
-      Each thick line represents the interval of query $q$'s range predicate.
-      Dirty: incorrect interval in corrupted query;
-      truth: correct interval in true query;
-      repair: interval returned by the solver.}
-    \label{fig:groups}
-    % \vspace*{-.1in}
-\end{figure}
+
 
 Our first optimization, \emph{tuple-slicing}, applies a two step process to reduce the 
 problem size without sacrificing accuracy: it
@@ -144,6 +130,22 @@ Figure~\ref{fig:groups}(b) highlights such a case where the dirty and truth inte
 % predicate, and introduces new errors by affecting tuples not originally part of  the complaint set. 
 % Figure~\ref{fig:groups}(b) highlights such a case where this aggressive approach generalized incorrectly.
 % The dirty and clean intervals are non-overlapping, so the non-complaint tuple shown is not modified by $q$ (otherwise it would be a complaint!). This tuple is incorrectly included in the repaired interval, \emph{because the MILP formulation does not constrain its value}.
+
+\begin{figure}[t]
+    \centering
+    % \vspace*{-.1in}
+    \includegraphics[width=0.35\textwidth]{figures/2nditerationgroups}
+    \vspace*{-2mm}
+    \caption{
+      Graphical depiction of correct (a) and over-generalized (b) repairs.
+      Solid and empty circles represent complaint and non-complaint tuples.
+      Each thick line represents the interval of query $q$'s range predicate.
+      Dirty: incorrect interval in corrupted query;
+      truth: correct interval in true query;
+      repair: interval returned by the solver.}
+    \label{fig:groups}
+    % \vspace*{-.1in}
+\end{figure}
 
 \indent In both of these cases, the objective function will ensure that the repair
 does not over-generalize the upper bound towards the right because that strictly increases the objective function.
@@ -396,26 +398,7 @@ This is the foundation of our \emph{query-slicing} optimization.
 % set.  
 
 % Algorithm~\ref{alg:fullimpact} describes how $\mathcal{F}(q_i)$ can be computed:
-\begin{algorithm}[t]
-\scriptsize
-\caption{$FullImpact:$ Algorithm for finding $\mathcal{F}(q)$.}
-\label{alg:fullimpact}
-\begin{algorithmic}[2]
-\REQUIRE {$\mathcal{Q}$, $q_i$}
-% \ENSURE {$\mathcal{F}(\mathcal{Q})=\{\{\mathcal{F}(q_1)\}, ..., \{\mathcal{F}(q_n)\}\}$}
-% \FOR {each $q_i$ in $q_n, ..., q_1$}
-\STATE $\mathcal{F}(q_i) \leftarrow \mathcal{I}(q_i)$
-\FOR {each $q_j$ in $q_{i+1}, ..., q_{n} \in \mathcal{Q}$}
-\IF {$\mathcal{F}(q_i)\cap \mathcal{P}(q_j) \neq \emptyset$}
-\STATE $\mathcal{F}(q_i) \leftarrow \mathcal{F}(q_i) \cup \mathcal{F}(q_j)$
-\ENDIF
-\ENDFOR
-%\STATE $\mathcal{F}(\mathcal{Q}) \leftarrow \mathcal{F}(\mathcal{Q}) \cup {\red{\{\mathcal{F}(q_i)\}}}$
-% \ENDFOR
-\STATE Return $\mathcal{F}(q_i)$
-\end{algorithmic}
-\end{algorithm}
-% \vspace*{-.1in}
+
 
 
 
@@ -470,6 +453,27 @@ The incremental approach prioritizes repairs for complaints that are due to more
 Given that the \emph{basic} algorithm simply fails beyond a small log size, we believe this is a natural and pragmatic assumption to use, and results in 
 a $10\times$ scalability improvement.
 Our experiments further evaluate different batching level $k$ in the incremental algorithm and show that it is impractical from both a performance and accuracy to have $k > 1$.
+
+\begin{algorithm}[t]
+\scriptsize
+\caption{$FullImpact:$ Algorithm for finding $\mathcal{F}(q)$.}
+\label{alg:fullimpact}
+\begin{algorithmic}[2]
+\REQUIRE {$\mathcal{Q}$, $q_i$}
+% \ENSURE {$\mathcal{F}(\mathcal{Q})=\{\{\mathcal{F}(q_1)\}, ..., \{\mathcal{F}(q_n)\}\}$}
+% \FOR {each $q_i$ in $q_n, ..., q_1$}
+\STATE $\mathcal{F}(q_i) \leftarrow \mathcal{I}(q_i)$
+\FOR {each $q_j$ in $q_{i+1}, ..., q_{n} \in \mathcal{Q}$}
+\IF {$\mathcal{F}(q_i)\cap \mathcal{P}(q_j) \neq \emptyset$}
+\STATE $\mathcal{F}(q_i) \leftarrow \mathcal{F}(q_i) \cup \mathcal{F}(q_j)$
+\ENDIF
+\ENDFOR
+%\STATE $\mathcal{F}(\mathcal{Q}) \leftarrow \mathcal{F}(\mathcal{Q}) \cup {\red{\{\mathcal{F}(q_i)\}}}$
+% \ENDFOR
+\STATE Return $\mathcal{F}(q_i)$
+\end{algorithmic}
+\end{algorithm}
+% \vspace*{-.1in}
 
 \begin{algorithm}[t]
 \caption{$Inc_k:$ The incremental algorithm. 
