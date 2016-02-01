@@ -90,6 +90,7 @@ only tuples modified by the fixed queries
 \label{sec:opt:tbsize}
 \begin{figure}[t]
     \centering
+    % \vspace*{-.1in}
     \includegraphics[width=0.35\textwidth]{figures/2nditerationgroups}
     \vspace*{-.2in}
     \caption{
@@ -100,7 +101,7 @@ only tuples modified by the fixed queries
       truth: correct interval in true query;
       repair: interval returned by the solver.}
     \label{fig:groups}
-    \vspace*{-.1in}
+    % \vspace*{-.1in}
 \end{figure}
 
 Our first optimization, \emph{tuple-slicing}, applies a two step process to reduce the 
@@ -162,15 +163,15 @@ the repaired interval until the non-complaint tuples are all excluded),
 the straightforward approaches are not effective when multiple corrupt 
 queries have been repaired because they don't take the query interactions into account.
 
-% \looseness -1
-Instead, we solve this using a second, significantly smaller, MILP problem.   
+\looseness -1
+Instead, we solve this with a second, significantly smaller, MILP problem.   
 Let $\mathcal{Q}^*_{rep}$ be the set of repaired queries from the  initial MILP formulation with tuple slicing;
 $\mathcal{NC}$ be the set of non-complaint tuples now matching the repaired \texttt{WHERE} clauses, as in Figure~\ref{fig:groups}(b); and $\mathcal{C}^+ = \mathcal{C} \cup \mathcal{NC}$.
 We create a new MILP using $\mathcal{C}^+$ as the complaint set.  
 The key is to only parameterize the repaired clauses from Step 1 as constraints with undetermined variables.
 The variables for all other tuples and queries are fixed to their assigned values from Step 1.
-In this way, we {\it refine} the solutions from the previous step while incorporating knowledge about complaints in $\mathcal{NC}$, 
-Finally, we use a new objective function that minimizes the number of non-complaint tuples 
+This \emph{refines} the solutions from the previous step while incorporating knowledge about complaints in $\mathcal{NC}$, 
+Finally, we use a new objective function to minimize the number of non-complaint tuples 
 $t \in \mathcal{NC}$ that are matched by the solution.
 
 % initialize and fix all variables  and fix binary variable $x_{q,t}$ for complaint tuples $t \in \mathcal{C}$ and the values of all queries not in $\mathcal{Q}^*_{rep}$ to their assignment in the solution from the first step.
@@ -340,7 +341,7 @@ problem.  In summary, \emph{tuple-slicing} is an effective method to improve the
 \subsection{Query Slicing: Reducing Queries}
 \label{sec:opt:query}
 
-
+\looseness -1
 In practice, many of the queries in the query log could not have affected the \emph{complaint attributes} (defined below). For example, if $q_{N-1}$ and $q_{N}$ 
 only read and wrote attribute $A_1$, then they could not have contributed to an error in $A_2$.  
 However, if $q_{N}$  wrote $A_2$, then either or both queries may have caused the error. 
@@ -416,6 +417,8 @@ This is the foundation of our \emph{query-slicing} optimization.
 \end{algorithm}
 % \vspace*{-.1in}
 
+
+
 By computing the full-impact of $q$, we can determine the extent that it affects $\mathcal{C}$
 based on its overlap with the complaint attributes.
 Specifically, 
@@ -445,23 +448,7 @@ We find that this type of slicing can be effective for wide tables along with qu
 
 \subsection{Incremental Repairs}\label{sec:incremental}
 
-\begin{algorithm}[t]
-\caption{$Inc_k:$ The incremental algorithm. 
-}
-\scriptsize
-\label{alg:incalg}
-\begin{algorithmic}[2]
-\REQUIRE {$Q, \mathcal{D}_j, \mathcal{D}_n, \mathcal{C}, k$}
-\STATE Sort $Q$ from most to least recent
-\FOR {each $q_i...q_{i+k} \in Q$}
-  \STATE $\mathcal{Q}_{suffix}$ = $\{q_j | j \ge i \}$ % \wedge q_j \in Rel\mathcal{(Q)}\}$
-  \STATE $\mathcal{Q}^*$ $\leftarrow$ $Basic_{params}(\mathcal{Q}_{suffix}, \mathcal{D}_j, \mathcal{D}_n, \mathcal{C}, \{q_i, q_{i+k}\})$
-  \IF {$\mathcal{Q}^* \neq \emptyset$}
-    \STATE Return $\mathcal{Q}^*$
-  \ENDIF
-\ENDFOR
-\end{algorithmic}
-\end{algorithm}
+
 
 \looseness -1
 Even with the slicing optimizations, the number of undetermined variables can remain high, resulting in slow solver runtime.  
@@ -483,6 +470,24 @@ The incremental approach prioritizes repairs for complaints that are due to more
 Given that the \emph{basic} algorithm simply fails beyond a small log size, we believe this is a natural and pragmatic assumption to use, and results in 
 a $10\times$ scalability improvement.
 Our experiments further evaluate different batching level $k$ in the incremental algorithm and show that it is impractical from both a performance and accuracy to have $k > 1$.
+
+\begin{algorithm}[t]
+\caption{$Inc_k:$ The incremental algorithm. 
+}
+\scriptsize
+\label{alg:incalg}
+\begin{algorithmic}[2]
+\REQUIRE {$Q, \mathcal{D}_j, \mathcal{D}_n, \mathcal{C}, k$}
+\STATE Sort $Q$ from most to least recent
+\FOR {each $q_i...q_{i+k} \in Q$}
+  \STATE $\mathcal{Q}_{suffix}$ = $\{q_j | j \ge i \}$ % \wedge q_j \in Rel\mathcal{(Q)}\}$
+  \STATE $\mathcal{Q}^*$ $\leftarrow$ $Basic_{params}(\mathcal{Q}_{suffix}, \mathcal{D}_j, \mathcal{D}_n, \mathcal{C}, \{q_i, q_{i+k}\})$
+  \IF {$\mathcal{Q}^* \neq \emptyset$}
+    \STATE Return $\mathcal{Q}^*$
+  \ENDIF
+\ENDFOR
+\end{algorithmic}
+\end{algorithm}
 
 % generates a problem for each suffix of the query log (e.g., $\{ q_i\ldots, q_n | i \in [1, n] \}$) where only $q_i$'s constraints contain undetermined variables.
 % We focus on the case where there is a single corrupted query single query case \ewu{BECAUSE XXXX.}
