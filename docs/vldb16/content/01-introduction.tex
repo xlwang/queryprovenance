@@ -38,7 +38,7 @@ impractical and non-scalable as it requires users to answer challenge
 questions before allowing the updates, and it is not applicable to updates
 initiated by applications.
 
-
+\looseness -1
 In this paper, we present \sys, a \emph{diagnosis and repair} framework for data errors
 caused by erroneous updates. In contrast to existing approaches in data
 cleaning that aim to detect and correct errors in the data directly, the goal
@@ -49,7 +49,7 @@ In addition, once the erroneous queries have been confirmed, repairing the sourc
 can potentially lead to the identification of additional discrepancies in
 the data that would have otherwise remained undetected.  
 We describe two motivating examples; the first is a real-life scenario, provided to us by a large US-based wireless provider.
-
+% 
 \begin{example}[Wireless discount policies]\label{ex:telco}
 
 A wireless provider offers company discounts as incentives for
@@ -68,7 +68,7 @@ harder to trace as the source of the errors is obscured.
 % \footnote{This is a real-life scenario, provided to us by a large US-based wireless provider.}
 
 \end{example}
-
+% 
 \begin{example}[Tax bracket adjustment]\label{ex:taxes}
     
 Tax brackets, which determine tax rates for different income levels, are
@@ -78,7 +78,7 @@ in these update queries (e.g., Figure~\ref{fig:example}) result in errors in
 the tax rates and computed taxes. 
 
 \end{example}
-
+% 
 In these application scenarios, data errors are typically reported to
 a customer service department, which does not have the resources nor
 the capability to investigate the errors more broadly. Instead, errors
@@ -145,9 +145,10 @@ following contributions:
     \item We formalize the problem of diagnosing a set of errors using log
     histories of updates that operated on the data. Given a set of 
     \emph{complaints} as representations of data discrepancies in the current
-    state of a dataset, \sys identifies the queries in the log that require the  minimal
-    amount of changes (to the original query log) 
-    that would resolve all of the complaints (Section~\ref{sec:abstractions}).
+    state of a dataset, \sys determines how to resolve all of the complaints with the minimal amount of changes to the queries in the log (Section~\ref{sec:abstractions}).
+    % identifies the queries in the log that require the  minimal
+    % amount of changes (to the original query log) 
+    % that would resolve all of the complaints (Section~\ref{sec:abstractions}).
       
     \item We provide an exact error-diagnosis solution through a non-trivial
     transformation of the problem to a mixed integer linear program (MILP) that
