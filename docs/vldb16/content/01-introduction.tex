@@ -44,14 +44,16 @@ caused by erroneous updates. In contrast to existing approaches in data
 cleaning that aim to detect and correct errors in the data directly, the goal
 of \sys is to identify errors in the queries that introduced errors in the
 data. These diagnoses \emph{explain} how errors were introduced to a
-dataset, \ewu{and allow an administrator to easily identify and further validate the most likely query-based sources of these errors. 
+dataset, and allow an administrator to easily identify and further validate the most likely query-based sources of these errors. 
 In addition, once the erroneous queries have been confirmed, repairing the source of the errors
-can} potentially lead to the identification of additional discrepancies in
-the data that would have otherwise remained undetected.  \ewu{Consider the following motivating examples, the first is based on conversations with a large US-based wireless provider:}
+can potentially lead to the identification of additional discrepancies in
+the data that would have otherwise remained undetected.  
+We provide two motivating examples, This is a real-life scenario, provided to us by a large US-based wireless provider.
+\ewu{Consider the following motivating examples, the first is based on conversations with a large US-based wireless provider:}
 
 \begin{example}[Wireless discount policies]\label{ex:telco}
 
-A \ewu{\sout{large US-based}} wireless provider offers company discounts as incentives for
+A wireless provider offers company discounts as incentives for
 corporate customers. There are different types of discounts (flat, percentage,
 fee-based), and their details are specific to corporate agreements. The large
 number of policies and complexities in their rules frequently cause policies
@@ -63,7 +65,7 @@ do not have the capacity or ability to investigate the complaints deeply. The
 standard course of action is to correct billing mistakes on a case-by-case
 basis for each complaint. As a result, unreported errors remain in the
 database for a long time, or they never get corrected, and their cause becomes
-harder to trace as the source of the errors is obscured.\footnote{This is a real-life scenario, provided to us by a popular US-based wireless provider.}
+harder to trace as the source of the errors is obscured.\footnote{This is a real-life scenario, provided to us by a large US-based wireless provider.}
 
 \end{example}
 
