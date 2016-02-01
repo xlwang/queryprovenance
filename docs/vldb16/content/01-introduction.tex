@@ -59,9 +59,10 @@ number of policies and complexities in their rules frequently cause policies
 to be set incorrectly, leading to errors in the application of discounts to
 customers' accounts.
 
+\looseness -1
 Customers who notice billing errors contact the provider, but the call centers
 do not have the capacity or ability to investigate the complaints deeply. The
-standard course of action is to correct billing mistakes on a case-by-case
+standard course of action is to correct mistakes on a case-by-case
 basis for each complaint. As a result, unreported errors remain in the
 database for a long time, or they never get corrected, and their cause becomes
 harder to trace as the source of the errors is obscured.
@@ -92,7 +93,9 @@ techniques:
 
 \begin{description}[leftmargin=*, topsep=0mm, itemsep=0mm]
     
-    \item[Obscurity.] Detection of the resulting errors in the data often
+    \item[Obscurity.] \looseness -1
+    % Detection of the resulting errors in the data often
+    Handling data errors directly often
     leads to partial fixes that further complicate the eventual diagnosis and
     resolution of the problem. For example, a transaction implementing a
     change in the state tax law updated tax rates using the wrong rate,
@@ -204,12 +207,7 @@ These challenges present exciting future extensions to the system presented in t
 \section{{\large\textbf{\sys}}: architecture}
 
 
-\begin{figure}[t]
-    \centering
-        \includegraphics[scale=0.35]{figures/architecture}
-    \caption{\sys processes data anomalies in the form of complaints and analyzes logged query histories to identify the causes of error. In the heart of the system, transformation algorithms express the diagnosis problem as a mixed integer linear program (MILP), and optimization modules ensure that the MILP programs can be evaluated efficiently.}
-    \label{fig:architecture}
-\end{figure}
+
 
 Figure~\ref{fig:architecture} shows the architecture of \sys. The system uses
 two inputs: a log of update queries (including UPDATE, INSERT, and DELETE
@@ -218,7 +216,7 @@ analyzes the data errors and the query logs to trace the causes of the errors
 in queries in the log (diagnoses), and to automatically derive query repairs.
 The query repairs represent corrections to the queries in the log, and can be
 used to identify additional errors in the data that were not reported.
-
+% 
 The core of \sys is a transformation module that expresses the query diagnosis
 problem as a Mixed Integer Linear Program (MILP). Two performance optimization modules
 ensure that the system can scale to large datasets efficiently, while
@@ -229,4 +227,10 @@ maintaining high accuracy.
 
 % \alex{Xiaolan, please add a couple of sentences on implementation.}
 
+\begin{figure}[t]
+    \centering
+        \includegraphics[scale=0.35]{figures/architecture}
+    \caption{\sys processes data anomalies in the form of complaints and analyzes logged query histories to identify the causes of error. In the heart of the system, transformation algorithms express the diagnosis problem as a mixed integer linear program (MILP), and optimization modules ensure that the MILP programs can be evaluated efficiently.}
+    \label{fig:architecture}
+\end{figure}
 
