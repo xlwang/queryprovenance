@@ -31,7 +31,7 @@ focus for data management research, handling new errors, introduced during
 regular database interactions, has received little attention. Most work in
 this direction focuses on \emph{guarding against} erroneous updates. For
 example, integrity constraints~\cite{Khoussainova2006} reject some improper
-updates (\xlw{for ordered attributes} \alex{I don't understand this}), 
+updates (\alex{I don't understand this} \xlw{one reviewer complained `` Integrity constraints can do more than specify ranges.'' }), 
 but only if the data falls outside rigid, predefined ranges.
 Certificate-based verification~\cite{Chen2011} is less rigid, but it is
 impractical and non-scalable as it requires users to answer challenge
@@ -162,7 +162,7 @@ following contributions:
     scale to large datasets ($100k$ records) and large query logs (hundreds to thousands of update queries). Further, we
     show that our optimization techniques have the additional
     advantage of tolerating incomplete information, such as unreported
-    errors (Section~\ref{sec:opt}).
+    errors (Section~\ref{sec:opt}). 
 
     
     % \item We extend our framework to also handle false positives: complaints
@@ -172,7 +172,7 @@ following contributions:
     % that complaints of low density are likely false positives and thus can be
     % safely ignored (Section~\ref{???}).
     
-    \item We \ewu{perform a thorough evaluation of the trade-offs between speed and accuracy of our baseline and optimized methods under a controlled, synthetic setting.  
+    \item We \ewu{perform a thorough evaluation of the trade-offs between speed and accuracy of our baseline and optimized methods under a controlled, synthetic setting. \xlw{In particular, we demonstrate that the optimized \sys achieves 40$\times$ speedup compared with baseline algorithm when attribute size in the table is $500$ (Section~\ref{sec:experiments}). }
     We also evaluate \sys on common OLTP benchmarks and show how \sys can propose fully accurate repairs within milliseconds on a TPC-C workload with $1500$ queries (Section~\ref{sec:experiments}) }
     %experimentally evaluate the effectiveness and efficiency of our
     %methods against benchmark and synthetic datasets and query logs. 
