@@ -204,34 +204,37 @@ These challenges present exciting future extensions to the system presented in t
 
 
 
-\section{{\sys}: architecture}
+\section{{\sys} System Architecture}
 
 
 
+\begin{figure}[t]
+    \centering
+        \includegraphics[scale=0.35]{figures/architecture}
+    \caption{\sys processes data anomalies in the form of complaints and analyzes logged query histories to identify the causes of error in the form of repaired queries. 
+    The key component is the MILP Encoder, which expresses the diagnosis problem as a mixed integer linear program.}
+% \vspace*{-0.1in}
+    \label{fig:architecture}
+\end{figure}
 
-Figure~\ref{fig:architecture} shows the architecture of \sys. The system uses
-two inputs: a log of update queries (including UPDATE, INSERT, and DELETE
+Figure~\ref{fig:architecture} shows the \sys architecture. The system takes
+two inputs: a log of update queries (including \texttt{UPDATE}, \texttt{INSERT}, and \texttt{DELETE}
 statements) and a set of identified data errors (\emph{complaints}). \sys
 analyzes the data errors and the query logs to trace the causes of the errors
 in queries in the log (diagnoses), and to automatically derive query repairs.
 The query repairs represent corrections to the queries in the log, and can be
 used to identify additional errors in the data that were not reported.
-% 
-The core of \sys is a transformation module that expresses the query diagnosis
-problem as a Mixed Integer Linear Program (MILP). Two performance optimization modules
-ensure that the system can scale to large datasets efficiently, while
-maintaining high accuracy. 
+ 
+The core of \sys is the \emph{MILP Encoder}, which expresses the query diagnosis
+problem as a Mixed Integer Linear Program (MILP), and the constraint problem is solved by the \emph{Solver}. 
+The \emph{Optimizer} uses slicing and incremental techniques that
+help the system scale to large datasets and query logs efficiently, while maintaining high accuracy. 
+For completeness, an optional \emph{Denoiser} can be applied to the inputs to detect and remove incorrect complaints---we regard this component as orthogonal to this paper.
+
 % Finally, the density filtering component ensures
 % smooth handling of false errors (data that has been identified as erroneous,
 % but it is in fact correct).
 
 % \alex{Xiaolan, please add a couple of sentences on implementation.}
 
-\begin{figure}[t]
-    \centering
-        \includegraphics[scale=0.35]{figures/architecture}
-    \caption{\sys processes data anomalies in the form of complaints and analyzes logged query histories to identify the causes of error. In the heart of the system, transformation algorithms express the diagnosis problem as a mixed integer linear program (MILP), and optimization modules ensure that the MILP programs can be evaluated efficiently.}
-% \vspace*{-0.1in}
-    \label{fig:architecture}
-\end{figure}
 
