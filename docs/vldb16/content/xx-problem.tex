@@ -18,10 +18,10 @@ spirit of Example~\ref{ex:taxes}. The adjustment sets the tax rate to 30\% for
 income levels above \$87,500, and is implemented by query $q_1$. A digit
 transposition mistake in the query, results in an incorrect owed amount for tuples
 $t_3$ and $t_4$. Query $q_2$, which inserts a tuple with slightly higher
-income than $t_3$ and $t_4$ and the correct (lower) tax rate, obscures this mistake.
+income than $t_3$ and $t_4$ and the correct information, obscures this mistake.
 This mistake is further propagated by query $q_3$, which calculates the pay 
 check amount based on the corresponding
-tax rate and income. 
+income and owed. 
 \iffalse    
 Figure~\ref{fig:example} demonstrates an example tax bracket adjustment in the
 spirit of Example~\ref{ex:taxes}. The adjustment sets the tax rate to 30\% for
@@ -42,8 +42,8 @@ reason for the data errors is the incorrect predicate value in query $q_1$.
 In this paper, we assume that we know \emph{some} errors in the dataset, and
 that these errors were caused by erroneous updates. The errors may be
 obtained in different ways: traditional data cleaning tools may identify
-discrepancies in the data (e.g., a tuple with lower income has higher tax
-rate), or errors can be reported directly from users (e.g., customers
+discrepancies in the data (e.g., a tuple with lower income has higher owed tax
+amount), or errors can be reported directly from users (e.g., customers
 reporting discrepancies to customer service). \emph{Our goal is not to correct
 the errors directly in the data, but to analyze them as a ``symptom'' and provide a
 diagnosis.} The diagnosis can produce a targeted treatment: knowing how the
