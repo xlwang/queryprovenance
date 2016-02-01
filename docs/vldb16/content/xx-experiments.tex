@@ -460,7 +460,7 @@ Figure~\ref{f:dbsize_time} varies the database size ($N_D \in [100, 100k]$), and
 In contrast to the previous experiment, the scalabality curve is nearly flat for both corruption query indices.
 The reason is because the solver's implicit pruning optimization is less effective when there are only $10$ attributes, because every query is likely to touch an attribute that affects the complaint set.
 We verified this by applyng query-slicing to the same setting, and found that a negligable number of queries were pruned.
-The more recent corruption at $q_{200}$ is executed \ewu{nearly immediately} even as the database size increases, with a perfect F1-score. 
+The more recent corruption at $q_{200}$ is executed \ewu{nearly immediately (make a more concrete number)} even as the database size increases, with a perfect F1-score. 
 When the corruption is old ($q_{50}$), the performance is more variable at smaller database sizes due to empirical variability of the true query selectivity due to randomness in the data and query generator.
 This leads to more variability in the size of the resulting complaint set, which increases the size and difficulty of the encoded problem, and leads to the spike in average latency at small database sizes.
 
