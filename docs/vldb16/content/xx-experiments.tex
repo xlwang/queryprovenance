@@ -1,20 +1,6 @@
 %!TEX root = ../main.tex
 
-%
-% Notes: 
-%
-%  exact implementation
-%  comparison with rollback at batch N
-%  relaxing the solvers
-%  dealing with false positives
-%
-%  running on TPC-C/sanjay's.  equality is easier
-%
-% Need names for
-%  * rollback
-%  * exact solution
-%  * fixing an individual/batch of queries
-%
+
 \section{Experiments}
 \label{sec:experiments}
 
@@ -72,9 +58,7 @@ In this section, we carefully study the performance and accuracy
 characteristics of the basic MILP-based repair algorithm, 
 slicing-based optimizations that improve the latency of the system, 
 and the incremental algorithm for single query corruptions. 
-%and 
-%the multi-pass tuple-slicing algorithm that tolerates incomplete complaint sets with minimal loss in accuracy.
-Our goal is to understand these trade-offs in
+\ewu{Due to the difficulty of collecting corrupt query logs from active deployments, our goal instead} is to understand these trade-offs in
 controlled synthetic scenarios, as well as study the effectiveness
 in typical database query workloads based on widely used benchmarks.
 % \xlw{ By default, we set \sys as the incremental approach with tuple slicing optimization ($inc_1-tuple$) as it fixes our default synthetic query logs and benchmark workloads with minimum time cost and near perfect accuracy.  }
@@ -83,16 +67,15 @@ in typical database query workloads based on widely used benchmarks.
 To this end, our experiments are organized as follows: First, 
 we compare the basic and incremental MILP algorithm against the different optimizations 
 to highlight the value of different optimizations and the limitatios of the basic approach.  
-We then compare the repair costs of \texttt{INSERT}, \texttt{DELETE}, or \texttt{UPDATE}-only query logs 
-and find that the latter query type is by far the most complicated and costly to repair.
-For the subsequent experiments, we focus solely on \texttt{UPDATE}-only synthetic workloads 
-to understand how \sys responds to different query logs and databases.  
-We end with an evaluation using established database transaction benchmarks from OLTP-bench~\cite{difallah2013oltp},
+We then show that \texttt{UPDATE} queries are particularly difficult to repair and focus solely
+on different types of \texttt{UPDATE}-only workloads to understand how \sys responds to different parameter settings.
+We end with an evaluation using established database transaction benchmarks from OLTP-bench~\cite{difallah2013oltp}:
 TPC-C~\cite{tpcc} and TATP~\cite{tatp}. 
-All experiments were run on 12x2.66 GHz  machines with 16GB RAM running CentOS release 6.6. And we use IBM CPLEX~\cite{cplex2014v12} 
-as the MILP solver.
+All experiments were run on 12x2.66 GHz  machines with 16GB RAM running IBM CPLEX~\cite{cplex2014v12} as the MILP solver on CentOS release 6.6.
 
-
+% compare the repair costs of \texttt{INSERT}, \texttt{DELETE}, or \texttt{UPDATE}-only query logs 
+% and find that the latter query type is by far the most complicated and costly to repair.
+% For the subsequent experiments, we focus solely on 
 
 % establish the quality limitations of existing heuristics and the need for a formal, 
 % constraint-based algorithm (\exact).  Second, we study how each of the 
@@ -154,16 +137,12 @@ as the MILP solver.
 
 
 
-
 Each of our experiments follows a similar procedure. 
-We generate a sequence of queries using a synthetic query generator or 
-the benchmark program, and corrupt the query log as described below. 
-We then execute the original and corrupt query logs on an initial (possibly empty) database,
-and perform a tuple-wise comparison between the resulting database states 
-to generate a true complaint set.  
-We then add noise to the complaint set by removing (partial) true complaints to simulate false negatives.
-Finally, we execute the evaluated algorithms on the complaints and compare the fixed
-query log with the true query log, as well as the fixed and true
+We generate and corrupt a query log as described below. 
+We execute the original and corrupt query logs on an initial (possibly empty) database,
+perform a tuple-wise comparison between the resulting database states to generate a true complaint set,
+and simulate incomplete complaint sets by removing a subset of the true complaints.
+Finally, we execute the algorithms and compare \ewu{the fixed query log with the true query log}, as well as the fixed and true
 final database states to measure performance and accuracy metrics.
 Performance is measured as wall clock
 time between submitting a complaint set and the system terminating after retrieving a valid repair.  
@@ -175,7 +154,7 @@ We describe the experimental parameters in the context of the datasets and workl
 %Finally, Table~\ref{t:params} summarizes the key parameters that we vary throughout our experiments.  
 
 
-\subsubsection{Datasets and Workloads}
+% \subsubsection{Datasets and Workloads}
 
 
 %This subsection describes the query and data generation process in greater detail.
@@ -337,10 +316,9 @@ The F1 score for all settings is nearly 1 (Figure~\ref{f:indelup_acc}).
 
 \smallskip
 {\it Takeaways: we find that \texttt{basic}, even with slicing optimizations,
-has severe scalability limitations due to the large number of undetermined values -- this is not surprising
-since MILP constraint solving is a known NP-hard problem.
+has severe scalability limitations due to the large number of undetermined values---this is unsurprising as MILP constraint solving is an NP-hard problem.
 In contrast, the incremental algorithms can scale to larger query log sizes, however only a batch size of $k=1$ can retain high repair quality.
-Furthermore, we show that \texttt{UPDATE}-only workloads are significantly more expensive to repair than other query types. 
+\texttt{UPDATE} queries translate into more undetermined variables than other query types, and are significantly more expensive to repair.
 Based on these results, we focus on the incremental algorithm $inc_1$ and the more difficult \texttt{UPDATE}-only workloads.
 %Based on the result, we consider incremental algorithm at batching level 1 with tuple slicing optimization ($inc_1-tuple$) as default setting in the rest of the experiment. In addition, we only consider \texttt{UPDATE}-only workload in synthetic experiments in Section~\ref{sec:experiments:synth}. 
 }
@@ -459,18 +437,11 @@ We focus on a narrow table setting that contains $N_a = 10$ attributes, and a si
 Figure~\ref{f:dbsize_time} varies the database size ($N_D \in [100, 100k]$), and fixes query output cardinality and complaint set size in the same way as the previous scalability experiment.
 In contrast to the previous experiment, the scalabality curve is nearly flat for both corruption query indices.
 The reason is because the solver's implicit pruning optimization is less effective when there are only $10$ attributes: Every query is likely to touch an attribute that affects the complaint set.
-We verified this by applyng query-slicing to the same setting, and found that significant less amount of queries were pruned compared to previous experiment.
-The more recent corruption at $q_{200}$ is executed within 40 seconds even as the database size increases, with a perfect F1-score. 
-When the corruption is old ($q_{50}$), the performance is more variable at smaller database sizes due to the randomness in the data and query generator.
-This leads to more variability in the size of the resulting complaint set, which increases the size and difficulty of the encoded problem, and leads to the spike in average latency at small database sizes.
-
-% due to the smaller number of attributes, which reduces the effect of increasding $V_d$.  
-% Recall that the size of the MILP problem increases multiplicatively with the number of tuples and attributes.  
-% Thus reducing number of attributes in combination with tuple-slicing effectively contrains the size of the MILP problem.
-% The more recent corruption at $q_{200}$ is executed in nearly constant time as the database size increases, with a perfect F1-score. 
-% The performance is more variable at smaller database sizes due to variability in the true query selectivity due to randomness in the data and query generator.
-% This leads to more variability in the size of the resulting complaint set, which increases the size of the encoded problem.
-% Since the solver scales exponentially with the problem size, this leads to the performance spike when the database is small.
+We verified this by applyng query-slicing to the same setting, and found far fewer queries were pruned compared to the previous experiment.
+It takes less than a minute to perfectly repair the recent corruption $q_{200}$,
+and around $4$ minutes for the older corruption $q_{50}$, even as the database size increases.
+At smaller database sizes, the randomness in the workload generator leads to variability in the size of the complaint set, and ultimately a larger and more difficult MILP problem.
+The exponential relationship between solver time and problem difficulty results in the higher average latency for $q_{50}$.
 
 
 \emph{Query Clause Type: }
@@ -555,11 +526,13 @@ In addition, despite the refinement step of tuple-slicing, the repair may over g
 %     \caption{Incomplete Complaint Experiments}
 %   \end{figure}
 % 
+
+
 \smallskip
 \textit{Takeaways: we find that the performance of the different repair algorithm 
-heavily depends on the property of the datasets and queries. Attribute and query slicing show significant gain for 
-datasets with large number of attributes and \sys is able to solve hard problems
-(with ~$200$ \texttt{UPDATE}-only queries) in seconds or minutes---particular if the error is recent. }
+heavily depends on the property of the datasets and queries---in particular, the number of encoded candidate queries and the number of attributes. 
+Attribute and query slicing show significant gain for datasets with large number of attributes.
+\sys is able to solve hard problems (with ~$200$ \texttt{UPDATE}-only queries) in seconds or minutes---particularly if the error is recent. }
 
 \subsection{Benchmarks}
 \label{sec:experiments:benchmark}
@@ -568,9 +541,11 @@ Figure~\ref{f:tpcctatp} plots the performance of the incremental algorithm using
 The key reason is that each query affects a small set of records and leads to a very small complaint set---$1$ or $2$ on average.
 In addition, tuple and query slicing can aggressively reduce the total number of constraints to a very small number---often less than $100$ in total.
 Furthermore for TPC-C, the queries are predominantly \texttt{INSERT} queries, which \sys can solve within milliseconds.
+\ewu{Finally, we evaluated \sys on Example~\ref{ex:taxes} in Figure~\ref{fig:example} and fully repaired the correct query within milliseconds.}
 
-{\it Takeaway: many workloads in practice are dominated by \texttt{INSERT} and point \texttt{UPDATE} queries.  
-  In these settings, \sys is very effective at reducing the number of constraints and can derive repairs with near-interactive latencies.}
+{\it Takeaway: many workloads in practice are dominated by \texttt{INSERT} and point \texttt{UPDATE} queries (ignoring the dominant percentage of read-only queries).  
+In these settings, \sys is very effective at reducing the number of constraints and can derive repairs with near-interactive latencies.}
+
 \begin{figure}[h]
 \centering
   \includegraphics[width = .75\columnwidth]{figures/benchmark_time}
