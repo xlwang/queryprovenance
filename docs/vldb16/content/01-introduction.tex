@@ -31,7 +31,7 @@ focus for data management research, handling new errors, introduced during
 regular database interactions, has received little attention. Most work in
 this direction focuses on \emph{guarding against} erroneous updates. For
 example, integrity constraints~\cite{Khoussainova2006} reject some improper
-updates (\alex{I don't understand this} \xlw{one reviewer complained `` Integrity constraints can do more than specify ranges.'' }), 
+updates, 
 but only if the data falls outside rigid, predefined ranges.
 Certificate-based verification~\cite{Chen2011} is less rigid, but it is
 impractical and non-scalable as it requires users to answer challenge
@@ -48,8 +48,7 @@ dataset, and allow an administrator to easily identify and further validate the 
 In addition, once the erroneous queries have been confirmed, repairing the source of the errors
 can potentially lead to the identification of additional discrepancies in
 the data that would have otherwise remained undetected.  
-We provide two motivating examples, This is a real-life scenario, provided to us by a large US-based wireless provider.
-\ewu{Consider the following motivating examples, the first is based on conversations with a large US-based wireless provider:}
+We describe two motivating examples; the first is a real-life scenario, provided to us by a large US-based wireless provider.
 
 \begin{example}[Wireless discount policies]\label{ex:telco}
 
@@ -65,7 +64,8 @@ do not have the capacity or ability to investigate the complaints deeply. The
 standard course of action is to correct billing mistakes on a case-by-case
 basis for each complaint. As a result, unreported errors remain in the
 database for a long time, or they never get corrected, and their cause becomes
-harder to trace as the source of the errors is obscured.\footnote{This is a real-life scenario, provided to us by a large US-based wireless provider.}
+harder to trace as the source of the errors is obscured.
+% \footnote{This is a real-life scenario, provided to us by a large US-based wireless provider.}
 
 \end{example}
 
@@ -84,7 +84,7 @@ a customer service department, which does not have the resources nor
 the capability to investigate the errors more broadly. Instead, errors
 are resolved on a case-by-case basis. The goal of \sys is to identify
 the query or queries that caused the errors and propose corrections to
-those queries.  \ewu{Once these queries have been validated (say, by an expert), they can be used to} identify unreported
+those queries.  Once these repairs have been validated (say, by an expert), they can be used to identify unreported
 errors and to prevent the introduction of more errors. This problem
 has the following important characteristics that render it very difficult, and unsuitable for traditional
 techniques:
@@ -174,8 +174,8 @@ following contributions:
     % that complaints of low density are likely false positives and thus can be
     % safely ignored (Section~\ref{???}).
     
-    \item We \ewu{perform a thorough evaluation of the trade-offs between speed and accuracy of our baseline and optimized methods under a controlled, synthetic setting. \xlw{In particular, we demonstrate that the optimized \sys achieves 40$\times$ speedup compared with baseline algorithm when attribute size in the table is $500$ (Section~\ref{sec:experiments}). }
-    We also evaluate \sys on common OLTP benchmarks and show how \sys can propose fully accurate repairs within milliseconds on a TPC-C workload with $1500$ queries (Section~\ref{sec:experiments}) }
+    \item We perform a thorough evaluation of the trade-offs between speed and accuracy of our baseline and optimized methods under a controlled, synthetic setting. In particular, we demonstrate that the  \sys optimizations achieve significant speedup compared to the baseline algorithm (40$\times$ in some of our experimental settings).
+    We also evaluate \sys on common OLTP benchmarks and show how \sys can propose fully accurate repairs within milliseconds on a TPC-C workload with $1500$ queries (Section~\ref{sec:experiments}).
     %experimentally evaluate the effectiveness and efficiency of our
     %methods against benchmark and synthetic datasets and query logs. 
 \end{itemize}
@@ -192,7 +192,7 @@ that are less common in update workloads, such as nested queries,
 joins, and aggregation. 
 It also does not currently deal with large amounts of incorrect
 information, such as fake data errors reported by malicious users.
-\ewu{These challenges present exciting future extensions to the system presented in this work.}
+These challenges present exciting future extensions to the system presented in this work.
 % this challenge is orthogonal to the goals of \sys and to the focus of our work.
 
 
