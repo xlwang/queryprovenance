@@ -541,7 +541,7 @@ Figure~\ref{f:tpcctatp} plots the performance of the incremental algorithm using
 The key reason is that each query affects a small set of records and leads to a very small complaint set---$1$ or $2$ on average.
 In addition, tuple and query slicing can aggressively reduce the total number of constraints to a very small number---often less than $100$ in total.
 Furthermore for TPC-C, the queries are predominantly \texttt{INSERT} queries, which \sys can solve within milliseconds.
-\ewu{Finally, we evaluated \sys on Example~\ref{ex:taxes} in Figure~\ref{fig:example} and fully repaired the correct query within milliseconds.}
+Finally, we evaluated \sys on Example~\ref{ex:taxes} in Figure~\ref{fig:example} and fully repaired the correct query in 35 milliseconds.
 
 {\it Takeaway: many workloads in practice are dominated by \texttt{INSERT} and point \texttt{UPDATE} queries (ignoring the dominant percentage of read-only queries).  
 In these settings, \sys is very effective at reducing the number of constraints and can derive repairs with near-interactive latencies.}
