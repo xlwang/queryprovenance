@@ -360,14 +360,19 @@ As shown in Figure~\ref{f:attr}, when the number of attribute in a table is smal
 However, increasing the number of attribute exhibits a larger benefit for query and attribute slicing (up to $6.8\times$ reduction compared to tuple-slicing).
 When the table is wide ($N_a = 500$), applying all optimizations ($inc_1-all$) is $40\times$ faster than \emph{tuple-slicing} alone.  
 
-\emph{Database Size:} \xlw{explanation not correct. 
-We increase the database size ($N_D \in [100,5000]$) while keeping the number of attributes fixed at $N_a = 100$.
-In order to keep the query output cardinality constant, we correspondingly increase the range of attribute values $V_d$.
-Figure~\ref{f:attr100} shows that the cost predominantly grows when the corruption happens in an old query ($idx = 50$).
-The increase in cost despite the tuple-slicing optimization is an artifact of increasing $V_d$, which increases the space of possible value assignment for each undetermined variable.
-In fact, the number of constraints remains constant as the database increases, illustrating tuple-slicing's effectiveness.
-We find that the large number of attributes allows query and attribute slicing to have a large effect on the performance.
-As a result, combining all three optimizations improves the latency by $2\times$ in the worst case, and up to $4\times$ in the best case.}
+\emph{Database Size:} 
+We vary the database size ($N_D \in [100,5000]$) with a large number of attributes ($N_a = 100$).
+We fix the number of complaints by by decreasing the query selectivity in proportion to $N_D$'s increase---the specific mechanism to do so does not affect the findings.
+Figure~\ref{f:attr100} shows that the costs are relatively flat until the corruption occurs in and old query ($q_{50}$).  
+In addition, we find that the cost is highly correlated with the number of candidate queries that are encoded in the MILP problem.
+The increase in cost despite tuple-slicing is due to the larger number of candidate queries in the system; 
+we believe the increasing trend is due to the solver's ability to prune constraints that correspond to queries that clearly will not affect the complaint set---an implicit form o query slicing.  
+Applying attribute-slicing supercedes this implicit optimization and results in a flat curve, 
+while query-slicing explicitly reduces the number of candidate queries in proportion with the database size, and leads to the increasing trend.
+Ultimately, combining all three optimizations improves the latency over tuple-slicing by $2\times$ in the worst case, and up to $4\times$ in the best case.
+%We find that the large number of attributes allows query and attribute slicing to have a large effect on the performance.
+% The increase in cost despite the tuple-slicing optimization is an artifact of increasing $V_d$, which increases the space of possible value assignment for each undetermined variable.
+% In fact, the number of constraints remains constant as the database increases, illustrating tuple-slicing's effectiveness.
 
 % \ewu{why does the cost increase while the next experiment is flat??}
 % The large number of attributes in the schema enables the query and attribute optimizations to have a large effect.
@@ -436,36 +441,37 @@ These include factors such as query complexity, log size $N_q$, database size $N
 We focus on a narrow table setting that contains $N_a = 10$ attributes, and a single corrupt query in the query log.
 
 
-\iffalse 
-  \stitle{Scalability - Log Size:}
-  Figures~\ref{f:logsize_time} and~\ref{f:logsize_acc} increase the query log size (each subplot) between $50, 100, 500$ and $1000$.
-  We compared the baseline $\sys_{t,inc}^{1st}$ with addition attribute, query or both slicing optimizations.
-  For readibility purposes, we have normalized the x-axis to show the distance of the corrupted query from the most recent query in the log
-  (e.g., $x=50$ denotes that $q_{N-50}$ was corrupted).
-  As expectied, the cost increases as the corruption is older in the query log since more queries need to be tested before the
-  true corruption is encountered.  There algorithms all execute at roughly the same performance, though there is a slight advantage to
-  using the query-slicing optimization. The optimization reduces the time to linearize the query log by roughly $20\%$, however
-  the CPLEX solver time contributes to over half the total time so the improvement is difficult to see.
-  All algorithms exhibit near perfect F1-scores.
-\fi
+% \iffalse 
+%   \stitle{Scalability - Log Size:}
+%   Figures~\ref{f:logsize_time} and~\ref{f:logsize_acc} increase the query log size (each subplot) between $50, 100, 500$ and $1000$.
+%   We compared the baseline $\sys_{t,inc}^{1st}$ with addition attribute, query or both slicing optimizations.
+%   For readibility purposes, we have normalized the x-axis to show the distance of the corrupted query from the most recent query in the log
+%   (e.g., $x=50$ denotes that $q_{N-50}$ was corrupted).
+%   As expectied, the cost increases as the corruption is older in the query log since more queries need to be tested before the
+%   true corruption is encountered.  There algorithms all execute at roughly the same performance, though there is a slight advantage to
+%   using the query-slicing optimization. The optimization reduces the time to linearize the query log by roughly $20\%$, however
+%   the CPLEX solver time contributes to over half the total time so the improvement is difficult to see.
+%   All algorithms exhibit near perfect F1-scores.
+% \fi
 
 
 \emph{Database Size:}
-Figure~\ref{f:dbsize_time} varies the database size from $100$ to $100,000$ tuples, and fixes query output cardinality and complaint set size in the same way as the previous scalability experiment.
-%For simplicity, we plot the performance and accuracy of corruptions at two query indexes: $50$ and $200$.
-In contrast to the previous experiment, the scalabality curve is nearly flat for both corruption query indices due to the smaller number of attributes, which reduces the effect of increasding $V_d$.  
-Recall that the size of the MILP problem increases multiplicatively with the number of tuples and attributes.  
-Thus reducing number of attributes in combination with tuple-slicing effectively contrains the size of the MILP problem.
-The more recent corruption at $q_{200}$ is executed in nearly constant time as the database size increases, with a perfect F1-score. 
-The performance is more variable at smaller database sizes due to variability in the true query selectivity due to randomness in the data and query generator.
-This leads to more variability in the size of the resulting complaint set, which increases the size of the encoded problem.
-Since the solver scales exponentially with the problem size, this leads to the performance spike when the database is small.
+Figure~\ref{f:dbsize_time} varies the database size ($N_D \in [100, 100k]$), and fixes query output cardinality and complaint set size in the same way as the previous scalability experiment.
+In contrast to the previous experiment, the scalabality curve is nearly flat for both corruption query indices.
+The reason is because the solver's implicit pruning optimization is less effective when there are only $10$ attributes, because every query is likely to touch an attribute that affects the complaint set.
+We verified this by applyng query-slicing to the same setting, and found that a negligable number of queries were pruned.
+The more recent corruption at $q_{200}$ is executed \ewu{nearly immediately} even as the database size increases, with a perfect F1-score. 
+When the corruption is old ($q_{50}$), the performance is more variable at smaller database sizes due to empirical variability of the true query selectivity due to randomness in the data and query generator.
+This leads to more variability in the size of the resulting complaint set, which increases the size and difficulty of the encoded problem, and leads to the spike in average latency at small database sizes.
 
-% \xlw{Meanwhile, as we increase the database size, \sys achieves near constant time cost after database size greater than 1k. 
-% The reason is as we maintain the same query selectivity, the number of complaints maintains roughly the same when database size increases. 
-% And the performance of the solver in dependent on the number of complaints. 
-% However, small database size may increase the randomness in query selectivity, thus we observe different time cost when database size is 100. 
-% }
+% due to the smaller number of attributes, which reduces the effect of increasding $V_d$.  
+% Recall that the size of the MILP problem increases multiplicatively with the number of tuples and attributes.  
+% Thus reducing number of attributes in combination with tuple-slicing effectively contrains the size of the MILP problem.
+% The more recent corruption at $q_{200}$ is executed in nearly constant time as the database size increases, with a perfect F1-score. 
+% The performance is more variable at smaller database sizes due to variability in the true query selectivity due to randomness in the data and query generator.
+% This leads to more variability in the size of the resulting complaint set, which increases the size of the encoded problem.
+% Since the solver scales exponentially with the problem size, this leads to the performance spike when the database is small.
+
 
 \emph{Query Clause Type: }
 So far, we have focused on \texttt{UPDATE} queries with constant set clauses and range predicates.  
