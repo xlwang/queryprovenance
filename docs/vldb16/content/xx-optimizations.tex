@@ -57,6 +57,21 @@ the cost to the left side of Figure~\ref{fig:querysize_vs_time}.
 \end{figure}
 % \vspace*{-0.1in}
 
+\begin{figure}[t]
+    \centering
+    % \vspace*{-.1in}
+    \includegraphics[width=0.35\textwidth]{figures/2nditerationgroups}
+    \vspace*{-2mm}
+    \caption{
+      Graphical depiction of correct (a) and over-generalized (b) repairs.
+      Solid and empty circles represent complaint and non-complaint tuples.
+      Each thick line represents the interval of query $q$'s range predicate.
+      Dirty: incorrect interval in corrupted query;
+      truth: correct interval in true query;
+      repair: interval returned by the solver.}
+    \label{fig:groups}
+    % \vspace*{-.1in}
+\end{figure}
 
 % In the previous section, we introduce the basic approach to derive
 % the log repair by incorporating information from every query
@@ -131,21 +146,7 @@ Figure~\ref{fig:groups}(b) highlights such a case where the dirty and truth inte
 % Figure~\ref{fig:groups}(b) highlights such a case where this aggressive approach generalized incorrectly.
 % The dirty and clean intervals are non-overlapping, so the non-complaint tuple shown is not modified by $q$ (otherwise it would be a complaint!). This tuple is incorrectly included in the repaired interval, \emph{because the MILP formulation does not constrain its value}.
 
-\begin{figure}[t]
-    \centering
-    % \vspace*{-.1in}
-    \includegraphics[width=0.35\textwidth]{figures/2nditerationgroups}
-    \vspace*{-2mm}
-    \caption{
-      Graphical depiction of correct (a) and over-generalized (b) repairs.
-      Solid and empty circles represent complaint and non-complaint tuples.
-      Each thick line represents the interval of query $q$'s range predicate.
-      Dirty: incorrect interval in corrupted query;
-      truth: correct interval in true query;
-      repair: interval returned by the solver.}
-    \label{fig:groups}
-    % \vspace*{-.1in}
-\end{figure}
+
 
 \indent In both of these cases, the objective function will ensure that the repair
 does not over-generalize the upper bound towards the right because that strictly increases the objective function.

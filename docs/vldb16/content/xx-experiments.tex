@@ -50,7 +50,7 @@
     \end{subfigure}
     \vspace*{-.1in}
     \caption{Preliminary experiments.}
-    \vspace*{-.15in}
+    % \vspace*{-.15in}
   \end{figure*}
 
 
@@ -259,7 +259,7 @@ that are used in all experiments.
     \end{subfigure}
     \vspace*{-.1in}
     \caption{Comparison of optimizations.}
-    \vspace*{-.15in}
+    % \vspace*{-.15in}
   \end{figure*}
 The following set of experiments are designed to establish the rationale for 
 the settings in the subsequent experiments.  
@@ -363,7 +363,7 @@ Ultimately, combining all three optimizations improves the latency over tuple-sl
 % $10$ attributes and $1k$ attributes in the table. As the performance of \sys with different optimizations appears 
 % identical when $N_a = 10$, we will only show results of \sys with tuple slicing optimization in the rest of the 
 % experiments. 
-  \begin{figure*}[ht]
+  \begin{figure*}[t]
     \hspace*{-.1in}
     \centering
      \begin{subfigure}[t]{.33\textwidth}
@@ -407,7 +407,7 @@ Ultimately, combining all three optimizations improves the latency over tuple-sl
     \end{subfigure}
     \vspace*{-.25in}
     \caption{Sensitivity to data and workload factors. }
-    \vspace*{-.15in}
+    % \vspace*{-.15in}
   \end{figure*}
 
 
@@ -546,17 +546,17 @@ Finally, we evaluated \sys on Example~\ref{ex:taxes} in Figure~\ref{fig:example}
 {\it Takeaway: many workloads in practice are dominated by \texttt{INSERT} and point \texttt{UPDATE} queries (ignoring the dominant percentage of read-only queries).  
 In these settings, \sys is very effective at reducing the number of constraints and can derive repairs with near-interactive latencies.}
 
-\begin{figure}[h]
+\begin{figure}[t]
 \centering
   \includegraphics[width = .75\columnwidth]{figures/benchmark_time}
   \vspace*{-.2in}
   \caption{Performance on benchmarks}
   \label{f:tpcctatp} 
-  \vspace*{-.1in}
+  % \vspace*{-.1in}
 \end{figure}
 
 \iffalse  
-  \begin{figure*}[h]
+  \begin{figure*}[t]
     \centering
     \begin{subfigure}[t]{.3\textwidth}
       \includegraphics[width = .99\columnwidth]{figures/dbsize_time}
