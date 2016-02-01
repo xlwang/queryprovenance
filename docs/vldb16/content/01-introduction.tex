@@ -25,16 +25,6 @@ errors that are rooted in erroneous updates.
 Some data cleaning systems try to identify structural sources of
 mistakes~\cite{wang2015}, but they are unable to trace the source of
 the mistakes to particular faulty queries.
-\alex{Personally, I prefer the story we have already. Explanations
-don't seem to fit well with the type of experiments we have. The
-narrative would also have to change substantially in many other parts
-of the paper...}
-\ewu{Instead of talking about data cleaning and trashing it, maybe focus on the value of having explanations of the errors.  Maybe something like:
-1) analysis is hard and errors make it harder 2) could deal with it by preventing any errors, but that's hard.  3) lots of good work on finding errors as the result of analysis, or anomaly detection. 
-4) where did these errors come from?  Want to be able to find the source. The ability to do so could be used to explain surprising errors/results in the database, or identify new errors.
-5) There is a general \emph{Explanation} problem of deriving useful explanations of errors to users.
-6) Within this general explanation problem, we focus on databaes and queries. Call this query explanation
-7) Query explanation is hard because of X Y Z }
 
 While improving data quality and correcting data errors has been an important
 focus for data management research, handling new errors, introduced during
@@ -54,8 +44,9 @@ caused by erroneous updates. In contrast to existing approaches in data
 cleaning that aim to detect and correct errors in the data directly, the goal
 of \sys is to identify errors in the queries that introduced errors in the
 data. These diagnoses \emph{explain} how errors were introduced to a
-dataset, allow repairing the source of the errors, 
-and potentially lead to the identification of additional discrepancies in
+dataset, \ewu{and allow an administrator to easily identify and further validate the most likely sources of these errors. 
+In addition, once such queries have been confirmed, repairing the source of the errors
+can} potentially lead to the identification of additional discrepancies in
 the data that would have otherwise remained undetected.
 
 \begin{example}[Wireless discount policies]\label{ex:telco}
