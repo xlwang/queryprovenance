@@ -14,7 +14,7 @@ applications use the data, datasets can frequently change as applications
 and users execute queries that modify the data.
 Mistakes in these queries can introduce errors to the data, and these
 errors can propagate to more data by subsequent update queries.
-By the time errors are detected, their origin has often been obscured and it is very difficult identify the offending query and correct it.
+By the time errors are detected, their origin has often been obscured and it is difficult to identify the offending query and correct it.
 Identifying and correcting errors in the data directly is suboptimal, as it targets the symptom,
 rather than the underlying cause. Fixing the manifested data errors on a
 case-by-case basis often obscures the root of the problem and other data that may have been
@@ -65,14 +65,14 @@ do not have the capacity or ability to investigate the complaints deeply. The
 standard course of action is to correct mistakes on a case-by-case
 basis for each complaint. As a result, unreported errors remain in the
 database for a long time, or they never get corrected, and their cause becomes
-harder to trace as the source of the errors is obscured.
+harder to trace as further queries modify the database.%  the source of the errors is obscured.
 % \footnote{This is a real-life scenario, provided to us by a large US-based wireless provider.}
 
 \end{example}
 % 
 \begin{example}[Tax bracket adjustment]\label{ex:taxes}
     
-Tax brackets, which determine tax rates for different income levels, are
+Tax brackets determine tax rates for different income levels and are
 often adjusted. Accounting firms implement these changes to their
 databases by appropriately updating the tax rates of their customers. Mistakes
 in these update queries (e.g., Figure~\ref{fig:example}) result in errors in
@@ -123,8 +123,8 @@ techniques:
 \sys does not replace traditional data cleaning methods, but rather, complements them.
 Instead of identifying errors in the data directly, 
 \sys targets the diagnosis, explanation, and repair of errors at the root by
-leveraging errors acquired from 
-users or traditional data cleaning techniques.
+leveraging example errors acquired from 
+users, traditional data cleaning, or detection techniques.
 
 Diagnosing data errors stemming from incorrect updates is fundamentally
 challenging: the search space of possible mistakes and fixes is large, and the
