@@ -44,14 +44,14 @@ caused by erroneous updates. In contrast to existing approaches in data
 cleaning that aim to detect and correct errors in the data directly, the goal
 of \sys is to identify errors in the queries that introduced errors in the
 data. These diagnoses \emph{explain} how errors were introduced to a
-dataset, \ewu{and allow an administrator to easily identify and further validate the most likely sources of these errors. 
-In addition, once such queries have been confirmed, repairing the source of the errors
+dataset, \ewu{and allow an administrator to easily identify and further validate the most likely query-based sources of these errors. 
+In addition, once the erroneous queries have been confirmed, repairing the source of the errors
 can} potentially lead to the identification of additional discrepancies in
-the data that would have otherwise remained undetected.
+the data that would have otherwise remained undetected.  \ewu{Consider the following motivating examples, the first is based on conversations with a large US-based wireless provider:}
 
 \begin{example}[Wireless discount policies]\label{ex:telco}
 
-A large US-based wireless provider offers company discounts as incentives for
+A \ewu{\sout{large US-based}} wireless provider offers company discounts as incentives for
 corporate customers. There are different types of discounts (flat, percentage,
 fee-based), and their details are specific to corporate agreements. The large
 number of policies and complexities in their rules frequently cause policies
@@ -81,11 +81,11 @@ In these application scenarios, data errors are typically reported to
 a customer service department, which does not have the resources nor
 the capability to investigate the errors more broadly. Instead, errors
 are resolved on a case-by-case basis. The goal of \sys is to identify
-the query or queries that caused the errors, propose corrections to
-those queries, and use the modified queries to identify unreported
+the query or queries that caused the errors and propose corrections to
+those queries.  \ewu{Once these queries have been validated (say, by an expert), they can be used to} identify unreported
 errors and to prevent the introduction of more errors. This problem
-has the following important characteristics that render traditional
-techniques unsuitable:
+has the following important characteristics that render it very difficult, and unsuitable for traditional
+techniques:
 
 
 \begin{description}[leftmargin=*, topsep=0mm, itemsep=0mm]
@@ -159,7 +159,7 @@ following contributions:
     incremental repair method that targets the cases where the log
     contains a single corrupted query (or the search focuses on a
     single repair). This incremental analysis of the log allows us to
-    scale to very large datasets and large query logs. Further, we
+    scale to large datasets ($100k$ records) and large query logs (hundreds to thousands of update queries). Further, we
     show that our optimization techniques have the additional
     advantage of tolerating incomplete information, such as unreported
     errors (Section~\ref{sec:opt}).
@@ -172,23 +172,28 @@ following contributions:
     % that complaints of low density are likely false positives and thus can be
     % safely ignored (Section~\ref{???}).
     
-    \item We experimentally evaluate the effectiveness and efficiency of our
-    methods against benchmark and synthetic datasets and query logs. 
-    (Section~\ref{sec:experiments}). 
+    \item We \ewu{perform a thorough evaluation of the trade-offs between speed and accuracy of our baseline and optimized methods under a controlled, synthetic setting.  
+    We also evaluate \sys on common OLTP benchmarks and show how \sys can propose fully accurate repairs within milliseconds on a TPC-C workload with $1500$ queries (Section~\ref{sec:experiments}) }
+    %experimentally evaluate the effectiveness and efficiency of our
+    %methods against benchmark and synthetic datasets and query logs. 
 \end{itemize}
 
 To the best of our knowledge, \sys is the first system that diagnoses
 and repairs errors through query histories. We show that it is
 extremely effective and efficient with the update workloads found in
-most common benchmarks. \sys does not handle some complex query types
-that are less common in update workloads, such as nested queries,
-joins, and aggregation. While \sys trusts its input to be correct, it
+most common benchmarks. 
+While \sys trusts its input to be correct, it
 can handle incomplete information, and it can be resilient to some
 inaccuracies in the reported data errors (Section~\ref{sec:noise}).
-\sys does not currently deal with large amounts of incorrect
-information, such as fake data errors reported by malicious users;
-this challenge is orthogonal to the goals of \sys and to the focus of
-our work.
+\sys does not handle some complex query types
+that are less common in update workloads, such as nested queries,
+joins, and aggregation. 
+It also does not currently deal with large amounts of incorrect
+information, such as fake data errors reported by malicious users.
+\ewu{These challenges present exciting future extensions to the system presented in this work.}
+% this challenge is orthogonal to the goals of \sys and to the focus of our work.
+
+
 
 
 
