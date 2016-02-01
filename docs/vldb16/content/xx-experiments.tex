@@ -58,12 +58,12 @@ In this section, we carefully study the performance and accuracy
 characteristics of the basic MILP-based repair algorithm, 
 slicing-based optimizations that improve the latency of the system, 
 and the incremental algorithm for single query corruptions. 
-\ewu{Due to the difficulty of collecting corrupt query logs from active deployments, our goal instead} is to understand these trade-offs in
+Due to the difficulty of collecting corrupt query logs from active deployments, our goal instead is to understand these trade-offs in
 controlled synthetic scenarios, as well as study the effectiveness
 in typical database query workloads based on widely used benchmarks.
 % \xlw{ By default, we set \sys as the incremental approach with tuple slicing optimization ($inc_1-tuple$) as it fixes our default synthetic query logs and benchmark workloads with minimum time cost and near perfect accuracy.  }
 
-
+\looseness -1
 To this end, our experiments are organized as follows: First, 
 we compare the basic and incremental MILP algorithm against the different optimizations 
 to highlight the value of different optimizations and the limitatios of the basic approach.  
@@ -137,19 +137,18 @@ All experiments were run on 12x2.66 GHz  machines with 16GB RAM running IBM CPLE
 
 
 
-Each of our experiments follows a similar procedure. 
-We generate and corrupt a query log as described below. 
+For each of our experiments we generate and corrupt a query log. 
 We execute the original and corrupt query logs on an initial (possibly empty) database,
 perform a tuple-wise comparison between the resulting database states to generate a true complaint set,
 and simulate incomplete complaint sets by removing a subset of the true complaints.
-Finally, we execute the algorithms and compare \ewu{the fixed query log with the true query log}, as well as the fixed and true
-final database states to measure performance and accuracy metrics.
+Finally, we execute the algorithms and compare the repaired query log with the true query log, as well as the repaired and true
+final database states, to measure performance and accuracy metrics.
 Performance is measured as wall clock
 time between submitting a complaint set and the system terminating after retrieving a valid repair.  
-Accuracy is measured as repair's precision (percentage of repaired tuples that were correctly fixed), 
+Accuracy is measured as the repair's precision (percentage of repaired tuples that were correctly fixed), 
 the recall (the percentage of the full complaint set that was repaired), 
 and the F1 measure (the harmonic mean of precision and recall).
-Our reported metrics are the average across 20 runs.
+We report the average across 20 runs.
 We describe the experimental parameters in the context of the datasets and workloads below.
 %Finally, Table~\ref{t:params} summarizes the key parameters that we vary throughout our experiments.  
 
@@ -169,14 +168,15 @@ The default setting for these parameters are: $N_D = 1000, N_a = 10, V_d = 200, 
 % UPDATE SET X,.. WHERE Y ...
 
 
-\noindent \texttt{UPDATE} queries are defined by a SET clause that assigns an attribute a $Constant$ or $Relative$ value,
+\texttt{UPDATE} queries are defined by a SET clause that assigns an attribute a $Constant$ or $Relative$ value,
 and a WHERE clause can either be a $Point$ predicate on a key, or a $Range$ predicate on non-key attributes:
+
 {\scriptsize
 \begin{verbatim}
  SET Clause:                WHERE Clause:
   Constant: SET (a_i=?), ..   Point: WHERE a_j=? & ..
-  Relative: SET (a_i=a_i+?)   Range: WHERE a_j in [?,?+r] & ..\end{verbatim} }
-where \verb|?|$\in [0, V_d]$ is random and \verb|r| is the size of the range predicate. 
+  Relative: SET (a_i=a_i+?)   Range: WHERE a_j in [?,?+r] & ..\end{verbatim}}%
+\noindent where \verb|?|$\in [0, V_d]$ is random and \verb|r| is the size of the range predicate. 
 Query selectivity is by default $2\%$ (\verb|r|$=2$).
 Note that a range predicate where \texttt{r = 0} is distinct from a $Point$ predicate due to the non-key attribute.
 The WHERE clauses in \texttt{DELETE} queries are generated in an identical fashion, while
@@ -198,6 +198,7 @@ Each attribute in a query is picked from either a uniform distribution when $s=0
 This allows our experiments to vary between a uniform distribution, where each attribute is
 equally likely to be picked, and a skewed distribution where nearly all attributes are the same. 
 
+\looseness -1
 \stitle{Benchmarks: } We use the TPC-C~\cite{tpcc} and TATP~\cite{tatp} benchmarks.
 The former generates the {\it ORDER} table at scale 1 with one warehouse, and uses the queries that modify the {\it ORDER} table. 
 We execute a log of 2000 queries over an initial table containing 6000 tuples.  
@@ -240,7 +241,7 @@ that are used in all experiments.
 %   \caption{Benchmark Performance}
 % \end{figure}
 
-\subsection{Preliminaries}
+\subsection{Preliminary analysis}
 
  \begin{figure*}[ht]
     \vspace*{-.1in}
@@ -261,6 +262,8 @@ that are used in all experiments.
     \caption{Comparison of optimizations.}
     % \vspace*{-.15in}
   \end{figure*}
+  
+\looseness -1
 The following set of experiments are designed to establish the rationale for 
 the settings in the subsequent experiments.  
 Specifically, we compare different slicing-based optimizations of the basic approach
@@ -270,7 +273,7 @@ incremental approach in the context of a single
 corrupted query. We then establish the difficulty of repairing \texttt{UPDATE} 
 workloads as compared to other query types. 
 
-\stitle{Multiple Corrupt Queries:}
+\stitle{Multiple Corrupt Queries:} \looseness -1
 In this experiment, we compare the basic algorithm ($basic$) against 
 each slicing optimization individually($basic-tuple, basic-attr, basic-query$) and all of them together ($basic-all$).  
 We use the default settings with $N_D = 1000$ tuples and a sequence of \texttt{UPDATE} queries.
@@ -315,7 +318,7 @@ the corruption happens earlier in the query log---and a much faster rate for \te
 The F1 score for all settings is nearly 1 (Figure~\ref{f:indelup_acc}).
 
 \smallskip
-{\it Takeaways: we find that \texttt{basic}, even with slicing optimizations,
+\emph{Takeaways: We find that \texttt{basic}, even with slicing optimizations,
 has severe scalability limitations due to the large number of undetermined values---this is unsurprising as MILP constraint solving is an NP-hard problem.
 In contrast, the incremental algorithms can scale to larger query log sizes, however only a batch size of $k=1$ can retain high repair quality.
 \texttt{UPDATE} queries translate into more undetermined variables than other query types, and are significantly more expensive to repair.
@@ -330,9 +333,9 @@ We divide these experiments into two groups: the first evaluates the different s
 the latter algorithm and varies workload and dataset parameters.
 Note that omit accuracy figures when the F1-score is $\ge 0.99$.
 
-\noindent\textbf{Comparing Optimizations}
+\stitle{Comparing optimizations.}
 
-\emph{Varying \# Attributes:}
+\emph{Varying \# Attributes:} \looseness -1
 We first evaluate \sys and its optimizations by increasing the number of attribute ($N_a \in [10, 500]$) with $N_D = 100$.
 As shown in Figure~\ref{f:attr}, when the number of attribute in a table is small (e.g., $N_a=10$) all algorithms appear identical. 
 However, increasing the number of attribute exhibits a larger benefit for query and attribute slicing (up to $6.8\times$ reduction compared to tuple-slicing).
@@ -411,7 +414,7 @@ Ultimately, combining all three optimizations improves the latency over tuple-sl
   \end{figure*}
 
 
-\noindent\textbf{Sensitivity to Data and Workload Factors}
+\stitle{Sensitivity to data and workload factors.}
 
 The following set of synthetic experiments focus on a single \sys setting---incremental with tuple-slicing---and
 individually vary numerous database and workload parameters in order to tease apart the algorithm performance.  
@@ -433,7 +436,7 @@ We focus on a narrow table setting that contains $N_a = 10$ attributes, and a si
 % \fi
 
 
-\emph{Database Size:}
+\emph{Database Size:} \looseness -1
 Figure~\ref{f:dbsize_time} varies the database size ($N_D \in [100, 100k]$), and fixes query output cardinality and complaint set size in the same way as the previous scalability experiment.
 In contrast to the previous experiment, the scalabality curve is nearly flat for both corruption query indices.
 The reason is because the solver's implicit pruning optimization is less effective when there are only $10$ attributes: Every query is likely to touch an attribute that affects the complaint set.
