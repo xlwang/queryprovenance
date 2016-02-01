@@ -5,10 +5,9 @@
 % \ewu{we really need to emphasize that this is a HARD problem!!}
 
 Poor data quality is a hard and persistent problem.  
-\xlw{Review1 complained about these citations. } {\color{red}
 It is estimated to cost the US economy more than \$600 billion
 per year~\cite{eckerson2002} and erroneous price data in retail databases
-alone cost the US consumers \$2.5 billion each year~\cite{Fan2008}}. 
+alone cost the US consumers \$2.5 billion each year~\cite{Fan2008}. 
 Although data
 cleaning tools can purge many errors from a dataset before downstream 
 applications use the data, datasets can frequently change as applications
@@ -26,7 +25,11 @@ errors that are rooted in erroneous updates.
 Some data cleaning systems try to identify structural sources of
 mistakes~\cite{wang2015}, but they are unable to trace the source of
 the mistakes to particular faulty queries.
-\ewu{Instead of talking about data cleaning and transhing it, maybe focus on the value of having explanations of the errors.  Maybe something like:
+\alex{Personally, I prefer the story we have already. Explanations
+don't seem to fit well with the type of experiments we have. The
+narrative would also have to change substantially in many other parts
+of the paper...}
+\ewu{Instead of talking about data cleaning and trashing it, maybe focus on the value of having explanations of the errors.  Maybe something like:
 1) analysis is hard and errors make it harder 2) could deal with it by preventing any errors, but that's hard.  3) lots of good work on finding errors as the result of analysis, or anomaly detection. 
 4) where did these errors come from?  Want to be able to find the source. The ability to do so could be used to explain surprising errors/results in the database, or identify new errors.
 5) There is a general \emph{Explanation} problem of deriving useful explanations of errors to users.
@@ -38,7 +41,7 @@ focus for data management research, handling new errors, introduced during
 regular database interactions, has received little attention. Most work in
 this direction focuses on \emph{guarding against} erroneous updates. For
 example, integrity constraints~\cite{Khoussainova2006} reject some improper
-updates (\xlw{for ordered attributes}), 
+updates (\xlw{for ordered attributes} \alex{I don't understand this}), 
 but only if the data falls outside rigid, predefined ranges.
 Certificate-based verification~\cite{Chen2011} is less rigid, but it is
 impractical and non-scalable as it requires users to answer challenge
@@ -51,9 +54,9 @@ caused by erroneous updates. In contrast to existing approaches in data
 cleaning that aim to detect and correct errors in the data directly, the goal
 of \sys is to identify errors in the queries that introduced errors in the
 data. These diagnoses \emph{explain} how errors were introduced to a
-dataset, \xlw{\emph{fix} errors from source, 
-and also potentially lead to the identification of additional discrepancies in
-the data that would have otherwise remained undetected.}
+dataset, allow repairing the source of the errors, 
+and potentially lead to the identification of additional discrepancies in
+the data that would have otherwise remained undetected.
 
 \begin{example}[Wireless discount policies]\label{ex:telco}
 
@@ -83,16 +86,15 @@ the tax rates and computed taxes.
 
 \end{example}
 
-\xlw{In these application scenarios, data errors are typically reported to a
-customer service department, which does not have the resources nor the
-capability to investigate the errors more broadly. Instead, errors are
-resolved on a case-by-case basis. 
-The goal of \sys is to identify the query or queries that caused
-the errors, propose corrections to those queries, and use the modified queries to
-prevent introducing more errors and identify unreported errors.
-This problem has the following important characteristics that render 
-traditional base-by-case fixing \sout{traditional data cleaning} 
-unsuitable:}
+In these application scenarios, data errors are typically reported to
+a customer service department, which does not have the resources nor
+the capability to investigate the errors more broadly. Instead, errors
+are resolved on a case-by-case basis. The goal of \sys is to identify
+the query or queries that caused the errors, propose corrections to
+those queries, and use the modified queries to identify unreported
+errors and to prevent the introduction of more errors. This problem
+has the following important characteristics that render traditional
+techniques unsuitable:
 
 
 \begin{description}[leftmargin=*, topsep=0mm, itemsep=0mm]
@@ -122,12 +124,11 @@ unsuitable:}
     
 \end{description}
 % 
-\xlw{In fact, \sys is different with and serves as a complement of
-traditional data cleaning methods.
-Instead of identifying errors, 
-\sys targets on diagnosing, explaining, and fixing errors from the root by
-leveraging reported or detected errors that acquired from 
-users or traditional data cleaning techniques. }
+\sys does not replace traditional data cleaning methods, but rather, complements them.
+Instead of identifying errors in the data directly, 
+\sys targets the diagnosis, explanation, and repair of errors at the root by
+leveraging errors acquired from 
+users or traditional data cleaning techniques.
 
 Diagnosing data errors stemming from incorrect updates is fundamentally
 challenging: the search space of possible mistakes and fixes is large, and the
@@ -181,17 +182,25 @@ following contributions:
     % safely ignored (Section~\ref{???}).
     
     \item We experimentally evaluate the effectiveness and efficiency of our
-    methods against \sout{real-world} benchmark and synthetic datasets and query logs. 
+    methods against benchmark and synthetic datasets and query logs. 
     (Section~\ref{sec:experiments}). 
 \end{itemize}
 
-\xlw{
-\sys is the first system (to our knowledge) that tries to diagnose and fix errors from query
-history. It solves standard types of queries that could be found in most of the common benchmarks 
-effectively and efficiently when enough accurate information is provided. However, \sys may fail 
-in some complex scenarios when there are hard queries (e.g, queries with sub-query, join, and aggregation), 
-or inaccurate reported errors (e.g., false positives). 
-}
+To the best of our knowledge, \sys is the first system that diagnoses
+and repairs errors through query histories. We show that it is
+extremely effective and efficient with the update workloads found in
+most common benchmarks. \sys does not handle some complex query types
+that are less common in update workloads, such as nested queries,
+joins, and aggregation. While \sys trusts its input to be correct, it
+can handle incomplete information, and it can be resilient to some
+inaccuracies in the reported data errors (Section~\ref{sec:noise}).
+\sys does not currently deal with large amounts of incorrect
+information, such as fake data errors reported by malicious users;
+this challenge is orthogonal to the goals of \sys and to the focus of
+our work.
+
+
+
 
 \section{{\large\textbf{\sys}}: architecture}
 
