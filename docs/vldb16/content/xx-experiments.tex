@@ -360,14 +360,14 @@ As shown in Figure~\ref{f:attr}, when the number of attribute in a table is smal
 However, increasing the number of attribute exhibits a larger benefit for query and attribute slicing (up to $6.8\times$ reduction compared to tuple-slicing).
 When the table is wide ($N_a = 500$), applying all optimizations ($inc_1-all$) is $40\times$ faster than \emph{tuple-slicing} alone.  
 
-\emph{Database Size:}
+\emph{Database Size:} \xlw{explanation not correct. 
 We increase the database size ($N_D \in [100,5000]$) while keeping the number of attributes fixed at $N_a = 100$.
 In order to keep the query output cardinality constant, we correspondingly increase the range of attribute values $V_d$.
 Figure~\ref{f:attr100} shows that the cost predominantly grows when the corruption happens in an old query ($idx = 50$).
 The increase in cost despite the tuple-slicing optimization is an artifact of increasing $V_d$, which increases the space of possible value assignment for each undetermined variable.
 In fact, the number of constraints remains constant as the database increases, illustrating tuple-slicing's effectiveness.
 We find that the large number of attributes allows query and attribute slicing to have a large effect on the performance.
-As a result, combining all three optimizations improves the latency by $2\times$ in the worst case, and up to $4\times$ in the best case.
+As a result, combining all three optimizations improves the latency by $2\times$ in the worst case, and up to $4\times$ in the best case.}
 
 % \ewu{why does the cost increase while the next experiment is flat??}
 % The large number of attributes in the schema enables the query and attribute optimizations to have a large effect.

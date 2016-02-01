@@ -10,8 +10,8 @@ grows quadratically with respect to the database and the query log.
 This increase has a large impact on the running time of the solver, since it needs to find a (near)-optimal 
 assignment of all undetermined variables (exponential with the number of undetermined variables).
 This is depicted in the red bars in Figure~\ref{fig:querysize_vs_time}, which increases
-the query log size for a database of $1000$ tuples.  The red bars encode the problem using \emph{basic} while the blue bars
-use all of the optimizations described in this section.
+the query log size for a database of $1000$ tuples.  The red bars encode the problem using \xlw{\emph{basic} algorithm that parameterize all queries } while the blue bars \xlw{shows the potential gain by 
+only paramerizing a single (incorrect) query}.
 At a log size of $80$, the solver for \emph{basic} failed to produce an answer within $1000$ seconds.
 Although the empirical solver performance varies widely depending on the specific problem, 
 this experiment illustrates the performance limitation of the \emph{basic} approach. 
@@ -108,6 +108,8 @@ problem size without sacrificing accuracy: it
 first aggressively reduces
 the problem size by only encoding tuples in the complaint set and then refines the log repair 
 through a second but much smaller MILP problem. 
+
+\smallskip
 \noindent\textbf{Step 1 (Initial Repair Step):} 
 The first step of  \emph{tuple slicing} 
 aggressively reduces the problem size by only encoding those 
