@@ -10,10 +10,10 @@ in the query log.  In this approach, the number of constraints (as well as undet
 grows quadratically with respect to the database and the query log.
 This increase has a large impact on the running time of the solver, since it needs to find a (near)-optimal 
 assignment of all undetermined variables (exponential with the number of undetermined variables).
-This is depicted in the red bars in Figure~\ref{fig:querysize_vs_time} for increasing
-the query log size over a database of $1000$ tuples.  The red bars encode the problem using  the \emph{basic} algorithm that parameterizes all queries, while the blue bars show the potential gain of  parameterizing a single (presumed incorrect) query.
+This is depicted in Figure~\ref{fig:querysize_vs_time}, which increases the query log size over a database of $1000$ tuples.  
+The red bars encode the problem using  the \emph{basic} algorithm that parameterizes all queries, while the blue bars show the potential gain of only parameterising the oldest query that we assume is incorrect.
 At a log size of $80$, the solver for \emph{basic} failed to produce an answer within $1000$ seconds.
-Although empirical solver performance can vary significantly, 
+Although MILP solvers exhibit empirical performance variation,
 this experiment illustrates the performance limitation of the \emph{basic} approach. 
 
 A second limitation of \emph{basic} is its inability to handle errors in the complaint set.
