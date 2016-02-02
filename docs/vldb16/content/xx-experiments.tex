@@ -49,7 +49,7 @@
     \label{f:indelup_acc} 
     \end{subfigure}
     \vspace*{-.1in}
-    \caption{Prelim. experiments highlight limitations of \naive, the value of tuple-slicing, and high cost of \texttt{UPDATE} queries.}
+    \caption{Our analysis highlights limitations of \naive, the value of tuple-slicing, and the high cost of \texttt{UPDATE} queries.}
     % \vspace*{-.15in}
   \end{figure*}
 
@@ -66,7 +66,7 @@ in typical database query workloads based on widely used benchmarks.
 \looseness -1
 To this end, our experiments are organized as follows: First, 
 we compare the basic and incremental MILP algorithm against the different optimizations 
-to highlight the value of different optimizations and the limitatios of the basic approach.  
+to highlight the value of different optimizations and the limitations of the basic approach.  
 We then show that \texttt{UPDATE} queries are particularly difficult to repair and focus solely
 on different types of \texttt{UPDATE}-only workloads to understand how \sys responds to different parameter settings.
 We end with an evaluation using established database transaction benchmarks from OLTP-bench~\cite{difallah2013oltp}:
@@ -259,7 +259,7 @@ that are used in all experiments.
     \label{f:attr100} 
     \end{subfigure}
     \vspace*{-.1in}
-    \caption{Optimization comparison illustrates value of query and attribute slicing when \# attributes is high.}
+    \caption{For datasets with many attributes, the optimizations result in significant improvements.}
     % \vspace*{-.15in}
   \end{figure*}
   
@@ -274,7 +274,7 @@ corrupted query. We then establish the difficulty of repairing \texttt{UPDATE}
 workloads as compared to other query types. 
 
 \stitle{Multiple Corrupt Queries:} \looseness -1
-In this experiment, we compare the \naive ($basic$) against 
+In this experiment, we compare the basic approach (\naive) against 
 each slicing optimization individually($basic-tuple, basic-attr, basic-query$) and all of them together ($basic-all$).  
 We use the default settings with $N_D = 1000$ tuples and a sequence of \texttt{UPDATE} queries.
 We generate query logs in 5 different sizes $N_q\in \{10, 20, 30, 40, 50\}$ and corrupt 
@@ -409,7 +409,8 @@ Ultimately, combining all three optimizations improves the latency over tuple-sl
       \label{f:falsenegative_acc} 
     \end{subfigure}
     \vspace*{-.25in}
-    \caption{Data and workload parameter experiments show high sensitivity to query skew, clause types, and dimensionality.  \sys can handle high false negative rates in recent queries.}
+    \caption{
+    Performance and accuracy can be sensitive to some data and workload parameters, such as query skew, clause types, and dimensionality.  Notably, \sys can handle high false negative rates when the error resides in recent queries.}
     % \vspace*{-.15in}
   \end{figure*}
 
@@ -553,7 +554,7 @@ In these settings, \sys is very effective at reducing the number of constraints 
 \centering
   \includegraphics[width = .75\columnwidth]{figures/benchmark_time}
   \vspace*{-.2in}
-  \caption{Benchmark Experiments show low repair latencies on OLTP workloads.}
+  \caption{Our experiments on benchmark OLTP workloads show that \sys can produce repairs very fast.}
   \label{f:tpcctatp} 
   % \vspace*{-.1in}
 \end{figure}

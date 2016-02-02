@@ -447,7 +447,7 @@ These results suggest that it is \emph{faster} to run many small MILP problems t
 Our \emph{$Inc_k$} approach (Algorithm~\ref{alg:incalg}) focuses on the case where there is a single corrupted query to repair.
 It does so by linearizing the full query log, including any slicing optimizations, but only parameterizing and repairing a batch of $k$ consecutive queries at a time. 
 This procedure first attempts to repair the $k$ most recent queries, and continues to the next $k$ queries if a repair was not generated.
-The algorithm internally calls a modified version of \emph{basic} approach that takes extra parameters $\{q_i, q_{i+k}\}$, only parameterizes those queries, and fixes the values of all other variables.
+The algorithm internally calls a modified version of the \emph{basic} approach that takes extra parameters $\{q_i, q_{i+k}\}$, only parameterizes those queries, and fixes the values of all other variables.
 %The modified \emph{basic} approach only parameterizes $\{q_i, q_{i+k}\}$, and fixes the values for all other variables.
 
 The incremental approach prioritizes repairs for complaints that are due to more recent corruptions.
