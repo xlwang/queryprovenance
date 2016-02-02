@@ -49,7 +49,7 @@
     \label{f:indelup_acc} 
     \end{subfigure}
     \vspace*{-.1in}
-    \caption{Preliminary experiments.}
+    \caption{Prelim. experiments highlight limitations of \naive, the value of tuple-slicing, and high cost of \texttt{UPDATE} queries.}
     % \vspace*{-.15in}
   \end{figure*}
 
@@ -241,7 +241,7 @@ that are used in all experiments.
 %   \caption{Benchmark Performance}
 % \end{figure}
 
-\subsection{Preliminary analysis}
+\subsection{Preliminary Analysis}
 
  \begin{figure*}[ht]
     \vspace*{-.1in}
@@ -259,14 +259,14 @@ that are used in all experiments.
     \label{f:attr100} 
     \end{subfigure}
     \vspace*{-.1in}
-    \caption{Comparison of optimizations.}
+    \caption{Optimization comparison illustrates value of query and attribute slicing when \# attributes is high.}
     % \vspace*{-.15in}
   \end{figure*}
   
 \looseness -1
 The following set of experiments are designed to establish the rationale for 
 the settings in the subsequent experiments.  
-Specifically, we compare different slicing-based optimizations of the basic approach
+Specifically, we compare different slicing-based optimizations of \naive
 as the number of queries increases.  
 We then evaluate the scalability of the different slicing-based optimizations of the 
 incremental approach in the context of a single
@@ -274,7 +274,7 @@ corrupted query. We then establish the difficulty of repairing \texttt{UPDATE}
 workloads as compared to other query types. 
 
 \stitle{Multiple Corrupt Queries:} \looseness -1
-In this experiment, we compare the basic algorithm ($basic$) against 
+In this experiment, we compare the \naive ($basic$) against 
 each slicing optimization individually($basic-tuple, basic-attr, basic-query$) and all of them together ($basic-all$).  
 We use the default settings with $N_D = 1000$ tuples and a sequence of \texttt{UPDATE} queries.
 We generate query logs in 5 different sizes $N_q\in \{10, 20, 30, 40, 50\}$ and corrupt 
@@ -318,7 +318,7 @@ the corruption happens earlier in the query log---and a much faster rate for \te
 The F1 score for all settings is nearly 1 (Figure~\ref{f:indelup_acc}).
 
 \smallskip
-\emph{Takeaways: We find that \texttt{basic}, even with slicing optimizations,
+\emph{Takeaways: We find that \naive, even with slicing optimizations,
 has severe scalability limitations due to the large number of undetermined values---this is unsurprising as MILP constraint solving is an NP-hard problem.
 In contrast, the incremental algorithms can scale to larger query log sizes, however only a batch size of $k=1$ can retain high repair quality.
 \texttt{UPDATE} queries translate into more undetermined variables than other query types, and are significantly more expensive to repair.
@@ -409,7 +409,7 @@ Ultimately, combining all three optimizations improves the latency over tuple-sl
       \label{f:falsenegative_acc} 
     \end{subfigure}
     \vspace*{-.25in}
-    \caption{Sensitivity to data and workload factors. }
+    \caption{Data and workload parameter experiments show high sensitivity to query skew, clause types, and dimensionality.  \sys can handle high false negative rates in recent queries.}
     % \vspace*{-.15in}
   \end{figure*}
 
@@ -460,7 +460,7 @@ This both simplifies the difficulty of the constraint problem, and reduces the t
 % constant set clauses disconnect tuple values from query to query whereas relative set clauses maintain this connection. Thus, the searching space for the relative set clauses is often bigger than the constant one; 
 % 2. since relative set clauses maintain the tuple value connection, their complaint set sizes are normally larger than constant set clauses for the same corrupt index: In relative set clauses, incorrectness always inherits from previous database state and could infects other tuples, however, this is less likely to happen for constant set clauses.}
 
-\emph{Query Predicate Dimensionality:}
+\emph{Predicate Dimensionality:}
 Figure~\ref{f:where_time} varies the dimensionality of the update queries by increasing the number of predicates in the \texttt{WHERE} clause, while keeping the query cardinality constant.
 The cost increases with the dimensionality because each additional predicate is translated into a new set of constraints and undetermined variables, increasing the problem complexity.
 % From Figure~\ref{f:where_time}, we found that more predicates increases the cost in solving a problem. 
@@ -505,7 +505,7 @@ Note that the overall number of constraints in the problem is the same, only the
 % space in the MILP problem.
 
 
-\emph{Incomplete Complaint Sets:}
+\emph{Incomplete Complaint Set:}
 Our final experiment (Figures~\ref{f:falsenegative_time} and~\ref{f:falsenegative_acc}) varies the fase positive rate in incomplete complaint sets.
 We increase the rate from $0$ ($0\%$ missing in the complaint set) to $.75$ ($75\%$ are missing).  
 We find that reducing the size of the submitted complaint set naturally improves the repair performance,
@@ -546,14 +546,14 @@ In addition, tuple and query slicing can aggressively reduce the total number of
 Furthermore for TPC-C, the queries are predominantly \texttt{INSERT} queries, which \sys can solve within milliseconds.
 Finally, we evaluated \sys on Example~\ref{ex:taxes} in Figure~\ref{fig:example} and fully repaired the correct query in 35 milliseconds.
 
-{\it Takeaway: many workloads in practice are dominated by \texttt{INSERT} and point \texttt{UPDATE} queries (ignoring the dominant percentage of read-only queries).  
+{\it Takeaways: many workloads in practice are dominated by \texttt{INSERT} and point \texttt{UPDATE} queries (ignoring the dominant percentage of read-only queries).  
 In these settings, \sys is very effective at reducing the number of constraints and can derive repairs with near-interactive latencies.}
 
 \begin{figure}[t]
 \centering
   \includegraphics[width = .75\columnwidth]{figures/benchmark_time}
   \vspace*{-.2in}
-  \caption{Performance on benchmarks}
+  \caption{Benchmark Experiments show low repair latencies on OLTP workloads.}
   \label{f:tpcctatp} 
   % \vspace*{-.1in}
 \end{figure}
