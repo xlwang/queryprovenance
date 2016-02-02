@@ -444,7 +444,7 @@ These results suggest that it is \emph{faster} to run many small MILP problems t
 % In contrast, the light blue bars show that the scalability is significantly better when only a \emph{single query}
 % is parameterized, despite the same number of linearized queries. 
  \looseness -1
-Our \emph{$inc_k$} approach, described as $Inc$ in Algorithm~\ref{alg:incalg}, focuses on the case where there is a single corrupted query to repair.
+Our \emph{$Inc_k$} approach (Algorithm~\ref{alg:incalg}) focuses on the case where there is a single corrupted query to repair.
 It does so by linearizing the full query log, including any slicing optimizations, but only parameterizing and repairing a batch of $k$ consecutive queries at a time. 
 This procedure first attempts to repair the $k$ most recent queries, and continues to the next $k$ queries if a repair was not generated.
 The algorithm internally calls a modified version of \emph{basic} approach that takes extra parameters $\{q_i, q_{i+k}\}$, only parameterizes those queries, and fixes the values of all other variables.
