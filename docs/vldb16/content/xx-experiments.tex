@@ -177,7 +177,7 @@ and a WHERE clause can either be a $Point$ predicate on a key, or a $Range$ pred
   Constant: SET (a_i=?), ..   Point: WHERE a_j=? & ..
   Relative: SET (a_i=a_i+?)   Range: WHERE a_j in [?,?+r] & ..\end{verbatim}}%
 \noindent where \verb|?|$\in [0, V_d]$ is random and \verb|r| is the size of the range predicate. 
-Query selectivity is by default $2\%$ (\verb|r|$=2$).
+Query selectivity is by default $2\%$ (\verb|r|$=4$).
 Note that a range predicate where \texttt{r = 0} is distinct from a $Point$ predicate due to the non-key attribute.
 The WHERE clauses in \texttt{DELETE} queries are generated in an identical fashion, while
 \texttt{INSERT} queries insert values picked uniformly at random from $V_d$.
