@@ -547,6 +547,7 @@ In addition, tuple and query slicing can aggressively reduce the total number of
 Furthermore for TPC-C, the queries are predominantly \texttt{INSERT} queries, which \sys can solve within milliseconds.
 Finally, we evaluated \sys on Example~\ref{ex:taxes} in Figure~\ref{fig:example} and fully repaired the correct query in 35 milliseconds.
 
+\smallskip
 {\it Takeaways: many workloads in practice are dominated by \texttt{INSERT} and point \texttt{UPDATE} queries (ignoring the dominant percentage of read-only queries).  
 In these settings, \sys is very effective at reducing the number of constraints and can derive repairs with near-interactive latencies.}
 
