@@ -110,6 +110,7 @@ $q_i$, one needs to know the correct classification output, which
 corresponds to $D_i^*$. Unfortunately, even with a complete complaint
 set, which can derive the correct database $D_n^*$, there is no
 obvious way to ``rollback'' this state to derive $D_i^*$.
+\ewu{this isn't very clear.  Isn't the core reason that any error at any step in the query log will propogate?  Also we need to correctly derive each query's correct previous database state, which is really hard without knowing anything else}
 
 \textbf{Different Query Structure: } 
 \ewu{Can't we just incorporate a distance measure that takes predicate structure into account as part of the decision tree splitting procedure?}
