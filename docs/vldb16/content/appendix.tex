@@ -230,23 +230,50 @@ input factors: the number of constraints, undetermined variables, complaints and
 \emph{Number of Complaints: } In Figure~\ref{f:soltime}(b) we compare the solver solving 
 time with increasing number of complaints. As illustrated in Section~\ref{sec:sol}, 
 the size of number of constraints constructed MILP problem grows linearly with the number of complaints. Thus, solver solving time grows with the number of complaints. 
+\ewu{Can you plot the number of complaints vs num constraints and num undetermined variables?  That's what really matters right? Same for num queries}
 
 
 \smallskip
-\emph{Number of Queries: } We finally compare solver solving time with the number of queries encoded in the MILP problem and find the solver solving time grows exponentially with the number of queries. This again is due to the way we construct the MILP problem: by increasing the number of queries, more variables are introduced, which increase the hardness in solving the problem. 
+\emph{Number of Queries: }
+\ewu{Can cut, since overlaps with experiments in main paper}
+We finally compare solver solving time with the number of queries encoded in the MILP problem and find the solver solving time grows exponentially with the number of queries. This again is due to the way we construct the MILP problem: by increasing the number of queries, more variables are introduced, which increase the hardness in solving the problem. 
 
-\section{Identifying the Incorrect Query}
+
+
+
+
+
+
+
+
+\section{Repairing the Correct Query}
 \label{app:index}
-In Section~\ref{sec:experiments}, we use precision and recall as the accuracy metric to evaluate the \sys. In this section, we evaluate \sys using an alternative evaluation metric, \textit{rate of ``true'' fix}, that calculates the ratio of \textit{number of query repairs that fix the actual incorrect query} and \textit{total number of query repairs}. 
 
-\smallskip
-\emph{Rate of ``true'' fix vs. query types: } In Figure~\ref{fig:truerate}(a), we first evaluate the ``true'' fix rate on three types of workloads: \sys maintains constant and nearly perfect ``true'' fix rate for \texttt{UPDATE} and \texttt{INSERT} workloads but unstable and much lower rate for \texttt{DELETE} workload. This is expected since more information of the actual incorrectness get maintained through \texttt{UPDATE} queries by the updated tuple values. However, such information get lost and obscured for \texttt{DELETE} queries as those deleted tuples no longer exist in the database. As a result, actual incorrect queries in \texttt{UPDATE} workloads are much easier to identify than those in \texttt{DELETE} workloads. \texttt{INSERT} workloads are easy to fix by natural since each \texttt{INSERT} query only touches one tuple. 
+Experiment section focused primarily on performance and accuracy measures of the repairs, and for space constraints, ignored 
+whether the proposed repair was actually the correct query (it is possible we fix an incorrect query in a way that resolves the complaint set).
+Although we found \ewu{describe if we picked the right queries in tnhe paper experiments}, we now turn our attention to better understand 
+the conditions when we may fix the incorrect query.   We find that under most conditions, we can expect to identify and repair the correct query.
 
-\smallskip
-\emph{Rate of ``true'' fix vs. database sizes: } We next narrow down to \texttt{UPDATE} workload and evaluate \sys's behavior with increasing amount of tuples in the database. We observe nearly perfect rate on different corrupt indexes in all database sizes (Figure~\ref{fig:truerate}(b)). 
+\ewu{how many runs are you plotting? May be good to have more than 20 runs, or are you re-using existing experimental runs from the paper?}
 
-\smallskip
-\emph{Rate of ``true'' fix vs. false negatives: } We finally evaluate \sys on \texttt{UPDATE} workload with increasing false negative rates. Similar to the quality drop in Figure~\ref{f:falsenegative_acc}, we observe the ``true'' fix rate also suffers from less submitted complaints when errors happen early in the query log. However, \sys maintain nearly perfect ``true'' fix rate for more recent errors (corrupt index is 300 and 200). 
+To do this we \ewu{Describe experimental setup}.  We use two evaluation metrics to summarize our results over \ewu{X} runs.
+The first $p_{correct}$ computes the ratio between the number of runs where \sys correctly repairs the corrupt query and where \sys
+repairs the wrong query.  The second metric $topk$ measures the number of repairs that \sys proposes before repairing the true corrupt query.
+This metric is useful to quantify the extent that \sys's repairs are false positives (though they may correctly resolve the complaint set).
+A smaller $topk$ value suggests that \sys is still effective at providing repair \emph{recommendations} as part of a diagnostic interface.
+
+
+\textbf{Rate of ``true'' fix vs. query types: } In Figure~\ref{fig:truerate}(a), we first evaluate the ``true'' fix rate on three types of workloads: \sys maintains constant and 
+\ewu{what does nearly perfect mean?  Quantify how many we missed! e.g., 1 out of 1000 runs}
+nearly perfect ``true'' fix rate for \texttt{UPDATE} and \texttt{INSERT} workloads but unstable and much lower rate for \texttt{DELETE} workload. This is expected since more information of the actual incorrectness get maintained through \texttt{UPDATE} queries by the updated tuple values. However, such information get lost and obscured for \texttt{DELETE} queries as those deleted tuples no longer exist in the database. As a result, actual incorrect queries in \texttt{UPDATE} workloads are much easier to identify than those in \texttt{DELETE} workloads. \texttt{INSERT} workloads are easy to fix by natural since each \texttt{INSERT} query only touches one tuple. 
+
+\textbf{top k}: TO FILL IN
+
+
+\textbf{Rate of ``true'' fix vs. database sizes: } We next narrow down to \texttt{UPDATE} workload and evaluate \sys's behavior with increasing amount of tuples in the database. We observe nearly perfect rate on different corrupt indexes in all database sizes (Figure~\ref{fig:truerate}(b)). 
+
+\textbf{Rate of ``true'' fix vs. false negatives: } We finally evaluate \sys on \texttt{UPDATE} workload with increasing false negative rates. Similar to the quality drop in Figure~\ref{f:falsenegative_acc}, we observe the ``true'' fix rate also suffers from less submitted complaints when errors happen early in the query log. However, \sys maintain nearly perfect ``true'' fix rate for more recent errors (corrupt index is 300 and 200). 
+
 
 \section{Effect of Index of Corrupted Query}
 \label{app:qidx}
