@@ -153,12 +153,13 @@ classifier is unlikely to generate any rules.
 
 \ewu{Call it "solver performance" instead of solver solving time}
 
+\ewu{reference other constraint performance papers}
 In this section, we study factors that influence the MILP solver solving time. In this paper, we
-use CPLEX ~\cite{cplex2014v12} as a black box to solve the constructed MILP problems. 
-We carefully studied 
-the behavior of the solver and explored the connection between solver solving time (on \texttt{UPDATE} workload) with the following factors:
-number of complaints, number of queries, and number of constraints. 
- 
+use IBM CPLEX~\cite{cplex2014v12} as a black box to solve the constructed MILP problems. 
+We now directly study the solver behavior and the connection between solver performance on \texttt{UPDATE} workloads and numerous
+input factors: the number of constraints, undetermined variables, complaints and queries.
+
+\ewu{XL: more detail on how these experiments are run.  See my edits in previous section for example}
   
   \begin{figure*}[t]
   \centering
@@ -218,16 +219,21 @@ number of complaints, number of queries, and number of constraints.
   \end{figure*}
 
 \smallskip
-\emph{Solver solving time vs. number of constraints: } We first study the relation between solver solving time and number of constraints and observe that solver solving time is roughly positive proportional, with tiny fluctuation, to the number of constraints in both corrupt indexes (Figure~\ref{f:soltime}(a)). This is expected because increasing the number of constraints by large scale usually accompany with significantly greater amount of variables in the MILP problem, which lead to harder MILP problems by natural. However, MILP problems with slightly larger amount of constraints sometimes could be even easier to solve since the additional constraints help pruning the searching space for similar amount of variables.
+\emph{Number of Constraints: } We first study the relation between solver solving time and number of constraints and observe that solver solving time is roughly positive proportional, with tiny fluctuation, to the number of constraints in both corrupt indexes (Figure~\ref{f:soltime}(a)). This is expected because increasing the number of constraints by large scale usually accompany with significantly greater amount of variables in the MILP problem, which lead to harder MILP problems by natural. However, MILP problems with slightly larger amount of constraints sometimes could be even easier to solve since the additional constraints help pruning the searching space for similar amount of variables.
+
+\emph{Number of Undetermined Variables: } In our experiments we found that increasing the number of constraints by increasing the database, query log, or complaint set sizes aversely affects the solver performance,
+  solver performance has been shown to \emph{improve} as constraints that effectively reduce the problem space are added to the problem.  
+  Thus, we now focus on the effects on the number of undetermined variables, which strictly increases the problem space.
+  We keep the number of constraints fixed, however increase the number of undetermined variables by \ewu{XL fill in}
 
 \smallskip
-\emph{Solver solving time vs. number of complaints: } In Figure~\ref{f:soltime}(b) we compare the solver solving 
+\emph{Number of Complaints: } In Figure~\ref{f:soltime}(b) we compare the solver solving 
 time with increasing number of complaints. As illustrated in Section~\ref{sec:sol}, 
 the size of number of constraints constructed MILP problem grows linearly with the number of complaints. Thus, solver solving time grows with the number of complaints. 
 
 
 \smallskip
-\emph{Solver solving time vs. number of queries: } We finally compare solver solving time with the number of queries encoded in the MILP problem and find the solver solving time grows exponentially with the number of queries. This again is due to the way we construct the MILP problem: by increasing the number of queries, more variables are introduced, which increase the hardness in solving the problem. 
+\emph{Number of Queries: } We finally compare solver solving time with the number of queries encoded in the MILP problem and find the solver solving time grows exponentially with the number of queries. This again is due to the way we construct the MILP problem: by increasing the number of queries, more variables are introduced, which increase the hardness in solving the problem. 
 
 \section{Identifying the Incorrect Query}
 \label{app:index}
