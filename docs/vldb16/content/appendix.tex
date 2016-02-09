@@ -102,7 +102,7 @@ query at a time, it encodes all subsequent queries in the log.}, will not perfor
 
 \begin{itemize}[itemsep=1pt, leftmargin=5mm]
     
-\textbf{Single Query Limitation: }
+\item \textbf{Single Query Limitation: }
 In principle, one could attempt to apply this technique to the
 entire log one-query-at-a-time. However, this is not possible in
 practice: to learn a classifier on the \texttt{WHERE} clause of query
@@ -112,14 +112,14 @@ set, which can derive the correct database $D_n^*$, there is no
 obvious way to ``rollback'' this state to derive $D_i^*$.
 \ewu{this isn't very clear.  Isn't the core reason that any error at any step in the query log will propogate?  Also we need to correctly derive each query's correct previous database state, which is really hard without knowing anything else}
 
-\textbf{Different Query Structure: } 
+\item \textbf{Different Query Structure: } 
 \ewu{Can't we just incorporate a distance measure that takes predicate structure into account as part of the decision tree splitting procedure?}
 The classifier may derive a clause that is structurally very
 different from the original one (different attributes or number of
 conditions). This is problematic in general, as it corresponds to a
 larger-scale mistake in the query, which is a less likely scenario.
 
-\textbf{High Selectivity, Low Precision: }
+\item \textbf{High Selectivity, Low Precision: }
 Classifiers try to avoid overfitting, which is problematic for
 queries with high selectivity (e.g., single-tuple updates), as the
 classifier is unlikely to generate any rules.
