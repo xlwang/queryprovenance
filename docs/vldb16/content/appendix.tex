@@ -249,18 +249,22 @@ We finally compare solver solving time with the number of queries encoded in the
 \section{Repairing the Correct Query}
 \label{app:index}
 
-Experiment section focused primarily on performance and accuracy measures of the repairs, and for space constraints, ignored 
+\ewu{
+The experimental section (Section~\ref{sec:experiments}) primarily focused on performance and accuracy measures of the repairs, and for space constraints, ignored 
 whether the proposed repair was actually the correct query (it is possible we fix an incorrect query in a way that resolves the complaint set).
 Although we found \ewu{describe if we picked the right queries in tnhe paper experiments}, we now turn our attention to better understand 
 the conditions when we may fix the incorrect query.   We find that under most conditions, we can expect to identify and repair the correct query.
+}
 
 \ewu{how many runs are you plotting? May be good to have more than 20 runs, or are you re-using existing experimental runs from the paper?}
 
+\ewu{
 To do this we \ewu{Describe experimental setup}.  We use two evaluation metrics to summarize our results over \ewu{X} runs.
 The first $p_{correct}$ computes the ratio between the number of runs where \sys correctly repairs the corrupt query and where \sys
 repairs the wrong query.  The second metric $topk$ measures the number of repairs that \sys proposes before repairing the true corrupt query.
 This metric is useful to quantify the extent that \sys's repairs are false positives (though they may correctly resolve the complaint set).
 A smaller $topk$ value suggests that \sys is still effective at providing repair \emph{recommendations} as part of a diagnostic interface.
+}
 
 
 \textbf{Rate of ``true'' fix vs. query types: } In Figure~\ref{fig:truerate}(a), we first evaluate the ``true'' fix rate on three types of workloads: \sys maintains constant and 
