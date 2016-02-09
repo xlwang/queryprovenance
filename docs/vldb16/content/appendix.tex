@@ -13,17 +13,14 @@ We show that even in a simple case of a single query log and a complete complain
 We will first describe how to model the decision tree-based repair process, 
 present experimental results, and discuss the reasons for the poor accuracy of \dt.
 
-\ewu{If you say "insufficient theoretically and experimentally, you need to back it up with theoretical evidence!!}
-
 \subsection{Modeling Repairs with Decision Trees}
 
 \ewu{Justify why using decision trees is the right approach as compared to any other learning algorithm.  
 Probably because it is an exemplar rule-based learner, and we believe any other rule-based learner will face the same issues that we find here.}
 
-\ewu{Introduce the approach:} Rule-based learners are focused on classification, which naturally matches the goal of solving 
-errors in the WHERE clause, however they have no means for dealing with SET clauses, which directly modify data values.
-Thus, we take a two step approach, where we first use a classification-based rule learner to generate a repair for the WHERE clause,
-and use the modified query to identify repairs for the SET clause.
+\noindent \textbf{\dt Overview:} Rule-based learners are focused on classification, which naturally matches the goal of solving 
+errors in the \texttt{WHERE} clause, however they have no means for dealing with \texttt{SET} clauses, which directly modify data values.
+Thus, we take a two step approach, where we first use a classification-based rule learner to generate a repair for the \texttt{WHERE} clause, and use the modified query to identify repairs for the \texttt{SET} clause. 
 
 \noindent
 \textbf{Repairing the WHERE Clause:}
@@ -77,8 +74,8 @@ Directly solving for these variables will generate the desired repair for the \t
     \caption{Comparison on Accuracy. \ewu{fix yaxis to show .25, .5, .75}}
     \label{f:heuristic_acc} 
     \end{subfigure}
-    \label{f:heuristic}
    \caption{\dt compared with \sys}
+   \label{f:heuristic}
   \end{figure}
 
 
@@ -86,11 +83,14 @@ To illustrate these shortcomings, we compare \dt with \sys using a simplified ve
 We restrict the query log to contain a single query that is corrupted, use a complete complaint set  and vary the database size.
 The query follows the template:
 
+{\scriptsize
 \begin{verbatim}
-  XL DESCRIBE THE QUERY TEMPLATE
+   SET Clause:                WHERE Clause:
+  Constant: SET (a_i=?), ..   Range: WHERE a_j in [?,?+r] & ..
 \end{verbatim}
+}
 
-Figure~\ref{f:heuristic} shows that although the performance is better by \ewu{VERIFY:} a constant factor,
+Figure~\ref{f:heuristic} shows that although the performance is better by a constant factor ($\sim 2.5 \times$),
 \dt scales in a similar manner as \sys.  In addition, the F1-score is consistently below $0.5$ across all database sizes.
 From these empirical results, we find that \dt generates low-quality repairs under the simplest conditions---an approach
 that applies \dt one query at a time will have little hope.
