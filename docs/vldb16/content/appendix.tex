@@ -131,31 +131,38 @@ number of complaints, number of queries, and number of constraints.
       \begin{subfigure} [t]{.3\textwidth}
     \includegraphics[width = .99\columnwidth]{figures/num_cons_time}
     \vspace*{-.25in}
-    \caption{Cplex time vs. \# of constraints. }
+    \caption{\# of constraints vs. solver solving time.}
     \vspace*{-.1in}
     \label{f:heuristic_time} 
     \end{subfigure}
     \begin{subfigure} [t]{.3\textwidth}
     \includegraphics[width = .99\columnwidth]{figures/num_compl_time}
     \vspace*{-.25in}
-    \caption{Cplex time vs. \# of compl. }
+    \caption{\# of compl. vs. solver solving time.}
     \vspace*{-.1in}
     \label{f:heuristic_acc} 
     \end{subfigure}
     \begin{subfigure} [t]{.3\textwidth}
     \includegraphics[width = .99\columnwidth]{figures/num_queries_time}
     \vspace*{-.25in}
-    \caption{Cplex time vs. \# of queries.}
+    \caption{\# of queries vs. solver solving time.}
     \vspace*{-.1in}
     \label{f:heuristic_time} 
     \end{subfigure}
-   \caption{Solving Time for Cplex. }
+   \caption{Solver solving time grows with all three factors: number of constraints, number of complaints and number of queries. }
    \vspace*{-.1in}
    \label{f:soltime}
   \end{figure*}
 
   \begin{figure*}[ht]
   \centering
+  \begin{subfigure} [t]{.3\textwidth}
+    \includegraphics[width = .99\columnwidth]{figures/indelup_acc_idx}
+    \vspace*{-.25in}
+    \caption{Query types vs. rate of ``true'' fix}
+    \vspace*{-.1in}
+    \label{f:heuristic_time} 
+    \end{subfigure}
     \begin{subfigure} [t]{.3\textwidth}
     \includegraphics[width = .99\columnwidth]{figures/dbsize_acc_idx}
     \vspace*{-.25in}
@@ -164,24 +171,19 @@ number of complaints, number of queries, and number of constraints.
     \label{f:heuristic_acc} 
     \end{subfigure}
     \begin{subfigure} [t]{.3\textwidth}
-    \includegraphics[width = .99\columnwidth]{figures/indelup_acc_idx}
-    \vspace*{-.25in}
-    \caption{Query types vs. rate of ``true'' fix}
-    \vspace*{-.1in}
-    \label{f:heuristic_time} 
-    \end{subfigure}
-    \begin{subfigure} [t]{.3\textwidth}
     \includegraphics[width = .99\columnwidth]{figures/noise_fn_acc_idx}
     \vspace*{-.25in}
     \caption{False negatives vs. rate of ``true'' fix}
     \vspace*{-.1in}
     \label{f:heuristic_time} 
     \end{subfigure}
-   \caption{Solving Time for Cplex. }
+   \caption{Rate of ``true'' fix for \sys varies on different types of workloads and false negative rate but remain 
+   stable for with increasing number of tuples on \texttt{UPDATE} workload.}
    \vspace*{-.1in}
+   \label{fig:truerate}
   \end{figure*}
 
-
+\smallskip
 \emph{Solver solving time vs. number of constraints: } We first study the relation between solver solving time and number of constraints and observe that solver solving time is roughly positive proportional, with tiny fluctuation, to the number of constraints in both corrupt indexes (Figure~\ref{f:soltime}(a)). This is expected because increasing the number of constraints by large scale usually accompany with significantly greater amount of variables in the MILP problem, which lead to harder MILP problems by natural. However, MILP problems with slightly larger amount of constraints sometimes could be even easier to solve since the additional constraints help pruning the searching space for similar amount of variables.
 
 \smallskip
@@ -195,6 +197,16 @@ the size of number of constraints constructed MILP problem grows linearly with t
 
 \section{Identifying the Incorrect Query}
 \label{app:index}
+In Section~\ref{sec:experiments}, we use precision and recall as the accuracy metric to evaluate the \sys. In this section, we evaluate \sys using an alternative evaluation metric, \textit{rate of ``true'' fix}, that calculates the ratio of \textit{number of query repairs that fix the actual incorrect query} and \textit{total number of query repairs}. 
+
+\smallskip
+\emph{Rate of ``true'' fix vs. query types: } In Figure~\ref{fig:truerate}(a), we first evaluate the ``true'' fix rate on three types of workloads: \sys maintains constant and nearly perfect ``true'' fix rate for \texttt{UPDATE} and \texttt{INSERT} workloads but unstable and much lower rate for \texttt{DELETE} workload. This is expected since more information of the actual incorrectness get maintained through \texttt{UPDATE} queries by the updated tuple values. However, such information get lost and obscured for \texttt{DELETE} queries as those deleted tuples no longer exist in the database. As a result, actual incorrect queries in \texttt{UPDATE} workloads are much easier to identify than those in \texttt{DELETE} workloads. \texttt{INSERT} workloads are easy to fix by natural since each \texttt{INSERT} query only touches one tuple. 
+
+\smallskip
+\emph{Rate of ``true'' fix vs. database sizes: } We next narrow down to \texttt{UPDATE} workload and evaluate \sys's behavior with increasing amount of tuples in the database. We observe nearly perfect rate on different corrupt indexes in all database sizes (Figure~\ref{fig:truerate}(b)). 
+
+\smallskip
+\emph{Rate of ``true'' fix vs. false negatives: } We finally evaluate \sys on \texttt{UPDATE} workload with increasing false negative rates. Similar to the quality drop in Figure~\ref{f:falsenegative_acc}, we observe the ``true'' fix rate also suffers from less submitted complaints when errors happen early in the query log. However, \sys maintain nearly perfect ``true'' fix rate for more recent errors (corrupt index is 300 and 200). 
 
 \section{Effect of Index of Corrupted Query}
 \label{app:qidx}
