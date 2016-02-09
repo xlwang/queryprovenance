@@ -123,6 +123,7 @@ larger-scale mistake in the query, which is a less likely scenario.
 Classifiers try to avoid overfitting, which is problematic for
 queries with high selectivity (e.g., single-tuple updates), as the
 classifier is unlikely to generate any rules.
+\ewu{this is called severe class imbalance, would be good to reference some literature in this area.  Decision trees have some issues with sparcity and overfitting}
 
 \end{itemize}
 
@@ -270,6 +271,7 @@ A smaller $topk$ value suggests that \sys is still effective at providing repair
 \textbf{Rate of ``true'' fix vs. query types: } In Figure~\ref{fig:truerate}(a), we first evaluate the ``true'' fix rate on three types of workloads: \sys maintains constant and 
 \ewu{what does nearly perfect mean?  Quantify how many we missed! e.g., 1 out of 1000 runs}
 nearly perfect ``true'' fix rate for \texttt{UPDATE} and \texttt{INSERT} workloads but unstable and much lower rate for \texttt{DELETE} workload. This is expected since more information of the actual incorrectness get maintained through \texttt{UPDATE} queries by the updated tuple values. However, such information get lost and obscured for \texttt{DELETE} queries as those deleted tuples no longer exist in the database. As a result, actual incorrect queries in \texttt{UPDATE} workloads are much easier to identify than those in \texttt{DELETE} workloads. \texttt{INSERT} workloads are easy to fix by natural since each \texttt{INSERT} query only touches one tuple. 
+\ewu{talk about negative vs positive examples, why DELETE is harder.  Basically negative examples don't help a learner/solver correctly generalize, so you it is easy to overfit with a delet query that is similar enough.  Positive examples generate actual constraints that help reduce the set of queries that can be modified to repair the complaints. }
 
 \textbf{top k}: TO FILL IN
 
@@ -282,7 +284,6 @@ nearly perfect ``true'' fix rate for \texttt{UPDATE} and \texttt{INSERT} workloa
 \section{Effect of Index of Corrupted Query}
 \label{app:qidx}
 
-\ewu{talk about negative vs positive examples, why DELETE is harder}
 
 A key parameter for our experiments is the location of the corrupted query ($idx$).  
 This parameter determines the number of queries \sys must consider when searching for a fix,
