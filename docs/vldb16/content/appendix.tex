@@ -16,7 +16,8 @@ present experimental results, and discuss the reasons for the poor accuracy of \
 \subsection{Modeling Repairs with Decision Trees}
 
 \ewu{Justify why using decision trees is the right approach as compared to any other learning algorithm.  
-Probably because it is an exemplar rule-based learner, and we believe any other rule-based learner will face the same issues that we find here.}
+Probably because it is an exemplar rule-based learner, and we believe any other rule-based learner will face the same issues that we find here.} \xlw{The bad performance we observe in Figure~\ref{f:heuristic} is mainly caused by server data skew since we keep the same query selectivity when increasing number of tuples. As shown in a survey~\cite{galar2012review}, when 
+data get super skewed, none of the classification algorithm works. So, we would still observe the same accuracy even with other algorithms. }
 
 \noindent \textbf{\dt Overview:} Rule-based learners are focused on classification, which naturally matches the goal of solving 
 errors in the \texttt{WHERE} clause, however they have no means for dealing with \texttt{SET} clauses, which directly modify data values.
@@ -65,13 +66,13 @@ Directly solving for these variables will generate the desired repair for the \t
   \centering
     \begin{subfigure} [t]{.75\columnwidth}
     \includegraphics[width = \columnwidth]{figures/heuristictime}
-    \caption{Comparison on Performance. \ewu{XL: can you add 200k?  Want to know if it's linear or exponential}}
+    \caption{Comparison on Performance.}
     \label{f:heuristic_time} 
     \end{subfigure}\\
 
     \begin{subfigure} [t]{.75\columnwidth}
     \includegraphics[width = \columnwidth]{figures/heuristicacc}
-    \caption{Comparison on Accuracy. \ewu{fix yaxis to show .25, .5, .75}}
+    \caption{Comparison on Accuracy.}
     \label{f:heuristic_acc} 
     \end{subfigure}
    \caption{\dt compared with \sys}
@@ -107,13 +108,16 @@ In principle, one could attempt to apply this technique to the
 entire log one-query-at-a-time. However, this is not possible in
 practice: to learn a classifier on the \texttt{WHERE} clause of query
 $q_i$, one needs to know the correct classification output, which
-corresponds to $D_i^*$. Unfortunately, even with a complete complaint
+corresponds to \xlw{the previous and next database states 
+$D_{i-1}, D_i^*$ of query $q_i$. Unfortunately, deriving the previous 
+database state of a query from the later database state is hard without 
+knowing any additional information. Thus, even with a complete complaint
 set, which can derive the correct database $D_n^*$, there is no
-obvious way to ``rollback'' this state to derive $D_i^*$.
-\ewu{this isn't very clear.  Isn't the core reason that any error at any step in the query log will propogate?  Also we need to correctly derive each query's correct previous database state, which is really hard without knowing anything else}
+obvious way to ``rollback'' this state to derive $D_i^*$}.
+\ewu{this isn't very clear.  Isn't the core reason that any error at any step in the query log will propogate?  Also we need to correctly derive each query's correct previous database state, which is really hard without knowing anything else} \xlw{I think the core reason is still we cannot rollback. Even with a clean query log, if we want to figure out the where clause of a query, it is still impossible without a ``rollback'' function. }
 
 \item \textbf{Different Query Structure: } 
-\ewu{Can't we just incorporate a distance measure that takes predicate structure into account as part of the decision tree splitting procedure?}
+\ewu{Can't we just incorporate a distance measure that takes predicate structure into account as part of the decision tree splitting procedure?} \xlw{By doing do, we actually modify the objective function of decision tree. This may help improving \dt's performance, but it won't provide any guarantee. Also, we discuss \dt's limitation on single query, and that is the major reason why we don't want to further investigate on this direction. }
 The classifier may derive a clause that is structurally very
 different from the original one (different attributes or number of
 conditions). This is problematic in general, as it corresponds to a
@@ -122,7 +126,8 @@ larger-scale mistake in the query, which is a less likely scenario.
 \item \textbf{High Selectivity, Low Precision: }
 Classifiers try to avoid overfitting, which is problematic for
 queries with high selectivity (e.g., single-tuple updates), as the
-classifier is unlikely to generate any rules.
+classifier is unlikely to generate any rules. \xlw{In fact, the problem of learning 
+from sever imbalance data is still a great challenge for many major classification algorithms~\cite{he2009learning, galar2012review}. Thus we believe even using alternative classification algorithms, the performance wouldn't be improved as much. In addition, a great percentage of real workloads~\cite{oltpbench} mainly composed by point-update queries which would further worsen the behavior of learning-based approaches.  } 
 \ewu{this is called severe class imbalance, would be good to reference some literature in this area.  Decision trees have some issues with sparcity and overfitting}
 
 \end{itemize}
