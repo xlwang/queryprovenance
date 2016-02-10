@@ -16,7 +16,7 @@ present experimental results, and discuss the reasons for the poor accuracy of \
 \subsection{Modeling Repairs with Decision Trees}
 
 \ewu{Justify why using decision trees is the right approach as compared to any other learning algorithm.  
-Probably because it is an exemplar rule-based learner, and we believe any other rule-based learner will face the same issues that we find here.} \xlw{The bad performance we observe in Figure~\ref{f:heuristic} is mainly caused by server data skew since we keep the same query selectivity when increasing number of tuples. As shown in a survey~\cite{galar2012review}, when 
+Probably because it is an exemplar rule-based learner, and we believe any other rule-based learner will face the same issues that we find here.} \xlw{NOTES: The bad performance we observe in Figure~\ref{f:heuristic} is mainly caused by server data skew since we keep the same query selectivity when increasing number of tuples. As shown in a survey~\cite{galar2012review}, when 
 data get super skewed, none of the classification algorithm works. So, we would still observe the same accuracy even with other algorithms. }
 
 \noindent \textbf{\dt Overview:} Rule-based learners are focused on classification, which naturally matches the goal of solving 
@@ -114,10 +114,10 @@ database state of a query from the later database state is hard without
 knowing any additional information. Thus, even with a complete complaint
 set, which can derive the correct database $D_n^*$, there is no
 obvious way to ``rollback'' this state to derive $D_i^*$}.
-\ewu{this isn't very clear.  Isn't the core reason that any error at any step in the query log will propogate?  Also we need to correctly derive each query's correct previous database state, which is really hard without knowing anything else} \xlw{I think the core reason is still we cannot rollback. Even with a clean query log, if we want to figure out the where clause of a query, it is still impossible without a ``rollback'' function. }
+\ewu{this isn't very clear.  Isn't the core reason that any error at any step in the query log will propogate?  Also we need to correctly derive each query's correct previous database state, which is really hard without knowing anything else} \xlw{NOTES: I think the core reason is still we cannot rollback. Even with a clean query log, if we want to figure out the where clause of a query, it is still impossible without a ``rollback'' function. }
 
 \item \textbf{Different Query Structure: } 
-\ewu{Can't we just incorporate a distance measure that takes predicate structure into account as part of the decision tree splitting procedure?} \xlw{By doing do, we actually modify the objective function of decision tree. This may help improving \dt's performance, but it won't provide any guarantee. Also, we discuss \dt's limitation on single query, and that is the major reason why we don't want to further investigate on this direction. }
+\ewu{Can't we just incorporate a distance measure that takes predicate structure into account as part of the decision tree splitting procedure?} \xlw{NOTES: By doing do, we actually modify the objective function of decision tree. This may help improving \dt's performance, but it won't provide any guarantee. Also, we discuss \dt's limitation on single query, and that is the major reason why we don't want to further investigate on this direction. }
 The classifier may derive a clause that is structurally very
 different from the original one (different attributes or number of
 conditions). This is problematic in general, as it corresponds to a
