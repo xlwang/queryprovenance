@@ -7,32 +7,45 @@
   
 A drawback of the MILP approach is that the generated models grow with the 
 size of the database and query log.
-However, we argue that encoding the data and query log is necessary to generate a sufficient set of constraints to generate a good repair.
+However, we argue that the encoded information is necessary in order to generate a sufficient set of constraints that result in a good repair.
 In this section, we examine an alternative, simpler, decision tree-based approach called \dt. 
-We show that even in a simple case of a single query log and a complete complaint set, they are expected to perform poorly.
-We will first describe how to model the decision tree-based repair process, 
-present experimental results, and discuss the reasons for the poor accuracy of \dt.
+We show that even in a simple case of a single query log and a complete complaint set, it is expected to perform poorly.
+We will first describe how to model the repair process using a decision tree,
+present and discuss experimental results that illustrate its limitations, 
 
 \subsection{Modeling Repairs with Decision Trees}
 
-\ewu{Justify why using decision trees is the right approach as compared to any other learning algorithm.  
-Probably because it is an exemplar rule-based learner, and we believe any other rule-based learner will face the same issues that we find here.} \xlw{The bad performance we observe in Figure~\ref{f:heuristic} is mainly caused by server data skew since we keep the same query selectivity when increasing number of tuples. As shown in a survey~\cite{galar2012review}, when 
-data get super skewed, none of the classification algorithm works. So, we would still observe the same accuracy even with other algorithms. }
 
-\noindent \textbf{\dt Overview:} Rule-based learners are focused on classification, which naturally matches the goal of solving 
-errors in the \texttt{WHERE} clause, however they have no means for dealing with \texttt{SET} clauses, which directly modify data values.
-Thus, we take a two step approach, where we first use a classification-based rule learner to generate a repair for the \texttt{WHERE} clause, and use the modified query to identify repairs for the \texttt{SET} clause. 
+Rule-based learners are used in classification tasks to generate set of rules, or conjunctive predicates that best classify a set of labeled tuples.
+The rules are non-overlapping, and each is associated with a label---a tuple that matches a given rule is assigned the corresponding label.
+These rules exhibit a natural parallel with SQL \texttt{WHERE} clauses, 
+which can be viewed as labelling selected tuples with a positive label and rejected tuples with a negative label.
+Similarly, the structure of the rules are identical to those that \sys is designed to repair.
+Thus, given the database tuples labeled to describe the errors, we may use a rule-based learner to
+generate the most appropriate \texttt{WHERE} clause.
+We focus our attention on rule-based learners,
+and specifically the C4.5~\cite{quinlan1987} decision tree learner, which is an 
+exemplar of rule-based learners.
+
+A core limitation of this classification-based approach is that there is no means to 
+repair \texttt{SET} clauses, which modify data values rather than simply label them.
+We resolve this with a two step approach.
+We first use the decision tree to generate a repair for the
+\texttt{WHERE} clause, and then use the modified query to identify repairs for the \texttt{SET} clause.
+In fact, the need for this two step procedure is what limits this approach to encoding and repairing at most one query
+at a time.
 
 \noindent
 \textbf{Repairing the WHERE Clause:}
 The \texttt{WHERE} clause of an update query is equivalent to a
 rule-based binary classifier that splits tuples into two groups:
 (1)~tuples that satisfy the conditions in the \texttt{WHERE} clause
-and (2)~tuples that do not. A mistake in a query predicate can then
-result in misclassification: some tuples get classified into the wrong
-group, which in turn translates to errors in the data. Therefore,
-repairing the mistake corresponds to repairing the imprecise
-classification. This works as follows: For an incorrect query $q$, let
+and (2)~tuples that do not. A mistake in a query predicate can 
+cause a subset of the tuples to be misclassified, and in turn,
+translate into data errors. 
+Therefore, repairing the complaints corresponds to repairing the imprecise classification. 
+
+This works as follows: For an incorrect query $q$, let
 $D_0$ be the database state before $q$, and $D_1^*$ the \emph{correct}
 database state that should result after $q$.
 We use each tuple $t \in D_0$ as an element in the input training data
@@ -41,24 +54,24 @@ the feature vector and the label for $t$:
 	\[
     label(t)= 
     \begin{cases}
-    true ,& D_0.t \neq D_1^*.t\\
-    false,              & \text{otherwise}
+    true & \textrm{if\ }D_0.t \neq D_1^*.t\\
+    false              & \text{otherwise}
     \end{cases}
 \]
-We then train a rule-based classifier, 
-such as decision trees \cite{quinlan1987} to learn
-the correct classification rules rules for the \texttt{WHERE} clause.
+The \texttt{true} rules generated by the decision tree trained on this labeled dataset 
+forms a disjunction of rules that constitute the repaired \texttt{WHERE} clause.
 
 
 \noindent
 \textbf{Repairing the SET Clause:}
 The \texttt{WHERE} clause repair proposed by the classifier may not completely fix 
-the complaints if there was also an error in the \texttt{SET} clause.  In these cases,
-we execute a second repair step.
+the complaints if there was also an error in the \texttt{SET} clause. 
+In this case, we execute a second repair step.
 We model the errors as a simple linear system of equations: 
 each expression in the \texttt{SET} clause is translated into a
 linear equation in the same fashion as described in Section~\ref{sec:sol}.
-Directly solving for these variables will generate the desired repair for the \texttt{SET} expression.
+Directly solving the system of equations for the undetermined variables 
+will generate the desired repair for the \texttt{SET} expression.
 
 \subsection{Experimental Results}
 
@@ -82,20 +95,22 @@ Directly solving for these variables will generate the desired repair for the \t
 
 To illustrate these shortcomings, we compare \dt with \sys using a simplified version of the setup from Section~\ref{sec:experiments} that favors \dt.
 We restrict the query log to contain a single query that is corrupted, use a complete complaint set  and vary the database size.
-The query follows the template:
+We use the following query template, where all \texttt{SET} clauses assign the attributes to constants,
+and the \texttt{WHERE} clauses consist of range predicates:
 
 {\scriptsize
 \begin{verbatim}
-   SET Clause:                WHERE Clause:
-  Constant: SET (a_i=?), ..   Range: WHERE a_j in [?,?+r] & ..
+  UPDATE table
+  SET  (a_i=?), ...
+  WHERE a_j in [?,?+r] AND ...
 \end{verbatim}
 }
 
-Figure~\ref{f:heuristic} shows that although the performance is better by a constant factor ($\sim 2.5 \times$),
-\dt scales in a similar manner as \sys.  In addition, the F1-score is consistently below $0.5$ across all database sizes.
-From these empirical results, we find that \dt generates low-quality repairs under the simplest conditions---an approach
-that applies \dt one query at a time will have little hope.
-
+Figure~\ref{f:heuristic} shows that although the performance is better by small a constant factor ($\sim 2.5 \times$),
+its performance degrades exponentially, similar to \sys.
+In addition, the repairs are effectively not usable---the F1-score starts at $0.5$ and rapidly degrades towards $0$.
+From these empirical results, we find that \dt generates low-quality repairs even under the simplest conditions---an approach
+that applies \dt over more queries is expected to have little hope of succeeding.
 
 There are several reasons why \dt, and any approach that focuses on a single query at a 
 time\footnote{Although our incremental approach tries to generate a repair for a single
@@ -105,30 +120,47 @@ query at a time, it encodes all subsequent queries in the log.}, will not perfor
     
 \item \textbf{Single Query Limitation: }
 In principle, one could attempt to apply this technique to the
-entire log one-query-at-a-time. However, this is not possible in
-practice: to learn a classifier on the \texttt{WHERE} clause of query
-$q_i$, one needs to know the correct classification output, which
-corresponds to \xlw{the previous and next database states 
-$D_{i-1}, D_i^*$ of query $q_i$. Unfortunately, deriving the previous 
-database state of a query from the later database state is hard without 
-knowing any additional information. Thus, even with a complete complaint
-set, which can derive the correct database $D_n^*$, there is no
-obvious way to ``rollback'' this state to derive $D_i^*$}.
-\ewu{this isn't very clear.  Isn't the core reason that any error at any step in the query log will propogate?  Also we need to correctly derive each query's correct previous database state, which is really hard without knowing anything else} \xlw{I think the core reason is still we cannot rollback. Even with a clean query log, if we want to figure out the where clause of a query, it is still impossible without a ``rollback'' function. }
+entire log one query at a time, starting from the most recent query.
+Even ignoring the low repair accuracy shown in Figure~\ref{f:heuristic_acc},
+this approach is infeasible.
+Consider that we generate a labeled training dataset to repair $q_i$ 
+using the query's input and output database states $D_{i-1}$ and $D_i^*$.
+Note that $D_i^*$ is the theoretically \emph{correct} database state assuming no errors in the query log.
+We would need to derive $D_i^*$ by applying the complaint set to $D_n$ to create $D_n^*$, and roll back the database state.
+Unfortunately, \texttt{UPDATE} queries are commonly surjective such that their inverses are ambiguous.
 
-\item \textbf{Different Query Structure: } 
-\ewu{Can't we just incorporate a distance measure that takes predicate structure into account as part of the decision tree splitting procedure?} \xlw{By doing do, we actually modify the objective function of decision tree. This may help improving \dt's performance, but it won't provide any guarantee. Also, we discuss \dt's limitation on single query, and that is the major reason why we don't want to further investigate on this direction. }
-The classifier may derive a clause that is structurally very
-different from the original one (different attributes or number of
-conditions). This is problematic in general, as it corresponds to a
-larger-scale mistake in the query, which is a less likely scenario.
+% However, this is not possible in
+% practice: to learn a classifier on the \texttt{WHERE} clause of query
+% $q_i$, one needs to know the correct classification output, which
+% corresponds to \xlw{the previous and next database states 
+% $D_{i-1}, D_i^*$ of query $q_i$. Unfortunately, deriving the previous 
+% database state of a query from the later database state is hard without 
+% knowing any additional information. Thus, even with a complete complaint
+% set, which can derive the correct database $D_n^*$, there is no
+% obvious way to ``rollback'' this state to derive $D_i^*$}.
+% \ewu{this isn't very clear.  Isn't the core reason that any error at any step in the query log will propogate?  Also we need to correctly derive each query's correct previous database state, which is really hard without knowing anything else} \xlw{I think the core reason is still we cannot rollback. Even with a clean query log, if we want to figure out the where clause of a query, it is still impossible without a ``rollback'' function. }
+
+\item \textbf{Arbitrary \texttt{WHERE} Clause Result: } 
+The basic classifier approach simply learns a set of rules to minimize
+classification error, and can derive a clause whose struture is arbitrarily 
+different from the original query's \texttt{WHERE} clause.
+Although it may be possible to incorporate a distance measure as part of the decision tree
+splitting criteria, it is likely to be a heuristic with no guarantees.
+
+% In addition to the core limitation above, the basic classifier has no notion
+% \ewu{Can't we just incorporate a distance measure that takes predicate structure into account as part of the decision tree splitting procedure?} \xlw{By doing do, we actually modify the objective function of decision tree. This may help improving \dt's performance, but it won't provide any guarantee. Also, we discuss \dt's limitation on single query, and that is the major reason why we don't want to further investigate on this direction. }
+% The classifier may derive a clause that is structurally very
+% different from the original one (different attributes or number of
+% conditions). This is problematic in general, as it corresponds to a
+% larger-scale mistake in the query, which is a less likely scenario.
 
 \item \textbf{High Selectivity, Low Precision: }
-Classifiers try to avoid overfitting, which is problematic for
-queries with high selectivity (e.g., single-tuple updates), as the
-classifier is unlikely to generate any rules. \xlw{In fact, the problem of learning 
-from sever imbalance data is still a great challenge for many major classification algorithms~\cite{he2009learning, galar2012review}. Thus we believe even using alternative classification algorithms, the performance wouldn't be improved as much. In addition, a great percentage of real workloads~\cite{oltpbench} mainly composed by point-update queries which would further worsen the behavior of learning-based approaches.  } 
-\ewu{this is called severe class imbalance, would be good to reference some literature in this area.  Decision trees have some issues with sparcity and overfitting}
+Classifiers try to avoid overfitting by balancing the complexity of the rules with classification accuracy.
+This is problematic for highly selective queries (e.g., primary key update), because the classifier
+may simply ignore the single incorrect record and generate a rule such as \texttt{FALSE}.
+In fact, this form of severe imbalance data continues to be a challenge for most major classification algorithms~\cite{he2009learning, galar2012review}. 
+Thus, we believe even using alternative classification algorithms, the performance wouldn't be improved as much. 
+In addition, many workloads~\cite{oltpbench} are primarily composed of key update queries which would further limits the applicability of learning-based approaches.
 
 \end{itemize}
 
