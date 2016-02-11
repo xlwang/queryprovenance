@@ -11,19 +11,19 @@ However, we argue that the encoded information is necessary in order to generate
 In this section, we examine an alternative, simpler, decision tree-based approach called \dt. 
 We show that even in a simple case of a single query log and a complete complaint set, it is expected to perform poorly.
 We will first describe how to model the repair process using a decision tree,
-present and discuss experimental results that illustrate its limitations, 
+and then we will present and discuss experimental results that illustrate its limitations.
 
 \subsection{Modeling Repairs with Decision Trees}
 
-Rule-based learners are used in classification tasks to generate set of rules, or conjunctive predicates that best classify a set of labeled tuples.
+Rule-based learners are used in classification tasks to generate a set of rules, or conjunctive predicates that best classify a group of labeled tuples.
 The rules are non-overlapping, and each is associated with a label---a tuple that matches a given rule is assigned the corresponding label.
 These rules exhibit a natural parallel with SQL \texttt{WHERE} clauses, 
-which can be viewed as labelling selected tuples with a positive label and rejected tuples with a negative label.
-Similarly, the structure of the rules are identical to those that \sys is designed to repair.
+which can be viewed as labeling selected tuples with a positive label and rejected tuples with a negative label.
+Similarly, the structure of the rules is identical to those that \sys is designed to repair.
 Thus, given the database tuples labeled to describe the errors, we may use a rule-based learner to
 generate the most appropriate \texttt{WHERE} clause.
-We focus our attention on rule-based learners,
-and specifically the C4.5~\cite{quinlan1987} decision tree learner, which is an 
+We focus our attention on rule-based learners;
+specifically, we experiment with the C4.5~\cite{quinlan1987} decision tree learner, which is an 
 exemplar of rule-based learners.
 
 A core limitation of this classification-based approach is that there is no means to 
@@ -31,7 +31,7 @@ repair \texttt{SET} clauses, which modify data values rather than simply label t
 We resolve this with a two step approach.
 We first use the decision tree to generate a repair for the
 \texttt{WHERE} clause, and then use the modified query to identify repairs for the \texttt{SET} clause.
-In fact, the need for this two step procedure is what limits this approach to encoding and repairing at most one query
+The need for this two step procedure limits this approach to encoding and repairing at most one query
 at a time.
 
 \noindent
@@ -44,9 +44,9 @@ cause a subset of the tuples to be misclassified, and in turn,
 translate into data errors. 
 Therefore, repairing the complaints corresponds to repairing the imprecise classification. 
 
-This works as follows: For an incorrect query $q$, let
+The repair works as follows: For an incorrect query $q$, let
 $D_0$ be the database state before $q$, and $D_1^*$ the \emph{correct}
-database state that should result after $q$.
+database state that should have been the result after $q$, if $q$ were correct.
 We use each tuple $t \in D_0$ as an element in the input training data
 for the classifier where the values (of each attribute) of $t$ define
 the feature vector and the label for $t$:
@@ -63,7 +63,7 @@ forms a disjunction of rules that constitute the repaired \texttt{WHERE} clause.
 
 \noindent
 \textbf{Repairing the SET Clause:}
-The \texttt{WHERE} clause repair proposed by the classifier may not completely fix 
+The \texttt{WHERE} clause repair proposed by the classifier may not completely repair 
 the complaints if there was also an error in the \texttt{SET} clause. 
 In this case, we execute a second repair step.
 We model the errors as a simple linear system of equations: 
@@ -74,22 +74,7 @@ will generate the desired repair for the \texttt{SET} expression.
 
 \subsection{Experimental Results}
 
-  \begin{figure}[h!]
-  \centering
-    \begin{subfigure} [t]{.75\columnwidth}
-    \includegraphics[width = \columnwidth]{figures/heuristictime}
-    \caption{Comparison on Performance.}
-    \label{f:heuristic_time} 
-    \end{subfigure}\\
 
-    \begin{subfigure} [t]{.75\columnwidth}
-    \includegraphics[width = \columnwidth]{figures/heuristicacc}
-    \caption{Comparison on Accuracy.}
-    \label{f:heuristic_acc} 
-    \end{subfigure}
-   \caption{\dt compared with \sys}
-   \label{f:heuristic}
-  \end{figure}
 
 
 To illustrate these shortcomings, we compare \dt with \sys using a simplified version of the setup from Section~\ref{sec:experiments} that favors \dt.
@@ -105,13 +90,32 @@ and the \texttt{WHERE} clauses consist of range predicates:
 \end{verbatim}
 }
 
-Figure~\ref{f:heuristic} shows that although the performance is better by small a constant factor ($\sim 2.5 \times$),
-its performance degrades exponentially, similar to \sys.
-In addition, the repairs are effectively not usable---the F1-score starts at $0.5$ and rapidly degrades towards $0$.
+Figure~\ref{f:heuristic} shows that although the runtime performance of \dt is better than \sys by small a constant factor ($\sim 2.5 \times$),
+both runtimes degrade exponentially.
+In addition, the \dt repairs are effectively unusable as their accuracy is low: the F1-score starts at $0.5$ and rapidly degrades towards $0$.
 From these empirical results, we find that \dt generates low-quality repairs even under the simplest conditions---an approach
 that applies \dt over more queries is expected to have little hope of succeeding.
 
-There are several reasons why \dt, and any approach that focuses on a single query at a 
+\begin{figure}[t]
+\centering
+  \begin{subfigure} [t]{.75\columnwidth}
+  \includegraphics[width = \columnwidth]{figures/heuristictime}
+  % \vspace{-2mm}
+  \caption{Comparison on Performance.}
+  \label{f:heuristic_time} 
+  \end{subfigure}\\
+
+  \begin{subfigure} [t]{.75\columnwidth}
+  \includegraphics[width = \columnwidth]{figures/heuristicacc}
+  % \vspace{-2mm}
+  \caption{Comparison on Accuracy.}
+  \label{f:heuristic_acc} 
+  \end{subfigure}
+ \caption{\dt compared with \sys}
+ \label{f:heuristic}
+\end{figure}
+
+There are three important reasons why \dt, and any approach that focuses on a single query at a 
 time\footnote{Although our incremental approach tries to generate a repair for a single
 query at a time, it encodes all subsequent queries in the log.}, will not perform well.
 
@@ -126,7 +130,11 @@ Consider that we generate a labeled training dataset to repair $q_i$
 using the query's input and output database states $D_{i-1}$ and $D_i^*$.
 Note that $D_i^*$ is the theoretically \emph{correct} database state assuming no errors in the query log.
 We would need to derive $D_i^*$ by applying the complaint set to $D_n$ to create $D_n^*$, and roll back the database state.
-Unfortunately, \texttt{UPDATE} queries are commonly surjective such that their inverses are ambiguous.
+Unfortunately, \texttt{UPDATE} queries are commonly surjective such
+that their inverses are ambiguous, which means that it is often
+impossible to derive $D_i^*$. In contrast, the incremental version of
+\sys can bypass this problem by encoding subsequent queries in the log
+in a MILP representation.
 
 % However, this is not possible in
 % practice: to learn a classifier on the \texttt{WHERE} clause of query
@@ -155,11 +163,13 @@ splitting criteria, it is likely to be a heuristic with no guarantees.
 
 \item \textbf{High Selectivity, Low Precision: }
 Classifiers try to avoid overfitting by balancing the complexity of the rules with classification accuracy.
-This is problematic for highly selective queries (e.g., primary key update), because the classifier
+This is problematic for highly selective queries (e.g., primary key updates), because the classifier
 may simply ignore the single incorrect record and generate a rule such as \texttt{FALSE}.
-In fact, this form of severe imbalance data continues to be a challenge for most major classification algorithms~\cite{he2009learning, galar2012review}. 
-Thus, we believe even using alternative classification algorithms, the performance wouldn't be improved as much. 
-In addition, many workloads~\cite{oltpbench} are primarily composed of key update queries which would further limits the applicability of learning-based approaches.
+In fact, this form of severely imbalanced data continues to be a challenge for most major classification algorithms~\cite{he2009learning, galar2012review}. 
+Thus, we believe that alternative classification algorithms would not improve on these results. 
+Compound with the fact that many workloads are primarily composed of
+key update queries~\cite{oltpbench} this issue severely limits the
+applicability of learning-based approaches.
 
 \end{itemize}
 
