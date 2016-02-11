@@ -15,7 +15,6 @@ present and discuss experimental results that illustrate its limitations,
 
 \subsection{Modeling Repairs with Decision Trees}
 
-
 Rule-based learners are used in classification tasks to generate set of rules, or conjunctive predicates that best classify a set of labeled tuples.
 The rules are non-overlapping, and each is associated with a label---a tuple that matches a given rule is assigned the corresponding label.
 These rules exhibit a natural parallel with SQL \texttt{WHERE} clauses, 
@@ -140,7 +139,7 @@ Unfortunately, \texttt{UPDATE} queries are commonly surjective such that their i
 % obvious way to ``rollback'' this state to derive $D_i^*$}.
 % \ewu{this isn't very clear.  Isn't the core reason that any error at any step in the query log will propogate?  Also we need to correctly derive each query's correct previous database state, which is really hard without knowing anything else} \xlw{I think the core reason is still we cannot rollback. Even with a clean query log, if we want to figure out the where clause of a query, it is still impossible without a ``rollback'' function. }
 
-\item \textbf{Arbitrary \texttt{WHERE} Clause Result: } 
+\item \textbf{Structurally Different \texttt{WHERE} Clause Results: } 
 The basic classifier approach simply learns a set of rules to minimize
 classification error, and can derive a clause whose struture is arbitrarily 
 different from the original query's \texttt{WHERE} clause.

@@ -30,8 +30,6 @@ data.extend(tatp)
 data.extend(tpcc)
 
 
-
-
 p = ggplot(data, aes(x='corrupt_qidx', y='total_time', color='name', 
   shape='name', linetype='name'))
 p += geom_point(size=2) + geom_line(size=.6)

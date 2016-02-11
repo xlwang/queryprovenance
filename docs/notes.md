@@ -1,3 +1,25 @@
+# Feb 1
+
+Meeting agenda
+
+* Demo work
+* tech report appendix -- what to add?
+  * relationship to complaint set size
+  * r/V_D 
+  * num attributes
+  * practicality
+  * transaction support
+* Wu's CAREER and how to use this submission/$$$
+* next projects extending idea of context-aware explanation/error correction (1st P of conclusion)
+
+Appendix
+
+* real workloads that we can run
+  * email andy
+* compare with classification techniques wrt incomplete complaint sets
+* 
+
+
 # Dec 1
 
 * attribute slicing may work if
