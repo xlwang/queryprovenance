@@ -1,0 +1,25 @@
+
+\subsection{The Objective Function}
+
+The optimal diagnosis problem (Definition~\ref{def:problem}) seeks a
+log repair $\mathcal{Q}^*$, such that the distance
+$d(\mathcal{Q},\mathcal{Q}^*)$ is minimized. In this section, we
+describe our model for the objective function, which assumes numerical
+parameters and attributes. This assumption is not a restriction of the
+\sys framework.
+Handling other data types, such as categorical values comes down to defining an appropriate distance function, which can then be directly incorporated into \sys.
+
+In our experiments, we use the normalized Manhattan
+distance (in linearized format in the MILP problem) 
+between the parameters in $\mathcal{Q}$ and
+$\mathcal{Q}^*$. We use $q.param_i$ to denote the $i^{th}$ parameter
+of query $q$, and $|q.param|$ to denote the total number of parameters
+in $q$: \[d(\mathcal{Q}, \mathcal{Q}^*) = \sum_{i = 1} ^{n} \sum_{j =
+1}^{|q_i.param|} |q_i.param_j - q_i.param_j^*|\]
+Different choices for the objective function are also possible. For
+example, one may prioritize the total number of changes incurred in
+the log, rather than the magnitude of these changes. However, a
+thorough investigation of different possible distance metrics is
+beyond the scope of our work.
+
+

@@ -1,0 +1,38 @@
+
+\section{Summary and discussion}
+
+The general problem of data errors is highly complex, and exacerbated by its highly contextual nature.
+We believe that an approach that explains and repairs such data errors based on operations performed by the application or user
+is a promising step towards incorporating contextual hints into the analysis process.
+
+Towards this goal, we presented \sys, the first framework to diagnose and
+repair errors in the queries that operate on the data.
+Datasets are typically dynamic: even if a dataset starts clean,
+updates may introduce new errors. \sys can
+analyze query logs to trace reported errors to the queries that
+introduced them. This in turn helps identify additional errors
+in the data that may have been missed and gone unreported.
+
+We proposed a basic algorithm, \texttt{basic}, that uses non-trivial transformation rules to
+encode information from the data and the query log as a MILP problem. We further improve 
+\texttt{basic} with two types of optimizations: 
+(1)~slicing-based optimizations that reduce the problem
+size without compromising the accuracy, but rather often improving it, and 
+(2)~an incremental approach that analyzes a single query at a time. 
+Our experiments show that the latter
+optimization can achieve significant scaling gains for single-query
+errors, without significant reduction in accuracy.
+
+To the best of our knowledge, \sys is the first formalization and solution to the diagnosis
+and repair of errors using past executed queries. 
+Obviously, correcting such errors in practice poses additional challenges. 
+The initial version of \sys described in this paper focuses on a constrained problem consisting of
+simple (no subqueries, UDFs, aggregations, nor joins)
+single-query transactions with clauses composed of linear functions, and
+complaint sets without false positives.
+In future work, we hope to extend our techniques to relax these limitations.
+In addition, we plan to investigate additional methods of scaling the constraint analysis, 
+as well as techniques that can adapt the benefits of single-query analysis to errors in multiple queries.
+
+
+
