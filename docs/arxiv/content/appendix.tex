@@ -116,9 +116,50 @@ that applies \dt over more queries is expected to have little hope of succeeding
 There are three important reasons why \dt, and any approach that focuses on a single query at a 
 time\footnote{Although our incremental approach tries to generate a repair for a single
 query at a time, it encodes all subsequent queries in the log.}, will not perform well.
-
+  \begin{figure*}[t]
+  \centering
+      \begin{subfigure} [t]{.3\textwidth}
+    \includegraphics[width = .99\columnwidth]{figures/num_cons_time}
+    \vspace*{-.25in}
+    \caption{\# of constraints vs. solver solving time.}
+    \vspace*{-.1in}
+    \label{f:cons_vs_time} 
+    \end{subfigure}
+    \begin{subfigure} [t]{.3\textwidth}
+    \includegraphics[width = .99\columnwidth]{figures/num_vars_time}
+    \vspace*{-.25in}
+    \caption{\# of undetermined variables vs. solver solving time.}
+    \vspace*{-.1in}
+    \label{f:var_vs_time} 
+    \end{subfigure}
+    \begin{subfigure} [t]{.3\textwidth}
+    \includegraphics[width = .99\columnwidth]{figures/num_compl_time}
+    \vspace*{-.25in}
+    \caption{\# of compl. vs. solver solving time.}
+    \vspace*{-.1in}
+    \label{f:compl_vs_time} 
+    \end{subfigure} 
+    \iffalse
+    \begin{subfigure} [t]{.3\textwidth}
+    \includegraphics[width = .99\columnwidth]{figures/num_compl_cons}
+    \vspace*{-.25in}
+    \caption{\# of constraints vs.\# of compl.}
+    \vspace*{-.1in}
+    \label{f:compl_vs_cons} 
+    \end{subfigure}
+    \begin{subfigure} [t]{.3\textwidth}
+    \includegraphics[width = .99\columnwidth]{figures/num_compl_time}
+    \vspace*{-.25in}
+    \caption{\# of undetermined variables vs. \# of compl.}
+    \vspace*{-.1in}
+    \label{f:compl_vs_time}
+    \end{subfigure}
+    \fi
+   \caption{Solver solving time grows with all three factors: number of constraints, number of undermined variables and number of complaints. }
+   \vspace*{-.1in}
+   \label{f:soltime}
+  \end{figure*}
 \begin{itemize}[itemsep=1pt, leftmargin=5mm]
-    
 \item \textbf{Single Query Limitation: }
 In principle, one could attempt to apply this technique to the
 entire log one query at a time, starting from the most recent query.
@@ -170,8 +211,7 @@ applicability of learning-based approaches.
 \xlw{
 In this section, we study factors that influence the MILP solver solving time. In this paper, we
 use IBM CPLEX~\cite{cplex2014v12} as a black box to solve the constructed MILP problems. Similar to many solver performance studies~\cite{atamturk2005integer, meindl2012analysis, gearhart2013comparison}, 
-we first study the solver behavior and the connection between solver performance (on \texttt{UPDATE} workload) and multiple
- factors: the number of constraints, undetermined variables, and complaints.  We create \texttt{UPDATE}-only workloads using our synthetic data generator with 300 queries where the \texttt{SET} clauses assign the attribute to constant and \texttt{WHERE} clause select tuples by range predicates: }
+we majorly study the connection between solver performance between \textit{the number of constraints} and \textit{the number of variables} in the constructed MILP problem. For this, we create \texttt{UPDATE}-only workloads using our synthetic data generator for 300 queries with constant \texttt{SET} clause and range \texttt{WHERE} clause: }
 
 {\scriptsize
 \begin{verbatim}
@@ -180,55 +220,33 @@ we first study the solver behavior and the connection between solver performance
   WHERE a_j in [?,?+r] AND ...
 \end{verbatim}
 }
-\xlw{We further select two query indexes, $q_{50}$ and $q_{200}$, to create the dirty query log. }
+\xlw{We further corrupt two query indexes, $q_{50}$ and $q_{200}$, to create the dirty query logs. }
+\smallskip
+\emph{Number of Constraints: } \xlw{We first study the relationship between solver performance and number of constraints. From Figure~\ref{f:cons_vs_time}, we observe that solver solving time is roughly positive proportional, with tiny fluctuation, to the number of constraints in both corrupt indexes. This is expected because increasing the number of constraints by large scale usually accompany with significantly greater amount of variables in the MILP problem, which lead to harder MILP problems by natural. However, MILP problems with slightly larger amount of constraints sometimes could be even easier to solve since the additional constraints help pruning the searching space for similar amount of variables.}
 
-\ewu{XL: more detail on how these experiments are run.  See my edits in previous section for example}
-  
-  \begin{figure*}[t]
-  \centering
-      \begin{subfigure} [t]{.3\textwidth}
-    \includegraphics[width = .99\columnwidth]{figures/num_cons_time}
-    \vspace*{-.25in}
-    \caption{\# of constraints vs. solver solving time.}
-    \vspace*{-.1in}
-    \label{f:cons_vs_time} 
-    \end{subfigure}
-    \begin{subfigure} [t]{.3\textwidth}
-    \includegraphics[width = .99\columnwidth]{figures/num_vars_time}
-    \vspace*{-.25in}
-    \caption{\# of undetermined variables vs. solver solving time.}
-    \vspace*{-.1in}
-    \label{f:var_vs_time} 
-    \end{subfigure}
-    \begin{subfigure} [t]{.3\textwidth}
-    \includegraphics[width = .99\columnwidth]{figures/num_compl_time}
-    \vspace*{-.25in}
-    \caption{\# of compl. vs. solver solving time.}
-    \vspace*{-.1in}
-    \label{f:compl_vs_time} 
-    \end{subfigure} 
-    \iffalse
-    \begin{subfigure} [t]{.3\textwidth}
-    \includegraphics[width = .99\columnwidth]{figures/num_compl_cons}
-    \vspace*{-.25in}
-    \caption{\# of constraints vs.\# of compl.}
-    \vspace*{-.1in}
-    \label{f:compl_vs_cons} 
-    \end{subfigure}
-    \begin{subfigure} [t]{.3\textwidth}
-    \includegraphics[width = .99\columnwidth]{figures/num_compl_var}
-    \vspace*{-.25in}
-    \caption{\# of undetermined variables vs. \# of compl.}
-    \vspace*{-.1in}
-    \label{f:compl_vs_var}
-    \end{subfigure}
-    \fi
-   \caption{Solver solving time grows with all three factors: number of constraints, number of undermined variables and number of complaints. }
-   \vspace*{-.1in}
-   \label{f:soltime}
-  \end{figure*}
+\smallskip
+\emph{Number of Variables: } \xlw{Similar to the previous experiment, we next compare the solver solving time with the number of variables. As shown in Figure~\ref{f:var_vs_time}, we find highly correlated trends compare to Figure~\ref{f:cons_vs_time}. This is due to the way we construct the MILP problem: the number of constraints and the number of variables grows linearly with the number of queries and the number complaints. 
+}
 
-  \begin{figure*}[ht]
+
+\iffalse
+ In our experiments we found that increasing the number of constraints by increasing the database, query log, or complaint set sizes aversely affects the solver performance,
+  solver performance has been shown to \emph{improve} as constraints that effectively reduce the problem space are added to the problem.  
+  Thus, we now focus on the effects on the number of undetermined variables, which strictly increases the problem space.
+  We keep the number of constraints fixed, however increase the number of undetermined variables by \ewu{XL fill in}. \xlw{need to rerun exp to get required numbers. We need to gradually increase the batch size to achieve this. }
+
+\fi
+
+\smallskip
+\emph{Takeaway: }\xlw{ In Figure~\ref{f:compl_vs_time} we illustrate the above argument by comparing the average solver solving time between the number of complaints at two different corrupt indexes. As expected, with the same number of complaints, the solver solving time for corrupt index $50$ is significantly higher than index $200$ since the number of queries encoded in each problem is $250$ and $100$ respectively. In contract, with the same corrupt query index, problems with higher amount of complaints has much higher average solver solving cost than problems with lower amount of complaints. }
+
+\subsection{Factors Relevant to the Number of Complaints}
+\xlw{
+From the above experiments, we observe that the solver solving time is higher correlated to the number of complaints and the number of queries we encoded in a MILP problem. The number of queries can be easily controlled by a particular parameter. The number of complaints, on the other hand, is influence by various factors including the \texttt{SET} clause type, corrupt query index, query skewness, \texttt{WHERE} clause range, and some random factors. To better understand factors that control the size of the complaint set, we ran simulations using a database with $20$ attributes, and a query log of size $1000$ containing
+either all constant or relative \texttt{SET} clause \texttt{UPDATE} queries.
+We varied the number of corrupt index uniformly throughout the query log, and additionally varied
+the skew and range parameters to study how they affect the size of the complaint sets.}
+   \begin{figure*}[ht]
   \centering
   \begin{subfigure} [t]{.3\textwidth}
     \includegraphics[width = .99\columnwidth]{figures/indelup_acc_idx}
@@ -256,34 +274,40 @@ we first study the solver behavior and the connection between solver performance
    \vspace*{-.1in}
    \label{fig:truerate}
   \end{figure*}
+  \begin{figure}[!h]
+  \centering
+  \includegraphics[width = 3in]{figures/qidxsimulation/qidx_v_ncomplaints_20attrs_const}
+  \caption{Corrupt query index, skew, range vs complaint set size for \textit{constant} \texttt{SET} clauses.}
+  \label{f:qidx_v_ncomplaints_const} 
+  \end{figure}
+ 
 
 \smallskip
-\emph{Number of Constraints: } We first study the relation between solver solving time and number of constraints and observe that solver solving time is roughly positive proportional, with tiny fluctuation, to the number of constraints in both corrupt indexes (Figure~\ref{f:cons_vs_time}). This is expected because increasing the number of constraints by large scale usually accompany with significantly greater amount of variables in the MILP problem, which lead to harder MILP problems by natural. However, MILP problems with slightly larger amount of constraints sometimes could be even easier to solve since the additional constraints help pruning the searching space for similar amount of variables.
+\emph{Constant \texttt{SET} clause: } \xlw{Figure~\ref{f:qidx_v_ncomplaints_const} plots a representative set of parameters including corrupt query index, range, and skew. We plot one point
+for each corrupted query index that results in a complaint set with at least one complaint. 
+These results highlight several interesting trends:  With small update range and small skew factor (left upper corner)
+the size of the complaint sets are relatively small, and their frequency is constant across the possible query indices.
+However as we increase the range and skew, more recent queries are more likely to result in very large complaint sets (at times the size of the database).   
+This effect is a symptom of the fact that queries with higher overlap with each other will set groups of tuples to the same value,
+and over time, skew the distribution of tuple values to a small number of possible values. 
+Thus, more recent corruptions that affect a large cluster of similar tuples will result in a large complaint set.
+And the possibility of query overlap increases with update range and skew as these two factors increase the likelihood that queries share the same \texttt{WHERE} and \texttt{SET} clause. }
+
+\begin{figure}[!h]
+\centering
+\includegraphics[width = 3in]{figures/qidxsimulation/qidx_v_ncomplaints_20attrs_rel}
+\caption{Query index vs complaint set size for $set = rel$.}
+\label{f:qidx_v_ncomplaints_rel} 
+\end{figure}
 
 \smallskip
-\emph{Number of Undetermined Variables: } In our experiments we found that increasing the number of constraints by increasing the database, query log, or complaint set sizes aversely affects the solver performance,
-  solver performance has been shown to \emph{improve} as constraints that effectively reduce the problem space are added to the problem.  
-  Thus, we now focus on the effects on the number of undetermined variables, which strictly increases the problem space.
-  We keep the number of constraints fixed, however increase the number of undetermined variables by \ewu{XL fill in}. \xlw{need to rerun exp to get required numbers. We need to gradually increase the batch size to achieve this. }
-
-\smallskip
-\emph{Number of Complaints: } In Figure~\ref{f:soltime}(b) we compare the solver solving 
-time with increasing number of complaints. As illustrated in Section~\ref{sec:sol}, 
-the size of number of constraints constructed MILP problem grows linearly with the number of complaints. Thus, solver solving time grows with the number of complaints. 
-\ewu{Can you plot the number of complaints vs num constraints and num undetermined variables?  That's what really matters right? Same for num queries}
-
-\xlw{\sout{
-\smallskip
-\emph{Number of Queries: }
-\ewu{Can cut, since overlaps with experiments in main paper}
-We finally compare solver solving time with the number of queries encoded in the MILP problem and find the solver solving time grows exponentially with the number of queries. This again is due to the way we construct the MILP problem: by increasing the number of queries, more variables are introduced, which increase the hardness in solving the problem. }}
-
-\subsection{Factors in Synthetic Data Generator}
-In this section, we further studies the parameters in synthetic generator that control the number of complaints in synthetic datasets. 
-
-
-
-
+\emph{Relative \texttt{SET} clause: } \xlw{In contrast to \textit{constant} \texttt{SET} queries, Figure~\ref{f:qidx_v_ncomplaints_rel} executes the 
+same experiment using \textit{relative} \texttt{SET} queries.  In this setting, we find that the trend is
+reversed, and older corruptions tend to result in larger complaint sets.  This is because,
+subsequent \texttt{UPDATE} queries increment or decrement the attribute value, rather than
+overwriting it with a constant value.  The clustering of data values due to query overlap
+then increases the number of other tuples affected.
+}
 
 
 \section{Repairing the Correct Query}
@@ -318,87 +342,3 @@ nearly perfect ``true'' fix rate for \texttt{UPDATE} and \texttt{INSERT} workloa
 \textbf{Rate of ``true'' fix vs. database sizes: } We next narrow down to \texttt{UPDATE} workload and evaluate \sys's behavior with increasing amount of tuples in the database. We observe nearly perfect rate on different corrupt indexes in all database sizes (Figure~\ref{fig:truerate}(b)). 
 
 \textbf{Rate of ``true'' fix vs. false negatives: } We finally evaluate \sys on \texttt{UPDATE} workload with increasing false negative rates. Similar to the quality drop in Figure~\ref{f:falsenegative_acc}, we observe the ``true'' fix rate also suffers from less submitted complaints when errors happen early in the query log. However, \sys maintain nearly perfect ``true'' fix rate for more recent errors (corrupt index is 300 and 200). 
-
-
-\section{Effect of Index of Corrupted Query}
-\label{app:qidx}
-
-
-A key parameter for our experiments is the location of the corrupted query ($idx$).  
-This parameter determines the number of queries \sys must consider when searching for a fix,
-and affects the size of the complaint set.  
-Both of these characteristics directly impact \sys's 
-runtime performance. For this reason, it is undesirable to randomly pick and corrupt queries
-throughout the query log, as the performance and accuracy results may not be comparable. 
-To better understand the relationship between $idx$ and the size of the complaint set, we ran
-simulations using a database with $20$ attributes, and a query log of size $1000$ containing
-either all $set = const$ or $set = rel$ \texttt{UPDATE} queries.
-We varied  $idx$ uniformly throughout the query log, and additionally varied
-the skew $s$ and range $r$ parameters to study how they affect the size of the complaint sets.
-
-
-  \begin{figure}[h]
-  \centering
-  \includegraphics[width = 3.5in]{figures/qidxsimulation/qidx_v_ncomplaints_20attrs_const}
-  \caption{Query index vs complaint set size for $set = const$.}
-  \label{f:qidx_v_ncomplaints_const} 
-  \end{figure}
-
-
-Figure~\ref{f:qidx_v_ncomplaints_const} plots a representative set of parameters.  We plot one point
-for each corrupted query index that results in a complaint set with at least one complaint. 
-These results highlight several interesting trends.  When queries do not overlap ($r = 1$, leftmost column),
-the size of the complaint sets are relatively small, and their frequency is constant across the possible query indices.
-However as the possibility of overlap increases (e.g., $r$ increases), more recent queries are more likely to result in
-very large complaint sets (at times the size of the database).   
-This effect is a symptom of the fact that queries with large ranges will set groups of tuples to the same value,
-and over time, skew the distribution of tuple values to a small number of possible values.
-Thus, more recent corruptions that affect a large cluster of similar tuples will result in a large complaint set.
-We find that increasing the skew parameter also exacerbates this effect.  
-In addition, high skew increases the likelihood that queries will share the same \texttt{WHERE} and \texttt{SET} clause 
-attributes as a corrupted query, thus overwriting the error introduced by the corrupted query.  
-This is why the frequency of non-empty complaint sets decreases significantly as $s$ increases.
-
-
-\begin{figure}[h]
-\centering
-\includegraphics[width = 3.5in]{figures/qidxsimulation/qidx_v_ncomplaints_20attrs_rel}
-\caption{Query index vs complaint set size for $set = rel$.}
-\label{f:qidx_v_ncomplaints_rel} 
-\end{figure}
-
-In contrast to $set=const$ queries, Figure~\ref{f:qidx_v_ncomplaints_rel} executes the 
-same experiment using $set=rel$ queries.  In this setting, we find that the trend is
-reversed, and older corruptions tend to result in larger complaint sets.  This is because,
-subsequent \texttt{UPDATE} queries increment or decrement the attribute value, rather than
-overwriting it with a constant value.  The clustering of data values due to query overlap
-then increases the number of other tuples affected.
-
-
-\ewu{summarize findings and implications to experiments here.}
-not all corruptions result in complaint sets.
-In constant SET clause workloads, larger complaints sets are more likely to
-result from more recent corrupted queries -- particularly if the queries are range updates or
-the updated attributes are skewed.
-For this reason, our experiments corrupt the query log at six positions 
-$idx \in \{0, 25, 50, 100, 200, 250\}$ , relative 
-to the most recent query (e.g., the most recent query, the $25^th$ most recent query, and so on).
-
-% \begin{figure}[h]
-% \centering
-% \includegraphics[width = 3.5in]{figures/qidxsimulation/numinrange}
-% \caption{.}
-% \label{f:numinrange} 
-% \end{figure}
-
-
-As we observed from Figure~\ref{f:multiquery}, \milpall maintains high accuracy when errors
-happen more recent, however it does not scale when the error locate further from the most
-recent query. \milptuple scales better than \milpall, but ignoring tuples not 
-in the complaint set apparently hurts the precision. \milptuplestopearly run times faster
-than \milpall and \milptuple, however the aggressive strategy greatly reduce the 
-precision. In the end, \milpadvtuple significantly improves the precision with very limited
-time cost compare to \milptuple. \\
-Based on these observations, we only include the performance of \milpadvtuple and \milpadvall
-in the rest of the experiments. 
-
