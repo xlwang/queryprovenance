@@ -1,0 +1,133 @@
+\include{header}
+
+
+\newcommand{\papertext}[1]{#1}
+\newcommand{\techreport}[1]{#1}
+
+\newcommand{\alex}[1]{\noindent{\color{darkgreen}{Alexandra: #1}}}
+\newcommand{\xlw}[1]{\noindent{\color{blue}{xl: #1}}}
+\newcommand{\ewu}[1]{\noindent{\color{red}{EWu: #1}}}
+\newcommand{\xxx}[1]{{\fontsize{13pt}{13pt}\selectfont\textcolor{red}{#1}}}
+\newcommand{\codesize}{\fontsize{7}{8}}
+\newcommand{\stitle}[1]{\vspace{0.5em}\noindent\textbf{#1}}
+\newcommand{\calF}[0]{$\cal{F}$}
+
+\newcommand{\ind}{\hspace{\algorithmicindent}}
+
+% \newcommand{\deprecate}[1]{}
+\newcommand{\deprecate}[1]{\noindent{\color{light-gray}{#1}}}
+
+\newcommand{\prob}{{\sc Log-Corruption}\xspace}
+\newcommand{\exact}{{\sc EXACTSOL}\xspace}
+\newcommand{\qfix}{{\sc SingleQueryFix}\xspace}
+\newcommand{\density}{{\sc DENSITY}\xspace}
+
+
+\newcommand{\milpall}{\textsc{MILP-NAIVE}\xspace}
+\newcommand{\milptuple}{\textsc{MILP-COMPL}\xspace}
+\newcommand{\milptuplestopearly}{\textsc{MILP-COMPL-STOPEARLY}\xspace}
+\newcommand{\milpadvtuple}{\textsc{MILP-ADV-TUPLE}\xspace}
+\newcommand{\milpadvall}{\textsc{MILP-ADV-ALL}\xspace}
+\newcommand{\heurstic}{\textsc{HEURISTIC}\xspace}
+
+\pagenumbering{arabic}
+
+%%Ensuring that equation labels remain normal size, even if we shrink the equation text
+\makeatletter
+\def\maketag@@@#1{\hbox{\m@th\normalfont\normalsize#1}}
+\DeclareRobustCommand*\textsubscript[1]{%
+          \@textsubscript{\selectfont#1}}
+        \def\@textsubscript#1{%
+          {\m@th\ensuremath{_{\mbox{\fontsize\sf@size\z@#1}}}}}
+\makeatother
+
+\newcommand{\sysname}{\textsc{QueryFix}}
+\newcommand{\sys}{QFix\xspace}
+\newcommand{\naive}{\sysname\textsubscript{basic}\xspace}
+\newcommand{\tslice}{\sysname\textsubscript{ts}\xspace}
+\newcommand{\qslice}{\sysname\textsubscript{qs}\xspace}
+\newcommand{\aslice}{\sysname\textsubscript{as}\xspace}
+\newcommand{\incremental}{\sysname\textsubscript{inc}\xspace}
+
+% End of preamble. Here it comes the document.
+\begin{document}
+
+% for 
+\title{{\sys}: Demonstrating error diagnosis in query histories}
+
+\numberofauthors{3}
+\author{
+  \alignauthor Xiaolan Wang\\
+    \affaddr{School of Computer Science}\\
+    \affaddr{University of Massachusetts}\\
+    \email{xlwang@cs.umass.edu}\\
+  \alignauthor Alexandra Meliou\\
+  \affaddr{School of Computer Science}\\
+    \affaddr{University of Massachusetts}\\
+    \email{ameli@cs.umass.edu}\\
+  \alignauthor Eugene Wu\\
+    \affaddr{Computer Science}\\
+    \affaddr{Columbia University}\\
+    \email{ewu@cs.columbia.edu}\\
+}
+
+
+
+
+{
+\maketitle
+\vspace*{-.5in}
+}
+
+\begin{abstract}
+
+An increasing number of applications in all aspects of society rely on
+data. Despite the long line of research in data cleaning and repairs,
+data correctness has been an elusive goal. Errors in the data can be
+extremely disruptive, and are detrimental to the effectiveness and
+proper function of data-driven applications. Even when data is
+cleaned, new errors can be introduced by applications and users who
+interact with the data. Subsequent valid updates can obscure these
+errors and propagate them through the dataset causing more
+discrepancies. Any discovered errors tend to be corrected
+superficially, on a case-by-case basis, further obscuring the true
+underlying cause, and making detection of the remaining errors harder.
+
+In this demo proposal, we outline the design of \sys, a {\it query-centric}
+framework that derives explanations and repairs for discrepancies in 
+relational data based on potential errors in the queries that operated on the data. 
+This is a marked departure from traditional {\it data-centric} techniques that directly fix the data.
+We then describe how users will use \sys in a demonstration scenario. 
+Participants will be able to select from a number of 
+transactional benchmarks, introduce errors into the queries that are executed,
+and compare the fixes to the queries proposed by \sys as well as existing alternative algorithms
+such as decision trees.
+
+\end{abstract}
+
+\input{content/01-introduction}
+\input{content/02-arch}
+\input{content/xx-problem}
+\input{content/xx-demo}
+%\input{content/xx-related}
+
+\balance
+
+
+{
+% If you want to use smaller typesetting for the reference list,
+% uncomment the following line:
+\small
+%\bibliographystyle{acm-sigchi}
+\bibliographystyle{abbrv}
+\bibliography{main}
+}
+
+%\techreport{\input{content/appendix.tex}}
+
+
+
+
+
+
+\end{document}

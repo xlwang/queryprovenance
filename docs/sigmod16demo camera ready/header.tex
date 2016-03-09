@@ -1,0 +1,195 @@
+%!TEX root = main.tex
+
+\documentclass{vldb}
+% \usepackage{paralist}
+% Load basic packages
+\usepackage{balance}  % to better equalize the last page
+\usepackage{graphicx} % for EPS, load graphicx instead
+\usepackage{url}      % llt: nicely formatted URLs
+\usepackage{amsmath}
+\usepackage{color}
+\usepackage{cancel}
+\usepackage{listings}
+%\usepackage{wrapfig}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\setlength{\abovecaptionskip}{10pt plus 3pt minus 2pt}
+% \usepackage[english]{babel}
+\usepackage{booktabs}
+\usepackage{graphicx}
+% \usepackage{subfigure}
+% \usepackage{caption}
+% \usepackage[scriptsize, it, IT]{subfigure}
+% \usepackage[font={scriptsize,it}]{caption}
+% \usepackage{tikz}
+%\usepackage{MinionPro}
+% \usetikzlibrary{arrows,matrix,positioning}
+\usepackage[ruled,vlined,algonl,boxed]{algorithm2e}
+\usepackage{algorithmic}
+\usepackage{wrapfig}
+% \usepackage{framed}
+\usepackage{enumitem}
+\usepackage{xspace}
+\usepackage{xcolor}
+\usepackage{colortbl}
+% \usepackage{newtxmath}
+\usepackage[T1]{fontenc}
+
+\usepackage[nocompress]{cite}
+\usepackage{microtype}
+
+% llt: Define a global style for URLs, rather that the default one
+\makeatletter
+\def\url@leostyle{%
+  \@ifundefined{selectfont}{\def\UrlFont{\sf}}{\def\UrlFont{\small\bf\ttfamily}}}
+\makeatother
+\urlstyle{leo}
+
+\makeatletter
+\def\@copyrightspace{\relax}
+\makeatother
+
+% To make various LaTeX processors do the right thing with page size.
+\def\pprw{8.5in}
+\def\pprh{11in}
+\special{papersize=\pprw,\pprh}
+\setlength{\paperwidth}{\pprw}
+\setlength{\paperheight}{\pprh}
+\setlength{\pdfpagewidth}{\pprw}
+\setlength{\pdfpageheight}{\pprh}
+
+\newtheorem{definition}{Definition}%[section]
+\newtheorem{proposition}[definition]{Proposition}
+\newtheorem{lemma}[definition]{Lemma}
+\newtheorem{remark}[definition]{Remark}
+\newtheorem{corollary}[definition]{Corollary}
+\newtheorem{claim}[definition]{Claim}
+\newtheorem{theorem}[definition]{Theorem}
+\newtheorem{heuristic}[definition]{Heuristic}
+\newtheorem{example}[definition]{Example}
+%\newtheorem{proof}[definition]{Proof}
+\newtheorem{dimension}{Dimension}
+\newcounter{prob}
+\newtheorem{problem}[prob]{Problem}
+\newtheorem{conjecture}[definition]{Conjecture}
+\newtheorem{reduction}[definition]{Reduction}
+\newtheorem{property}[definition]{Property}
+\newtheorem{axiom}[definition]{Axiom}
+% 
+% \tikzset{
+%     %Define standard arrow tip
+%     >=stealth',
+%     %Define style for boxes
+%     punkt/.style={
+%            rectangle,
+%            rounded corners,
+%            draw=black, very thick,
+%            text width=6.5em,
+%            minimum height=2em,
+%            text centered},
+%     % Define arrow style
+%     pil/.style={
+%            ->,
+%            thick,
+%            shorten <=2pt,
+%            shorten >=2pt,}
+% }
+
+
+% \setitemize{noitemsep,topsep=0pt,parsep=0pt,partopsep=0pt}
+
+% \def\compactify{\itemsep=0pt \topsep=0pt \partopsep=0pt \parsep=0pt}
+% \let\latexusecounter=\usecounter
+% \newenvironment{CompactItemize}
+%   {\def\usecounter{\latexusecounter}
+%    \begin{itemize}[noitemsep,topsep=0pt,parsep=0pt,partopsep=0pt,leftmargin=*]}
+%   {\end{itemize}\let\usecounter=\latexusecounter}
+% \newenvironment{CompactEnumerate}
+%   {\def\usecounter{\compactify\latexusecounter}
+%    \begin{enumerate}[leftmargin=*]}
+%   {\end{enumerate}\let\usecounter=\latexusecounter}
+
+
+%%%  What is this?  Use enumitem instead
+% 
+% \newcommand{\squishlist}{
+%    \begin{list}{$\bullet$}
+%     { \setlength{\itemsep}{0pt}
+%       \setlength{\parsep}{2pt}
+%       \setlength{\topsep}{6pt}
+%       \setlength{\partopsep}{0pt}
+%       \leftmargin=25pt
+% \rightmargin=0pt
+% \labelsep=5pt
+% \labelwidth=10pt
+% \itemindent=0pt
+% \listparindent=0pt
+% \itemsep=\parsep
+%     }
+% }
+% \newcommand{\squishend}{\end{list}}
+% 
+% 
+% \newcommand{\squishframe}{\vspace{-6pt}
+% \begin{framed} 
+% \vspace{-6pt}}
+% 
+% \newcommand{\frameend}{\vspace{-6pt}
+% \end{framed}
+% \vspace{-6pt}}
+
+
+% create a shortcut to typeset table headings
+% \newcommand\tabhead[1]{\small\textbf{#1}}
+
+
+
+
+% Make sure hyperref comes last of your loaded packages, 
+% to give it a fighting chance of not being over-written, 
+% since its job is to redefine many LaTeX commands.
+\usepackage[pdftex]{hyperref}
+\hypersetup{
+  colorlinks=false,
+  linkcolor=darkred,
+  citecolor=darkgreen,
+  urlcolor=darkblue
+}
+% \usepackage{cleveref} % After hyperref, listings
+
+
+
+% Avoid widows and orphans
+\widowpenalty=500
+\clubpenalty=500
+
+% % Aggressive figure placement
+% \renewcommand{\topfraction}{0.9}
+% \renewcommand{\bottomfraction}{0.8}
+% \setcounter{topnumber}{2}
+% \setcounter{bottomnumber}{2}
+% \setcounter{totalnumber}{4}
+% \setcounter{dbltopnumber}{2}
+% \renewcommand{\dbltopfraction}{0.9}
+% \renewcommand{\textfraction}{0.07}
+% \renewcommand{\floatpagefraction}{0.7}
+% \renewcommand{\dblfloatpagefraction}{0.7}
+
+\definecolor{light-gray}{gray}{0.95}
+\definecolor{mid-gray}{gray}{0.85}
+\definecolor{darkred}{rgb}{0.7,0.25,0.25}
+\definecolor{darkgreen}{rgb}{0.15,0.55,0.15}
+\definecolor{darkblue}{rgb}{0.1,0.1,0.5}
+\definecolor{blue}{rgb}{0.19,0.58,1}
+
+\newcommand{\red}[1]{\textcolor{red}{#1}}
+\newcommand{\green}[1]{\textcolor{green}{#1}}
+\newcommand{\blue}[1]{\textcolor{blue}{#1}}
+\newcommand{\orange}[1]{\textcolor{orange}{#1}}
+\newcommand{\darkred}[1]{\textcolor{darkred}{#1}}
+\newcommand{\darkgreen}[1]{\textcolor{darkgreen}{#1}}
+\newcommand{\darkblue}[1]{\textcolor{darkblue}{#1}}
+
+\makeatletter
+\setlength{\@fptop}{0pt}
+\makeatother

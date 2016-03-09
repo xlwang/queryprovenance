@@ -1,0 +1,21 @@
+For example,  $\mathcal{C} = \{c_1\}$, where 
+$c_1 = (t3, \{tax = 21500\}, \{income = 86000\}, \{pay = 64500\})$ 
+forms the \textit{complaint set} with incorrect \textit{tax} and \textit{pay} attribute 
+for the query log $Q$ in Example~\ref{ex:telco}. A complaint 
+can also model addition or removal of tuples: 
+$c = (\bot, t^*)$ means that $t^*$ should be added to the database, 
+while $c = (t_i, \bot)$ denotes that $t_i$ should be removed.
+
+Our goal is to derive a diagnosis as a log repair
+$Q'=\{q_1',\dots, q_n'\}$, such that
+$Q'(D_0)=D_n^* $. In this work, we focus on errors produced
+by incorrect parameters in queries, so our repairs focus on altering
+query constants rather than query structure. Therefore, each query
+$q_i'\in Q'$ has the same structure as $q_i$
+(e.g., the same number of predicates, the same variables and operators 
+in the \texttt{WHERE} clause), 
+but possibly different parameters. 
+For example, a good log repair for the
+example of Figure~\ref{fig:example} is
+$Q'=\{q_1',q_2,q_3\}$, where $q_1'$=\texttt{UPDATE Taxes
+SET tax = 0.3 * income WHERE income >= 87500}.

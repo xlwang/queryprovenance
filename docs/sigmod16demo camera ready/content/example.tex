@@ -1,0 +1,62 @@
+%!TEX root = ../main.tex
+
+
+\begin{figure*}[t]
+    \begin{minipage}[t]{0.28\textwidth}
+         \vspace{0pt} 
+         \centering
+        \begin{tabular}{llll}
+            \multicolumn{4}{l}{\emph{Taxes}: $D_0$}\\
+            \toprule
+            \textbf{ID}  & \textbf{rate}  & \textbf{income}    & \textbf{owed}\\
+            \midrule
+            $t_1$   & 10    & \$9500    & \$950\\
+            $t_2$   & 25    & \$90000   & \$22500\\
+            $t_3$   & 25    & \$86000   & \$21500\\
+            $t_4$   & 25    & \$86500   & \$21625\\
+            \bottomrule
+            \\
+        \end{tabular}
+    \end{minipage}
+    \begin{minipage}[t]{0.43\textwidth}
+         \vspace{0pt} 
+         \centering
+        \begin{tabular}{|p{1ex}l|}
+            \multicolumn{2}{l}{\emph{Query log}: $\mathcal{Q}$}\\
+            % \toprule
+            \hline
+            $q_1$: & \texttt{\small UPDATE Taxes SET rate = 30}\\
+                   & \texttt{\small WHERE income >= \color{red}{85700}} \\
+            
+            $q_2$: & \texttt{\small UPDATE Taxes SET owed = income*rate/100}\\
+            
+            $q_3$: & \texttt{\small INSERT INTO Taxes}\\ 
+                   & \texttt{\small VALUES (25, 85800, 21450)}\\
+            \hline
+            % \bottomrule
+        \end{tabular}
+    \end{minipage}
+    \begin{minipage}[t]{0.28\textwidth}
+         \vspace{0pt} 
+         \centering
+        \begin{tabular}{llll}
+            \multicolumn{4}{l}{\emph{Taxes}: $D_3$}\\
+            \toprule
+            \textbf{ID}  & \textbf{rate}  & \textbf{income}    & \textbf{owed}\\
+            \midrule
+            $t_1$   & 10    & \$9500    & \$950\\
+            $t_2$   & 30    & \$90000   & \$27000\\
+            \rowcolor{mid-gray}
+            $t_3$   & \color{red}{30}    & \$86000   & \color{red}{\$25800}\\
+            \rowcolor{mid-gray}
+            $t_4$	 & \color{red}{30}	& \$86500	  & \color{red}{\$25950}\\
+            $t_5$	 & 25	& \$87000	  & \$21750\\
+            \bottomrule
+        \end{tabular}
+    \end{minipage}
+
+    \caption{A recent change in tax rate brackets calls for a tax rate of 30\% for those with income above \$87500.  The accounting department issues query $q_1$ to implement the new policy, but the predicate of the WHERE clause condition transposed two digits of the income value.  As a result, the tax rates of $t_3$ and $t_4$ were increased incorrectly.  Query $q_2$ that calculates the amount owed based on the corresponding tax rate and income propagates the error to additional fields.  The mistake is further obscured by query $q_3$, which inserts a tuple with similar income and the correct tax rate.
+    % \alex{I am confused about what happened with this example.  The numbers in the figure don't match the description in Example 3.  This doesn't see to be used later (yet).  Before I fix it, I want to check whether there is a reason for the particular changes...}}\xlw{I changed this example for later optimization sec.6 and noise sec.7 handling explanation. There are two goals: 1. we will demonstrate why we need 2 iterations to reduce noise when we only encode tuples in the complaint set for efficiency; 2. we will show if how we detect and prune false positive complaint $t_5$ by constructing complaint-tuple bipartite graph and searching densest sub-graph. 
+    }
+    \label{fig:example}
+\end{figure*}

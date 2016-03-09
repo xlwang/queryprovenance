@@ -1,0 +1,264 @@
+%!TEX root = ../main.tex
+
+\section{Introduction}
+\label{s:intro}
+
+Data errors are a pervasive, expensive, and time consuming problem
+that afflicts the vast majority of data-driven applications. For
+example, errors in retail price data cost US consumers \$2.5 billion
+each year~\cite{Fan2008}. In aggregate, studies estimate data errors
+to cost the US economy more than \$600 billion per
+year~\cite{eckerson2002}. Despite the costliness of data errors, 
+studies have found that a significant fraction of time in data analysis 
+--- up to 80\%~\cite{kandel2012} --- is devoted to cleaning and
+wrangling~\cite{kandel2011wrangler} the data into a structured and
+sufficiently clean form to use in downstream applications.
+
+In response, both industry and academia have focused on data cleaning solutions to mitigate this problem.
+ETL-type systems~\cite{krishnamurthy2009systemt, thomsen2005survey} focus on cleansing the data before it is loaded into the database
+using a set of pre-defined rules; outlier and anomaly detection
+ algorithms~\cite{chandola2007outlier} are used to identify errors
+in the database after the data has been loaded; while recent approaches use downstream applications
+such as interactive visualizations~\cite{kandel2011wrangler,Wu13}, application queries~\cite{krishnan2015sampleclean}, or 
+data-products to facilitate error detection and correction algorithms.
+In each of these cases, the focus of error diagnosis and cleaning has been {\it data centric}, in the sense that
+the process is meant to identify and directly fix data values.
+
+These efforts have largely ignored an important source of errors --- {\it queries}.
+Mistakes in queries can introduce errors that spread throughout the database due to subsequent, possibly correct updates.
+Consider the following salary management example:
+
+% change example
+\input{content/example2}
+%\input{content/example2}
+
+Although existing data-centric cleaning techniques may help identify and correct these reported errors directly, 
+this is suboptimal because it treats the symptom --- the errors in the current database state --- rather than the anomalous
+queries that are the underlying cause.  In practice, only a subset of the paystub errors will be reported, thus fixing
+the reported errors on a case-by-case basis will likely obscure the root problem, making it more difficult to
+find both the erroneous query and the other affected data.  
+Furthermore, a data-centric approach must repair \emph{all errors} --- a non-repaired value such as the incorrect tax rate
+may continue to introduce errors in the database through future queries 
+(e.g., inserting incorrectly computed paychecks based on the still-incorrect tax rate).
+
+For these reasons, traditional data cleaning approaches may be helpful for finding errors in the data, but are
+not designed to diagnose causes of the errors when they are rooted in incorrect queries.
+There has been some work along a similar spirit, but not directly for this problem.  
+For example, integrity constraint-based methods~\cite{Khoussainova2006} reject some improper
+updates if the data will fall outside predefined ranges.
+Certificate-based verification~\cite{Chen2011} handles a broader class of erroneous queries,
+but relies on asking users queries prior to executing the update, which renders application-generated
+updates infeasible.
+Several techniques have proposed diagnoses that describe structural sources of errors
+either in the form of predicates most correlated with the errors~\cite{Wu13}
+or common components of a workflow that caused the errors~\cite{wang2015}, but not at the level
+of query identification.
+
+Ultimately, query-centric cleaning and repair is challenging because an error introduced by a query can be obscured by, or propagated throughout the database
+by subsequent queries. This alludes to several factors that make even identifying problematic queries difficult:
+
+\begin{enumerate}[leftmargin=*, topsep=0mm, itemsep=0mm]
+
+  \item \textbf{Butterfly effect: } 
+  An error in even a single query can affect a large number of records, as documented in several real-world
+  cases~\cite{Yates10, Grady13, sakalerrors}.  Even if a single record is incorrect,
+  its value may be used as part of the \texttt{WHERE} or \texttt{SET} clauses of 
+  subsequent valid queries that introduce additional errors that are seemingly unrelated.
+
+  \item \textbf{Partial information:}  In most practical settings, we cannot assume that we can identify all
+  errors in the database --- for example, not all employees will complain about their incorrect paystubs.  
+  More likely, we only have access to a subset of the data errors, and must use them to extrapolate 
+  the queries that affected a possibly larger set of data.  A diagnostic tool that can reduce
+  the entire transaction log to the most likely candidate queries and propose fixes
+  is needed to make this process manageable.
+
+
+  \item \textbf{Multiple types of errors:} 
+  An erroneous query can cause multiple types of data errors.  For example, a record that should not exist may have been accidentally inserted, or conversely a record that 
+  should exist was unintentionally deleted.  Similarly, attribute values may be incorrectly updated,
+  updated when they should not have been, or not updated when they should have.  
+  Any combination of these error types may be present in the current state of the database,
+  and although they may not be obviously related to each other, they must be addressed in a holistic manner.  
+
+\end{enumerate}
+
+
+In this demo proposal, we outline the design of \sys, a framework that derives explanations
+and repairs for discrepancies in relational data based on potential errors in
+the queries that operated on the data, and describe how users will use \sys
+in a demonstration scenario. 
+In contrast to existing approaches in data
+cleaning that aim to detect and correct errors in the data directly, the goal
+of \sys is to identify  the problematic queries that introduced errors into the
+database. These diagnoses both \emph{explain} how errors were introduced to a
+dataset, and also lead to the identification of additional discrepancies in
+the data that would have otherwise remained undetected.
+Participants will be able to 
+select from a number of transactional benchmarks to generate a query workload,
+introduce errors into the queries that are executed,
+and compare the fixes to the queries proposed by \sys against existing alternative algorithms such as decision trees.
+
+
+
+% Poor data quality is a hard and persistent problem.  It is estimated to cost the US economy more than \$600 billion
+% per year~\cite{eckerson2002} and erroneous price data in retail databases
+% alone cost the US consumers \$2.5 billion each year~\cite{Fan2008}. Although data
+% cleaning tools can purge many errors from a dataset before downstream 
+% applications use the data, databases are constantly changing as applications
+% and users execute queries that modify the data.
+% Mistakes in these queries can introduce errors that spread through the database
+% due to subsequent update queries; 
+% by the time errors are detected, it is difficult to trace those errors back to the 
+% erroneous query and correct it.
+% Identifying and correcting errors in the data directly is suboptimal: it treats the symptom,
+% rather than the underlying cause. Fixing the manifested data errors on a
+% case-by-case basis often obscures the root of the problem and other data that may have been
+% affected. Therefore, traditional data cleaning approaches are not well-suited
+% for this setting: While they provide general-purpose tools to identify and
+% rectify anomalies in the data, they are not designed to diagnose the causes of
+% errors that are rooted in erroneous updates.
+% Some data cleaning systems try to identify structural sources of
+% mistakes~\cite{wang2015}, but they are unable to trace the source of
+% the mistakes to particular faulty queries.
+% 
+% While improving data quality and correcting data errors has been an important
+% focus for data management research, handling new errors, introduced during
+% regular database interactions, has received little attention. Most work in
+% this direction focuses on \emph{guarding against} erroneous updates. For
+% example, integrity constraints~\cite{Khoussainova2006} reject some improper
+% updates, but only if the data falls outside rigid, predefined ranges.
+% Certificate-based verification~\cite{Chen2011} is less rigid, but it is
+% impractical and non-scalable as it requires users to answer challenge
+% questions before allowing the updates, and it is not applicable to updates
+% initiated by applications.
+
+
+
+
+
+% \begin{example}[Wireless discount policies]\label{ex:telco}
+% 
+% A large US-based wireless provider offers company discounts as incentives for
+% corporate customers. There are different types of discounts (flat, percentage,
+% fee-based), and their details are specific to corporate agreements. The large
+% number of policies and complexities in their rules frequently cause policies
+% to be set incorrectly, leading to errors in the application of discounts to
+% customers' accounts.
+% 
+% Customers who notice billing errors contact the provider, but the call centers
+% do not have the capacity or ability to investigate the complaints deeply. The
+% standard course of action is to correct billing mistakes on a case-by-case
+% basis for each complaint. As a result, unreported errors remain in the
+% database for a long time, or they never get corrected, and their cause becomes
+% harder to trace as the source of the errors is obscured.\footnote{This is a real-life scenario, provided to us by a popular US-based wireless provider.}
+% 
+% \end{example}
+
+% \begin{example}[Tax bracket adjustment]\label{ex:taxes}
+%     
+% Tax brackets, which determine tax rates for different income levels, are
+% often adjusted. Accounting firms implement these changes to their
+% databases by appropriately updating the tax rates of their customers. Mistakes
+% in these update queries (e.g., Figure~\ref{fig:example}) result in errors in
+% the tax rates and computed taxes. 
+% 
+% \end{example}
+% 
+% 
+% In this application, data errors are typically reported to a
+% customer service department, which does not have the resources nor the
+% capability to investigate the errors more broadly. Instead, errors are
+% resolved on a case-by-case basis. In practice, customer service only deals
+% with a small portion of the actual errors. Once these errors are resolved,
+% there will still be a large number of incorrect records that were not
+% identified. The goal of \sys is to identify the query or queries that caused
+% the errors, propose corrections to those queries, and use the modified queries
+% to identify other errors.
+% 
+% Diagnosing data errors stemming from incorrect updates is fundamentally
+% challenging: the search space of possible mistakes and fixes is large, and the
+% amount of information (number of known errors) may be limited. The problem has
+% the following important characteristics that render traditional data cleaning
+% methods unsuitable:
+
+
+
+% \begin{description}[leftmargin=*, topsep=0mm, itemsep=0mm]
+%     
+%     \item[Obscurity.] Detection of the resulting errors in the data often
+%     leads to partial fixes that further complicate the eventual diagnosis and
+%     resolution of the problem. For example, a transaction implementing a
+%     change in the state tax law updated tax rates using the wrong rate,
+%     affecting a large number of consumers. This causes a large number of
+%     complaints to a call center, but each customer agent usually fixes each
+%     problem individually, which ends up obscuring the source of the problem.
+%     
+%     \item[Large impact.] Erroneous queries cause errors at a large scale. The
+%     potential impact of the errors is high, as manifested in several
+%     real-world cases~\cite{Yates10, Grady13, sakalerrors}. Further, errors
+%     that remain undetected for a significant amount of time can instigate
+%     additional errors, even through valid updates. This increases both their
+%     impact, and their obscurity.
+%     
+%     \item[Systemic errors.] The errors created by bad queries are
+%     \emph{systemic}: they have common characteristics, as they share the same
+%     cause. The link between the resulting data errors is the query that
+%     created them; cleaning techniques should leverage this connection to
+%     diagnose and fix the problem. Diagnosing the cause of the errors, will
+%     achieve systematic fixes that will correct all relevant errors, even if
+%     they have not been explicitly identified.
+%    
+% \end{description}
+% 
+% \sys addresses these challenges by analyzing the queries that operated on a
+% dataset in an efficient and scalable manner. More concretely, we make the
+% following contributions:
+
+
+% The goal of this paper is to design effective query
+% diagnosis techniques and identify possible fixes for query errors. We
+% model the problem assuming a log of update workloads over a database,
+% and a set of complaints that identify errors in the final database
+% state. We organize our contributions as follows:
+
+% \ewu{really like this organization}
+
+% \ewu{add: special case optimizations for single query case.}
+
+
+% \begin{itemize}[leftmargin=*, topsep=0mm, itemsep=0mm]      
+%     \item We formalize the problem of diagnosing a set of errors using log
+%     histories of updates that operated on the data. Given a set of 
+%     \emph{complaints} as representations of data discrepancies in the current
+%     state of a dataset, \sys identifies the queries in the log that require the  minimal
+%     amount of changes that would resolve all of the complaints (Section~\ref{sec:abstractions}).
+%       
+%     \item We provide an exact error-diagnosis solution through a non-trivial
+%     transformation of the problem to a mixed integer linear program (MILP) that
+%     encodes the data provenance of the erroneous tuples. Our approach employs state-of-the-art MILP solvers to identify
+%     optimal diagnoses that are guaranteed to resolve all complaints without introducing new errors to the data
+%     (Section~\ref{sec:sol}).
+%     
+%     \item We present several optimizations to our basic diagnostic
+%     method, which reduce the problem size without affecting the
+%     quality of the produced solutions. Further, we propose an
+%     incremental repair method that targets the cases where the log
+%     contains a single corrupted query (or the search focuses on a
+%     single repair). This incremental analysis of the log allows us to
+%     scale to very large datasets and large query logs. Further, we
+%     show that our optimization techniques have the additional
+%     advantage of tolerating incomplete information, such as unreported
+%     errors (Section~\ref{sec:opt}).
+% 
+%     
+%     % \item We extend our framework to also handle false positives: complaints
+%     % that mistakenly identify data as erroneous. We define the notion of
+%     % complaint \emph{density}, which is a query-driven measure of closeness of
+%     % a complaint to other complaints. The main intuition of our approach is
+%     % that complaints of low density are likely false positives and thus can be
+%     % safely ignored (Section~\ref{???}).
+%     
+%     \item We experimentally evaluate the effectiveness and efficiency of our
+%     methods against real-world and synthetic datasets and query logs. 
+%     (Section~\ref{sec:experiments}). 
+% \end{itemize}
