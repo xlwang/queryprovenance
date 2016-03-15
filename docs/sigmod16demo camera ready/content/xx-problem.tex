@@ -157,7 +157,9 @@ to scale to large query log and database sizes.  The first three are
 called {\it Slicing} optimizations that reduce each of the components in the problem size:
 {\it Tuple-slicing}; {\it Query-slicing}; {\it Attribute-slicing}. 
 MILP solvers typically (though not guaranteed) take a much longer time as the size of the MILP problem increases, thus
-each of the slicing techniques reduces the problem and speeds up the solver time. \xlw{We demonstrate that under certain circumstances, applying optimizations is 40$\times$ faster than the basic approach. Detailed experiment results can be found in our technical report~\cite{qfixarxiv}.}
+each of the slicing techniques reduces the problem and speeds up the solver time. 
+Our technical report~\cite{qfixarxiv} shows, among other results, that our optimizations
+can achieve up to 40$\times$ speedups over the basic approach.
 
 The final optimization serves to reduce the number of undetermined variables that the MILP solver must
 provide a solution for.  The cost of the solver, in our experiments, increases exponentially with the number of 
