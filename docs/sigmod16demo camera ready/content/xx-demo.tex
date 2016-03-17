@@ -8,23 +8,26 @@ that use existing techniques.
 
 \begin{figure}[t]
 \centering
-  \includegraphics[width = .8\columnwidth]{figures/demo1_exp2}
+  \includegraphics[width = .9\columnwidth]{figures/demo1_exp2}
   \vspace*{-0.2in}
   \caption{Users introduce errors to benchmark workloads.}
   \label{f:demo1} 
-  \vspace*{-.3in}
+  \vspace*{-0.25in}
 \end{figure}
 
+\looseness -1
 Figures~\ref{f:demo1} and~\ref{f:demo2} show screenshots of the initial and results pages.
 Each step is annotated with a circled number, which we detail below.
 
+\looseness -1
 \noindent {\bf Step 1 (Select Dataset):} Participants may first choose from a dropdown menu containing
 a number of transaction workload generators from the benchmarks in OLTPBench~\cite{oltpbench}.
 Since most transactional benchmarks focus on point update queries, we additionally include a 
 synthetic workload generator that includes range updates, as well as insert and delete queries.
-The text box on the right side allows users to additionally specify the number of queries to generate
+The text box on the right side allows users to specify the number of queries to generate
 in the workload.  
 
+\looseness -1
 \noindent {\bf Step 2 (Corrupt the Query Log):} 
 Once the workload generator is specified, the Query Log component of the interface
 renders a scrollable list containing all of the queries.  Users can either let the system to 
@@ -36,6 +39,7 @@ $income < 10,000$ to $income < 100$.
 %For example, in the figure, the user has edited query $Q_2$ by changing the \texttt{SET}
 %clause from $income = 1.1 * income$ to $income = 1.5 * income$. 
 
+\looseness -1
 \noindent {\bf Step 3 (Form a Complaint Set):} 
 The modified query cause the state of the database at the end of the workload
 to differ from the result of the original workload.  The candidate complaints table lists the tuples
@@ -47,14 +51,14 @@ When she is satisfied, the user clicks \texttt{Run QFix} to execute the baseline
 
 \begin{figure}[t]
 \centering
-  \includegraphics[width = .8\columnwidth]{figures/demo2_exp2}
+  \includegraphics[width = .9\columnwidth]{figures/demo2_exp2}
   \vspace*{-0.2in}
   \caption{Comparisons between proposed fixes.}
   \label{f:demo2} 
   \vspace*{-.2in}
 \end{figure}
 
-
+\looseness -1
 \noindent {\bf Step 4 (View Log Repairs):}  The result page lists the original query ID and text at the top.  The ID 
 is important because some proposed fixes may identify an incorrect query.  Below the original query,
 the interface shows each of the proposed fixes as columns.  For example, Figure~\ref{f:demo2} shows 
@@ -62,6 +66,7 @@ that both the \sys and alternative fixes identified the correct query $Q_2$, how
 to run, and correctly fixed $Q_2$, whereas the alternative took $10$ sec, 
 incorrectly selected $Q_5$, and proposed an incorrect fix.
 
+\looseness -1
 \noindent {\bf Step 5 (Validate Repairs):} The bottom tables show the effects of the fixes on the complaints from
 step 3.  Correctly fixed attribute values are highlighted in blue, unfixed errors are shown as red text, while incorrectly
 fixed values are highlighted with a red background.  Finally, it is possible for proposed fixes to 

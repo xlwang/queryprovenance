@@ -49,7 +49,7 @@
 
 
 \subsection{Problem Outline}
-
+\looseness -1
 We assume a query log $Q$ containing a sequence of update, insert and delete queries 
 $q_1, \ldots q_n$  that have been executed on an initial database state $D_0$.  
 For simplicity, we assume that the database is a single relation with attributes 
@@ -61,11 +61,13 @@ We assume that \texttt{UPDATE} and \texttt{DELETE} queries use predicates compos
 of the form $\langle A_j\ op\ ?\rangle$, where $op \in \{=, >, <, \le, \ge, \ne\}$ and $?$ is a constant value.
 We also assume that \texttt{SET} clauses are of the form $\langle A_j\ =\ A_i\ +\ ? \rangle$ (relative update) or $\langle A_j\ =\ ?\rangle$ (constant update).
 
+\looseness -1
 Queries in $Q$ are possibly erroneous and introduce errors in the data.  We assume there is 
 a true sequence of queries $Q^* = \{q^*_1,\ldots,q^*_n\}$ that generate a true sequence of database states
 $\{D_0, D^*_1,\ldots,D^*_n\}$.  The true query log and database states are unknown, and our goal is to 
 find and correct errors in $Q$ to retrieve the correct database state $D^*_n$.
 
+\looseness -1
 To do so, \sys takes as input a set of identified or user-reported
 data errors, called a {\it complaint set} and denoted as $\mathcal{C}$. 
 A complaint $c \in \mathcal{C}$ corresponds to a tuple in $D_n$ along with its true attribute value assignments.  
@@ -73,13 +75,13 @@ A complaint $c \in \mathcal{C}$ corresponds to a tuple in $D_n$ along with its t
 
 
 \subsubsection*{Problem definition}
-
+\looseness -1
 We now formalize the problem definition for diagnosing data
 errors using query logs. A diagnosis is a log repair
 $Q'$ that resolves all complaints in the set $\mathcal{C}$
 and leads to a correct database state $D_n^*$.
 
-\vspace*{-0.1in}
+\vspace*{-0.05in}
 \begin{definition}[Optimal diagnosis]\label{def:problem}
     Given database states $D_0$ and $D_n$, a query log $Q$ 
     such that $Q(D_0)=D_n$, a set of complaints $\mathcal{C}$ on $D_n$,  
@@ -90,8 +92,9 @@ and leads to a correct database state $D_n^*$.
         \item $d(\mathcal{Q}, \mathcal{Q}^*)$ is minimized
     \end{itemize}
 \end{definition}
-\vspace*{-0.1in}
+\vspace*{-0.05in}
 
+\looseness -1
 Where $d(\mathcal{Q}, \mathcal{Q}^*)$ measures the changes made in the repaired query log.
 Informally, we seek the minimum changes to the log $\mathcal{Q}$
 that would result in a clean database state $D_n^*$. Obviously, a
@@ -100,7 +103,7 @@ complaint set contains all of, and only, true complaints.
 
 
 \subsection{Solution Sketch}
-
+\looseness -1
 Our general strategy is to translate the starting
 and ending database states, $D_0$ and $D_n$, the query log $Q$, and
 complaint set $\mathcal{C}$ into a mixed-integer linear program (MILP)
@@ -141,11 +144,13 @@ used to construct an objective function that prefers value assignments
 that minimize both the amount that the queries change and the number
 of non-complaint tuples that are affected.
 \input{content/example2-sec32}
+\looseness -1
 Note that the initial range $[minval, maxval]$ of the 
 undetermined variables could be defined based on
 the valid range of the corresponding attribute(s), or, as a heuristic,
 based on the empirical distribute of the attribute values in the database. 
 
+\looseness -1
 Extending this process to all tuples and all queries in the log 
 describes the naive encoding procedure that solves the
 \textsc{Optimal Diagnosis} problem.
@@ -153,7 +158,7 @@ However, the size of the resulting constraint problem increases
 at a rate of $O(|D|\times |Q|\times \mathrm{\#attributes})$, rendering
 it infeasible for all but the smallest databases and query logs.
 
-
+\looseness -1
 \sys uses four additional optimizations not presented in this paper 
 to scale to large query log and database sizes.  The first three are
 called {\it Slicing} optimizations that reduce each of the components in the problem size:
@@ -163,11 +168,13 @@ each of the slicing techniques reduces the problem and speeds up the solver time
 Our technical report~\cite{qfixarxiv} shows, among other results, that our optimizations
 can achieve up to 40$\times$ speedups over the basic approach.
 
+\looseness -1
 The final optimization serves to reduce the number of undetermined variables that the MILP solver must
 provide a solution for.  The cost of the solver, in our experiments, increases exponentially with the number of 
 undetermined variables.  To this end, \sys uses an incremental algorithm that tries to fix the queries in the query
 log one at a time.
 
+\looseness -1
 These optimizations enable \sys to propose a solution within several seconds for thousands of 
 queries and tuples on common transaction benchmarks in OLTPBench~\cite{oltpbench}.
 

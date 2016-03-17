@@ -1,35 +1,32 @@
 
 Due to space constraints, we will walk through an example of how the query
-\texttt{UPDATE Taxes SET tax = 0.3 * income WHERE income > 85700}, when applied to 
+\texttt{UPDATE Taxes SET tax = 0.3*income WHERE income>85700}, when applied to 
 $t_3^{old}$ to produce $t_3^{new}$, is translated into a set of constraints
 as detailed below.
 
 First, we can rewrite the query as a conditional statement:
 
 \vspace*{-0.15in}
-{\scriptsize
 \[
 t_3^{new}.tax = \begin{cases}
 				  0.3*t_3^{old}.rate              & \mathrm{if}\ p  \\
                   t_3^{old}.tax  & \mathrm{1-p}
                \end{cases}
-\]}
+\]
 \vspace*{-0.1in}
 where 
 \vspace*{-0.1in}
 
-{\scriptsize
 \[p = t_3^{old}.income > 85700\]
-}
-\vspace*{-0.1in}
 
+\vspace*{-0.05in}
+\looseness -1
 This is equivalent to the following linearized form.
 In addition, we add constraints on the starting and ending value for the $rate$ attribute:
 If $t_3^{new}.tax$ was specified in $\mathcal{C}$, then the provided value
 is used instead of the value in the database:
 \vspace*{-0.1in}
 
-{\scriptsize
 \[
 \begin{array}{l l l}
 t_3^{new}.tax &= (0.3*t_3^{old}.income)\times p + t_3^{old}.tax\times (1-p)\\
@@ -37,9 +34,9 @@ p &= t_3^{old}.income > 85700\\
 t_3^{old}.tax &= 30 \\
 t_3^{new}.tax &= 25
 \end{array}
-\]}
+\]
 
-\vspace*{-0.1in}
+\vspace*{-0.05in}
 In the above formulation, all variables are determined and is trivially
 solvable.  Instead, we replace
 the constaints $0.3$ and $85700$ with undetermined variables $v_1$ and $v_2$,

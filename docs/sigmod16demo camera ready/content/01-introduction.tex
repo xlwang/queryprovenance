@@ -2,7 +2,7 @@
 
 \section{Introduction}
 \label{s:intro}
-
+\looseness -1
 Data errors are a pervasive, expensive, and time consuming problem
 that afflicts the vast majority of data-driven applications. For
 example, errors in retail price data cost US consumers \$2.5 billion
@@ -14,6 +14,7 @@ studies have found that a significant fraction of time in data analysis
 wrangling~\cite{kandel2011wrangler} the data into a structured and
 sufficiently clean form to use in downstream applications.
 
+\looseness -1
 In response, both industry and academia have focused on data cleaning solutions to mitigate this problem.
 ETL-type systems~\cite{krishnamurthy2009systemt, thomsen2005survey} focus on cleansing the data before it is loaded into the database
 using a set of pre-defined rules; outlier and anomaly detection
@@ -24,16 +25,16 @@ data-products to facilitate error detection and correction algorithms.
 In each of these cases, the focus of error diagnosis and cleaning has been {\it data centric}, in the sense that
 the process is meant to identify and directly fix data values.
 
+\looseness -1
 These efforts have largely ignored an important source of errors --- {\it queries}.
 Mistakes in queries can introduce errors that spread throughout the database due to subsequent, possibly correct updates.
-Consider the following salary management example:
+Consider the following %salary management 
+example:
 
-% change example
-\vspace*{-0.05in}
 \input{content/example2}
-\vspace*{-0.05in}
 %\input{content/example2}
 
+\looseness -1
 Although existing data-centric cleaning techniques may help identify and correct these reported errors directly, 
 this is suboptimal because it treats the symptom --- the errors in the current database state --- rather than the anomalous
 queries that are the underlying cause.  In practice, only a subset of the paystub errors will be reported, thus fixing
@@ -43,6 +44,7 @@ Furthermore, a data-centric approach must repair \emph{all errors} --- a non-rep
 may continue to introduce errors in the database through future queries 
 (e.g., inserting incorrectly computed paychecks based on the still-incorrect tax rate).
 
+\looseness -1
 For these reasons, traditional data cleaning approaches may be helpful for finding errors in the data, but are
 not designed to diagnose causes of the errors when they are rooted in incorrect queries.
 There has been some work along a similar spirit, but not directly for this problem.  
@@ -56,18 +58,22 @@ either in the form of predicates most correlated with the errors~\cite{Wu13}
 or common components of a workflow that caused the errors~\cite{wang2015}, but not at the level
 of query identification.
 
+\looseness -1
 Ultimately, query-centric cleaning and repair is challenging because an error introduced by a query can be obscured by, or propagated throughout the database
 by subsequent queries. This alludes to several factors that make even identifying problematic queries difficult:
 
 \begin{enumerate}[leftmargin=*, topsep=0mm, itemsep=0mm]
 
   \item \textbf{Butterfly effect: } 
+  \looseness -1
   An error in even a single query can affect a large number of records, as documented in several real-world
   cases~\cite{Yates10, Grady13, sakalerrors}.  Even if a single record is incorrect,
   its value may be used as part of the \texttt{WHERE} or \texttt{SET} clauses of 
   subsequent valid queries that introduce additional errors that are seemingly unrelated.
 
-  \item \textbf{Partial information:}  In most practical settings, we cannot assume that we can identify all
+  \item \textbf{Partial information:} 
+  \looseness -1
+   In most practical settings, we cannot assume that we can identify all
   errors in the database --- for example, not all employees will complain about their incorrect paystubs.  
   More likely, we only have access to a subset of the data errors, and must use them to extrapolate 
   the queries that affected a possibly larger set of data.  A diagnostic tool that can reduce
@@ -84,7 +90,7 @@ by subsequent queries. This alludes to several factors that make even identifyin
 
 \end{enumerate}
 
-
+\looseness -1
 In this demo proposal, we outline the design of \sys, a framework that derives explanations
 and repairs for discrepancies in relational data based on potential errors in
 the queries that operated on the data, and describe how users will use \sys
