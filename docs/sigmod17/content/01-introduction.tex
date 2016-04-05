@@ -159,17 +159,20 @@ following contributions:
 \end{itemize}
 
 To the best of our knowledge, \sys is the first system that diagnoses
-and repairs errors through query histories. We show that it is
-extremely effective and efficient with the update workloads found in
-most common benchmarks. 
-While \sys trusts its input to be correct, it
-can handle incomplete information, and it can be resilient to some
-inaccuracies in the reported data errors (Section~\ref{sec:noise}).
-\sys does not handle some complex query types
-that are less common in update workloads, such as nested queries,
-joins, and aggregation. 
-It also does not currently deal with large amounts of incorrect
-information, such as fake data errors reported by malicious users.
+and repairs errors through query histories. \xlw{ 
+However, \sys does not currently deal with large amounts of incorrect
+information, such as fake data errors reported by malicious users. 
+In addition, \sys only persists its effectiveness and efficiency with 
+with relatively simple update workloads.
+
+We carefully study the complexity of update workloads and further divide them 
+into four distinct groups according to their \texttt{WHERE} clause complexity: 
+point update with primary key; 
+point update with non-primary key; range update; update with nested queries, joins, and aggregation.
+This categorization covers the majority of update queries including queries without a \texttt{WHERE} clause: for example, 
+\texttt{INSERT} query can also be considered as ``point update with primary key'' as it only impact on a 
+particular tuple identified by its own primary key. After investigate more than 10 common benchmarks, we found that most of them only consist queries belong to the first group, which could be efficiently and effectively solved by \sys. However, \sys's capability in solving more complex workloads (the second and third groups) significantly reduce as it requires higher execution time and handles limited amount of errors. \sys does not able to handle the last group of workloads. 
+}
 These challenges present exciting future extensions to the system presented in this work.
 
 
