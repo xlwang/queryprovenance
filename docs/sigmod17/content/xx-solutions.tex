@@ -26,11 +26,17 @@ and translating it into a set of constraints.  We then extend the process to the
 query log and finally define the objective function.
 Subsequent sections introduce optimizations that both
 improve the speed and quality of the results, as well as harness the trade-off between the two. 
+\subsection{Why MILP?}
+\label{sec:whymilp}
+\xlw{
+Unlike existing query revision works~\cite{Chapman2009, tran2010conquer,tzompanaki14semi,Wu13,GebalyAGKS14,Roy2014}
+that target on modifying a single \texttt{SELECT} query, the \textit{optimal diagnosis} problem involves \textbf{multiple update} queries, which render it much more difficult to solve. We consider two directions in solving this problem: break down the query log into individual queries and solves each individual query separately; consider the query log as a single complex function with unknown parameters and solves the entire query log as a whole. 
 
+In order to break down the query log, we must have a \textit{magic function} that roll-back database states. A roll-back function essentially works as the following: it solves an unknown database state given queries that operate on it and the resulted database state. However, this \textit{magic function} does not exist as when we roll-back database, the range of attributes in the unknown database state could easily get unbounded. Without relative tight bounds, it is infeasible to solve the \textbf{optimal diagnosis} problem following the first direction. In addition, even with a \textit{magic function}, solving individual update query cannot be effectively solved through learning-based approaches. We demonstrate why an alternative learning-based approach fail to effectively solve single update query in Appendix~\ref{sec:heuristic}. 
+  
 
-
-
-
+The second direction suggests encoding the entire query log into a single function over tuples in the database. And this function can be easily expressed by a mixed-integer linear programming (MILP) problem: we introduce intermediate variables and constraints to connect database states before and after execute queries and later create the objective function upon these variables. In fact, we can express any query with linear (or quadratic) \texttt{SET} or \texttt{WHERE} clauses as constraints in a MILP problem and solve it by a MILP solver. In most cases, such MILP problems would be solved effectively and efficiently. However, since the MILP problem itself is \textbf{NP-Hard}, thus, none of the existing solvers is guaranteed to solve the problem in polynomial time.
+}
 
 
 
