@@ -65,7 +65,7 @@ forms a disjunction of rules that constitute the repaired \texttt{WHERE} clause.
 The \texttt{WHERE} clause repair proposed by the classifier may not completely repair 
 the complaints if there was also an error in the \texttt{SET} clause. 
 In this case, we execute a second repair step.
-\begin{figure}[!htb]
+\begin{figure}[htb]
 \centering
   \begin{subfigure} [t]{.75\columnwidth}
   \includegraphics[width = \columnwidth]{figures/heuristictime}
@@ -205,13 +205,15 @@ applicability of learning-based approaches.
 
 \section{MILP Solver Performance}
 \label{app:solvtime}
+
+Some background about why we are runnig these experiments.  What is known about MILP solvers already.
+
 \subsection{Factors Relevant to Solver Performance}
 
 \ewu{reference other constraint performance papers}
-\xlw{
 In this section, we study factors that influence the MILP solver solving time. In this paper, we
-use IBM CPLEX~\cite{cplex2014v12} as a black box to solve the constructed MILP problems. Similar to many solver performance studies~\cite{atamturk2005integer, meindl2012analysis, gearhart2013comparison}, 
-we majorly study the connection between solver performance between \textit{the number of constraints} and \textit{the number of variables} in the constructed MILP problem. For this, we create \texttt{UPDATE}-only workloads using our synthetic data generator for 300 queries with constant \texttt{SET} clause and range \texttt{WHERE} clause: }
+use IBM CPLEX~\cite{cplex2014v12} as a black box to solve the constructed MILP problems.  \ewu{describe MILP problems to justify why we focus on num constraints and num variables.} Similar to many solver performance studies~\cite{atamturk2005integer, meindl2012analysis, gearhart2013comparison}, 
+we majorly study the connection between solver performance between \textit{the number of constraints} and \textit{the number of variables} in the constructed MILP problem. For this, we create \texttt{UPDATE}-only workloads using our synthetic data generator for 300 queries with constant \texttt{SET} clause and range \texttt{WHERE} clause: 
 
 {\scriptsize
 \begin{verbatim}
@@ -220,14 +222,16 @@ we majorly study the connection between solver performance between \textit{the n
   WHERE a_j in [?,?+r] AND ...
 \end{verbatim}
 }
-\xlw{We further corrupt two query indexes, $q_{50}$ and $q_{200}$, to create the dirty query logs. }
+We further corrupt two query indexes, $q_{50}$ and $q_{200}$, to create the dirty query logs. \xlw{We believe that the results we observe in \texttt{UPDATE}-only workloads also extend to other types of workloads. In addition, the selected corrupt query indexes allow us to evaluate the solver performance over diverse problem sizes.}  \ewu{We chose these because...} 
+
 
 \smallskip
-\emph{Number of Constraints: } \xlw{We first study the relationship between solver performance and number of constraints. From Figure~\ref{f:cons_vs_time}, we observe that solver solving time is roughly positive proportional, with tiny fluctuation, to the number of constraints in both corrupt indexes. This is expected because increasing the number of constraints by large scale usually accompany with significantly greater amount of variables in the MILP problem, which lead to harder MILP problems by natural. However, MILP problems with slightly larger amount of constraints sometimes could be even easier to solve since the additional constraints help pruning the searching space for similar amount of variables.}
+\emph{Number of Constraints: } We first study the relationship between solver performance and number of constraints. The number of constraints is controlled via a wide spectrum of factors including the number of complaints, corrupt query index, complexity of queries. Due to the randomness in synthetic data generator, we are not able to control the size of constraints to a specific value. \ewu{Explain that the number of constraints is not controlled by you, which is why the lines start and end at different values in the figures.} From Figure~\ref{f:cons_vs_time}, we observe that solver timeis roughly positive proportional, with tiny fluctuation, to the number of constraints in both corrupt indexes. This is expected because increasing the number of constraints by large scale usually accompany with significantly greater amount of variables in the MILP problem, which lead to harder MILP problems by natural. However, MILP problems \ewu{cite MILP papers that say this, so it's clear we are describing well known problems} with slightly larger amount of constraints sometimes could be even easier to solve since the additional constraints help pruning the searching space for similar amount of variables.
 
 \smallskip
-\emph{Number of Variables: } \xlw{Similar to the previous experiment, we next compare the solver solving time with the number of variables. As shown in Figure~\ref{f:var_vs_time}, we find highly correlated trends compare to Figure~\ref{f:cons_vs_time}. This is due to the way we construct the MILP problem: the number of constraints and the number of variables grows linearly with the number of queries and the number complaints. 
-}
+\emph{Number of Variables: } Similar to the previous experiment, we next compare the solver time with the number of variables. As shown in Figure~\ref{f:var_vs_time}, we find highly correlated trends compare to Figure~\ref{f:cons_vs_time}. 
+This is due to the way we construct the MILP problem: the number of constraints and the number of variables grows linearly with the number of queries and the number complaints.  
+
 
 
 \iffalse
@@ -238,16 +242,17 @@ we majorly study the connection between solver performance between \textit{the n
 
 \fi
 
-\smallskip
-\emph{Takeaway: }\xlw{ In Figure~\ref{f:compl_vs_time} we illustrate the above argument by comparing the average solver solving time between the number of complaints at two different corrupt indexes. As expected, with the same number of complaints, the solver solving time for corrupt index $50$ is significantly higher than index $200$ since the number of queries encoded in each problem is $250$ and $100$ respectively. In contract, with the same corrupt query index, problems with higher amount of complaints has much higher average solver solving cost than problems with lower amount of complaints. }
+In Figure~\ref{f:compl_vs_time} we illustrate the above argument by comparing the average solver time between the number of complaints at two different corrupt indexes. We would then need to compare solver time vs number of queries as described above. As expected, with the same number of complaints, the solver solving time for corrupt index $50$ is significantly higher than index $200$ since the number of queries encoded in each problem is $250$ and $100$ respectively. In contrast, with the same corrupt query index, problems with higher amount of complaints has much higher average solver solving cost than problems with lower amount of complaints. We believe that this is because increasing the number of queries and the number of complaints would increase both the number of variables and constraints in the constructed MILP problem. 
+
+\xlw{The number of variables and constraints are two factors that are easy to quantify in the MILP problem. However, there are other non-quantifiable factors, including but not limited to the correlations among variables, searching space of under-determined variables after pre-processing, that influence that hardness of the MILP problem and thus highly correlated to the solver time. These factors are hard to control and optimize. Thus, in this paper, we mainly focus on reducing the number of variables and constraints in order to optimize the MILP problem constructed through \sys. }
 
 \subsection{Factors Relevant to the Number of Complaints}
-\xlw{
-From the above experiments, we observe that the solver solving time is higher correlated to the number of complaints and the number of queries we encoded in a MILP problem. The number of queries can be easily controlled by a particular parameter. The number of complaints, on the other hand, is influence by various factors including the \texttt{SET} clause type, corrupt query index, query skewness, \texttt{WHERE} clause range, and some random factors. To better understand factors that control the size of the complaint set, we ran simulations using a database with $20$ attributes, and a query log of size $1000$ containing
-either all constant or relative \texttt{SET} clause \texttt{UPDATE} queries.
+
+From the above experiments, we observe that the solver time is highly correlated to the number of complaints and the number of queries we encoded in a MILP problem. The number of queries can be easily controlled by a particular parameter $N_q$. The number of complaints, on the other hand, is a reflection of the queries that have run over the database. It is influenced by  factors including the \texttt{SET} clause type, corrupt query index, query skewness, \texttt{WHERE} clause range, and some random factors. \ewu{however, don't know how the affect the complaint set.}  To better understand factors that control the size of the complaint set, we ran simulations using a database with $20$ attributes, and a query log of size $1000$ containing
+either all constant or relative \texttt{SET} clause \texttt{UPDATE} queries. We found that SET and relative queries behave differently.
 We varied the number of corrupt index uniformly throughout the query log, and additionally varied
-the skew and range parameters to study how they affect the size of the complaint sets.}
-   \begin{figure*}[ht]
+the skew and range parameters to study how they affect the size of the complaint sets.
+   \begin{figure*}[t]
   \centering
   \begin{subfigure} [t]{.3\textwidth}
     \includegraphics[width = .99\columnwidth]{figures/indelup_acc_idx}
@@ -293,31 +298,37 @@ the skew and range parameters to study how they affect the size of the complaint
    \vspace*{-.1in}
    \label{fig:truerate}
   \end{figure*}
-  \begin{figure}[!h]
-  \centering
-  \includegraphics[width = 3in]{figures/qidxsimulation/qidx_v_ncomplaints_20attrs_const}
-  \caption{Corrupt query index, skew, range vs complaint set size for \textit{constant} \texttt{SET} clauses.}
-  \label{f:qidx_v_ncomplaints_const} 
-  \end{figure}
- 
 
-\smallskip
-\emph{Constant \texttt{SET} clause: } \xlw{Figure~\ref{f:qidx_v_ncomplaints_const} plots a representative set of parameters including corrupt query index, range, and skew. We plot one point
-for each corrupted query index that results in a complaint set with at least one complaint. 
-These results highlight several interesting trends:  With small update range and small skew factor (left upper corner)
-the size of the complaint sets are relatively small, and their frequency is constant across the possible query indices.
-However as we increase the range and skew, more recent queries are more likely to result in very large complaint sets (at times the size of the database).   
-This effect is a symptom of the fact that queries with higher overlap with each other will set groups of tuples to the same value,
-and over time, skew the distribution of tuple values to a small number of possible values. 
-Thus, more recent corruptions that affect a large cluster of similar tuples will result in a large complaint set.
-And the possibility of query overlap increases with update range and skew as these two factors increase the likelihood that queries share the same \texttt{WHERE} and \texttt{SET} clause. }
 
-\begin{figure}[!h]
+
+\begin{figure}[t]
 \centering
 \includegraphics[width = 3in]{figures/qidxsimulation/qidx_v_ncomplaints_20attrs_rel}
 \caption{Query index vs complaint set size for $set = rel$.}
 \label{f:qidx_v_ncomplaints_rel} 
 \end{figure}
+
+
+\smallskip
+\emph{Constant \texttt{SET} clause: } Figure~\ref{f:qidx_v_ncomplaints_const} plots a representative set of parameters including corrupt query index, range, and skew. We plot one point
+for each corrupted query index that results in a complaint set with at least one complaint. 
+These results highlight several interesting trends:  With small update range and small skew factor (left upper corner)
+the size of the complaint sets are relatively small, and their frequency is constant across the possible query indices.
+However as we increase the range and skew, more recent queries are more likely to result in very large complaint sets (at times the size of the database).   
+This effect is because the queries that have higher overlap of their \texttt{WHERE} clauses will set groups of tuples to the same value,
+and over time, skew the distribution of tuple values to a small number of possible values. 
+Thus, more recent corruptions that affect a large cluster of similar tuples will result in a large complaint set.
+\ewu{This this effect an artifact of bad experiment design (of our query generation), or is it something that would always happen?  Need to address, since obvious question!}
+And the possibility of query overlap increases with update range and skew as these two factors increase the likelihood that queries share the same \texttt{WHERE} and \texttt{SET} clause. 
+
+
+\begin{figure}[h]
+\centering
+\includegraphics[width = 3in]{figures/qidxsimulation/qidx_v_ncomplaints_20attrs_const}
+\caption{Corrupt query index, skew, range vs complaint set size for \textit{constant} \texttt{SET} clauses.}
+\label{f:qidx_v_ncomplaints_const} 
+\end{figure}
+
 
 \smallskip
 \emph{Relative \texttt{SET} clause: } \xlw{In contrast to \textit{constant} \texttt{SET} queries, Figure~\ref{f:qidx_v_ncomplaints_rel} executes the 
@@ -339,19 +350,19 @@ the conditions when we may fix the incorrect query.
 
 
 \subsection{Experimental Results}
-To evaluate \sys's ability in identifying the correct query to fix, we use two evaluation metrics to summarize our results over 20 runs.
+To evaluate \sys's ability in identifying the correct query to fix, \ewu{we execute QFix over 20 random XXX and summarize our results using two evaluation metrics} we use two evaluation metrics to summarize our results over 20 runs\ewu{plot or report standard deviation or 95th percentiles}.
 The first $p_{correct}$ computes the ratio between the number of runs where \sys correctly repairs the corrupt query and where \sys
 repairs the wrong query.  The second metric $topk$ measures the number of repairs that \sys proposes before repairing the true corrupt query.
 This metric is useful to quantify the extent that \sys's repairs are false positives (though they may correctly resolve the complaint set).
-A smaller $topk$ value suggests that \sys is still effective at providing repair \emph{recommendations} as part of a diagnostic interface.
+A small $topk$ value suggests that \sys is still effective at providing repair \emph{recommendations} as part of a diagnostic interface.
 
-\textbf{Correct repair ratio vs. query types: } In Figure~\ref{f:querytyperatio}, we first evaluate $p_{correct}$ rate on three types of workloads: \sys identifies the correct query to fix ($p_{correct} = 1.0$ and $topk = 1$) for \texttt{UPDATE} and \texttt{INSERT} workloads but unstable and much lower rate for \texttt{DELETE} workload. This is expected since more information of the actual incorrectness get maintained through \texttt{UPDATE} queries by the updated tuple values. However, such information get lost and obscured for \texttt{DELETE} queries as those deleted tuples no longer exist in the database. As a result, actual incorrect queries in \texttt{UPDATE} workloads are much easier to identify than those in \texttt{DELETE} workloads. \texttt{INSERT} workloads are easy to fix by natural since each \texttt{INSERT} query only touches one tuple. 
+\textbf{Correct repair ratio vs. query types: } In Figure~\ref{f:querytyperatio}, we first evaluate $p_{correct}$ rate on three types of workloads: \sys identifies the correct query to fix ($p_{correct} = 1.0$ and $topk = 1$) for \texttt{UPDATE} and \texttt{INSERT} workloads but unstable and much lower rate for \texttt{DELETE} workload. This is expected since more information of the actual incorrectness get maintained through \texttt{UPDATE} queries by the updated tuple values. \ewu{Is this because the problem is fundamentally underconstrained?  if so, explain in those terms and describe why.} However, such information get lost and obscured for \texttt{DELETE} queries as those deleted tuples no longer exist in the database. As a result, actual incorrect queries in \texttt{UPDATE} workloads are much easier to identify than those in \texttt{DELETE} workloads. \texttt{INSERT} workloads are easy to fix by natural since each \texttt{INSERT} query only touches one tuple. 
 
-To further illustrate this, we present the following example (Figure~\ref{fig:example2}) of two simple query logs, one for \texttt{DELETE} workload and one for \texttt{UPDATE} workload, that operate on the same initial database state and with the exact same \texttt{WHERE} clauses. 
+To further illustrate this, we present the following \ewu{toy} example (Figure~\ref{fig:example2}) of two simple query logs, one for \texttt{DELETE} workload and one for \texttt{UPDATE} workload, that operate on the same initial database state and with the exact same \texttt{WHERE} clauses. 
 
 In the above example, we find that there exist two candidate fixes for the \texttt{DELETE} workload $\mathcal{Q}_{del}$: one can either modify the \texttt{WHERE} clause of $Q2$ to $[12, 12]$ or the \texttt{WHERE} clause of $Q1$ to $[4, 4]$. In addition, the two candidate fixes achieve the exact same final database state. However, there only exists one candidate fix for the \texttt{UPDATE} workload $\mathcal{Q}_{up}$ since values in every attribute must satisfy with the desired database state. According to the converted constraints, modifying $Q2$ cannot solve the problem since it would not fix the value in the incorrect attribute $a_1$.  
 
-\textbf{Top-k vs. query types: } In Figure~\ref{f:querytypefixcount}, we observe the same trend: the $topk$ count for \texttt{UPDATE} and \texttt{INSERT} workloads remain $1$ across all query indexes while the $topk$ count shows unstable and much higher value for \texttt{DELETE} workloads. 
+\textbf{Top-k vs. query types: } In Figure~\ref{f:querytypefixcount}, we observe the same trend: the $topk$ count for \texttt{UPDATE} and \texttt{INSERT} workloads remain $1$ across all query indexes while the $topk$ count shows unstable and much higher value for \texttt{DELETE} workloads. \ewu{What is the maximum of the topk value over all the runs?   Can we say that we ALWAYs find the true repair within 3 diagnoses, or...?}
 
 
 \textbf{Correct repair ratio \& top-k vs. database sizes: } We next narrow down to \texttt{UPDATE} workload and evaluate \sys's behavior with increasing amount of tuples in the database. We observe $p_{correct} = 1$ and $topk = 1$ on different corrupt indexes in all database sizes (Figure~\ref{f:dbsizeratio}~\ref{f:dbsizecount}). 
