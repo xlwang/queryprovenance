@@ -294,32 +294,32 @@ The cost increases with the dimensionality because each additional predicate is 
 \subsection{Solving Hard Problems}
 \label{sec:experiments:hardprob}
 
+In this section, we further study the performance of \sys in solving hard problems. In particular, we conduct two sets of experiments: the first experiment evaluate \sys with incomplete complaint sets; the second illustrate \sys's capability in handling multiple errors. 
 \emph{Incomplete Complaint Set:}
-Our final experiment (Figures~\ref{f:falsenegative_time} and~\ref{f:falsenegative_acc}) varies the fase positive rate in incomplete complaint sets.
+The first experiment (Figures~\ref{f:falsenegative_time} and~\ref{f:falsenegative_acc}) varies the fase positive rate in incomplete complaint sets.
 We increase the rate from $0$ ($0\%$ missing in the complaint set) to $.75$ ($75\%$ are missing).  
 We find that reducing the size of the submitted complaint set naturally improves the repair performance,
 however the repair quality, both precision and recall in Figure~\ref{f:falsenegative_acc}, may suffer if the corruption occured in a very old query. 
 This is expected because \sys targets reported complaints, thus unreported complaints may easily be missed and lead to low recall.
 In addition, despite the refinement step of tuple-slicing, the repair may over generalize and ``fix'' the wrong records, leading to low precision.
 
-  \begin{figure}[!htb]
+
+    
+    \begin{figure}[!htb]
   \hspace*{-.1in}
   \centering
-    \vspace*{-.2in}
     \begin{subfigure}[t]{.33\textwidth}
-    \includegraphics[width = .99\columnwidth]{figures/multi_time}
-    \vspace*{-.25in}
-    \caption{Performance for multiple corruptions.}
-    \label{f:multi_time} 
+      \includegraphics[width = .99\columnwidth]{figures/noise_fn_time} 
+      \caption{False negatives vs time.}
+      \label{f:falsenegative_time} 
     \end{subfigure}
     \\
-        \begin{subfigure}[t]{.33\textwidth}
-    \includegraphics[width = .99\columnwidth]{figures/multi_pr}
-    \vspace*{-.25in}
-    \caption{Accuracy for multiple corruptions.}
-    \label{f:multi_acc} 
+    \begin{subfigure}[t]{.33\textwidth}
+      \includegraphics[width = .99\columnwidth]{figures/noise_fn_acc}
+      \caption{False negatives vs accuracy.}
+      \label{f:falsenegative_acc} 
     \end{subfigure}
-        \vspace*{-.1in}
+    \vspace*{-.1in}
     \caption{Our analysis highlights limitations of \naive, the value of tuple-slicing, and the high cost of \texttt{UPDATE} queries.}
   \end{figure}
 
@@ -336,8 +336,8 @@ Note that the overall number of constraints in the problem is the same, only the
 
 
 \stitle{Multiple Corrupt Queries:} \looseness -1
-In this experiment, we compare the basic approach (\naive) against 
-each slicing optimization individually($basic-tuple, basic-attr, basic-query$) and all of them together ($basic-all$).  
+In the second experiment, we compare the basic approach (\naive) against 
+each slicing optimization individually($basic-tuple, basic-attr, basic-query$).  
 We use the default settings with $N_D = 1000$ tuples and a sequence of \texttt{UPDATE} queries.
 We generate query logs in 5 different sizes $N_q\in \{10, 20, 30, 40, 50\}$ and corrupt 
 every tenth query starting from oldest query $q_1$,
@@ -351,6 +351,25 @@ when $40$ queries are involved (with $4$ corruptions)
 and we ignore the infeasible executions, the average execution time is $300$ seconds
 and the precision and recall are greater than $0.94$.  Unfortunately, with $50$ queries ($5$ corruptions),
 all runs exceed the time limit and return infeasibility.
+
+  \begin{figure}[!htb]
+  \hspace*{-.1in}
+  \centering
+    \vspace*{-.2in}
+    \begin{subfigure}[t]{.33\textwidth}
+    \includegraphics[width = .99\columnwidth]{figures/multi_time}
+    \caption{Performance for multiple corruptions.}
+    \label{f:multi_time} 
+    \end{subfigure}
+    \\
+        \begin{subfigure}[t]{.33\textwidth}
+    \includegraphics[width = .99\columnwidth]{figures/multi_pr}
+    \caption{Accuracy for multiple corruptions.}
+    \label{f:multi_acc} 
+    \end{subfigure}
+        \vspace*{-.1in}
+    \caption{Our analysis highlights limitations of \naive, the value of tuple-slicing, and the high cost of \texttt{UPDATE} queries.}
+  \end{figure}
 
 \iffalse
 \stitle{Single Corrupt Query:}
@@ -369,32 +388,11 @@ A secondary reason is beause the refinement step of  tuple slicing may not gener
 This is why the precision curve is lower than the recall curve for $inc_8-tuple$.
 \fi
 
-    
-    \begin{figure}[!htb]
-  \hspace*{-.1in}
-  \centering
-    \begin{subfigure}[t]{.33\textwidth}
-      \includegraphics[width = .99\columnwidth]{figures/noise_fn_time}
-      \vspace*{-.25in}
-      \caption{False negatives vs time.}
-      \label{f:falsenegative_time} 
-    \end{subfigure}
-    \vspace*{0.2in}
-    \\
-    \begin{subfigure}[t]{.33\textwidth}
-      \includegraphics[width = .99\columnwidth]{figures/noise_fn_acc}
-      \vspace*{-.25in}
-      \caption{False negatives vs accuracy.}
-      \label{f:falsenegative_acc} 
-    \end{subfigure}
-    \vspace*{-.1in}
-    \caption{Our analysis highlights limitations of \naive, the value of tuple-slicing, and the high cost of \texttt{UPDATE} queries.}
-  \end{figure}
-
 
 \smallskip
-\emph{Takeaways: We find that \naive, even with slicing optimizations,
-has severe scalability limitations due to the large number of undetermined values---this is unsurprising as MILP constraint solving is an NP-hard problem.
-In contrast, the incremental algorithms can scale to larger query log sizes, however only a batch size of $k=1$ can retain high repair quality.
+\emph{Takeaways: We observe \sys is able to solve recent errors (e.g., errors in most recent 100 queries) efficiently and effectively even with very limited information. Also, we find that basic, even with slicing optimizations, has severe scalability
+limitations due to the large number of undetermined values—
+this is unsurprising as MILP constraint solving is an NP-hard
+problem.
 }
 
