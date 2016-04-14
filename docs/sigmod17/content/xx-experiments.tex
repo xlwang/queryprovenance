@@ -180,6 +180,8 @@ that are used in all experiments.
 
 
 \subsection{Preliminary Analysis}
+
+\ewu{These are all increemental algorithms, not basic!  Need to explain what the names of each line means (e.g., inc1-all)}
   
 \looseness -1
 The following set of experiments are designed to establish the rationale for 
@@ -196,6 +198,7 @@ When the table is wide ($N_a = 500$), applying all optimizations ($inc_1-all$) i
 
 
 \stitle{Increasing Database Size:} \looseness -1
+\ewu{Need to ref Figure 6b in the text}
 We vary the database size ($N_D \in [100,5000]$) with a large number of attributes ($N_a = 100$).
 We fix the number of complaints by decreasing the query selectivity in proportion to $N_D$'s increase---the specific mechanism to do so does not affect the findings.
 Figure~\ref{f:attr100} shows that the costs are relatively flat until the corruption occurs in an old query ($q_{50}$).  
@@ -207,6 +210,8 @@ while query-slicing explicitly reduces the number of candidate queries in propor
 Ultimately, combining all three optimizations improves the latency over tuple-slicing by $2\times$ in the worst case, and up to $4\times$ in the best case.
 
 \xlw{Note that in both experiments, we omit the results of algorithms without applying tuple-slicing optimization as the these algorithms failed to scale over most of the problems. }
+
+\ewu{Need to introduce QFix again as setup for the subsequent experiments}
 
 \smallskip
 \textit{Takeaways: we find that the performance of the different repair algorithm 
@@ -221,6 +226,7 @@ The key reason is that each query affects a small set of records and leads to a 
 In addition, tuple and query slicing can aggressively reduce the total number of constraints to a very small number---often less than $100$ in total.
 Furthermore for TPC-C, the queries are predominantly \texttt{INSERT} queries, which \sys can solve within milliseconds.
 Finally, we evaluated \sys on Example~\ref{ex:taxes} in Figure~\ref{fig:example} and fully repaired the correct query in 35 milliseconds.
+\ewu{Explain why TATP has a steeper slope than TPC-C}
 
 \begin{figure}[!thb]
 \centering
@@ -265,11 +271,9 @@ remains relatively constant, the cost for \texttt{DELETE}-only and \texttt{UPDAT
 the corruption happens earlier in the query log---and a much faster rate for \texttt{UPDATE} queries.
 The F1 score for all settings is nearly 1 (Figure~\ref{f:indelup_acc}).
 
-\smallskip
-We observe that \texttt{UPDATE} queries translate into more undetermined variables than other query types, and are significantly more expensive to repair. Based on these results, we focus on the incremental algorithm $inc_1$ and the more difficult \texttt{UPDATE}-only workloads in the rest of the experiments.
+\ewu{Probably not needed at this point.  Maybe instead say "This is why we have focused on UPDATE queries in most of our experiments.}  We observe that \texttt{UPDATE} queries translate into more undetermined variables than other query types, and are significantly more expensive to repair. Based on these results, we focus on the incremental algorithm $inc_1$ and the more difficult \texttt{UPDATE}-only workloads in the rest of the experiments.
 
 \smallskip
-
 \emph{Query Clause Type: }
 So far, we have focused on \texttt{UPDATE} queries with constant set clauses and range predicates.  
 Figure~\ref{f:qidx_time} individually varies each clause and compares against {\it Constant/Point} and {\it Relative/Range} queries. 
@@ -281,9 +285,11 @@ We believe the latter pair is because the constant set clauses break the causal 
 This both simplifies the difficulty of the constraint problem, and reduces the total number of constraints.
 
 
+\smallskip
 \emph{Predicate Dimensionality:}
 Figure~\ref{f:where_time} varies the dimensionality of the update queries by increasing the number of predicates in the \texttt{WHERE} clause, while keeping the query cardinality constant.
 The cost increases with the dimensionality because each additional predicate is translated into a new set of constraints and undetermined variables, increasing the problem complexity.
+\ewu{Mention potential solutions to this issue}
 
 
 \smallskip
@@ -293,6 +299,8 @@ The cost increases with the dimensionality because each additional predicate is 
 
 \subsection{Solving Hard Problems}
 \label{sec:experiments:hardprob}
+
+\ewu{Is this setion for "solving hard problems", or examining the limitations of basic on multi-query errors?}
 
 In this section, we further study the performance of \sys in solving hard problems. In particular, we conduct two sets of experiments: the first experiment evaluate \sys with incomplete complaint sets; the second illustrate \sys's capability in handling multiple errors. 
 \emph{Incomplete Complaint Set:}
