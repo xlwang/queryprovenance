@@ -9,6 +9,19 @@
 
     <script src="/static/util.js" ></script>
     <style>
+
+      ::-webkit-scrollbar {
+          -webkit-appearance: none;
+          width: 7px;
+      }
+      ::-webkit-scrollbar-thumb {
+          border-radius: 4px;
+          background-color: rgba(0,0,0,.5);
+          -webkit-box-shadow: 0 0 1px rgba(255,255,255,.5);
+      }
+
+
+
       body {
         margin-top: 2em;
       }
@@ -59,9 +72,12 @@
       #querylog li:hover pre{
         background: #fffffe;
       }
-      #datatable {
+      #datatable-container {
         height: 300px;
         overflow-y: scroll;
+        width: 100%;
+      }
+      #datatable {
         width: 100%;
       }
       #run-btn {
@@ -78,10 +94,10 @@
     <div class="col-md-2">
       <div id="workloads-container"></div>
     </div>
-    <div class="col-md-4">
+    <div class="col-md-5">
       <div id="querylog-container"></div>
     </div>
-    <div class="col-md-6">
+    <div class="col-md-5">
       <textarea id="querytext"></textarea>
     </div>
   </div>
