@@ -13,7 +13,7 @@ Edit `server.py` to set your database URI
 Run it in the shell
 
 
-        python server.py
+        python server.py 
 
 Get help:
 

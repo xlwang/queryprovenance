@@ -10,9 +10,10 @@ eugene wu 2015
 """
 
 import os
+import json
 from sqlalchemy import *
 from sqlalchemy.pool import NullPool
-from flask import Flask, request, render_template, g, redirect, Response
+from flask import Flask, request, render_template, g, redirect, Response, jsonify
 
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 app = Flask(__name__, template_folder=tmpl_dir)
@@ -37,6 +38,41 @@ def teardown_request(exception):
   except Exception as e:
     pass
 
+
+@app.route('/workload/', methods=["POST", "GET"])
+def workload():
+  workload = request.args.get('workload', 'default')
+  return jsonify(**get_workload(workload))
+
+
+def get_workload(workload='default'):
+  if workload == 'default':
+    queries = [
+        "UPDATE salary \nSET tax = 0.3*income \nWHERE income > 87500",
+        "UPDATE salary \nSET pay = income - tax",
+        "INSERT INTO salary \nVALUES (4, 21625, 86500, 64875)"
+    ]
+    ncols = 5
+    nrows = 10
+    queries = [ dict(query=q, id=i) for i, q in enumerate(queries)]
+    header = [ "header-%s" % i  for i in xrange(ncols) ]
+    rows = [
+        dict(
+          data=["v-%s" % j for j in xrange(ncols)],
+          iscomplaint=(i == 5)
+        )
+        for i in xrange(nrows)
+    ]
+    table = dict(
+        header=header,
+        rows=rows
+    )
+
+  return dict(queries=queries, table=table)
+
+
+
+
 @app.route('/', methods=["POST", "GET"])
 def index():
   """
@@ -46,31 +82,42 @@ def index():
   request.args:     dictionary of URL arguments e.g., {a:1, b:2} for http://localhost?a=1&b=2
   See its API: http://flask.pocoo.org/docs/0.10/api/#incoming-request-data
   """
-  # DEBUG: this is debugging code to see what request looks like
   print request.args
+  workload = request.args.get('workload', 'default')
 
-  queries = [
-      "UPDATE salary SET tax = 0.3*income WHERE income > 87500",
-      "UPDATE salary SET pay = income - tax",
-      "INSERT INTO salary values (4, 21625, 86500, 64875"
-  ]
-  queries = [ dict(query=q, id=i) for i, q in enumerate(queries)]
-  header = [ "header-%s" % i  for i in xrange(10) ]
-  table = [
-      dict(
-        data=["v-%s" % j for j in xrange(10)],
-        iscomplaint=False
-      )
-      for i in xrange(20)
-  ]
+  workload = get_workload(workload)
 
-  context = dict(
-      queries = queries,
-      header = header,
-      table = table
-  )
+  context = dict()
+  context.update(workload)
 
   return render_template("index.html", **context)
+
+@app.route('/complaints/')
+def complaints():
+  qid = request.args['qid']
+  wid = request.args['workload']
+  q = request.args['query']
+
+  data = {}
+
+  return json.dumps(data)
+
+
+
+@app.route('/solve/')
+def solve():
+  q = "UPDATE blah\nSET x=99"
+  qfix_q = "UPDATE blah\nSET x=y+1"
+  alt_q = "UPDATE blah\nSET x=y+10"
+  data = dict(
+      query=q,
+      qfix_query = qfix_q,
+      alt_query = alt_q,
+      table1 = get_workload()['table'],
+      table2 = get_workload()['table']
+  )
+
+  return jsonify(**data)
 
 
 if __name__ == "__main__":

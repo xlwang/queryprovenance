@@ -12,6 +12,10 @@
       body {
         margin-top: 2em;
       }
+      tr.complaint td {
+        color: red;
+        font-weight: bold;
+      }
 
       #querytext {
         width: 100%;
@@ -29,9 +33,14 @@
       #querylog li {
         width: 100%;
         padding: 1em;
-        cursor: pointer;
         white-space: initial;
         text-align: left;
+      }
+      #querylog li pre {
+        cursor: pointer;
+      }
+      #querylog li:hover pre{
+        background: #fffffe;
       }
       #datatable {
         height: 300px;
@@ -46,79 +55,104 @@
   </head>
 
 <body class="container">
-  <h2 style="margin-bottom: 1ex">QFix Sigmod 2016 Demo</h2>
-
+  <h1 style="margin-bottom: 1ex">QFix Sigmod 2016 Demo</h1>
 
   <div class="row">
     <div class="col-md-2"></div>
-    <div class="col-md-3">
+    <div class="col-md-4">
       <div id="querylog-container"></div>
     </div>
-    <div class="col-md-4">
+    <div class="col-md-6">
       <textarea id="querytext"></textarea>
     </div>
   </div>
 
   <div class="row">
-    <div class="col-md-10">
-      <div id="datatable">
-        <table  class="table table-striped">
-          <tbody>
-            <tr>
-              {% for col in header %}<th>{{col}}</th>{% endfor %}
-            </tr>
-            {% for row in table %}
-              <tr>
-                {% for col in row.data %}<td>{{col}}</td>{% endfor %}
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+    <div class="col-md-12">
+      <div id="datatable-container">
       </div>
     </div>
   </div>
 
   <div class="row">
-    <div class="col-md-10">
+    <div class="col-md-12" style="text-align: center">
       <button id="run-btn" class="btn btn-primary">Run QueryFix</button>
     </div>
   </div>
 
 
+  <div id="result-view" style="display: none">
+    <div class="row" style="margin-top: 3em">
+      <div class="col-md-12" style="text-align: center">
+        <div class="jumbotron">
+          <pre id="err_q"></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-6">
+        <h2>QFix</h2>
+        <pre id="qfix_q">  </pre>
+      </div>
+      <div class="col-md-6">
+        <h2>Decision Tree</h2>
+        <pre id="alt_q"> </pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-6">
+      <div id="qfix-data-container"></div>
+    </div>
+    <div class="col-md-6">
+      <div id="alt-data-container"></div>
+    </div>
+  </div>
+
 </body>
-
-<script>
-  $(function() {
-    var queries = [
-    {% for q in queries %}
-      {
-        query: "{{q.query|safe}}",
-        id: {{q.id}}
-      }
-      {% if not loop.last %}, {% endif %}
-    {% endfor %}
-    ];
-    renderQueryLog({
-      queries: queries
-    });
-
-    
-  });
-</script>
-
 </html>
 
 {% raw %}
+
+<script id="table-template" type="text/x-handlebars-template">
+  <table class="table table-striped">
+    <tbody>
+      <tr>
+        {{#each header}}<th>{{this}}</th>{{/each}}
+      </tr>
+      {{#each rows}}
+        <tr class="{{#if iscomplaint}}complaint{{/if}}">
+          {{#each data}}<td>{{this}}</td>{{/each}}
+        </tr>
+      {{/each}}
+    </tbody>
+  </table>
+</script>
 
 
 <script id="querylog-template" type="text/x-handlebars-template">
   <ul id="querylog" class="list-unstyled">
     {{#each queries}}
-    <li id="q-{{id}}" class="btn btn-link">
-      {{query}}
+    <li id="q-{{id}}"><!-- class="btn btn-link">-->
+      <pre>{{query}}</pre>
     </li>
     {{/each}}
   </ul>
 </script>
 
 {% endraw %}
+
+
+
+
+
+<script>
+  $(function() {
+    app.loadWorkload('default')
+    $("#run-btn").click(app.submitPressed.bind(app));
+  });
+</script>
+
+
