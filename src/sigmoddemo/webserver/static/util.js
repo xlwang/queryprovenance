@@ -9,6 +9,7 @@ var app = (function() {
 
   };
 
+
   var renderRepairs = function(opts) {
     var source   = $("#table-template").html();
     var template = Handlebars.compile(source);
@@ -21,7 +22,21 @@ var app = (function() {
   };
 
 
+  var loadAndRenderWorkloads = function(opts) {
+    $.get("/workloads/", {}, function(resp) {
+      var source   = $("#workloads-template").html();
+      var template = Handlebars.compile(source);
+      console.log(resp)
+      $("#workloads-container").html(template(resp));
+    });
+  };
+
+
+
   var loadWorkload = function(workload) {
+    renderQueryLog({})
+    $("#datatable-container").empty();
+
     var data =  { workload: workload };
     $.get("/workload/", data, function(resp) {
       renderWorkload(resp);
@@ -78,6 +93,7 @@ var app = (function() {
   };
 
   return {
+    loadAndRenderWorkloads: loadAndRenderWorkloads,
     renderQueryLog: renderQueryLog,
     submitPressed: submitPressed,
     loadWorkload: loadWorkload,

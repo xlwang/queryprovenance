@@ -39,6 +39,14 @@ def teardown_request(exception):
     pass
 
 
+@app.route('/workloads/', methods=["POST", "GET"])
+def workloads():
+  workloads = [ 'default', 'TPC-C' ]
+  workloads = [dict(id=i, workload=w) for i,w in enumerate(workloads)]
+  return jsonify(workloads=workloads)
+
+
+
 @app.route('/workload/', methods=["POST", "GET"])
 def workload():
   workload = request.args.get('workload', 'default')
