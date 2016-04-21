@@ -29,6 +29,10 @@
         color: red;
         font-weight: bold;
       }
+	  tr.selected td {
+	      background-color: #333;
+	      color: #fff;    
+	  }
       li {
         margin-bottom:5px;
       }
@@ -92,24 +96,77 @@
 
   <div class="row">
     <div class="col-md-2">
+		<h4> Select Datasets </h4>
       <div id="workloads-container"></div>
     </div>
     <div class="col-md-5">
-      <div id="querylog-container"></div>
+		<h4> Dataset Configeration </h4>
+		<h5> Select table size:  </h5>
+		<p>
+		<button id="run-corrupt" class="btn btn-primary" style="width: 5em">5</button> 
+		<button id="run-corrupt" class="btn btn-primary" style="width: 5em">15</button> 
+		<button id="run-corrupt" class="btn btn-primary" style="width: 5em">20</button> 
+	</p>
+		<h5> Select querylog size:  </h5>
+		<p>
+		<button id="run-corrupt" class="btn btn-primary btn-small" style="width: 5em">1</button> 
+		<button id="run-corrupt" class="btn btn-primary btn-small" style="width: 5em">5</button> 
+		<button id="run-corrupt" class="btn btn-primary btn-small" style="width: 5em">10</button>
+		<button id="run-corrupt" class="btn btn-primary btn-small" style="width: 5em">15</button> 
+	</p>
     </div>
     <div class="col-md-5">
-      <textarea id="querytext"></textarea>
+		<h4> Clean Querylog </h4> <br>
+      <div id="querylog-container"></div>
     </div>
+  </div>
+  <div class = "row">
+	  <div class = "col-md-2" style = "text-align: justify">
+		  <h4> Random corruption</h4>
+		  <h5> Pick # of corruptions:  </h5>
+		  <p>
+  		<button id="run-corrupt" class="btn btn-primary btn-small" style="width: 5em">1</button> 
+  		<button id="run-corrupt" class="btn btn-primary btn-small" style="width: 5em">2</button> 
+	</p>
+		<p>
+  		<button id="run-corrupt" class="btn btn-primary btn-small" style="width: 5em">3</button>
+  		<button id="run-corrupt" class="btn btn-primary btn-small" style="width: 5em">4</button>
+	    </p>
+		<br>
+		<button id="run-corrupt" class="btn btn-primary btn-small" style="width: 12em">Generate</button>
+	  </div>
+	  
+	  <div class = "col-md-5">
+		  <h4> Customized Corruption</h4>
+		  <textarea id="querytext" style="width: 100%; height: 12em;" ></textarea>
+  		  <button id="run-corrupt" class="btn btn-primary btn-small" style="width: 49%">Save</button>
+		  <button id="run-corrupt" class="btn btn-primary btn-small" style="width: 49%">Done</button>
+	</div>
+
+	  <div class = "col-md-5">
+		  <h4> Dirty Querylog </h4>
+	  	  <textarea id="querytext"></textarea>
+	  </div>
   </div>
 
   <div class="row">
     <div class="col-md-12">
+	  <h4> Final database state </h4>
       <div id="datatable-container">
       </div>
     </div>
   </div>
 
   <div class="row">
+	  <div class = "col-md-4" style="text-align: center">
+		  <button id="run-btn" class="btn btn-primary" style="width: 100%">Hide Correct Tuple</button>
+	  </div>
+	  <div class = "col-md-4" style="text-align: center">
+		  <button id="run-btn" class="btn btn-primary" style="width: 100%">Fix By All Compl</button>
+	  </div>
+	  <div class = "col-md-4" style="text-align: center">
+		  <button id="run-btn" class="btn btn-primary" style="width: 100%">Fix By Selected Compl</button>
+	  </div>
     <div class="col-md-12" style="text-align: center">
       <button id="run-btn" class="btn btn-primary">Run QueryFix</button>
     </div>
@@ -120,6 +177,7 @@
     <div class="row" style="margin-top: 3em">
       <div class="col-md-12" style="text-align: center">
         <div class="jumbotron">
+			<h3>Corrupt Queries</h3>
           <pre id="err_q"></pre>
         </div>
       </div>
@@ -127,11 +185,11 @@
 
     <div class="row">
       <div class="col-md-6">
-        <h2>QFix</h2>
+        <h3>QFix</h3>
         <pre id="qfix_q">  </pre>
       </div>
       <div class="col-md-6">
-        <h2>Decision Tree</h2>
+        <h3>Decision Tree</h3>
         <pre id="alt_q"> </pre>
       </div>
     </div>
