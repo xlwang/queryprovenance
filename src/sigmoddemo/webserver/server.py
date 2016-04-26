@@ -50,19 +50,23 @@ def workloads():
 @app.route('/workload/', methods=["POST", "GET"])
 def workload():
   workload = request.args.get('workload', 'default')
-  return jsonify(**get_workload(workload))
+  querylogsize = request.args.get('querylogsize', 10)
+  return jsonify(**get_workload(workload, int(querylogsize)))
 
 
-def get_workload(workload='default'):
+def get_workload(workload='default', querylogsize = 10):
   if workload == 'default':
     queries = [
-        "UPDATE salary \nSET tax = 0.3*income \nWHERE income > 87500",
-        "UPDATE salary \nSET pay = income - tax",
-        "INSERT INTO salary \nVALUES (4, 21625, 86500, 64875)"
+        dict(query = "UPDATE salary SET tax = 0.3 * income WHERE income > 87500", corrupted = (False), dirtyquery = "", cached = "UPDATE salary SET tax = 0.3 * income WHERE income > 85700"),
+        dict(query = "UPDATE salary SET pay = income - tax", corrupted = (False), dirtyquery = "", cached = "UPDATE salary SET pay = income - tax"),
+        dict(query = "INSERT INTO salary VALUES (4, 21625, 86500, 64875)", corrupted = (False), dirtyquery = "", cached = "INSERT INTO salary VALUES (4, 12625, 86500, 64875)")
     ]
     ncols = 5
     nrows = 10
-    queries = [ dict(query=q, id=i) for i, q in enumerate(queries)]
+    if len(queries) < querylogsize:
+        querylogsize = len(queries)
+        
+    queries = [ dict(query=q, id=i) for i, q in enumerate(queries[0:querylogsize])]
     header = [ "header-%s" % i  for i in xrange(ncols) ]
     rows = [
         dict(
@@ -75,6 +79,15 @@ def get_workload(workload='default'):
         header=header,
         rows=rows
     )
+  elif workload == 'TPC-C':
+      # load tpcc
+      print('load tpcc data')
+  elif workload == 'TATP':
+      # load tatp
+      print('load tatp data')
+  else:
+      # load synthetic
+      print('load synthetic data')
 
   return dict(queries=queries, table=table)
 

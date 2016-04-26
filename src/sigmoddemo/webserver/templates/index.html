@@ -6,7 +6,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.5/handlebars.min.js"></script>
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
-
     <script src="/static/util.js" ></script>
     <style>
 
@@ -29,10 +28,7 @@
         color: red;
         font-weight: bold;
       }
-	  tr.selected td {
-	      background-color: #333;
-	      color: #fff;    
-	  }
+
       li {
         margin-bottom:5px;
       }
@@ -65,7 +61,7 @@
       }
       #querylog li {
         width: 100%;
-        padding: 5px;
+        padding: 0px;
         white-space: initial;
         text-align: left;
       }
@@ -74,8 +70,28 @@
         margin: 0px;
       }
       #querylog li:hover pre{
-        background: #fffffe;
       }
+	  
+      #querylog li:select pre{
+        background: #ffff00;
+      }
+	  
+	  #querylog li pre tr.corrupted td {
+	  	text-decoration: line-through;
+	  }
+	  .corrupted td {
+	  	  	text-decoration: line-through;
+	  	  }
+	  
+	  #querylog li pre tr.dirty td {
+	  	color: red;
+		font-weight: bold;
+	  }
+	  .dirty td {
+	  	  	color: red;
+	  		font-weight: bold;
+	  }
+	  
       #datatable-container {
         height: 300px;
         overflow-y: scroll;
@@ -88,6 +104,19 @@
         margin-top: 2em;
         width: 100%;
       }
+	  .highlight {
+	      color: red;
+	      font-weight: bold;
+		  background: yellow;
+	  }
+	  .highlightcompl {
+	      font-weight: bold;
+		  background: #FAAFBA;
+	  }
+	  label {
+	      padding-left: 15px;
+	      text-indent: -15px;
+	  }
     </style>
   </head>
 
@@ -95,78 +124,43 @@
   <h1 style="margin-bottom: 1ex">QFix Sigmod 2016 Demo</h1>
 
   <div class="row">
-    <div class="col-md-2">
-		<h4> Select Datasets </h4>
-      <div id="workloads-container"></div>
-    </div>
-    <div class="col-md-5">
-		<h4> Dataset Configeration </h4>
-		<h5> Select table size:  </h5>
-		<p>
-		<button id="run-corrupt" class="btn btn-primary" style="width: 5em">5</button> 
-		<button id="run-corrupt" class="btn btn-primary" style="width: 5em">15</button> 
-		<button id="run-corrupt" class="btn btn-primary" style="width: 5em">20</button> 
-	</p>
+    <div class="col-md-4">
+		<h4> Dataset Configurations </h4>
 		<h5> Select querylog size:  </h5>
 		<p>
-		<button id="run-corrupt" class="btn btn-primary btn-small" style="width: 5em">1</button> 
-		<button id="run-corrupt" class="btn btn-primary btn-small" style="width: 5em">5</button> 
-		<button id="run-corrupt" class="btn btn-primary btn-small" style="width: 5em">10</button>
-		<button id="run-corrupt" class="btn btn-primary btn-small" style="width: 5em">15</button> 
+		<button id="qlogsize-1" onclick="app.loadQuerylogSize(1)" class="btn btn-primary btn-small" style="width: 5em">1</button> 
+		<button id="qlogsize-5" onclick="app.loadQuerylogSize(5)" class="btn btn-primary btn-small" style="width: 5em">5</button> 
+		<button id="qlogsize-10" onclick="app.loadQuerylogSize(10)" class="btn btn-primary btn-small" style="width: 5em">10</button>
+		<button id="qlogsize-15" onclick="app.loadQuerylogSize(15)" class="btn btn-primary btn-small" style="width: 5em">15</button> 
+	</p>
+	<h5>Select Dataset: </h5>
+	<div id="workloads-container"></div>
+	<p>
+		
 	</p>
     </div>
-    <div class="col-md-5">
-		<h4> Clean Querylog </h4> <br>
+    <div class="col-md-8">
+		<h4> Querylog </h4> <br>
       <div id="querylog-container"></div>
     </div>
   </div>
-  <div class = "row">
-	  <div class = "col-md-2" style = "text-align: justify">
-		  <h4> Random corruption</h4>
-		  <h5> Pick # of corruptions:  </h5>
-		  <p>
-  		<button id="run-corrupt" class="btn btn-primary btn-small" style="width: 5em">1</button> 
-  		<button id="run-corrupt" class="btn btn-primary btn-small" style="width: 5em">2</button> 
-	</p>
-		<p>
-  		<button id="run-corrupt" class="btn btn-primary btn-small" style="width: 5em">3</button>
-  		<button id="run-corrupt" class="btn btn-primary btn-small" style="width: 5em">4</button>
-	    </p>
-		<br>
-		<button id="run-corrupt" class="btn btn-primary btn-small" style="width: 12em">Generate</button>
-	  </div>
-	  
-	  <div class = "col-md-5">
-		  <h4> Customized Corruption</h4>
-		  <textarea id="querytext" style="width: 100%; height: 12em;" ></textarea>
-  		  <button id="run-corrupt" class="btn btn-primary btn-small" style="width: 49%">Save</button>
-		  <button id="run-corrupt" class="btn btn-primary btn-small" style="width: 49%">Done</button>
-	</div>
-
-	  <div class = "col-md-5">
-		  <h4> Dirty Querylog </h4>
-	  	  <textarea id="querytext"></textarea>
-	  </div>
-  </div>
 
   <div class="row">
-    <div class="col-md-12">
-	  <h4> Final database state </h4>
-      <div id="datatable-container">
+      <div class="col-md-8">
+  	  <h4> Final database state </h4>
       </div>
+      <div class="col-md-4">
+  	  <label><input type="checkbox" id="selectall" style="zoom:1.5; margin-right:2px; margin-left:5px"> select all   </label>  
+  	  <label><input type="checkbox" id="selectall" style="zoom:1.5; margin-right:2px; margin-left:5px"> select all compl</label>
+      </div>
+  </div>
+  <div class="row">
+    <div class="col-md-12">
+      <div id="datatable-container"></div>
     </div>
   </div>
 
   <div class="row">
-	  <div class = "col-md-4" style="text-align: center">
-		  <button id="run-btn" class="btn btn-primary" style="width: 100%">Hide Correct Tuple</button>
-	  </div>
-	  <div class = "col-md-4" style="text-align: center">
-		  <button id="run-btn" class="btn btn-primary" style="width: 100%">Fix By All Compl</button>
-	  </div>
-	  <div class = "col-md-4" style="text-align: center">
-		  <button id="run-btn" class="btn btn-primary" style="width: 100%">Fix By Selected Compl</button>
-	  </div>
     <div class="col-md-12" style="text-align: center">
       <button id="run-btn" class="btn btn-primary">Run QueryFix</button>
     </div>
@@ -229,7 +223,8 @@
   <ul id="querylog" class="list-unstyled">
     {{#each queries}}
     <li id="q-{{id}}"><!-- class="btn btn-link">-->
-      <pre>{{query}}</pre>
+      <pre><table><tbody><tr id = "q-{{id}}-clean" class = "{{#if query.corrupted}}corrupted{{/if}}"><td>{{query.query}} </td></tr>
+<tr id = "q-{{id}}-dirty" class = "{{#if query.corrupted}}dirty{{/if}}"><td>{{query.dirtyquery}}</td></tr></tbody></table></pre>
     </li>
     {{/each}}
   </ul>
@@ -240,7 +235,7 @@
   <ul id="workloads-list" class="list-unstyled">
     {{#each workloads}}
     <li id="w-{{id}}">
-      <div onclick="app.loadWorkload('{{workload}}')" class="btn btn-primary btn-small" style="width: 100%">{{workload}}</div>
+      <div onclick="app.loadWorkload('{{workload}}')" class="btn btn-primary btn-small" style="width: 21em">{{workload}}</div>
     </li>
     {{/each}}
   </ul>
