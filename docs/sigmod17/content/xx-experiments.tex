@@ -178,8 +178,32 @@ that are used in all experiments.
   \end{figure*}
 
 
+\subsection{Benchmarks}
+\label{sec:experiments:benchmark}
 
-\subsection{Preliminary Analysis}
+Figure~\ref{f:tpcctatp} plots the performance of the incremental algorithm using tuple-slicing on the TPC-C and TATP benchmark applications.  
+The key reason is that each query affects a small set of records and leads to a very small complaint set---$1$ or $2$ on average.
+In addition, tuple and query slicing can aggressively reduce the total number of constraints to a very small number---often less than $100$ in total.
+Furthermore for TPC-C, the queries are predominantly \texttt{INSERT} queries, which \sys can solve within milliseconds.
+Finally, we evaluated \sys on Example~\ref{ex:taxes} in Figure~\ref{fig:example} and fully repaired the correct query in 35 milliseconds.
+\ewu{Explain why TATP has a steeper slope than TPC-C}
+
+\begin{figure}[!thb]
+\centering
+  \includegraphics[width = .75\columnwidth]{figures/benchmark_time}
+  \vspace*{-.2in}
+  \caption{Our experiments on benchmark OLTP workloads show that \sys can produce repairs very fast.}
+  \label{f:tpcctatp} 
+\end{figure}
+\smallskip
+{\it Takeaways: many workloads in practice are dominated by \texttt{INSERT} and point \texttt{UPDATE} queries (ignoring the dominant percentage of read-only queries).  
+In these settings, \sys is very effective at reducing the number of constraints and can derive repairs with near-interactive latencies.}
+
+
+
+
+\subsection{Synthetic Incremental Experiments}
+\subsubsection{Increasing the Hardness of Database}
 
 \ewu{These are all increemental algorithms, not basic!  Need to explain what the names of each line means (e.g., inc1-all)}
   
@@ -217,31 +241,7 @@ Ultimately, combining all three optimizations improves the latency over tuple-sl
 \textit{Takeaways: we find that the performance of the different repair algorithm 
 heavily depends on the property of the datasets and queries---in particular, the number of encoded candidate queries and the number of attributes. Tuple slicing is essential to solve general problems. Attribute and query slicing show significant gain for datasets with large number of attributes. }
 
-
-\subsection{Benchmarks}
-\label{sec:experiments:benchmark}
-
-Figure~\ref{f:tpcctatp} plots the performance of the incremental algorithm using tuple-slicing on the TPC-C and TATP benchmark applications.  
-The key reason is that each query affects a small set of records and leads to a very small complaint set---$1$ or $2$ on average.
-In addition, tuple and query slicing can aggressively reduce the total number of constraints to a very small number---often less than $100$ in total.
-Furthermore for TPC-C, the queries are predominantly \texttt{INSERT} queries, which \sys can solve within milliseconds.
-Finally, we evaluated \sys on Example~\ref{ex:taxes} in Figure~\ref{fig:example} and fully repaired the correct query in 35 milliseconds.
-\ewu{Explain why TATP has a steeper slope than TPC-C}
-
-\begin{figure}[!thb]
-\centering
-  \includegraphics[width = .75\columnwidth]{figures/benchmark_time}
-  \vspace*{-.2in}
-  \caption{Our experiments on benchmark OLTP workloads show that \sys can produce repairs very fast.}
-  \label{f:tpcctatp} 
-\end{figure}
-\smallskip
-{\it Takeaways: many workloads in practice are dominated by \texttt{INSERT} and point \texttt{UPDATE} queries (ignoring the dominant percentage of read-only queries).  
-In these settings, \sys is very effective at reducing the number of constraints and can derive repairs with near-interactive latencies.}
-
-
-  
-\subsection{Synthetic Incremental Experiments}
+\subsubsection{Increasing the Hardness of QueryLog}
 \label{sec:experiments:synth}
 The following set of synthetic experiments focus on a single \sys setting---incremental with tuple-slicing---and
 individually vary numerous database and workload parameters in order to tease apart the algorithm performance.  
@@ -262,7 +262,8 @@ At smaller database sizes, the randomness in the workload generator leads to var
 The exponential relationship between solver time and problem difficulty results in the higher average latency for $q_{50}$.
 \fi
 
-\emph{Query Type: }\label{sec:indelup}
+
+\stitle{Query Type: }\label{sec:indelup}
 Our final preliminary experiment evaluates the incremental algorithm with tuple slicing optimization 
 ($inc_1-tuple$) on \texttt{INSERT}, \texttt{DELETE}, or \texttt{UPDATE}-only workloads.
 We increase the number of queries from $1$ to $200$ and corrupt the oldest query in the log.  
@@ -274,7 +275,7 @@ The F1 score for all settings is nearly 1 (Figure~\ref{f:indelup_acc}).
 \ewu{Probably not needed at this point.  Maybe instead say "This is why we have focused on UPDATE queries in most of our experiments.}  We observe that \texttt{UPDATE} queries translate into more undetermined variables than other query types, and are significantly more expensive to repair. Based on these results, we focus on the incremental algorithm $inc_1$ and the more difficult \texttt{UPDATE}-only workloads in the rest of the experiments.
 
 \smallskip
-\emph{Query Clause Type: }
+\stitle{Query Clause Type: }
 So far, we have focused on \texttt{UPDATE} queries with constant set clauses and range predicates.  
 Figure~\ref{f:qidx_time} individually varies each clause and compares against {\it Constant/Point} and {\it Relative/Range} queries. 
 The x-axis varies the index of the corrupted query between $q_1$ and $q_{249}$.
@@ -286,7 +287,7 @@ This both simplifies the difficulty of the constraint problem, and reduces the t
 
 
 \smallskip
-\emph{Predicate Dimensionality:}
+\stitle{Predicate Dimensionality:}
 Figure~\ref{f:where_time} varies the dimensionality of the update queries by increasing the number of predicates in the \texttt{WHERE} clause, while keeping the query cardinality constant.
 The cost increases with the dimensionality because each additional predicate is translated into a new set of constraints and undetermined variables, increasing the problem complexity.
 \ewu{Mention potential solutions to this issue}
@@ -302,8 +303,9 @@ The cost increases with the dimensionality because each additional predicate is 
 
 \ewu{Is this setion for "solving hard problems", or examining the limitations of basic on multi-query errors?}
 
-In this section, we further study the performance of \sys in solving hard problems. In particular, we conduct two sets of experiments: the first experiment evaluate \sys with incomplete complaint sets; the second illustrate \sys's capability in handling multiple errors. 
-\emph{Incomplete Complaint Set:}
+In this section, we further study the performance of \sys in solving hard problems. In particular, we conduct two sets of experiments: the first experiment evaluate \sys with incomplete complaint sets; the second illustrate \sys's capability in handling multiple errors.
+ 
+\stitle{Incomplete Complaint Set:} \looseness -1
 The first experiment (Figures~\ref{f:falsenegative_time} and~\ref{f:falsenegative_acc}) varies the fase positive rate in incomplete complaint sets.
 We increase the rate from $0$ ($0\%$ missing in the complaint set) to $.75$ ($75\%$ are missing).  
 We find that reducing the size of the submitted complaint set naturally improves the repair performance,
