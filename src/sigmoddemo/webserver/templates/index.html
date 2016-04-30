@@ -109,7 +109,7 @@
 	      font-weight: bold;
 		  background: yellow;
 	  }
-	  .highlightcompl {
+	  tr.highlightcompl td {
 	      font-weight: bold;
 		  background: #FAAFBA;
 	  }
@@ -151,7 +151,7 @@
       </div>
       <div class="col-md-4">
   	  <label><input type="checkbox" id="selectall" style="zoom:1.5; margin-right:2px; margin-left:5px"> select all   </label>  
-  	  <label><input type="checkbox" id="selectall" style="zoom:1.5; margin-right:2px; margin-left:5px"> select all compl</label>
+  	  <label><input type="checkbox" id="selectall" style="zoom:1.5; margin-right:2px; margin-left:5px"> select all complaints</label>
       </div>
   </div>
   <div class="row">
@@ -210,8 +210,8 @@
         {{#each header}}<th>{{this}}</th>{{/each}}
       </tr>
       {{#each rows}}
-        <tr class="{{#if iscomplaint}}complaint{{/if}}">
-          {{#each data}}<td>{{this}}</td>{{/each}}
+        <tr id="row-{{id}}" class="table_data {{#if iscomplaint}}complaint{{/if}}">
+          {{#each data}}<td>{{this.clean}}</td>{{/each}}
         </tr>
       {{/each}}
     </tbody>

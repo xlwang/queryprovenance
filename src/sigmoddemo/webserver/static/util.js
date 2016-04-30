@@ -1,6 +1,8 @@
 var app = (function() {
 
+	var exp_id = 0;
 	var workload = null;
+	var workloadname = null;
 	var modifiedQueryId = null;
 	var querylogsize = null;
 	var workloaddata = null;
@@ -37,11 +39,14 @@ var app = (function() {
 	}
 
 	var loadWorkload = function(workload) {
+		exp_id = exp_id + 1;
+		workloadname = workload;
 		renderQueryLog({})
 		$("#datatable-container").empty();
 		var data = {
 			workload: workload,
-			querylogsize: querylogsize
+			querylogsize: querylogsize,
+			exp_id: exp_id
 		};
 		$.get("/workload/", data, function(resp) {
 			renderWorkload(resp);
@@ -51,11 +56,9 @@ var app = (function() {
 
 	var renderWorkload = function(workloadData) {
 		workloaddata = workloadData;
-		var source = $("#table-template").html();
-		var template = Handlebars.compile(source);
-		$("#datatable-container").html(template(workloadData.table));
-
+		
 		renderQueryLog(workloadData);
+		renderWorkloadData();
 	}
 
 
@@ -77,27 +80,53 @@ var app = (function() {
 					$("#q-" + q.id + "-dirty td").html('' + q.query.dirtyquery);
 					$("#q-" + q.id + "-clean").removeClass('corrupted');
 					$("#q-" + q.id + "-dirty").removeClass('dirty');
-					workloaddata.table.rows[5].iscomplaint = false;
+					renderWorkloadData();
 				} else {
 					$("#q-" + q.id + ' pre').addClass('highlight');
 					modifiedQueryId = q.id;
-					q.query.dirtyquery = q.query.cached;
-					q.query.corrupted = true;
-					var tmp = $("#q-" + q.id + "-dirty td")
-					$("#q-" + q.id + "-clean").addClass('corrupted');
-					$("#q-" + q.id + "-dirty td").html('' + q.query.dirtyquery);
-					$("#q-" + q.id + "-dirty").addClass('dirty');
-					workloaddata.table.rows[5].iscomplaint = true;
-				
+					// corrupt current query
+					var data = {
+						workload: workloadname,
+						query: q.id,
+						exp_id: exp_id,
+						qlogsize: workloaddata.queries.length
+					};
+					$.get("/corrupt/", data, function(resp) {
+						q.query.dirtyquery = resp.dirtyquery;
+						renderCorruptQuery(q);
+					});
 				}
-				$("#datatable-container").empty();
-				var source = $("#table-template").html();
-				var template = Handlebars.compile(source);
-				$("#datatable-container").html(template(workloaddata.table));
 			});
 		});
 
 	};
+	
+	var renderCorruptQuery = function(query) {
+		var q = query;
+		q.query.corrupted = true;
+		var tmp = $("#q-" + q.id + "-dirty td")
+		$("#q-" + q.id + "-clean").addClass('corrupted');
+		$("#q-" + q.id + "-dirty td").html('' + q.query.dirtyquery);
+		$("#q-" + q.id + "-dirty").addClass('dirty');
+		
+		renderWorkloadData();
+	}
+	
+	var renderWorkloadData = function() {
+		$("#datatable-container").empty();
+		var source = $("#table-template").html();
+		var template = Handlebars.compile(source);
+		$("#datatable-container").html(template(workloaddata.table));
+		$(".table_data td").on("click", function() {
+		    var tr = $(this).parent();
+		    if(tr.hasClass("highlightcompl")) {
+		        tr.removeClass("highlightcompl");
+		    } else {
+		        tr.addClass("highlightcompl");
+		    }
+
+		});
+	}
 
 	var computeComplaints = function() {
 		if (modifiedQueryId !== null) {

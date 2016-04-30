@@ -9,7 +9,7 @@ Read about it online.
 eugene wu 2015
 """
 
-import os
+import os, random
 import json
 from sqlalchemy import *
 from sqlalchemy.pool import NullPool
@@ -45,40 +45,125 @@ def workloads():
   workloads = [dict(id=i, workload=w) for i,w in enumerate(workloads)]
   return jsonify(workloads=workloads)
 
+@app.route('/corrupt/', methods = ["POST", "GET"])
+def corrupt():
+    workload = request.args.get('workload', 'default')
+    
+    expid = request.args.get('exp_id', 0)    
+    queryid = request.args.get('query', 0)
+    querylogsize = int(request.args.get('qlogsize', 0))
+    
+    corrupt_query = """select query from qlogs where expid = %d and mode = 'dirty' and qid = %d""" 
+    db_query_dirty = """select * from %s_dirty_%d"""
+    db_query_clean = """select * from %s_clean_%d"""
 
+    primary_key = []
+    if workload == 'default':
+        primary_key = set(["employer_id"])
+        db_query_dirty = db_query_dirty % ('taxes', querylogsize)
+        db_query_clean = db_query_clean % ('taxes', querylogsize)
+        corrupt_query = """select query from qlogs where expid = %d and mode = 'dirty' and qid = %d""" % (0, int(queryid))
+        print "default"
+    elif workload == 'TPC-C':
+        print "corrupt tpcc"
+    elif workload == 'TATP':
+        print "corrupt tatp"
+    else:
+        print "corrupt synthetic"
+    # load queries
+    header_and_query = g.conn.execute(corrupt_query)
+    raw_query = [dict(zip(header_and_query.keys(), list(row))) for row in header_and_query]
 
-@app.route('/workload/', methods=["POST", "GET"])
-def workload():
-  workload = request.args.get('workload', 'default')
-  querylogsize = request.args.get('querylogsize', 10)
-  return jsonify(**get_workload(workload, int(querylogsize)))
-
-
-def get_workload(workload='default', querylogsize = 10):
-  if workload == 'default':
-    queries = [
-        dict(query = "UPDATE salary SET tax = 0.3 * income WHERE income > 87500", corrupted = (False), dirtyquery = "", cached = "UPDATE salary SET tax = 0.3 * income WHERE income > 85700"),
-        dict(query = "UPDATE salary SET pay = income - tax", corrupted = (False), dirtyquery = "", cached = "UPDATE salary SET pay = income - tax"),
-        dict(query = "INSERT INTO salary VALUES (4, 21625, 86500, 64875)", corrupted = (False), dirtyquery = "", cached = "INSERT INTO salary VALUES (4, 12625, 86500, 64875)")
-    ]
-    ncols = 5
-    nrows = 10
-    if len(queries) < querylogsize:
-        querylogsize = len(queries)
+    query = []
+    for i, q in enumerate(raw_query):
+        query = q['query']
         
-    queries = [ dict(query=q, id=i) for i, q in enumerate(queries[0:querylogsize])]
-    header = [ "header-%s" % i  for i in xrange(ncols) ]
-    rows = [
-        dict(
-          data=["v-%s" % j for j in xrange(ncols)],
-          iscomplaint=(i == 5)
-        )
-        for i in xrange(nrows)
-    ]
+    # load data
+    header_and_data_clean = g.conn.execute(db_query_clean)
+    header_and_data_dirty = g.conn.execute(db_query_dirty)
+
+    header = []
+    for i, attrname in enumerate(header_and_data_clean.keys()):
+        header.append(str(attrname))
+   
+    raw_data_clean = [dict(zip(header_and_data_clean.keys(), list(row))) for row in header_and_data_clean]
+
+    clean_rows = {}
+    for i, d in enumerate(raw_data_clean):
+        data = []
+        row_key = ""
+        for attrname in header:
+            if attrname in primary_key:
+                row_key = row_key + "\t" + str(d[attrname])
+            data.append(dict(clean = str(d[attrname]), iscorrect = True, dirty = ""))
+        clean_rows[row_key] = dict(data = data, iscomplaint = False, id = i, indirty = False)
+
+    rows = []
+    raw_data_dirty = [dict(zip(header_and_data_dirty.keys(), list(row))) for row in header_and_data_dirty]
+    for i, d in enumerate(raw_data_dirty):
+        data = []
+        row_key = ""
+        for attrname in header:
+            if attrname in primary_key:
+                row_key = row_key + "\t" + str(d[attrname])
+            data.append(dict(clean = str(d[attrname]), iscorrect = True, dirty = ""))
+    
+        # compare data and data clean
+        iscomplaint = False
+        if row_key in clean_rows:
+            data_clean = clean_rows[row_key]
+
+            for j in range(len(data_clean['data'])):
+                if data_clean['data'][j]['clean'] != data[j]['clean']:
+                    data[j]['dirty'] = data[j]['clean']
+                    data[j]['clean'] = data_clean['data'][j]['clean']
+                    data[j]['iscorrect']= False
+                    iscomplaint = True
+            data_clean['indirty'] = True
+            clean_rows[row_key] = data_clean
+        else:
+            # data not exist
+            for j in len(data):
+                data[j]['dirty'] = data[j]['clean']
+                data[j]['clean'] = "NULL"
+                data[j]['iscorrect'] = False
+            iscomplaint = True
+        rows.append(dict(data = data, iscomplaint = iscomplaint, id = i))
+
+    # check clean data
+    i = len(rows)
+    for key in clean_rows:
+        data_clean = clean_rows[key]
+        if data_clean['indirty'] == False:
+            data = []
+            for i in len(data_clean['data']):
+                data.append(dict(clean = data_clean['data'][i]['clean'], iscorrect = False, dirty = "NULL"))   
+            rows.append(dict(data = data, iscomplaint = True, id = i))
+        i = i + 1
+
     table = dict(
         header=header,
         rows=rows
     )
+    return jsonify(dirtyquery=query, table = table)
+
+@app.route('/workload/', methods=["POST", "GET"])
+def workload(): 
+  workload = request.args.get('workload', 'default')
+  querylogsize = request.args.get('querylogsize', 10)
+  expid = request.args.get('exp_id', 0)
+  return jsonify(**get_workload(workload, int(querylogsize), expid))
+
+
+def get_workload(workload='default', querylogsize = 10, expid = 0):
+  db_query = ""
+  queries_query = """select query from qlogs where expid = %d and mode = 'clean' order by qid limit %d"""
+  if workload == 'default':
+    expid = 0        
+    # define to database and query 
+    db_query = """select * from taxes_clean_%d"""
+    queries_query = queries_query % (int(expid), int(querylogsize))
+    
   elif workload == 'TPC-C':
       # load tpcc
       print('load tpcc data')
@@ -88,7 +173,40 @@ def get_workload(workload='default', querylogsize = 10):
   else:
       # load synthetic
       print('load synthetic data')
-
+      
+  # load queries
+  header_and_query = g.conn.execute(queries_query)
+  raw_query = [dict(zip(header_and_query.keys(), list(row))) for row in header_and_query]
+  print raw_query
+  queries = []
+  for i, q in enumerate(raw_query):
+      query=q['query']
+      queries.append(dict(query = str(query), corrupted=(False), dirtyquery = ""))
+  queries = [ dict(query=q, id=i) for i, q in enumerate(queries[0:len(queries)])]
+  
+  # load table data
+  db_query = db_query % len(queries)
+  print db_query
+  header_and_data = g.conn.execute(db_query)
+  
+  header = []
+  for i, attrname in enumerate(header_and_data.keys()):
+      header.append(str(attrname))
+       
+  raw_data = [dict(zip(header_and_data.keys(), list(row))) for row in header_and_data]
+  
+  rows = []
+  for i, d in enumerate(raw_data):
+      data = []
+      for attrname in header:
+          data.append(dict(clean = str(d[attrname]), iscorrect = True, dirty = ""))
+      rows.append(dict(data = data, iscomplaint = False, id = i))
+      
+  table = dict(
+      header=header,
+      rows=rows
+  )
+          
   return dict(queries=queries, table=table)
 
 
