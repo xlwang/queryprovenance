@@ -48,10 +48,13 @@ def workloads():
 @app.route('/corrupt/', methods = ["POST", "GET"])
 def corrupt():
     workload = request.args.get('workload', 'default')
-    
+    # get parameters
     expid = request.args.get('exp_id', 0)    
     queryid = request.args.get('query', 0)
     querylogsize = int(request.args.get('qlogsize', 0))
+    mode = request.args.get('mode', 'corrupt')
+    
+    # corrupt query: call java function 
     
     corrupt_query = """select query from qlogs where expid = %d and mode = 'dirty' and qid = %d""" 
     db_query_dirty = """select * from %s_dirty_%d"""
@@ -128,18 +131,16 @@ def corrupt():
                 data[j]['clean'] = "NULL"
                 data[j]['iscorrect'] = False
             iscomplaint = True
-        rows.append(dict(data = data, iscomplaint = iscomplaint, id = i))
+        rows.append(dict(data = data, iscomplaint = iscomplaint, id = row_key))
 
     # check clean data
-    i = len(rows)
     for key in clean_rows:
         data_clean = clean_rows[key]
         if data_clean['indirty'] == False:
             data = []
             for i in len(data_clean['data']):
                 data.append(dict(clean = data_clean['data'][i]['clean'], iscorrect = False, dirty = "NULL"))   
-            rows.append(dict(data = data, iscomplaint = True, id = i))
-        i = i + 1
+            rows.append(dict(data = data, iscomplaint = True, id = key))
 
     table = dict(
         header=header,
@@ -152,17 +153,20 @@ def workload():
   workload = request.args.get('workload', 'default')
   querylogsize = request.args.get('querylogsize', 10)
   expid = request.args.get('exp_id', 0)
-  return jsonify(**get_workload(workload, int(querylogsize), expid))
+  return jsonify(**get_workload(workload, int(querylogsize), expid, 'clean', ''))
 
 
-def get_workload(workload='default', querylogsize = 10, expid = 0):
+def get_workload(workload='default', querylogsize = 10, expid = 0, mode = 'clean', algorithm = ''):
   db_query = ""
-  queries_query = """select query from qlogs where expid = %d and mode = 'clean' order by qid limit %d"""
+  queries_query = """select query from qlogs where expid = %d and mode = '%s' and algorithm = '%s' order by qid limit %d"""
+  primary_key = []
+  
   if workload == 'default':
     expid = 0        
     # define to database and query 
-    db_query = """select * from taxes_clean_%d"""
-    queries_query = queries_query % (int(expid), int(querylogsize))
+    db_query = """select * from taxes_%s_%d"""
+    queries_query = queries_query % (int(expid), mode, algorithm, int(querylogsize))
+    primary_key = set(["employer_id"])
     
   elif workload == 'TPC-C':
       # load tpcc
@@ -177,7 +181,6 @@ def get_workload(workload='default', querylogsize = 10, expid = 0):
   # load queries
   header_and_query = g.conn.execute(queries_query)
   raw_query = [dict(zip(header_and_query.keys(), list(row))) for row in header_and_query]
-  print raw_query
   queries = []
   for i, q in enumerate(raw_query):
       query=q['query']
@@ -185,8 +188,7 @@ def get_workload(workload='default', querylogsize = 10, expid = 0):
   queries = [ dict(query=q, id=i) for i, q in enumerate(queries[0:len(queries)])]
   
   # load table data
-  db_query = db_query % len(queries)
-  print db_query
+  db_query = db_query % (mode, len(queries))
   header_and_data = g.conn.execute(db_query)
   
   header = []
@@ -198,9 +200,12 @@ def get_workload(workload='default', querylogsize = 10, expid = 0):
   rows = []
   for i, d in enumerate(raw_data):
       data = []
+      row_key = ""
       for attrname in header:
+          if attrname in primary_key:
+              row_key = row_key + "\t" + str(d[attrname])
           data.append(dict(clean = str(d[attrname]), iscorrect = True, dirty = ""))
-      rows.append(dict(data = data, iscomplaint = False, id = i))
+      rows.append(dict(data = data, iscomplaint = False, id = row_key))
       
   table = dict(
       header=header,
@@ -209,7 +214,38 @@ def get_workload(workload='default', querylogsize = 10, expid = 0):
           
   return dict(queries=queries, table=table)
 
-
+@app.route('/updatecomplaint/', methods=["POST", "GET"])
+def updatecomplaint(): 
+  expid = request.args.get('exp_id', 0)
+  row_keys = request.args.get('row_keys', '')
+  add_or_remove = request.args.get('addorremove', '1')
+  
+  row_keys = row_keys.replace('row-', '').strip()
+  # for test
+  expid = 0
+  # get current compl_list
+  compl_list = ""
+  if row_keys == "selectall":
+      if add_or_remove != '0':
+          compl_list = "selectall"
+  elif row_keys == "selectallcompl":
+      if add_or_remove != '0':
+          compl_list = "selectallcompl"
+  else:
+      complquery = """select compl_list from qfixconfig where expid = %d""" % int(expid)
+      header_and_data = g.conn.execute(complquery)
+      raw_data = [dict(zip(header_and_data.keys(), list(row))) for row in header_and_data]
+      
+      cur_compl = raw_data[0]['compl_list'].split(';')
+      if add_or_remove == '1':
+          compl_list = raw_data[0]['compl_list'] + row_keys + ";"
+      else:
+          for compl in cur_compl:
+              if compl != row_keys and len(str(compl)) > 0:
+                  compl_list = compl_list + compl + ";"
+  update_query = """update qfixconfig set compl_list ='%s' where expid = %d""" % (compl_list, int(expid))
+  g.conn.execute(update_query)
+  return jsonify(update = "")
 
 
 @app.route('/', methods=["POST", "GET"])
@@ -245,9 +281,19 @@ def complaints():
 
 @app.route('/solve/')
 def solve():
-  q = "UPDATE blah\nSET x=99"
-  qfix_q = "UPDATE blah\nSET x=y+1"
-  alt_q = "UPDATE blah\nSET x=y+10"
+  workload = request.args.get('workload', 'default')
+  querylogsize = request.args.get('querylogsize', 10)
+  expid = request.args.get('exp_id', 0)
+  
+  # get qfix result
+  query_and_data = get_workload(workload, int(querylogsize), expid, 'fixed', 'qfix')
+  qfix_q = query_and_data['queries']
+  table1 = query_and_data['table']
+  
+  query_and_data2 = get_workload(workload, int(querylogsize), expid, 'fixed', 'alt')
+  alt_q = query_and_data2['queries']
+  table2 = query_and_data2['table']
+  
   data = dict(
       query=q,
       qfix_query = qfix_q,

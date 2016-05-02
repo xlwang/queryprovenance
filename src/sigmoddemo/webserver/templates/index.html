@@ -24,10 +24,16 @@
       body {
         margin-top: 2em;
       }
-      tr.complaint td {
-        color: red;
+      tr.complaint td p {
         font-weight: bold;
       }
+	  tr.complaint td p.cross {
+		color: red;
+	  	text-decoration: line-through;
+	  }
+	  tr.complaint td p.correct {
+		color: green;
+	  }
 
       li {
         margin-bottom:5px;
@@ -150,8 +156,8 @@
   	  <h4> Final database state </h4>
       </div>
       <div class="col-md-4">
-  	  <label><input type="checkbox" id="selectall" style="zoom:1.5; margin-right:2px; margin-left:5px"> select all   </label>  
-  	  <label><input type="checkbox" id="selectall" style="zoom:1.5; margin-right:2px; margin-left:5px"> select all complaints</label>
+  	  <label><input type="checkbox" onclick="app.selectTuple(1,$(this))" id="selectall" style="zoom:1.5; margin-right:2px; margin-left:5px; visibility: hidden"> <p id ="selectalltext" style="display:inline; visibility: hidden">select all </p>  </label>  
+  	  <label><input type="checkbox" onclick="app.selectTuple(2, $(this))" id="selectallcompl" style="zoom:1.5; margin-right:2px; margin-left:5px; visibility: hidden"> <p id ="selectallcompltext" style="display:inline; visibility: hidden">select all complaints</p></label>
       </div>
   </div>
   <div class="row">
@@ -204,14 +210,14 @@
 {% raw %}
 
 <script id="table-template" type="text/x-handlebars-template">
-  <table class="table table-striped">
+  <table id = "table-workload" class="table table-striped">
     <tbody>
       <tr>
         {{#each header}}<th>{{this}}</th>{{/each}}
       </tr>
       {{#each rows}}
         <tr id="row-{{id}}" class="table_data {{#if iscomplaint}}complaint{{/if}}">
-          {{#each data}}<td>{{this.clean}}</td>{{/each}}
+          {{#each data}}<td><p class = "correct" style="display:inline">{{this.clean}}</p> <p class="cross" style="display:inline"> {{this.dirty}}</p></td>{{/each}}
         </tr>
       {{/each}}
     </tbody>
