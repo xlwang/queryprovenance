@@ -14,6 +14,7 @@ import json
 from sqlalchemy import *
 from sqlalchemy.pool import NullPool
 from flask import Flask, request, render_template, g, redirect, Response, jsonify
+from subprocess import call
 
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 app = Flask(__name__, template_folder=tmpl_dir)
@@ -53,16 +54,18 @@ def corrupt():
     queryid = request.args.get('query', 0)
     querylogsize = int(request.args.get('qlogsize', 0))
     mode = request.args.get('mode', 'corrupt')
-    
+
     # corrupt query: call java function 
     
     corrupt_query = """select query from qlogs where expid = %d and mode = 'dirty' and qid = %d""" 
-    db_query_dirty = """select * from %s_dirty_%d"""
-    db_query_clean = """select * from %s_clean_%d"""
+    db_query_dirty = ""
+    db_query_clean = ""
 
     primary_key = []
     if workload == 'default':
         primary_key = set(["employer_id"])
+        db_query_dirty = """select * from %s_dirty_%d order by employer_id"""
+        db_query_clean = """select * from %s_clean_%d order by employer_id"""
         db_query_dirty = db_query_dirty % ('taxes', querylogsize)
         db_query_clean = db_query_clean % ('taxes', querylogsize)
         corrupt_query = """select query from qlogs where expid = %d and mode = 'dirty' and qid = %d""" % (0, int(queryid))
@@ -72,7 +75,16 @@ def corrupt():
     elif workload == 'TATP':
         print "corrupt tatp"
     else:
-        print "corrupt synthetic"
+        call(["java", "-jar", "synthetic.jar", "5432", "dbconn.config", "-exp", expid, "-option", "2", "-qidx", queryid])
+        primary_key = set(["id"])
+        db_query_dirty = """select * from %s_dirty_%d order by id"""
+        db_query_clean = """select * from %s_clean_%d order by id"""
+        db_query_dirty = db_query_dirty % ('synthetic', querylogsize-1)
+        db_query_clean = db_query_clean % ('synthetic', querylogsize-1)
+        corrupt_query = """select query from qlogs where expid = %d and mode = 'dirty' and qid = %d""" % (int(expid), int(queryid))
+        print db_query_dirty
+        print corrupt_query
+        
     # load queries
     header_and_query = g.conn.execute(corrupt_query)
     raw_query = [dict(zip(header_and_query.keys(), list(row))) for row in header_and_query]
@@ -158,7 +170,7 @@ def workload():
 
 def get_workload(workload='default', querylogsize = 10, expid = 0, mode = 'clean', algorithm = ''):
   db_query = ""
-  queries_query = """select query from qlogs where expid = %d and mode = '%s' and algorithm = '%s' order by qid limit %d"""
+  queries_query = """select query, correct from qlogs where expid = %d and mode = '%s' and algorithm = '%s' order by qid limit %d"""
   primary_key = []
   
   if workload == 'default':
@@ -175,43 +187,55 @@ def get_workload(workload='default', querylogsize = 10, expid = 0, mode = 'clean
       # load tatp
       print('load tatp data')
   else:
-      # load synthetic
-      print('load synthetic data')
+      # generate data
+      if mode == 'clean' and algorithm == '':
+          call(["java", "-jar", "synthetic.jar", "5432", "dbconn.config", "-exp", expid, "-option", "0"])
+          call(["java", "-jar", "synthetic.jar", "5432", "dbconn.config", "-exp", expid, "-option", "1", "-qsize", str(querylogsize)])
+          # load synthetic
+          configquery = """insert into qfixconfig values (%d, '', 'qfix;alt', '%s')""" % (int(expid), "synthetic")
+          g.conn.execute(configquery)
+      
+      db_query = """select * from synthetic_%s_%d order by id"""
+      queries_query = queries_query % (int(expid), mode, algorithm, int(querylogsize))
+      primary_key = set(["id"])
       
   # load queries
+  print queries_query
   header_and_query = g.conn.execute(queries_query)
   raw_query = [dict(zip(header_and_query.keys(), list(row))) for row in header_and_query]
   queries = []
   for i, q in enumerate(raw_query):
       query=q['query']
-      queries.append(dict(query = str(query), corrupted=(False), dirtyquery = ""))
+      queries.append(dict(query = str(query), corrupted=(q['correct'] == 0), dirtyquery = ""))
   queries = [ dict(query=q, id=i) for i, q in enumerate(queries[0:len(queries)])]
   
   # load table data
-  db_query = db_query % (mode, len(queries))
-  header_and_data = g.conn.execute(db_query)
-  
   header = []
-  for i, attrname in enumerate(header_and_data.keys()):
-      header.append(str(attrname))
-       
-  raw_data = [dict(zip(header_and_data.keys(), list(row))) for row in header_and_data]
-  
   rows = []
-  for i, d in enumerate(raw_data):
-      data = []
-      row_key = ""
-      for attrname in header:
-          if attrname in primary_key:
-              row_key = row_key + "\t" + str(d[attrname])
-          data.append(dict(clean = str(d[attrname]), iscorrect = True, dirty = ""))
-      rows.append(dict(data = data, iscomplaint = False, id = row_key))
+  if len(queries) > 0:
+      db_query = db_query % (mode, len(queries) - 1)
+      print db_query
+      header_and_data = g.conn.execute(db_query)
+  
+
+      for i, attrname in enumerate(header_and_data.keys()):
+          header.append(str(attrname))
+       
+      raw_data = [dict(zip(header_and_data.keys(), list(row))) for row in header_and_data]
+  
+      for i, d in enumerate(raw_data):
+          data = []
+          row_key = ""
+          for attrname in header:
+              if attrname in primary_key:
+                  row_key = row_key + "\t" + str(d[attrname])
+              data.append(dict(clean = str(d[attrname]), iscorrect = True, dirty = ""))
+          rows.append(dict(data = data, iscomplaint = False, id = row_key))
       
   table = dict(
       header=header,
       rows=rows
-  )
-          
+  )     
   return dict(queries=queries, table=table)
 
 @app.route('/updatecomplaint/', methods=["POST", "GET"])
@@ -221,8 +245,6 @@ def updatecomplaint():
   add_or_remove = request.args.get('addorremove', '1')
   
   row_keys = row_keys.replace('row-', '').strip()
-  # for test
-  expid = 0
   # get current compl_list
   compl_list = ""
   if row_keys == "selectall":
@@ -277,6 +299,22 @@ def complaints():
 
   return json.dumps(data)
 
+@app.route('/checksolve/')
+def check():
+  
+  expid = request.args.get('exp_id', 0)   
+  # test only
+  complquery = """select compl_list from qfixconfig where expid = %d""" % int(expid)
+  header_and_data = g.conn.execute(complquery)
+  raw_data = [dict(zip(header_and_data.keys(), list(row))) for row in header_and_data]
+  print raw_data
+  cur_compl = raw_data[0]['compl_list'].split(';')
+  print cur_compl
+  num_compl = 0
+  for compl in cur_compl:
+      if len(compl) > 0:
+          num_compl = num_compl + 1
+  return  jsonify(valid = (num_compl > 0))
 
 
 @app.route('/solve/')
@@ -285,21 +323,24 @@ def solve():
   querylogsize = request.args.get('querylogsize', 10)
   expid = request.args.get('exp_id', 0)
   
+  call(["java", "-Djava.library.path=/Users/xlwang/Applications/IBM/ILOG/CPLEX_Studio126/cplex/bin/x86-64_osx", "-jar", "queryfix.jar", "5432", "dbconn.config", expid])
+  
   # get qfix result
-  query_and_data = get_workload(workload, int(querylogsize), expid, 'fixed', 'qfix')
-  qfix_q = query_and_data['queries']
+  query_and_data = get_workload(workload, int(querylogsize)-1, expid, 'fixed', 'qfix')
+  
+  qfix_q = dict(queries = query_and_data['queries'])
   table1 = query_and_data['table']
   
-  query_and_data2 = get_workload(workload, int(querylogsize), expid, 'fixed', 'alt')
-  alt_q = query_and_data2['queries']
+  query_and_data2 = get_workload(workload, int(querylogsize)-1, expid, 'fixed', 'alt')
+  
+  alt_q = dict(queries = query_and_data2['queries'])
   table2 = query_and_data2['table']
   
   data = dict(
-      query=q,
       qfix_query = qfix_q,
       alt_query = alt_q,
-      table1 = get_workload()['table'],
-      table2 = get_workload()['table']
+      table1 = table1,
+      table2 = table2
   )
 
   return jsonify(**data)
@@ -321,7 +362,11 @@ if __name__ == "__main__":
     Show the help text using
         python server.py --help
     """
-
+    # initialize db
+    call(["dropdb", "queryprov"])
+    call(["createdb", "queryprov"])
+    call(["psql","-f", "syntheticsetup.sql", "queryprov"])
+      
     HOST, PORT = host, port
     print "running on %s:%d" % (HOST, PORT)
     app.run(host=HOST, port=PORT, debug=debug, threaded=threaded)

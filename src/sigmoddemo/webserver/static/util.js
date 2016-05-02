@@ -107,8 +107,7 @@ var app = (function() {
 		_.each(queries, function(q, i) {
 			$("#q-" + q.id).click(function() {
 				// $("#querytext").text(q.query);
-				if ($("#q-" + q.id + ' pre').hasClass('highlight')) {
-					$("#q-" + q.id + ' pre').removeClass('highlight');
+				if ($("#q-" + q.id + ' pre').hasClass('highlight')) {				
 					// corrupt current query
 					var data = {
 						workload: workloadname,
@@ -123,7 +122,6 @@ var app = (function() {
 						renderCorruptQuery(q);
 					});
 				} else {
-					$("#q-" + q.id + ' pre').addClass('highlight');
 					// corrupt current query
 					var data = {
 						workload: workloadname,
@@ -146,12 +144,14 @@ var app = (function() {
 	var renderCorruptQuery = function(query) {
 		var q = query;
 		if (q.query.dirtyquery != "") {
+			$("#q-" + q.id + ' pre').addClass('highlight');
 			q.query.corrupted = true;
 			var tmp = $("#q-" + q.id + "-dirty td")
 			$("#q-" + q.id + "-clean").addClass('corrupted');
 			$("#q-" + q.id + "-dirty td").html('' + q.query.dirtyquery);
 			$("#q-" + q.id + "-dirty").addClass('dirty');
 		} else {
+			$("#q-" + q.id + ' pre').removeClass('highlight');
 			q.query.corrupted = false;
 			$("#q-" + q.id + "-dirty td").html('' + q.query.dirtyquery);
 			$("#q-" + q.id + "-clean").removeClass('corrupted');
@@ -199,9 +199,23 @@ var app = (function() {
 
 
 	var submitPressed = function() {
-		$.get("/solve/", {
-			qid: modifiedQueryId
-		}, function(resp) {
+		$("#result-view").hide();
+		$.get("/checksolve/", {exp_id: exp_id}, function(resp) {
+			if (resp.valid) {
+				solveRepairs();
+			} else {
+				alert("Please select at least 1 tuple!");
+			}
+		});
+	};
+	
+	var solveRepairs = function() {
+		var data = {
+			workload: workloadname,
+			querylogsize: querylogsize,
+			exp_id: exp_id
+		}
+		$.get("/solve/", data, function(resp) {
 			$("#result-view").show();
 			renderRepairs(resp);
 		});
@@ -213,9 +227,24 @@ var app = (function() {
 		$("#qfix-data-container").html(template(opts.table1));
 		$("#alt-data-container").html(template(opts.table2));
 
-		$("#err_q").text(opts.query);
-		$("#qfix_q").text(opts.qfix_query);
-		$("#alt_q").text(opts.alt_query);
+		var source1 = $("#fixquerylog-template").html();
+		var template1 = Handlebars.compile(source1);
+		if (opts.qfix_query.queries.length > 0) {
+			$("#qfix_q").text("Succeed!");
+			$("#qfix_q").addClass("succeed");
+			$("#qfix_query-container").html(template1(opts.qfix_query));
+		} else {
+			$("#qfix_q").text("Failed!");
+			$("#qfix_q").addClass("failed");
+		}
+		if (opts.alt_query.queries.length > 0) {
+			$("#alt_q").text("Succeed!");
+			$("#alt_q").addClass("succeed");
+			$("#alt_query-container").html(template1(opts.alt_query));
+		} else {
+			$("#alt_q").text("Failed!");
+			$("#alt_q").addClass("failed");
+		}
 	};
 	
 	return {
@@ -227,7 +256,8 @@ var app = (function() {
 		renderWorkload: renderWorkload,
 		renderRepairs: renderRepairs,
 		renderComplaints: renderComplaints,
-		selectTuple: selectTuple
+		selectTuple: selectTuple,
+		solveRepairs: solveRepairs
 	};
 
 })()

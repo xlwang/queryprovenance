@@ -86,16 +86,20 @@
 	  	text-decoration: line-through;
 	  }
 	  .corrupted td {
-	  	  	text-decoration: line-through;
-	  	  }
+	  	text-decoration: line-through;
+	  }
+	  .fixed td {
+  	  	font-weight: bold;
+  		color: blue;
+	  }
 	  
 	  #querylog li pre tr.dirty td {
 	  	color: red;
 		font-weight: bold;
 	  }
 	  .dirty td {
-	  	  	color: red;
-	  		font-weight: bold;
+	  	color: red;
+	  	font-weight: bold;
 	  }
 	  
       #datatable-container {
@@ -122,6 +126,14 @@
 	  label {
 	      padding-left: 15px;
 	      text-indent: -15px;
+	  }
+	  .Succeed {
+	  	color: green;
+		font-size: 18px;
+	  }
+	  .failed {
+	  	color: red;
+		font-size: 18px;
 	  }
     </style>
   </head>
@@ -174,23 +186,16 @@
 
 
   <div id="result-view" style="display: none">
-    <div class="row" style="margin-top: 3em">
-      <div class="col-md-12" style="text-align: center">
-        <div class="jumbotron">
-			<h3>Corrupt Queries</h3>
-          <pre id="err_q"></pre>
-        </div>
-      </div>
-    </div>
-
     <div class="row">
       <div class="col-md-6">
         <h3>QFix</h3>
-        <pre id="qfix_q">  </pre>
+		<pre id="qfix_q">  </pre>
+        <div id="qfix_query-container"></div>
       </div>
       <div class="col-md-6">
         <h3>Decision Tree</h3>
-        <pre id="alt_q"> </pre>
+		<pre id="alt_q"> </pre>
+        <div id="alt_query-container"></div>
       </div>
     </div>
   </div>
@@ -231,6 +236,16 @@
     <li id="q-{{id}}"><!-- class="btn btn-link">-->
       <pre><table><tbody><tr id = "q-{{id}}-clean" class = "{{#if query.corrupted}}corrupted{{/if}}"><td>{{query.query}} </td></tr>
 <tr id = "q-{{id}}-dirty" class = "{{#if query.corrupted}}dirty{{/if}}"><td>{{query.dirtyquery}}</td></tr></tbody></table></pre>
+    </li>
+    {{/each}}
+  </ul>
+</script>
+
+<script id="fixquerylog-template" type="text/x-handlebars-template">
+  <ul id="querylog" class="list-unstyled">
+    {{#each queries}}
+    <li id="q-{{id}}"><!-- class="btn btn-link">-->
+      <pre><table><tbody><tr id = "q-{{id}}-fixed" class = "{{#if query.corrupted}}fixed{{/if}}"><td>{{query.query}}</td></tbody></table></pre>
     </li>
     {{/each}}
   </ul>
