@@ -322,29 +322,60 @@ def solve():
   workload = request.args.get('workload', 'default')
   querylogsize = request.args.get('querylogsize', 10)
   expid = request.args.get('exp_id', 0)
+  clearstats = """delete from stats where expid = %d""" % int(expid)
+  g.conn.execute(clearstats)
   
   call(["java", "-Djava.library.path=/Users/xlwang/Applications/IBM/ILOG/CPLEX_Studio126/cplex/bin/x86-64_osx", "-jar", "queryfix.jar", "5432", "dbconn.config", expid])
   
   # get qfix result
-  query_and_data = get_workload(workload, int(querylogsize)-1, expid, 'fixed', 'qfix')
+  query_and_data = get_workload(workload, int(querylogsize), expid, 'fixed', 'qfix')
   
   qfix_q = dict(queries = query_and_data['queries'])
   table1 = query_and_data['table']
   
-  query_and_data2 = get_workload(workload, int(querylogsize)-1, expid, 'fixed', 'alt')
+  query_and_data2 = get_workload(workload, int(querylogsize), expid, 'fixed', 'alt')
   
   alt_q = dict(queries = query_and_data2['queries'])
   table2 = query_and_data2['table']
+  
+  # get statistics
+  stats_query = """select * from stats where expid = %d and algorithm = '%s'"""
+  qfix_stats_query = stats_query % (int(expid), 'qfix')
+  header_and_data = g.conn.execute(qfix_stats_query)
+  raw_data = [dict(zip(header_and_data.keys(), list(row))) for row in header_and_data]
+  qfix_stats = "Failed!"
+  print raw_data
+  if len(raw_data) > 0:
+      qfix_stats = "Succeed! Time: %f; Precision: %f; Recall: %f" % (raw_data[0]['exetime'], raw_data[0]['precision'], raw_data[0]['recall'])
+      #qfix_stats = dict(time = raw_data[0]['exetime'], precision = raw_data[0]['precision'], recall = raw_data[0]['recall'])
+  
+  alt_stats_query = stats_query % (int(expid), 'alt')
+  header_and_data = g.conn.execute(alt_stats_query)
+  raw_data = [dict(zip(header_and_data.keys(), list(row))) for row in header_and_data]
+  alt_stats = "Failed!"
+  if len(raw_data) > 0:
+      alt_stats = "Succeed! Time: %f; Precision: %f; Recall: %f" % (raw_data[0]['exetime'], raw_data[0]['precision'], raw_data[0]['recall'])
+      #dict(time = raw_data[0]['exetime'], precision = raw_data[0]['precision'], recall = raw_data[0]['recall'])
   
   data = dict(
       qfix_query = qfix_q,
       alt_query = alt_q,
       table1 = table1,
-      table2 = table2
+      table2 = table2,
+      qfix_stats = qfix_stats,
+      alt_stats = alt_stats
   )
 
   return jsonify(**data)
 
+@app.route('/getexpid/')
+def getexp():
+    query = """select max(expid)+1 as expid from qfixconfig"""
+    header_and_data = g.conn.execute(query)
+    raw_data = [dict(zip(header_and_data.keys(), list(row))) for row in header_and_data]
+    print raw_data
+    expid = raw_data[0]['expid']
+    return jsonify(expid = expid)
 
 if __name__ == "__main__":
   import click

@@ -66,7 +66,20 @@ var app = (function() {
 	}
 
 	var loadWorkload = function(workload) {
-		exp_id = exp_id + 1;
+		if (workload != 'Synthetic') {
+			alert("Workload not available, check back later!");
+		} else {
+			$("#result-view").hide();
+			$("#qfix-data-container").empty();
+			$("#alt_query-container").empty();
+			$.get("/getexpid/", {}, function(resp){
+				exp_id = resp.expid;
+				loadFullWorkload(workload);
+			});
+		}
+	};
+	
+	var loadFullWorkload = function(workload) {
 		workloadname = workload;
 		renderQueryLog({})
 		$("#datatable-container").empty();
@@ -78,8 +91,7 @@ var app = (function() {
 		$.get("/workload/", data, function(resp) {
 			renderWorkload(resp);
 		});
-
-	};
+	}
 
 	var renderWorkload = function(workloadData) {
 		workloaddata = workloadData;
@@ -106,6 +118,9 @@ var app = (function() {
 
 		_.each(queries, function(q, i) {
 			$("#q-" + q.id).click(function() {
+				$("#result-view").hide();
+				$("#qfix-data-container").empty();
+				$("#alt_query-container").empty();
 				// $("#querytext").text(q.query);
 				if ($("#q-" + q.id + ' pre').hasClass('highlight')) {				
 					// corrupt current query
@@ -200,6 +215,8 @@ var app = (function() {
 
 	var submitPressed = function() {
 		$("#result-view").hide();
+		$("#qfix-data-container").empty();
+		$("#alt_query-container").empty();
 		$.get("/checksolve/", {exp_id: exp_id}, function(resp) {
 			if (resp.valid) {
 				solveRepairs();
@@ -230,7 +247,7 @@ var app = (function() {
 		var source1 = $("#fixquerylog-template").html();
 		var template1 = Handlebars.compile(source1);
 		if (opts.qfix_query.queries.length > 0) {
-			$("#qfix_q").text("Succeed!");
+			$("#qfix_q").text(opts.qfix_stats);
 			$("#qfix_q").addClass("succeed");
 			$("#qfix_query-container").html(template1(opts.qfix_query));
 		} else {
@@ -238,7 +255,7 @@ var app = (function() {
 			$("#qfix_q").addClass("failed");
 		}
 		if (opts.alt_query.queries.length > 0) {
-			$("#alt_q").text("Succeed!");
+			$("#alt_q").text(opts.alt_stats);
 			$("#alt_q").addClass("succeed");
 			$("#alt_query-container").html(template1(opts.alt_query));
 		} else {
@@ -253,6 +270,7 @@ var app = (function() {
 		renderQueryLog: renderQueryLog,
 		submitPressed: submitPressed,
 		loadWorkload: loadWorkload,
+		loadFullWorkload: loadFullWorkload,
 		renderWorkload: renderWorkload,
 		renderRepairs: renderRepairs,
 		renderComplaints: renderComplaints,

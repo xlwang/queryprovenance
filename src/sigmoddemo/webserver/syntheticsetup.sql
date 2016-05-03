@@ -22,6 +22,7 @@ CREATE TABLE qfixconfig (
 	algorithm text,
 	workload text
 );
+insert into qfixconfig values (0,'','','');
 
 drop table if exists stats cascade;
 CREATE TABLE stats (
