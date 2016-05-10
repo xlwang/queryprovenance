@@ -24,6 +24,9 @@ var app = (function() {
 
 	var loadQuerylogSize = function(qlogsize) {
 		querylogsize = qlogsize;
+		if (workloadname != null) {
+			loadWorkload(workloadname)
+		}
 	}
 	
 	var selectTuple = function(option, t) {
