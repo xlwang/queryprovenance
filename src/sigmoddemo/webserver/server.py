@@ -42,7 +42,7 @@ def teardown_request(exception):
 
 @app.route('/workloads/', methods=["POST", "GET"])
 def workloads():
-  workloads = [ 'default', 'TPC-C', 'TATP', 'Synthetic' ]
+  workloads = [ 'default', 'TPC-C', 'Synthetic' ]
   workloads = [dict(id=i, workload=w) for i,w in enumerate(workloads)]
   return jsonify(workloads=workloads)
 
@@ -64,8 +64,8 @@ def corrupt():
     primary_key = []
     if workload == 'default':
         primary_key = set(["employer_id"])
-        db_query_dirty = """select * from %s_dirty_%d order by employer_id"""
-        db_query_clean = """select * from %s_clean_%d order by employer_id"""
+        db_query_dirty = """select * from %s_%d_dirty_%d order by employer_id"""
+        db_query_clean = """select * from %s_%d_clean_%d order by employer_id"""
         db_query_dirty = db_query_dirty % ('taxes', querylogsize)
         db_query_clean = db_query_clean % ('taxes', querylogsize)
         corrupt_query = """select query from qlogs where expid = %d and mode = 'dirty' and qid = %d""" % (0, int(queryid))
@@ -77,13 +77,11 @@ def corrupt():
     else:
         call(["java", "-jar", "synthetic.jar", "5432", "dbconn.config", "-exp", expid, "-option", "2", "-qidx", queryid])
         primary_key = set(["id"])
-        db_query_dirty = """select * from %s_dirty_%d order by id"""
-        db_query_clean = """select * from %s_clean_%d order by id"""
-        db_query_dirty = db_query_dirty % ('synthetic', querylogsize-1)
-        db_query_clean = db_query_clean % ('synthetic', querylogsize-1)
+        db_query_dirty = """select * from %s_%d_dirty_%d order by id"""
+        db_query_clean = """select * from %s_%d_clean_%d order by id"""
+        db_query_dirty = db_query_dirty % ('synthetic', int(expid), querylogsize-1)
+        db_query_clean = db_query_clean % ('synthetic', int(expid), querylogsize-1)
         corrupt_query = """select query from qlogs where expid = %d and mode = 'dirty' and qid = %d""" % (int(expid), int(queryid))
-        print db_query_dirty
-        print corrupt_query
         
     # load queries
     header_and_query = g.conn.execute(corrupt_query)
@@ -110,7 +108,7 @@ def corrupt():
         for attrname in header:
             if attrname in primary_key:
                 row_key = row_key + "\t" + str(d[attrname])
-            data.append(dict(clean = str(d[attrname]), iscorrect = True, dirty = ""))
+            data.append(dict(clean = str(d[attrname]), isdirty = False, dirty = ""))
         clean_rows[row_key] = dict(data = data, iscomplaint = False, id = i, indirty = False)
 
     rows = []
@@ -121,7 +119,7 @@ def corrupt():
         for attrname in header:
             if attrname in primary_key:
                 row_key = row_key + "\t" + str(d[attrname])
-            data.append(dict(clean = str(d[attrname]), iscorrect = True, dirty = ""))
+            data.append(dict(clean = str(d[attrname]), isdirty = False, dirty = ""))
     
         # compare data and data clean
         iscomplaint = False
@@ -132,7 +130,7 @@ def corrupt():
                 if data_clean['data'][j]['clean'] != data[j]['clean']:
                     data[j]['dirty'] = data[j]['clean']
                     data[j]['clean'] = data_clean['data'][j]['clean']
-                    data[j]['iscorrect']= False
+                    data[j]['isdirty']= True
                     iscomplaint = True
             data_clean['indirty'] = True
             clean_rows[row_key] = data_clean
@@ -141,7 +139,7 @@ def corrupt():
             for j in len(data):
                 data[j]['dirty'] = data[j]['clean']
                 data[j]['clean'] = "NULL"
-                data[j]['iscorrect'] = False
+                data[j]['isdirty'] = True
             iscomplaint = True
         rows.append(dict(data = data, iscomplaint = iscomplaint, id = row_key))
 
@@ -151,7 +149,7 @@ def corrupt():
         if data_clean['indirty'] == False:
             data = []
             for i in len(data_clean['data']):
-                data.append(dict(clean = data_clean['data'][i]['clean'], iscorrect = False, dirty = "NULL"))   
+                data.append(dict(clean = data_clean['data'][i]['clean'], isdirty = True, dirty = "NULL"))   
             rows.append(dict(data = data, iscomplaint = True, id = key))
 
     table = dict(
@@ -165,18 +163,18 @@ def workload():
   workload = request.args.get('workload', 'default')
   querylogsize = request.args.get('querylogsize', 10)
   expid = request.args.get('exp_id', 0)
-  return jsonify(**get_workload(workload, int(querylogsize), expid, 'clean', ''))
+  return jsonify(**get_workload(workload, int(querylogsize), expid, ['clean'], ''))
 
 
-def get_workload(workload='default', querylogsize = 10, expid = 0, mode = 'clean', algorithm = ''):
+def get_workload(workload='default', querylogsize = 10, expid = 0, modes = ['clean'], algorithm = ''):
   db_query = ""
-  queries_query = """select query, correct from qlogs where expid = %d and mode = '%s' and algorithm = '%s' order by qid limit %d"""
+  queries_query = """select query, correct from qlogs where expid = %d and mode = '%s' and algorithm = '%s' where qid = %d"""
   primary_key = []
   
   if workload == 'default':
     expid = 0        
     # define to database and query 
-    db_query = """select * from taxes_%s_%d"""
+    db_query = """select * from taxes_%d_%s_%d"""
     queries_query = queries_query % (int(expid), mode, algorithm, int(querylogsize))
     primary_key = set(["employer_id"])
     
@@ -188,32 +186,41 @@ def get_workload(workload='default', querylogsize = 10, expid = 0, mode = 'clean
       print('load tatp data')
   else:
       # generate data
-      if mode == 'clean' and algorithm == '':
+      if len(modes) == 1 and modes[0] == 'clean' and algorithm == '':
           call(["java", "-jar", "synthetic.jar", "5432", "dbconn.config", "-exp", expid, "-option", "0"])
           call(["java", "-jar", "synthetic.jar", "5432", "dbconn.config", "-exp", expid, "-option", "1", "-qsize", str(querylogsize)])
           # load synthetic
-          configquery = """insert into qfixconfig values (%d, '', 'qfix;alt', '%s')""" % (int(expid), "synthetic")
+          configquery = """insert into qfixconfig values (%d, '', 'qfix;alt', '%s')""" % (int(expid), "synthetic_" + str(expid))
           g.conn.execute(configquery)
       
-      db_query = """select * from synthetic_%s_%d order by id"""
-      queries_query = queries_query % (int(expid), mode, algorithm, int(querylogsize))
+      db_query = """select * from synthetic_%d_%s_%d order by id"""
       primary_key = set(["id"])
-      
+  
+  
   # load queries
-  print queries_query
-  header_and_query = g.conn.execute(queries_query)
-  raw_query = [dict(zip(header_and_query.keys(), list(row))) for row in header_and_query]
   queries = []
-  for i, q in enumerate(raw_query):
-      query=q['query']
-      queries.append(dict(query = str(query), corrupted=(q['correct'] == 0), dirtyquery = ""))
-  queries = [ dict(query=q, id=i) for i, q in enumerate(queries[0:len(queries)])]
+  for i in range(querylogsize):
+      query = []
+      for mode in modes:
+          queries_query = queries_query % (int(expid), mode, algorithm, i)    
+          header_and_query = g.conn.execute(queries_query)
+          raw_query = [dict(zip(header_and_query.keys(), list(row))) for row in header_and_query]
+          query[mode] = raw_query[0]['query']
+      
+      query["corrupted"] = raw_query[0]['correct']
+          
+  for mode in modes:
+      queries_query = queries_query % (int(expid), mode, algorithm, int(querylogsize))
+      for i, q in enumerate(raw_query):
+          query=q['query']
+          queries.append(dict(query = str(query), corrupted=(q['correct'] == 0), dirtyquery = ""))
+      queries = [ dict(query=q, id=i) for i, q in enumerate(queries[0:len(queries)])]
   
   # load table data
   header = []
   rows = []
   if len(queries) > 0:
-      db_query = db_query % (mode, len(queries) - 1)
+      db_query = db_query % (int(expid), mode, len(queries) - 1)
       print db_query
       header_and_data = g.conn.execute(db_query)
   
@@ -229,7 +236,7 @@ def get_workload(workload='default', querylogsize = 10, expid = 0, mode = 'clean
           for attrname in header:
               if attrname in primary_key:
                   row_key = row_key + "\t" + str(d[attrname])
-              data.append(dict(clean = str(d[attrname]), iscorrect = True, dirty = ""))
+              data.append(dict(clean = str(d[attrname]), isdirty = False, dirty = ""))
           rows.append(dict(data = data, iscomplaint = False, id = row_key))
       
   table = dict(

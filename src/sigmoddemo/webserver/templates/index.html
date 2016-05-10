@@ -28,11 +28,16 @@
         font-weight: bold;
       }
 	  tr.complaint td p.cross {
-		color: red;
 	  	text-decoration: line-through;
 	  }
 	  tr.complaint td p.correct {
 		color: green;
+	  }
+	  tr.complaint td p.dirty {
+		color: red;
+	  }
+	  tr.complaint td.dirty{
+	  	background: yellow;
 	  }
 
       li {
@@ -83,6 +88,8 @@
       }
 	  
 	  #querylog li pre tr.corrupted td {
+		color: green;
+		font-weight: bold;
 	  	text-decoration: line-through;
 	  }
 	  .corrupted td {
@@ -157,9 +164,15 @@
 		
 	</p>
     </div>
-    <div class="col-md-8">
+    <div class="col-md-7">
 		<h4> Querylog </h4> <br>
       <div id="querylog-container"></div>
+    </div>
+    <div id = "arrow" class="col-md-1">
+		<br><br><br>
+		<h4>Oldest</h4>
+		<img src="/static/arrow.png" height="140" width="40"/>
+		<h4>Newest</h4>
     </div>
   </div>
 
@@ -222,7 +235,7 @@
       </tr>
       {{#each rows}}
         <tr id="row-{{id}}" class="table_data {{#if iscomplaint}}complaint{{/if}}">
-          {{#each data}}<td><p class = "correct" style="display:inline">{{this.clean}}</p> <p class="cross" style="display:inline"> {{this.dirty}}</p></td>{{/each}}
+          {{#each data}}<td class = "{{#if this.isdirty }}dirty{{/if}}"><p class = "correct {{#if this.isdirty }}cross{{/if}}" style="display:inline">{{this.clean}}</p> <p class="dirty" style="display:inline"> {{this.dirty}}</p></td>{{/each}}
         </tr>
       {{/each}}
     </tbody>
