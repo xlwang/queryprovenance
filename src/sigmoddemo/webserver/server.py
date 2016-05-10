@@ -163,12 +163,12 @@ def workload():
   workload = request.args.get('workload', 'default')
   querylogsize = request.args.get('querylogsize', 10)
   expid = request.args.get('exp_id', 0)
-  return jsonify(**get_workload(workload, int(querylogsize), expid, ['clean'], ''))
+  return jsonify(**get_workload(workload, int(querylogsize), expid, 'clean', ''))
 
 
-def get_workload(workload='default', querylogsize = 10, expid = 0, modes = ['clean'], algorithm = ''):
+def get_workload(workload='default', querylogsize = 10, expid = 0, mode = 'clean', algorithm = ''):
   db_query = ""
-  queries_query = """select query, correct from qlogs where expid = %d and mode = '%s' and algorithm = '%s' where qid = %d"""
+  queries_query = """select query, correct from qlogs where expid = %d and mode = '%s' and algorithm = '%s' order by qid limit %d"""
   primary_key = []
   
   if workload == 'default':
@@ -186,7 +186,7 @@ def get_workload(workload='default', querylogsize = 10, expid = 0, modes = ['cle
       print('load tatp data')
   else:
       # generate data
-      if len(modes) == 1 and modes[0] == 'clean' and algorithm == '':
+      if mode == 'clean' and algorithm == '':
           call(["java", "-jar", "synthetic.jar", "5432", "dbconn.config", "-exp", expid, "-option", "0"])
           call(["java", "-jar", "synthetic.jar", "5432", "dbconn.config", "-exp", expid, "-option", "1", "-qsize", str(querylogsize)])
           # load synthetic
@@ -194,27 +194,18 @@ def get_workload(workload='default', querylogsize = 10, expid = 0, modes = ['cle
           g.conn.execute(configquery)
       
       db_query = """select * from synthetic_%d_%s_%d order by id"""
-      primary_key = set(["id"])
-  
-  
-  # load queries
-  queries = []
-  for i in range(querylogsize):
-      query = []
-      for mode in modes:
-          queries_query = queries_query % (int(expid), mode, algorithm, i)    
-          header_and_query = g.conn.execute(queries_query)
-          raw_query = [dict(zip(header_and_query.keys(), list(row))) for row in header_and_query]
-          query[mode] = raw_query[0]['query']
-      
-      query["corrupted"] = raw_query[0]['correct']
-          
-  for mode in modes:
       queries_query = queries_query % (int(expid), mode, algorithm, int(querylogsize))
-      for i, q in enumerate(raw_query):
-          query=q['query']
-          queries.append(dict(query = str(query), corrupted=(q['correct'] == 0), dirtyquery = ""))
-      queries = [ dict(query=q, id=i) for i, q in enumerate(queries[0:len(queries)])]
+      primary_key = set(["id"])
+      
+  # load queries
+  print queries_query
+  header_and_query = g.conn.execute(queries_query)
+  raw_query = [dict(zip(header_and_query.keys(), list(row))) for row in header_and_query]
+  queries = []
+  for i, q in enumerate(raw_query):
+      query=q['query']
+      queries.append(dict(query = str(query), corrupted=(q['correct'] == 0), dirtyquery = ""))
+  queries = [ dict(query=q, id=i) for i, q in enumerate(queries[0:len(queries)])]
   
   # load table data
   header = []
