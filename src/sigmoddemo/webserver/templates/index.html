@@ -235,7 +235,7 @@
       </tr>
       {{#each rows}}
         <tr id="row-{{id}}" class="table_data {{#if iscomplaint}}complaint{{/if}}">
-          {{#each data}}<td class = "{{#if this.isdirty }}dirty{{/if}}"><p class = "correct {{#if this.isdirty }}cross{{/if}}" style="display:inline">{{this.clean}}</p> <p class="dirty" style="display:inline"> {{this.dirty}}</p></td>{{/each}}
+          {{#each data}}<td class = "{{#if this.isdirty }}dirty{{/if}}"><p class = "correct {{#if this.isdirty}}cross{{/if}}" style="display:inline">{{this.clean}}</p> <p class="dirty" style="display:inline"> {{this.dirty}}</p></td>{{/each}}
         </tr>
       {{/each}}
     </tbody>
@@ -258,7 +258,7 @@
   <ul id="querylog" class="list-unstyled">
     {{#each queries}}
     <li id="q-{{id}}"><!-- class="btn btn-link">-->
-      <pre><table><tbody><tr id = "q-{{id}}-fixed" class = "{{#if query.corrupted}}fixed{{/if}}"><td>{{query.query}}</td></tbody></table></pre>
+      <pre><table><tbody><tr id = "q-{{id}}-fixed" class = "{{#if query.corrupted}}corrupted{{/if}}"><td>{{query.query}}</td><tr class = "{{#if query.corrupted}}dirty{{/if}}"><td>{{query.dirtyquery}}</td></tr><tr class = "{{#if query.corrupted}}fixed{{/if}}"><td>{{query.fixedquery}}</td></tr></tbody></table></pre>
     </li>
     {{/each}}
   </ul>

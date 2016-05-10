@@ -15,6 +15,7 @@ from sqlalchemy import *
 from sqlalchemy.pool import NullPool
 from flask import Flask, request, render_template, g, redirect, Response, jsonify
 from subprocess import call
+import collections
 
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 app = Flask(__name__, template_folder=tmpl_dir)
@@ -158,11 +159,77 @@ def corrupt():
     )
     return jsonify(dirtyquery=query, table = table)
 
+def diff_queries(query_clean = [], query_dirty = [], query_fixed = []):
+    print query_clean
+    print query_dirty
+    print query_fixed
+    queries = []
+    for i in range(len(query_fixed)):
+        query = []
+        if query_clean[i]["query"]["query"] != query_dirty[i]["query"]["query"] or query_clean[i]["query"]["query"] != query_fixed[i]["query"]["query"]:
+            query = dict(query = query_clean[i]["query"]["query"], dirtyquery = query_dirty[i]["query"]["query"], fixedquery = query_fixed[i]["query"]["query"], corrupted = True)
+            queries.append(dict(query = query, id = i))
+        else:
+            query = dict(query = query_clean[i]["query"]["query"], dirtyquery = "", fixedquery = "", corrupted = False)
+            queries.append(dict(query = query, id = i))
+    return queries
+    
+def diff_table(table_clean = {}, table_dirty = {}):
+    header = []
+    rows = []
+    
+    data_clean = {}
+    for row in table_clean["rows"]:
+        data_clean[row["id"]] = row["data"]
+    header = table_clean["header"]
+    data_clean = collections.OrderedDict(sorted(data_clean.items()))
+    
+    data_dirty = {}
+    for row in table_dirty["rows"]:
+        data_dirty[row["id"]] = row["data"]
+    data_dirty = collections.OrderedDict(sorted(data_dirty.items()))
+    
+    for key in data_clean.keys():
+        iscomplaint = False
+        data = []
+        if key in data_dirty:
+            for i in range(len(data_clean[key])):
+                if data_clean[key][i]['clean'] != data_dirty[key][i]['clean']:
+                    data.append(dict(clean = data_clean[key][i]['clean'], isdirty = True, dirty = data_dirty[key][i]['clean']))
+                    iscomplaint = True
+                else:
+                    data.append(dict(clean = data_clean[key][i]['clean'], isdirty = False, dirty = ""))
+        else:
+            iscomplaint = True
+            for i in len(data_clean[key]):
+                data.append(dict(clean = data_clean[key][i]['clean'], isdirty = True, dirty = "NULL"))
+        rows.append(dict(data = data, iscomplaint = iscomplaint, id = key))
+    for key in data_dirty.keys():
+        if key not in data_clean:
+            iscomplaint = True
+            data = []
+            for i in range(len(data_dirty[key])):
+                data.append(dict(clean = "NULL", isdirty = True, dirty = data_dirty[key][i]['clean']))
+            rows.append(dict(data = data, iscomplaint = True, id = key))
+    
+    table = dict(
+        header = header,
+        rows = rows
+    )
+    
+    return table    
+        
+        
+
 @app.route('/workload/', methods=["POST", "GET"])
 def workload(): 
   workload = request.args.get('workload', 'default')
   querylogsize = request.args.get('querylogsize', 10)
   expid = request.args.get('exp_id', 0)
+  call(["java", "-jar", "synthetic.jar", "5432", "dbconn.config", "-exp", expid, "-option", "0"])
+  call(["java", "-jar", "synthetic.jar", "5432", "dbconn.config", "-exp", expid, "-option", "1", "-qsize", str(querylogsize)])
+  configquery = """insert into qfixconfig values (%d, '', 'qfix;alt', '%s')""" % (int(expid), "synthetic_" + str(expid))
+  g.conn.execute(configquery)
   return jsonify(**get_workload(workload, int(querylogsize), expid, 'clean', ''))
 
 
@@ -185,14 +252,6 @@ def get_workload(workload='default', querylogsize = 10, expid = 0, mode = 'clean
       # load tatp
       print('load tatp data')
   else:
-      # generate data
-      if mode == 'clean' and algorithm == '':
-          call(["java", "-jar", "synthetic.jar", "5432", "dbconn.config", "-exp", expid, "-option", "0"])
-          call(["java", "-jar", "synthetic.jar", "5432", "dbconn.config", "-exp", expid, "-option", "1", "-qsize", str(querylogsize)])
-          # load synthetic
-          configquery = """insert into qfixconfig values (%d, '', 'qfix;alt', '%s')""" % (int(expid), "synthetic_" + str(expid))
-          g.conn.execute(configquery)
-      
       db_query = """select * from synthetic_%d_%s_%d order by id"""
       queries_query = queries_query % (int(expid), mode, algorithm, int(querylogsize))
       primary_key = set(["id"])
@@ -327,9 +386,13 @@ def solve():
   
   # get qfix result
   query_and_data = get_workload(workload, int(querylogsize), expid, 'fixed', 'qfix')
+  query_and_data_clean = get_workload(workload, int(querylogsize), expid, 'clean', '')
+  query_and_data_dirty = get_workload(workload, int(querylogsize), expid, 'dirty', '')
+ 
+  qfix_q = dict(queries = diff_queries(query_and_data_clean['queries'], query_and_data_dirty['queries'], query_and_data['queries']))
   
-  qfix_q = dict(queries = query_and_data['queries'])
-  table1 = query_and_data['table']
+  print "calculate diff"
+  table1 = diff_table(query_and_data_clean['table'], query_and_data['table'])
   
   query_and_data2 = get_workload(workload, int(querylogsize), expid, 'fixed', 'alt')
   
