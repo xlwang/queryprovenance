@@ -160,9 +160,6 @@ def corrupt():
     return jsonify(dirtyquery=query, table = table)
 
 def diff_queries(query_clean = [], query_dirty = [], query_fixed = []):
-    print query_clean
-    print query_dirty
-    print query_fixed
     queries = []
     for i in range(len(query_fixed)):
         query = []
@@ -257,7 +254,6 @@ def get_workload(workload='default', querylogsize = 10, expid = 0, mode = 'clean
       primary_key = set(["id"])
       
   # load queries
-  print queries_query
   header_and_query = g.conn.execute(queries_query)
   raw_query = [dict(zip(header_and_query.keys(), list(row))) for row in header_and_query]
   queries = []
@@ -304,24 +300,17 @@ def updatecomplaint():
   row_keys = row_keys.replace('row-', '').strip()
   # get current compl_list
   compl_list = ""
-  if row_keys == "selectall":
-      if add_or_remove != '0':
-          compl_list = "selectall"
-  elif row_keys == "selectallcompl":
-      if add_or_remove != '0':
-          compl_list = "selectallcompl"
+  complquery = """select compl_list from qfixconfig where expid = %d""" % int(expid)
+  header_and_data = g.conn.execute(complquery)
+  raw_data = [dict(zip(header_and_data.keys(), list(row))) for row in header_and_data]
+
+  cur_compl = raw_data[0]['compl_list'].split(';')
+  if add_or_remove == '1':
+      compl_list = raw_data[0]['compl_list'] + row_keys + ";"
   else:
-      complquery = """select compl_list from qfixconfig where expid = %d""" % int(expid)
-      header_and_data = g.conn.execute(complquery)
-      raw_data = [dict(zip(header_and_data.keys(), list(row))) for row in header_and_data]
-      
-      cur_compl = raw_data[0]['compl_list'].split(';')
-      if add_or_remove == '1':
-          compl_list = raw_data[0]['compl_list'] + row_keys + ";"
-      else:
-          for compl in cur_compl:
-              if compl != row_keys and len(str(compl)) > 0:
-                  compl_list = compl_list + compl + ";"
+      for compl in cur_compl:
+          if compl != row_keys and len(str(compl)) > 0:
+              compl_list = compl_list + compl + ";"
   update_query = """update qfixconfig set compl_list ='%s' where expid = %d""" % (compl_list, int(expid))
   g.conn.execute(update_query)
   return jsonify(update = "")

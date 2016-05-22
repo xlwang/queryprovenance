@@ -181,8 +181,8 @@
   	  <h4> Final database state </h4>
       </div>
       <div class="col-md-4">
-  	  <label><input type="checkbox" onclick="app.selectTuple(1,$(this))" id="selectall" style="zoom:1.5; margin-right:2px; margin-left:5px; visibility: hidden"> <p id ="selectalltext" style="display:inline; visibility: hidden">select all </p>  </label>  
-  	  <label><input type="checkbox" onclick="app.selectTuple(2, $(this))" id="selectallcompl" style="zoom:1.5; margin-right:2px; margin-left:5px; visibility: hidden"> <p id ="selectallcompltext" style="display:inline; visibility: hidden">select all complaints</p></label>
+	<button id="selectall" onclick="app.selectData(1)" class="btn btn-primary btn-small; visibility: visible" style="width: 12em">select all</button> 
+	<button id="selectallcompl" onclick="app.selectData(2)" class="btn btn-primary btn-small; visibility: visible" style="width: 12em">select all complaints</button>
       </div>
   </div>
   <div class="row">
