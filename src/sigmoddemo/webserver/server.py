@@ -386,7 +386,8 @@ def solve():
   clearqlogs = """delete from qlogs where mode = 'fixed' and expid = %d""" % int(expid)
   g.conn.execute(clearqlogs)
   
-  call(["java", "-Djava.library.path=/Users/xlwang/Applications/IBM/ILOG/CPLEX_Studio126/cplex/bin/x86-64_osx", "-jar", "queryfix.jar", "5432", "dbconn.config", expid])
+  #call(["java", "-Djava.library.path=/Users/xlwang/Applications/IBM/ILOG/CPLEX_Studio126/cplex/bin/x86-64_osx", "-jar", "queryfix.jar", "5432", "dbconn.config", expid])
+  call(["java", "-Djava.library.path=/Users/xlwang/Applications/IBM/ILOG/CPLEX_Studio126/cplex/bin/x86-64_osx", "-jar", "queryfixdummy.jar", "5432", "dbconn.config", expid])
   
   # get qfix result
   query_and_data = get_workload(workload, int(querylogsize), expid, 'fixed', 'qfix')
