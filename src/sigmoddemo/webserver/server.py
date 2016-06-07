@@ -43,7 +43,7 @@ def teardown_request(exception):
 
 @app.route('/workloads/', methods=["POST", "GET"])
 def workloads():
-  workloads = [ 'default', 'TPC-C', 'Synthetic' ]
+  workloads = [ 'taxes', 'TPC-C', 'Synthetic' ]
   workloads = [dict(id=i, workload=w) for i,w in enumerate(workloads)]
   return jsonify(workloads=workloads)
 
@@ -63,14 +63,15 @@ def corrupt():
     db_query_clean = ""
 
     primary_key = []
-    if workload == 'default':
-        primary_key = set(["employer_id"])
-        db_query_dirty = """select * from %s_%d_dirty_%d order by employer_id"""
-        db_query_clean = """select * from %s_%d_clean_%d order by employer_id"""
-        db_query_dirty = db_query_dirty % ('taxes', querylogsize)
-        db_query_clean = db_query_clean % ('taxes', querylogsize)
-        corrupt_query = """select query from qlogs where expid = %d and mode = 'dirty' and qid = %d""" % (0, int(queryid))
-        print "default"
+    if workload == 'taxes':
+        call(["java", "-jar", "taxes.jar", "5432", "dbconn.config", "-exp", expid, "-option", "2", "-qidx", queryid])
+        primary_key = set(["employee_id"])
+        db_query_dirty = """select * from %s_%d_dirty_%d order by employee_id"""
+        db_query_clean = """select * from %s_%d_clean_%d order by employee_id"""
+        db_query_dirty = db_query_dirty % ('taxes', int(expid), querylogsize-1)
+        db_query_clean = db_query_clean % ('taxes', int(expid), querylogsize-1)
+        corrupt_query = """select query from qlogs where expid = %d and mode = 'dirty' and qid = %d""" % (int(expid), int(queryid))
+        
     elif workload == 'TPC-C':
         print "corrupt tpcc"
     elif workload == 'TATP':
@@ -223,10 +224,21 @@ def workload():
   workload = request.args.get('workload', 'default')
   querylogsize = request.args.get('querylogsize', 10)
   expid = request.args.get('exp_id', 0)
-  call(["java", "-jar", "synthetic.jar", "5432", "dbconn.config", "-exp", expid, "-option", "0"])
-  call(["java", "-jar", "synthetic.jar", "5432", "dbconn.config", "-exp", expid, "-option", "1", "-qsize", str(querylogsize)])
-  configquery = """insert into qfixconfig values (%d, '', 'qfix;alt', '%s')""" % (int(expid), "synthetic_" + str(expid))
-  g.conn.execute(configquery)
+  print expid
+  print querylogsize
+  
+  if workload == 'taxes':
+      call(["java", "-jar", "taxes.jar", "5432", "dbconn.config", "-exp", str(expid), "-option", "1", "-qsize", str(querylogsize)])
+      configquery = """insert into qfixconfig values (%d, '', 'qfix;alt', '%s')""" % (int(expid), "taxes_" + str(expid))
+      g.conn.execute(configquery)
+  elif workload == 'TPC-C':
+      print "not yet finished"
+  else:
+      call(["java", "-jar", "synthetic.jar", "5432", "dbconn.config", "-exp", str(expid), "-option", "0"])
+      call(["java", "-jar", "synthetic.jar", "5432", "dbconn.config", "-exp", str(expid), "-option", "1", "-qsize", str(querylogsize)])
+      configquery = """insert into qfixconfig values (%d, '', 'qfix;alt', '%s')""" % (int(expid), "synthetic_" + str(expid))
+      g.conn.execute(configquery)
+      
   return jsonify(**get_workload(workload, int(querylogsize), expid, 'clean', ''))
 
 
@@ -234,13 +246,13 @@ def get_workload(workload='default', querylogsize = 10, expid = 0, mode = 'clean
   db_query = ""
   queries_query = """select query, correct from qlogs where expid = %d and mode = '%s' and algorithm = '%s' order by qid limit %d"""
   primary_key = []
+  configquery = """"""
   
-  if workload == 'default':
-    expid = 0        
+  if workload == 'taxes':     
     # define to database and query 
     db_query = """select * from taxes_%d_%s_%d"""
     queries_query = queries_query % (int(expid), mode, algorithm, int(querylogsize))
-    primary_key = set(["employer_id"])
+    primary_key = set(["employee_id"])
     
   elif workload == 'TPC-C':
       # load tpcc
@@ -252,7 +264,8 @@ def get_workload(workload='default', querylogsize = 10, expid = 0, mode = 'clean
       db_query = """select * from synthetic_%d_%s_%d order by id"""
       queries_query = queries_query % (int(expid), mode, algorithm, int(querylogsize))
       primary_key = set(["id"])
-      
+  
+  
   # load queries
   header_and_query = g.conn.execute(queries_query)
   raw_query = [dict(zip(header_and_query.keys(), list(row))) for row in header_and_query]
@@ -370,6 +383,8 @@ def solve():
   expid = request.args.get('exp_id', 0)
   clearstats = """delete from stats where expid = %d""" % int(expid)
   g.conn.execute(clearstats)
+  clearqlogs = """delete from qlogs where mode = 'fixed' and expid = %d""" % int(expid)
+  g.conn.execute(clearqlogs)
   
   call(["java", "-Djava.library.path=/Users/xlwang/Applications/IBM/ILOG/CPLEX_Studio126/cplex/bin/x86-64_osx", "-jar", "queryfix.jar", "5432", "dbconn.config", expid])
   
@@ -447,6 +462,7 @@ if __name__ == "__main__":
     call(["dropdb", "queryprov"])
     call(["createdb", "queryprov"])
     call(["psql","-f", "syntheticsetup.sql", "queryprov"])
+    call(["psql","-f", "taxes.sql", "queryprov"])
       
     HOST, PORT = host, port
     print "running on %s:%d" % (HOST, PORT)

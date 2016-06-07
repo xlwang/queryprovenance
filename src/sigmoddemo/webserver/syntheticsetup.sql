@@ -36,10 +36,9 @@ CREATE TABLE stats (
 
 drop table if exists taxes cascade;	  
 CREATE TABLE taxes (
-	employer_id int primary key,
+	employee_id int primary key,
 	income real,
-	CHECK (income BETWEEN 1 AND 1000000),
-	owed real,
+	tax_rate real,
 	pay real
 );
 
@@ -91,14 +90,4 @@ CREATE TABLE subscriber (
 	byte2_10 SMALLINT,
 	msc_location INTEGER,
 	vlr_location INTEGER
-);
-
-drop table if exists synthetic_5 cascade;
-CREATE TABLE synthetic_5 (
-	id int primary key,
-	col_1 int,
-	col_2 int,
-	col_3 int,
-	col_4 int,
-	col_5 int
 );

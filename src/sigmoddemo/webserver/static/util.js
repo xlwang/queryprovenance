@@ -136,7 +136,7 @@ var app = (function() {
 	}
 
 	var loadWorkload = function(workload) {
-		if (workload != 'Synthetic') {
+		if (workload == 'TPC-C') {
 			alert("Workload not available, check back later!");
 		} else {
 			$("#result-view").hide();
