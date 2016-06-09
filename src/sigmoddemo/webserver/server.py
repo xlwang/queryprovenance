@@ -55,6 +55,9 @@ def corrupt():
     queryid = request.args.get('query', 0)
     querylogsize = int(request.args.get('qlogsize', 0))
     mode = request.args.get('mode', 'corrupt')
+    # clear selected complaints
+    clear_sql = """update qfixconfig set compl_list = '' where expid = %d""" % int(expid)
+    g.conn.execute(clear_sql)
 
     # corrupt query: call java function 
     
@@ -307,10 +310,17 @@ def get_workload(workload='default', querylogsize = 10, expid = 0, mode = 'clean
 @app.route('/updatecomplaint/', methods=["POST", "GET"])
 def updatecomplaint(): 
   expid = request.args.get('exp_id', 0)
-  row_keys = request.args.get('row_keys', '')
+  row_keys_str = request.args.get('row_keys', '')
   add_or_remove = request.args.get('addorremove', '1')
   
-  row_keys = row_keys.replace('row-', '').strip()
+  print row_keys_str
+  row_keys_str = row_keys_str.replace('row-', '')
+  print "str: " + row_keys_str
+  row_keys = row_keys_str.split(';')
+  for i in range(len(row_keys)):
+      row_keys[i] = row_keys[i].strip()
+      
+  
   # get current compl_list
   compl_list = ""
   complquery = """select compl_list from qfixconfig where expid = %d""" % int(expid)
@@ -319,10 +329,12 @@ def updatecomplaint():
 
   cur_compl = raw_data[0]['compl_list'].split(';')
   if add_or_remove == '1':
-      compl_list = raw_data[0]['compl_list'] + row_keys + ";"
+      compl_list = raw_data[0]['compl_list']
+      for row_key in row_keys:
+          compl_list = compl_list + ";" + row_key
   else:
       for compl in cur_compl:
-          if compl != row_keys and len(str(compl)) > 0:
+          if compl not in row_keys and len(str(compl)) > 0:
               compl_list = compl_list + compl + ";"
   update_query = """update qfixconfig set compl_list ='%s' where expid = %d""" % (compl_list, int(expid))
   g.conn.execute(update_query)
@@ -386,8 +398,8 @@ def solve():
   clearqlogs = """delete from qlogs where mode = 'fixed' and expid = %d""" % int(expid)
   g.conn.execute(clearqlogs)
   
-  #call(["java", "-Djava.library.path=/Users/xlwang/Applications/IBM/ILOG/CPLEX_Studio126/cplex/bin/x86-64_osx", "-jar", "queryfix.jar", "5432", "dbconn.config", expid])
-  call(["java", "-Djava.library.path=/Users/xlwang/Applications/IBM/ILOG/CPLEX_Studio126/cplex/bin/x86-64_osx", "-jar", "queryfixdummy.jar", "5432", "dbconn.config", expid])
+  call(["java", "-Djava.library.path=/Users/xlwang/Applications/IBM/ILOG/CPLEX_Studio126/cplex/bin/x86-64_osx", "-jar", "queryfix.jar", "5432", "dbconn.config", expid])
+  #call(["java", "-Djava.library.path=/Users/xlwang/Applications/IBM/ILOG/CPLEX_Studio126/cplex/bin/x86-64_osx", "-jar", "queryfixdummy.jar", "5432", "dbconn.config", expid])
   
   # get qfix result
   query_and_data = get_workload(workload, int(querylogsize), expid, 'fixed', 'qfix')

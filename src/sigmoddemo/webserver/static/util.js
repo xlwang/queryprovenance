@@ -43,6 +43,7 @@ var app = (function() {
 					addorremove = 1;
 					row.classList.add("highlightcompl");
 				} else {
+					mode = mode + ";" + row.id;
 					row.classList.remove("highlightcompl");
 				}	
 			}
@@ -65,6 +66,7 @@ var app = (function() {
 					row.classList.add("highlightcompl");
 				} else {
 					if (selectallmode == 0) {
+						mode = mode + ";" + row.id;
 						row.classList.remove("highlightcompl");
 					}	
 				}
@@ -84,55 +86,6 @@ var app = (function() {
 			addorremove: addorremove
 		}
 		$.get("/updatecomplaint/", data, function(resp){});		
-	}
-	
-	var selectTuple = function(option, t) {
-		var table = document.getElementById("table-workload");
-		var addorremove = 0;
-		var mode = ""
-		if (option == "1") {
-			// select all
-			mode = "selectall";
-			var selectallcheckbox = document.getElementById("selectall");
-			for (var i = 0, row; row = table.rows[i]; i++) {
-				if (selectallmode == 0) {
-					addorremove = 1;
-					row.classList.add("highlightcompl");
-					selectallmode = 1;
-					selectallcheckbox.value = "de-select all";
-				} else {
-					selectallmode = 0;
-					row.classList.remove("highlightcompl");
-					selectallcheckbox.value = "select all";
-				}	
-			}
-		} else if (option == "2") {
-			// select all complaints
-			mode = "selectallcompl"
-			var selectallcomplcheckbox = document.getElementById("selectallcompl");
-			for (var i = 0, row; row = table.rows[i]; i++) {
-				if (!row.classList.contains("complaint")) {
-					continue;
-				}
-				if (selectallcomplmode == 0) {
-					addorremove = 1;
-					row.classList.add("highlightcompl");
-					selectallcomplmode = 1;
-					selectallcomplcheckbox.value = "de-select all compl";	
-				} else {
-					selectallcomplmode = 0;
-					row.classList.remove("highlightcompl");
-					selectallcomplcheckbox.value = "select all compl";
-				}
-		
-			}
-		}
-		var data = {
-			exp_id: exp_id,
-			row_keys: mode,
-			addorremove: addorremove
-		}
-		$.get("/updatecomplaint/", data, function(resp){});
 	}
 
 	var loadWorkload = function(workload) {
@@ -213,7 +166,9 @@ var app = (function() {
 					};
 					$.get("/corrupt/", data, function(resp) {
 						workloaddata.table = resp.table;
-						q.query.dirtyquery = resp.dirtyquery;
+						if (q.query.query != resp.dirtyquery) {
+							q.query.dirtyquery = resp.dirtyquery;
+						}
 						renderCorruptQuery(q);
 					});
 				}
@@ -340,7 +295,6 @@ var app = (function() {
 		renderWorkload: renderWorkload,
 		renderRepairs: renderRepairs,
 		renderComplaints: renderComplaints,
-		selectTuple: selectTuple,
 		selectData: selectData,
 		solveRepairs: solveRepairs
 	};
