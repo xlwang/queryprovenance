@@ -120,7 +120,9 @@ var app = (function() {
 		var data = {
 			exp_id: exp_id
 		}
-		$.get("/reporterror/", data, function(resp){});
+		$.get("/reporterror/", data, function(resp){
+			alert("Thanks! I will check this error later. ");
+		});
 	}
 
 	var renderWorkload = function(workloadData) {
