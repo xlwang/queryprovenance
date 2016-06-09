@@ -140,6 +140,10 @@ var app = (function() {
 				$("#result-view").hide();
 				$("#qfix-data-container").empty();
 				$("#alt_query-container").empty();
+				var selectallcomplcheckbox = document.getElementById("selectallcompl");
+				selectallcomplcheckbox.textContent= "select all compl";
+				var selectallcheckbox = document.getElementById("selectall");
+				selectallcheckbox.textContent= "select all";
 				// $("#querytext").text(q.query);
 				if ($("#q-" + q.id + ' pre').hasClass('highlight')) {				
 					// corrupt current query
