@@ -180,17 +180,23 @@ def diff_table(table_clean = {}, table_dirty = {}):
     rows = []
     
     data_clean = {}
+    key_list_clean = []
+    key_list_dirty = []
     for row in table_clean["rows"]:
-        data_clean[row["id"]] = row["data"]
+        key_list_clean.append(int(row["id"]))
+        data_clean[(row["id"])] = row["data"]
     header = table_clean["header"]
-    data_clean = collections.OrderedDict(sorted(data_clean.items()))
+    #data_clean = collections.OrderedDict(sorted(data_clean.items()))
     
     data_dirty = {}
     for row in table_dirty["rows"]:
-        data_dirty[row["id"]] = row["data"]
-    data_dirty = collections.OrderedDict(sorted(data_dirty.items()))
-    
-    for key in data_clean.keys():
+        key_list_dirty.append(int(row["id"]))
+        data_dirty[(row["id"])] = row["data"]
+    #data_dirty = collections.OrderedDict(sorted(data_dirty.items()))
+    key_list_clean.sort()
+    key_list_dirty.sort()
+    for key in key_list_clean:
+        key = '\t' + str(key)
         iscomplaint = False
         data = []
         if key in data_dirty:
@@ -205,8 +211,10 @@ def diff_table(table_clean = {}, table_dirty = {}):
             for i in len(data_clean[key]):
                 data.append(dict(clean = data_clean[key][i]['clean'], isdirty = True, dirty = "NULL"))
         rows.append(dict(data = data, iscomplaint = iscomplaint, id = key))
-    for key in data_dirty.keys():
+    for key in key_list_dirty:
+        key = '\t' + str(key)
         if key not in data_clean:
+            print "dirty:" + key
             iscomplaint = True
             data = []
             for i in range(len(data_dirty[key])):
@@ -409,6 +417,7 @@ def solve():
   qfix_q = dict(queries = diff_queries(query_and_data_clean['queries'], query_and_data_dirty['queries'], query_and_data['queries']))
   
   print "calculate diff"
+  
   table1 = diff_table(query_and_data_clean['table'], query_and_data['table'])
   
   query_and_data2 = get_workload(workload, int(querylogsize), expid, 'fixed', 'alt')
