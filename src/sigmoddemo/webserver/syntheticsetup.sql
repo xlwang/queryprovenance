@@ -54,6 +54,11 @@ CREATE TABLE oorder (
 	PRIMARY KEY (o_w_id,o_d_id,o_id),
 	UNIQUE (o_w_id,o_d_id,o_c_id,o_id)
 );
+
+drop table if exists error_tracker cascade;
+CREATE TABLE error_tracker (
+	expid int PRIMARY KEY
+);
 	
 drop table if exists subscriber cascade;
 CREATE TABLE subscriber (

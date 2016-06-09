@@ -230,6 +230,14 @@ def diff_table(table_clean = {}, table_dirty = {}):
         
         
 
+@app.route('/reporterror/', methods=["POST", "GET"])
+def reporterror():
+    expid = request.args.get('exp_id', 0)
+    insertquery = """insert into error_tracker values (%d)""" % int(expid)
+    g.conn.execute(insertquery)
+    
+    return jsonify(report = "yes")
+    
 @app.route('/workload/', methods=["POST", "GET"])
 def workload(): 
   workload = request.args.get('workload', 'default')

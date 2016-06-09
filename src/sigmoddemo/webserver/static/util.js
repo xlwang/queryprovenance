@@ -115,6 +115,13 @@ var app = (function() {
 			renderWorkload(resp);
 		});
 	}
+	
+	var reportError = function() {
+		var data = {
+			exp_id: exp_id
+		}
+		$.get("/reporterror/", data, function(resp){});
+	}
 
 	var renderWorkload = function(workloadData) {
 		workloaddata = workloadData;
@@ -300,7 +307,8 @@ var app = (function() {
 		renderRepairs: renderRepairs,
 		renderComplaints: renderComplaints,
 		selectData: selectData,
-		solveRepairs: solveRepairs
+		solveRepairs: solveRepairs,
+		reportError: reportError
 	};
 
 })()
