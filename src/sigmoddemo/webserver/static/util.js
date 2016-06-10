@@ -94,7 +94,7 @@ var app = (function() {
 		} else {
 			$("#result-view").hide();
 			$("#qfix-data-container").empty();
-			$("#alt_query-container").empty();
+			$("#alt-data-container").empty();
 			$.get("/getexpid/", {}, function(resp){
 				exp_id = resp.expid;
 				loadFullWorkload(workload);
@@ -148,6 +148,7 @@ var app = (function() {
 			$("#q-" + q.id).click(function() {
 				$("#result-view").hide();
 				$("#qfix-data-container").empty();
+				$("#alt-data-container").empty();
 				$("#alt_query-container").empty();
 				var selectallcomplcheckbox = document.getElementById("selectallcompl");
 				selectallcomplcheckbox.textContent= "select all compl";
@@ -250,6 +251,7 @@ var app = (function() {
 	var submitPressed = function() {
 		$("#result-view").hide();
 		$("#qfix-data-container").empty();
+		$("#alt-data-container").empty();
 		$("#alt_query-container").empty();
 		$.get("/checksolve/", {exp_id: exp_id}, function(resp) {
 			if (resp.valid) {
@@ -274,9 +276,10 @@ var app = (function() {
 
 	var renderRepairs = function(opts) {
 		var source = $("#table-template").html();
-		var template = Handlebars.compile(source);
-		$("#qfix-data-container").html(template(opts.table1));
-		$("#alt-data-container").html(template(opts.table2));
+		var template1 = Handlebars.compile(source);
+		var template2 = Handlebars.compile(source);
+		$("#qfix-data-container").html(template1(opts.table1));
+		$("#alt-data-container").html(template2(opts.table2));
 
 		var source1 = $("#fixquerylog-template").html();
 		var template1 = Handlebars.compile(source1);

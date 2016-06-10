@@ -1,0 +1,9 @@
+@RELATION test
+@ATTRIBUTE col0 NUMERIC
+@ATTRIBUTE class {'g','b'}
+@DATA
+186000.0,'b'
+177000.0,'g'
+9000.0,'g'
+210000.0,'g'
+172000.0,'g'

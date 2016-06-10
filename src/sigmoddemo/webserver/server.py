@@ -269,7 +269,10 @@ def get_workload(workload='default', querylogsize = 10, expid = 0, mode = 'clean
   
   if workload == 'taxes':     
     # define to database and query 
-    db_query = """select * from taxes_%d_%s_%d"""
+    if mode == 'fixed':
+        db_query = """select * from taxes_%d_%s_%s_%d"""
+    else:
+        db_query = """select * from taxes_%d_%s_%d"""
     queries_query = queries_query % (int(expid), mode, algorithm, int(querylogsize))
     primary_key = set(["employee_id"])
     
@@ -280,7 +283,13 @@ def get_workload(workload='default', querylogsize = 10, expid = 0, mode = 'clean
       # load tatp
       print('load tatp data')
   else:
-      db_query = """select * from synthetic_%d_%s_%d order by id"""
+      print mode
+      print algorithm
+      if mode == 'fixed':
+          db_query = """select * from synthetic_%d_%s_%s_%d order by id"""
+      else: 
+          db_query = """select * from synthetic_%d_%s_%d order by id"""
+      
       queries_query = queries_query % (int(expid), mode, algorithm, int(querylogsize))
       primary_key = set(["id"])
   
@@ -298,7 +307,10 @@ def get_workload(workload='default', querylogsize = 10, expid = 0, mode = 'clean
   header = []
   rows = []
   if len(queries) > 0:
-      db_query = db_query % (int(expid), mode, len(queries) - 1)
+      if mode == 'fixed':
+          db_query = db_query % (int(expid), algorithm, mode, len(queries) - 1)
+      else:
+          db_query = db_query % (int(expid), mode, len(queries) - 1)
       print db_query
       header_and_data = g.conn.execute(db_query)
   
@@ -415,6 +427,7 @@ def solve():
   g.conn.execute(clearqlogs)
   
   call(["java", "-Djava.library.path=/Users/xlwang/Applications/IBM/ILOG/CPLEX_Studio126/cplex/bin/x86-64_osx", "-jar", "queryfix.jar", "5432", "dbconn.config", expid])
+  call(["java", "-Djava.library.path=/Users/xlwang/Applications/IBM/ILOG/CPLEX_Studio126/cplex/bin/x86-64_osx", "-jar", "queryfix_dt.jar", "5432", "dbconn.config", expid])
   #call(["java", "-Djava.library.path=/Users/xlwang/Applications/IBM/ILOG/CPLEX_Studio126/cplex/bin/x86-64_osx", "-jar", "queryfixdummy.jar", "5432", "dbconn.config", expid])
   
   # get qfix result
@@ -430,8 +443,8 @@ def solve():
   
   query_and_data2 = get_workload(workload, int(querylogsize), expid, 'fixed', 'alt')
   
-  alt_q = dict(queries = query_and_data2['queries'])
-  table2 = query_and_data2['table']
+  alt_q = dict(queries = diff_queries(query_and_data_clean['queries'], query_and_data_dirty['queries'], query_and_data2['queries']))
+  table2 = diff_table(query_and_data_clean['table'], query_and_data2['table'])
   
   # get statistics
   stats_query = """select * from stats where expid = %d and algorithm = '%s'"""
@@ -448,7 +461,7 @@ def solve():
   header_and_data = g.conn.execute(alt_stats_query)
   raw_data = [dict(zip(header_and_data.keys(), list(row))) for row in header_and_data]
   alt_stats = "Failed!"
-  if len(raw_data) > 0:
+  if len(raw_data) > 0 and raw_data[0]['precision'] > 0 and raw_data[0]['recall'] > 0:
       alt_stats = "Succeed! Time: %f; Precision: %f; Recall: %f" % (raw_data[0]['exetime'], raw_data[0]['precision'], raw_data[0]['recall'])
       #dict(time = raw_data[0]['exetime'], precision = raw_data[0]['precision'], recall = raw_data[0]['recall'])
   
