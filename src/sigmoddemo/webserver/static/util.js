@@ -36,47 +36,56 @@ var app = (function() {
 		var mode = ""
 		var addorremove = 0;
 		if (option == "1") {
+			// check if select all compl is selected
 			mode = "selectall";
 			var selectallcheckbox = document.getElementById("selectall");
-			for (var i = 0, row; row = table.rows[i]; i++) {
-				if (selectallmode == 0) {
-					addorremove = 1;
-					row.classList.add("highlightcompl");
-				} else {
-					mode = mode + ";" + row.id;
-					row.classList.remove("highlightcompl");
-				}	
-			}
-			if (selectallmode == 0) {
-				selectallmode = 1;
-				selectallcheckbox.textContent = "de-select all";
+			if (selectallcomplmode != 0) {
+				alert("Please de-select select all compl first!");
 			} else {
-				selectallmode = 0;
-				selectallcheckbox.textContent = "select all";
-			}
-		} else if (option == "2") {
-			mode = "selectallcompl"
-			var selectallcomplcheckbox = document.getElementById("selectallcompl");
-			for (var i = 0, row; row = table.rows[i]; i++) {
-				if (!row.classList.contains("complaint")) {
-					continue;
-				}
-				if (selectallcomplmode == 0) {
-					addorremove = 1;
-					row.classList.add("highlightcompl");
-				} else {
+				for (var i = 0, row; row = table.rows[i]; i++) {
 					if (selectallmode == 0) {
+						addorremove = 1;
+						row.classList.add("highlightcompl");
+					} else {
 						mode = mode + ";" + row.id;
 						row.classList.remove("highlightcompl");
 					}	
 				}
+				if (selectallmode == 0) {
+					selectallmode = 1;
+					selectallcheckbox.textContent = "de-select all";
+				} else {
+					selectallmode = 0;
+					selectallcheckbox.textContent = "select all";
+				}
 			}
-			if (selectallcomplmode == 0) {
-				selectallcomplmode = 1;
-				selectallcomplcheckbox.textContent = "de-select all compl";
+		} else if (option == "2") {
+			mode = "selectallcompl"
+			var selectallcomplcheckbox = document.getElementById("selectallcompl");
+			if (selectallmode != 0) {
+				alert("Please de-select select all first!");
 			} else {
-				selectallcomplmode = 0;
-				selectallcomplcheckbox.textContent= "select all compl";
+				for (var i = 0, row; row = table.rows[i]; i++) {
+					if (!row.classList.contains("complaint")) {
+						continue;
+					}
+					if (selectallcomplmode == 0) {
+						addorremove = 1;
+						row.classList.add("highlightcompl");
+					} else {
+						if (selectallmode == 0) {
+							mode = mode + ";" + row.id;
+							row.classList.remove("highlightcompl");
+						}	
+					}
+				}
+				if (selectallcomplmode == 0) {
+					selectallcomplmode = 1;
+					selectallcomplcheckbox.textContent = "de-select all compl";
+				} else {
+					selectallcomplmode = 0;
+					selectallcomplcheckbox.textContent= "select all compl";
+				}
 			}
 		}
 
