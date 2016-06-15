@@ -89,17 +89,14 @@ var app = (function() {
 	}
 
 	var loadWorkload = function(workload) {
-		if (workload == 'TPC-C') {
-			alert("Workload not available, check back later!");
-		} else {
-			$("#result-view").hide();
-			$("#qfix-data-container").empty();
-			$("#alt-data-container").empty();
-			$.get("/getexpid/", {}, function(resp){
-				exp_id = resp.expid;
-				loadFullWorkload(workload);
-			});
-		}
+		
+		$("#result-view").hide();
+		$("#qfix-data-container").empty();
+		$("#alt-data-container").empty();
+		$.get("/getexpid/", {}, function(resp){
+			exp_id = resp.expid;
+			loadFullWorkload(workload);
+		});
 	};
 	
 	var loadFullWorkload = function(workload) {
@@ -263,6 +260,9 @@ var app = (function() {
 	};
 	
 	var solveRepairs = function() {
+		if (workload == 'TPC-C') {
+			alert("Workload not available, check back later!");
+		} else {
 		var data = {
 			workload: workloadname,
 			querylogsize: querylogsize,
@@ -272,6 +272,7 @@ var app = (function() {
 			$("#result-view").show();
 			renderRepairs(resp);
 		});
+	}
 	};
 
 	var renderRepairs = function(opts) {

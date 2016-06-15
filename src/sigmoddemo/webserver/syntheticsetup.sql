@@ -14,6 +14,7 @@ CREATE TABLE qlogs (
 	wherec text
 );
 
+drop table if exists  qlogs_act cascade;
 CREATE TABLE qlogs_act (
 	expid int,
 	qid int,

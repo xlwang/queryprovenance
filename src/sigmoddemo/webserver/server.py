@@ -76,7 +76,17 @@ def corrupt():
         corrupt_query = """select query from qlogs where expid = %d and mode = 'dirty' and qid = %d""" % (int(expid), int(queryid))
         
     elif workload == 'TPC-C':
-        print "corrupt tpcc"
+        call(["java", "-jar", "tpcc.jar", "5432", "dbconn.config", "-exp", expid, "-option", "2", "-qidx", queryid])
+        primary_key = set(["o_id"])
+        print primary_key
+        db_query_dirty = """select * from %s_%d_dirty_%d order by o_id"""
+        db_query_clean = """select * from %s_%d_clean_%d order by o_id"""
+        db_query_dirty = db_query_dirty % ('oorder', int(expid), querylogsize-1)
+        print db_query_dirty 
+        db_query_clean = db_query_clean % ('oorder', int(expid), querylogsize-1)
+        print db_query_clean
+        corrupt_query = """select query from qlogs where expid = %d and mode = 'dirty' and qid = %d""" % (int(expid), int(queryid))
+        print corrupt_query
     elif workload == 'TATP':
         print "corrupt tatp"
     else:
@@ -91,21 +101,21 @@ def corrupt():
     # load queries
     header_and_query = g.conn.execute(corrupt_query)
     raw_query = [dict(zip(header_and_query.keys(), list(row))) for row in header_and_query]
-
+    
     query = []
     for i, q in enumerate(raw_query):
         query = q['query']
-        
+    print "bk 1"   
     # load data
     header_and_data_clean = g.conn.execute(db_query_clean)
     header_and_data_dirty = g.conn.execute(db_query_dirty)
-
+    print "bk 2"
     header = []
     for i, attrname in enumerate(header_and_data_clean.keys()):
         header.append(str(attrname))
    
     raw_data_clean = [dict(zip(header_and_data_clean.keys(), list(row))) for row in header_and_data_clean]
-
+    print "bk 3"
     clean_rows = {}
     for i, d in enumerate(raw_data_clean):
         data = []
@@ -115,7 +125,7 @@ def corrupt():
                 row_key = row_key + "\t" + str(d[attrname])
             data.append(dict(clean = str(d[attrname]), isdirty = False, dirty = ""))
         clean_rows[row_key] = dict(data = data, iscomplaint = False, id = i, indirty = False)
-
+    print "bk 4"
     rows = []
     raw_data_dirty = [dict(zip(header_and_data_dirty.keys(), list(row))) for row in header_and_data_dirty]
     for i, d in enumerate(raw_data_dirty):
@@ -147,7 +157,7 @@ def corrupt():
                 data[j]['isdirty'] = True
             iscomplaint = True
         rows.append(dict(data = data, iscomplaint = iscomplaint, id = row_key))
-
+    print "bk 5"
     # check clean data
     for key in clean_rows:
         data_clean = clean_rows[key]
@@ -252,7 +262,10 @@ def workload():
       configquery = """insert into qfixconfig values (%d, '', 'qfix;alt', '%s')""" % (int(expid), "taxes_" + str(expid))
       g.conn.execute(configquery)
   elif workload == 'TPC-C':
-      print "not yet finished"
+      call(["java", "-jar", "tpcc.jar", "5432", "dbconn.config", "-exp", str(expid), "-option", "0"])
+      call(["java", "-jar", "tpcc.jar", "5432", "dbconn.config", "-exp", str(expid), "-option", "1", "-qsize", str(querylogsize)])
+      configquery = """insert into qfixconfig values (%d, '', 'qfix;alt', '%s')""" % (int(expid), "oorder_" + str(expid))
+      g.conn.execute(configquery)
   else:
       call(["java", "-jar", "synthetic.jar", "5432", "dbconn.config", "-exp", str(expid), "-option", "0"])
       call(["java", "-jar", "synthetic.jar", "5432", "dbconn.config", "-exp", str(expid), "-option", "1", "-qsize", str(querylogsize)])
@@ -280,6 +293,14 @@ def get_workload(workload='default', querylogsize = 10, expid = 0, mode = 'clean
   elif workload == 'TPC-C':
       # load tpcc
       print('load tpcc data')
+      if mode == 'fixed':
+          db_query = """select * from oorder_%d_%s_%s_%d order by o_id, o_d_id, o_w_id"""
+      else: 
+          db_query = """select * from oorder_%d_%s_%d order by o_id, o_d_id, o_w_id"""
+      
+      queries_query = queries_query % (int(expid), mode, algorithm, int(querylogsize))
+      primary_key = set(["o_id"])
+      
   elif workload == 'TATP':
       # load tatp
       print('load tatp data')
@@ -296,6 +317,7 @@ def get_workload(workload='default', querylogsize = 10, expid = 0, mode = 'clean
   
   
   # load queries
+  print queries_query
   header_and_query = g.conn.execute(queries_query)
   raw_query = [dict(zip(header_and_query.keys(), list(row))) for row in header_and_query]
   queries = []
