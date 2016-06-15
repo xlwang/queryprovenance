@@ -167,12 +167,13 @@ def diff_queries(query_clean = [], query_dirty = [], query_fixed = []):
     queries = []
     for i in range(len(query_fixed)):
         query = []
-        if query_clean[i]["query"]["query"] != query_dirty[i]["query"]["query"] or query_clean[i]["query"]["query"] != query_fixed[i]["query"]["query"]:
+        if query_dirty[i]["query"]["query"] != query_fixed[i]["query"]["query"]:
             query = dict(query = query_clean[i]["query"]["query"], dirtyquery = query_dirty[i]["query"]["query"], fixedquery = query_fixed[i]["query"]["query"], corrupted = True)
-            queries.append(dict(query = query, id = i))
+        elif query_dirty[i]["query"]["query"] != query_clean[i]["query"]["query"]:
+            query = dict(query = query_clean[i]["query"]["query"], dirtyquery = query_dirty[i]["query"]["query"], fixedquery = "", corrupted = True)
         else:
             query = dict(query = query_clean[i]["query"]["query"], dirtyquery = "", fixedquery = "", corrupted = False)
-            queries.append(dict(query = query, id = i))
+        queries.append(dict(query = query, id = i))
     return queries
     
 def diff_table(table_clean = {}, table_dirty = {}):
@@ -434,7 +435,7 @@ def solve():
   query_and_data = get_workload(workload, int(querylogsize), expid, 'fixed', 'qfix')
   query_and_data_clean = get_workload(workload, int(querylogsize), expid, 'clean', '')
   query_and_data_dirty = get_workload(workload, int(querylogsize), expid, 'dirty', '')
- 
+   
   qfix_q = dict(queries = diff_queries(query_and_data_clean['queries'], query_and_data_dirty['queries'], query_and_data['queries']))
   
   print "calculate diff"
@@ -451,18 +452,18 @@ def solve():
   qfix_stats_query = stats_query % (int(expid), 'qfix')
   header_and_data = g.conn.execute(qfix_stats_query)
   raw_data = [dict(zip(header_and_data.keys(), list(row))) for row in header_and_data]
-  qfix_stats = "Failed!"
+  qfix_stats = "Error: QFix cannot fix this problem \n\n\n"
   print raw_data
-  if len(raw_data) > 0:
-      qfix_stats = "Succeed! Time: %f; Precision: %f; Recall: %f" % (raw_data[0]['exetime'], raw_data[0]['precision'], raw_data[0]['recall'])
+  if len(raw_data) > 0 and raw_data[0]['precision'] > 0 and raw_data[0]['recall'] > 0:
+      qfix_stats = "Succeed! \nTime: %f; \nPrecision: %f; Recall: %f" % (raw_data[0]['exetime'], raw_data[0]['precision'], raw_data[0]['recall'])
       #qfix_stats = dict(time = raw_data[0]['exetime'], precision = raw_data[0]['precision'], recall = raw_data[0]['recall'])
   
   alt_stats_query = stats_query % (int(expid), 'alt')
   header_and_data = g.conn.execute(alt_stats_query)
   raw_data = [dict(zip(header_and_data.keys(), list(row))) for row in header_and_data]
-  alt_stats = "Failed!"
+  alt_stats = "Error: Decision tree cannot fix this problem \n\n\n"
   if len(raw_data) > 0 and raw_data[0]['precision'] > 0 and raw_data[0]['recall'] > 0:
-      alt_stats = "Succeed! Time: %f; Precision: %f; Recall: %f" % (raw_data[0]['exetime'], raw_data[0]['precision'], raw_data[0]['recall'])
+      alt_stats = "Succeed! \nTime: %f; \nPrecision: %f; Recall: %f" % (raw_data[0]['exetime'], raw_data[0]['precision'], raw_data[0]['recall'])
       #dict(time = raw_data[0]['exetime'], precision = raw_data[0]['precision'], recall = raw_data[0]['recall'])
   
   data = dict(

@@ -14,6 +14,21 @@ CREATE TABLE qlogs (
 	wherec text
 );
 
+CREATE TABLE qlogs_act (
+	expid int,
+	qid int,
+	type text, 
+	mode text,
+	algorithm text,
+	priority int,
+	correct int,
+	query text,
+	vals text,
+	attrs text,
+	setc text,
+	wherec text
+);
+
 	  
 drop table if exists qfixconfig cascade;
 CREATE TABLE qfixconfig (
@@ -44,6 +59,20 @@ CREATE TABLE taxes (
 
 drop table if exists oorder cascade;
 CREATE TABLE oorder (
+	o_w_id int NOT NULL,
+	o_d_id int NOT NULL,
+	o_id int NOT NULL,
+	o_c_id int NOT NULL,
+	o_carrier_id int DEFAULT NULL,
+	o_ol_cnt decimal(2,0) NOT NULL,
+	o_all_local decimal(1,0) NOT NULL,
+	o_entry_d text,
+	PRIMARY KEY (o_w_id,o_d_id,o_id),
+	UNIQUE (o_w_id,o_d_id,o_c_id,o_id)
+);
+
+drop table if exists oorder_act cascade;
+CREATE TABLE oorder_act (
 	o_w_id int NOT NULL,
 	o_d_id int NOT NULL,
 	o_id int NOT NULL,
