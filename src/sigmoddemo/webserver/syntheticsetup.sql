@@ -68,7 +68,7 @@ CREATE TABLE oorder (
 	o_ol_cnt decimal(2,0) NOT NULL,
 	o_all_local decimal(1,0) NOT NULL,
 	o_entry_d text,
-	PRIMARY KEY (o_w_id,o_d_id,o_id),
+	PRIMARY KEY (o_id),
 	UNIQUE (o_w_id,o_d_id,o_c_id,o_id)
 );
 
@@ -81,7 +81,7 @@ CREATE TABLE oorder_act (
 	o_carrier_id int DEFAULT NULL,
 	o_ol_cnt decimal(2,0) NOT NULL,
 	o_all_local decimal(1,0) NOT NULL,
-	PRIMARY KEY (o_w_id,o_d_id,o_id),
+	PRIMARY KEY (o_id),
 	UNIQUE (o_w_id,o_d_id,o_c_id,o_id)
 );
 

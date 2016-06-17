@@ -37,13 +37,13 @@ var app = (function() {
 		var addorremove = 0;
 		if (option == "1") {
 			// check if select all compl is selected
-			mode = "selectall";
 			var selectallcheckbox = document.getElementById("selectall");
 			if (selectallcomplmode != 0) {
 				alert("Please de-select select all compl first!");
 			} else {
 				for (var i = 0, row; row = table.rows[i]; i++) {
 					if (selectallmode == 0) {
+						mode = mode + ";" + row.id;
 						addorremove = 1;
 						row.classList.add("highlightcompl");
 					} else {
@@ -60,7 +60,6 @@ var app = (function() {
 				}
 			}
 		} else if (option == "2") {
-			mode = "selectallcompl"
 			var selectallcomplcheckbox = document.getElementById("selectallcompl");
 			if (selectallmode != 0) {
 				alert("Please de-select select all first!");
@@ -70,6 +69,7 @@ var app = (function() {
 						continue;
 					}
 					if (selectallcomplmode == 0) {
+						mode = mode + ";" + row.id;
 						addorremove = 1;
 						row.classList.add("highlightcompl");
 					} else {
@@ -135,6 +135,8 @@ var app = (function() {
 		workloaddata = workloadData;
 		var selectallcheckbox = document.getElementById("selectall");
 		var selectallcomplcheckbox = document.getElementById("selectallcompl");
+		selectallcomplmode = 0;
+		selectallmode = 0;
 		selectallcheckbox.style.visibility = "visible";
 		selectallcomplcheckbox.style.visibility = "visible";
 		
@@ -160,6 +162,8 @@ var app = (function() {
 				selectallcomplcheckbox.textContent= "select all compl";
 				var selectallcheckbox = document.getElementById("selectall");
 				selectallcheckbox.textContent= "select all";
+				selectallcomplmode = 0;
+				selectallmode = 0;
 				// $("#querytext").text(q.query);
 				if ($("#q-" + q.id + ' pre').hasClass('highlight')) {				
 					// corrupt current query
