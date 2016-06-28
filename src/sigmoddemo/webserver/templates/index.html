@@ -163,7 +163,7 @@
 
 <body class="container">
   <h1 style="margin-bottom: 1ex">QFix Sigmod 2016 Demo</h1>
-  <button id="report_error" onclick="app.reportError()" class="btn btn-primary btn-small; visibility: visible" style="width: 12em">Report Error!</button> 
+  <button id="report_error" onclick="app.reportError()" class="btn btn-primary btn-small; visibility: hidden" style="width: 12em">Report Error!</button> 
   <div class="row">
     <div class="col-md-4">
 		<h4> Dataset Configurations </h4>
@@ -197,8 +197,8 @@
   	  <h4> Final database state </h4>
       </div>
       <div class="col-md-4">
-	<button id="selectallcompl" onclick="app.selectData(2)" class="btn btn-primary btn-small; visibility: visible" style="width: 12em">select all complaints</button>
--      </div>
+	<button id="selectall" onclick="app.selectData(2)" class="btn btn-primary btn-small; visibility: hidden" style="width: 12em">select all</button>      <button id="selectallcompl" onclick="app.selectData(2)" class="btn btn-primary btn-small; visibility: visible" style="width: 12em">select all complaints</button>     
+	</div>
   </div>
   <div class="row">
     <div class="col-md-12">

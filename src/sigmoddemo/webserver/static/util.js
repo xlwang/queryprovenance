@@ -37,6 +37,7 @@ var app = (function() {
 		var addorremove = 0;
 		if (option == "1") {
 			// check if select all compl is selected
+			/*
 			var selectallcheckbox = document.getElementById("selectall");
 			if (selectallcomplmode != 0) {
 				alert("Please de-select select all compl first!");
@@ -58,7 +59,7 @@ var app = (function() {
 					selectallmode = 0;
 					selectallcheckbox.textContent = "select all";
 				}
-			}
+			}*/
 		} else if (option == "2") {
 			var selectallcomplcheckbox = document.getElementById("selectallcompl");
 			if (selectallmode != 0) {
@@ -133,11 +134,11 @@ var app = (function() {
 
 	var renderWorkload = function(workloadData) {
 		workloaddata = workloadData;
-		var selectallcheckbox = document.getElementById("selectall");
+		// var selectallcheckbox = document.getElementById("selectall");
 		var selectallcomplcheckbox = document.getElementById("selectallcompl");
 		selectallcomplmode = 0;
 		selectallmode = 0;
-		selectallcheckbox.style.visibility = "visible";
+		// selectallcheckbox.style.visibility = "visible";
 		selectallcomplcheckbox.style.visibility = "visible";
 		
 		renderQueryLog(workloadData);
@@ -160,8 +161,8 @@ var app = (function() {
 				$("#alt_query-container").empty();
 				var selectallcomplcheckbox = document.getElementById("selectallcompl");
 				selectallcomplcheckbox.textContent= "select all compl";
-				var selectallcheckbox = document.getElementById("selectall");
-				selectallcheckbox.textContent= "select all";
+				//  selectallcheckbox = document.getElementById("selectall");
+				// selectallcheckbox.textContent= "select all";
 				selectallcomplmode = 0;
 				selectallmode = 0;
 				// $("#querytext").text(q.query);

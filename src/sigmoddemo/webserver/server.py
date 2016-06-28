@@ -284,9 +284,9 @@ def get_workload(workload='default', querylogsize = 10, expid = 0, mode = 'clean
   if workload == 'taxes':     
     # define to database and query 
     if mode == 'fixed':
-        db_query = """select * from taxes_%d_%s_%s_%d"""
+        db_query = """select * from taxes_%d_%s_%s_%d order by employee_id"""
     else:
-        db_query = """select * from taxes_%d_%s_%d"""
+        db_query = """select * from taxes_%d_%s_%d order by employee_id"""
     queries_query = queries_query % (int(expid), mode, algorithm, int(querylogsize))
     primary_key = set(["employee_id"])
     

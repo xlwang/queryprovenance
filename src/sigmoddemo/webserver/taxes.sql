@@ -15,7 +15,7 @@ SET search_path = public, pg_catalog;
 -- Data for Name: taxes; Type: TABLE DATA; Schema: public; Owner: xlwang
 --
 
-COPY taxes (employee_id, income, tax_rate, pay) FROM stdin;
+COPY taxes (employee_id, income, tax_rate, owed) FROM stdin;
 1	186000	0.25	\N
 2	177000	0.25	\N
 3	9000	0.150000006	\N

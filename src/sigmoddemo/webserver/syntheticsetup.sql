@@ -55,7 +55,7 @@ CREATE TABLE taxes (
 	employee_id int primary key,
 	income real,
 	tax_rate real,
-	pay real
+	owed real
 );
 
 drop table if exists oorder cascade;
