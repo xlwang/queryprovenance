@@ -1,3 +1,60 @@
+# July 11
+
+Discussed revision for sigmod
+
+Intro story:  
+* keep first 2  paragraphs
+* why is this problem hard?  1) many ways queries can cause errors 2) any other reasons?
+* nothing addresses this
+* We can't solve it either, so we focus on OLTP
+* many important applications are OLTP and matches this problem well
+* contributions.
+
+Alternative intro story
+
+* erors are important, see them everywhere
+* caused by queries
+* an important class are OLTP applications (~all user facing applications)
+* even for this case, it's quite hard because X Y Z
+* it turns out the more general problem is very very hard.
+* contributions include recgonizing and formulating the problem, and solving for a big chunk of the OLTP class of applications.
+
+
+Related work: move to earlier in the text to justify "why the general problem is too hard" Alexandra had thoughts here
+
+MILP: explain it's properties so results are in context.  
+
+Experiments: reorganize based on reviewer feedback.
+
+
+# Applications and Motivation
+
+* Researchers: Medical errors now third leading cause of death in United States
+  * https://www.washingtonpost.com/news/to-your-health/wp/2016/05/03/researchers-medical-errors-now-third-leading-cause-of-death-in-united-states/
+
+References
+
+* http://www.sciencedirect.com/science/article/pii/S0747563211000707
+* http://www.vldb.org/pvldb/vol8/p1828-potharaju.pdf
+
+
+# Apr 5
+
+Meeting summary:
+We talked about the review today and conclude the following revision plan:
+1. Introduction: avoid over-selling; compare the problem we want to solve, e.g., synthetic data, with real query log. 
+
+2. Tech weak? add text demonstrating why we pick MILP solver to solve the problem. Emphasis that this problem is never solved before and discuss why other techniques won't work. Also add some text introducing the state of art of MILP problem. 
+
+3. Complexity: add complexity proof (NP-complete) in the paper. 
+
+4. Experiment organization: re-organize the experiment section. Highlight key sentences. Remove some experiment results. 
+
+Re-submission candidates:
+Sigmod 17 (first deadline is July 22th). 
+Any other thoughts?
+
+
 # Feb 1
 
 Meeting agenda
