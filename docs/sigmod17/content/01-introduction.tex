@@ -9,9 +9,12 @@ alone cost the US consumers \$2.5 billion each year~\cite{Fan2008}.
 Although data
 cleaning tools can purge many errors from a dataset before downstream 
 applications use the data, datasets can frequently change as applications
-and users execute queries that modify the data.
-Mistakes in these queries can introduce errors to the data, and these
-errors can propagate to more data by subsequent update queries.
+and users execute \xlw{OLTP updates} that modify the data. 
+\xlw{In fact, mistakes in such modification queries are 
+frequently introduced, especially by applications that turn human inputs into 
+database transactions. Thus, executing these incorrect queries may
+induce additional errors to the data }and these
+errors can further propagate to more data by subsequent update queries.
 By the time errors are detected, their origin has often been obscured and it is difficult to identify the offending query and correct it.
 Identifying and correcting errors in the data directly is suboptimal, as it targets the symptom,
 rather than the underlying cause. Fixing the manifested data errors on a
@@ -36,9 +39,11 @@ impractical and non-scalable as it requires users to answer challenge
 questions before allowing the updates, and it is not applicable to updates
 initiated by applications.
 
+
 \looseness -1
 In this paper, we present \sys, a \emph{diagnosis and repair} framework for data errors
-caused by erroneous updates. In contrast to existing approaches in data
+caused by erroneous OLTP updates. 
+In contrast to existing approaches in data
 cleaning that aim to detect and correct errors in the data directly, the goal
 of \sys is to identify errors in the queries that introduced errors in the
 data. These diagnoses \emph{explain} how errors were introduced to a
@@ -159,19 +164,12 @@ following contributions:
 \end{itemize}
 
 To the best of our knowledge, \sys is the first system that diagnoses
-and repairs errors through query histories. \xlw{
-However, \sys does not currently deal with large amounts of incorrect
-information, such as fake data errors reported by malicious users. 
-In addition, \sys only persists its effectiveness and efficiency with 
-with relatively simple update workloads.
-
-We carefully study the complexity of update workloads and divide them 
-into four distinct groups according to their \texttt{WHERE} clause complexity: 
-point update with primary key; 
-point update with non-primary key; range update; update with nested queries, joins, and aggregation.
-This categorization covers the majority of update queries including queries without a \texttt{WHERE} clause: for example, 
-\texttt{INSERT} query can also be considered as ``point update with primary key'' as it only impacts on a 
-particular tuple identified by its own primary key. After investigate more than 10 common benchmarks, we found that most of them only consist queries belong to the first group, which could be efficiently and effectively solved by \sys. However, \sys's capability in solving more complex workloads (the second and third groups) significantly reduce as it requires higher execution time and handles limited amount of errors. \sys does not able to handle the last group of workloads. 
+and repairs errors through query histories. \xlw{\sys 
+could persists its effectiveness and efficiency with OLTP update workloads, however,
+it currently cannot deal with large amounts of incorrect
+information, such as fake data errors reported by malicious users. In addition, \sys 
+only targets at solving common short on-line OLTP updates and it
+does not support complex OLAP updates with aggregations or(and) nested sub-queries. 
 }
 These challenges present exciting future extensions to the system presented in this work.
 
