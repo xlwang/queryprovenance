@@ -1,12 +1,16 @@
 
 \section{A MILP-based Solution}
 \label{sec:sol}
+\xlw{
+In Definition~\ref{def:problem}, we define the \textit{optimize diagnosis} problem as deriving a log repair such that the provided complaints are all resolved by executing the log repair on the initial (clean) database. This definition forces an important requisite for the algorithm that solves this problem: the algorithm must be able to handle query dependencies. However, this requisite render many existing works~\cite{Wu13, Chapman2009} infeasible to solve the problem as they all targets on a single \texttt{SELECT} query revision. Moreover, many of these existing approaches are learning-based. In Appendix~\ref{sec:heuristic}, we further illustrate that these learning-based approach has major limitations in solving even single OLTP update queries. }
 
 In this section, we introduce a \emph{basic} solver-based approach to 
-resolve the errors reflected in the complaint set.
-This approach constructs a mixed-integer linear 
+resolve the errors reflected in the complaint set. \xlw{This solver-based approach handles
+query dependencies by representing database tuples as variables and queries as undetermined 
+functions that operate on the 
+tuples. It further constructs a mixed-integer linear 
 programming (MILP) problem by linearizing and parameterizing the 
-corrupted query log over the tuples in the database. 
+corrupted query log over the tuples in the database.}
 Briefly, an MILP is a linear program where only a subset of the undetermined variables
 are required to be integers, while the rest are real-valued.
 
