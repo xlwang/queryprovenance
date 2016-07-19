@@ -1,4 +1,4 @@
-\newpage
+
 \appendix
 
 \section{A Learning-based Approach}
@@ -116,6 +116,8 @@ that applies \dt over more queries is expected to have little hope of succeeding
 There are three important reasons why \dt, and any approach that focuses on a single query at a 
 time\footnote{Although our incremental approach tries to generate a repair for a single
 query at a time, it encodes all subsequent queries in the log.}, will not perform well.
+
+\iffalse
   \begin{figure*}[t]
   \centering
       \begin{subfigure} [t]{.3\textwidth}
@@ -159,6 +161,7 @@ query at a time, it encodes all subsequent queries in the log.}, will not perfor
    \vspace*{-.1in}
    \label{f:soltime}
   \end{figure*}
+\fi
 \begin{itemize}[itemsep=1pt, leftmargin=5mm]
 \item \textbf{Single Query Limitation: }
 In principle, one could attempt to apply this technique to the
@@ -200,7 +203,7 @@ applicability of learning-based approaches.
 
 
 
-
+\iffalse
 
 
 \section{MILP Solver Performance}
@@ -367,3 +370,4 @@ In the above example, we find that there exist two candidate fixes for the \text
 \textbf{Correct repair ratio \& top-k vs. database sizes: } We next narrow down to \texttt{UPDATE} workload and evaluate \sys's behavior with increasing amount of tuples in the database. We observe $p_{correct} = 1$ and $topk = 1$ on different corrupt indexes in all database sizes (Figure~\ref{f:dbsizeratio}~\ref{f:dbsizecount}). 
 
 \textbf{Correct repair ratio \& top-k vs. false negatives: } We finally evaluate \sys on \texttt{UPDATE} workload with increasing false negative rates. Similar to the quality drop in Figure~\ref{f:falsenegative_acc}, we observe the $p_{correct}$ (Figure~\ref{f:fnratio}) rate also suffers from less submitted complaints when errors happen early in the query log. However, \sys achieves above $0.75$ $p_{correct}$ rate for more recent errors (corrupt index is 300 and 200) even with high false negative rate. The $topk$ behaves similar to $p_{correct}$ in which $topk$ increasing with the false negative rate (Figure~\ref{f:fnfixcount}).  
+\fi
