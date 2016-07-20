@@ -222,23 +222,14 @@ In these settings, \sys is very effective at reducing the number of constraints 
 \subsection{Sensitivity of the Incremental Algorithms}
 \label{sec:experiments:incsec}
 
-This subsection evaluates the efficacy of using each slicing optimization on the incremental algorithm by 
-varying the characteristics of the database and query log.  
+This subsection evaluates the efficacy of using each slicing optimization on the incremental algorithm by varying the characteristics of the database and query log.  
+We report performance and omit accuracy numbers because the F1 for all settings is nearly 1.
 
 \subsubsection{Sensitivity to Database Properties}
 
-The following tow experiments compares different combinations of the slicing optimizations \emph{tuple/query/attr} under varying database size and schema size settings.  
+The following two experiments compares different combinations of the slicing optimizations \emph{tuple/query/attr} under varying database size and schema size settings.  
+By default, tuple-slicing is always enabled because none of the algorithms were able to scale without it \ewu{EXPLAIN}.
 Each facet (subplot) in Figure~\ref{f:database} represents the location of the corruption as $q_{50, 200, 300}$.
-We report performance and omit accuracy numbers because the F1 for all settings is nearly 1.
-
-% \looseness -1
-% The following set of experiments are designed to establish the rationale for 
-% the settings in the subsequent experiments.  
-% \xlw{
-% Specifically, we compare different slicing-based optimizations of incremental repair (\emph{$Inc_1$})
-% as the hardness of database (number of attribute or database size) increases in the context of a single
-% corrupted query: \emph{inc1-all} as the incremental repair with all slicing optimization and \emph{inc-tuple/query/attr} as
-% the incremental repair with the corresponding tuple, query, and attribute slicing optimization. In addition, we omit the accuracy figures as the F1 score for all settings is nearly 1.}
 
 \stitle{Increasing \# of Attribute :} \looseness -1
 We first vary the number of attribute ($N_a \in [10, 500]$) under a fixed database size $N_D = 100$.
@@ -259,17 +250,18 @@ while query-slicing explicitly reduces the number of candidate queries in propor
 Ultimately, combining all three optimizations outperforms tuple-slicing by $2-4\times$.
 
 \smallskip
-\textit{Takeaways: we find that the performance of the different repair algorithm 
-heavily depends on the property of the datasets---in particular, the number of attributes and the number of tuples in the database. Tuple slicing is essential to solve general problems. Attribute and query slicing show significant gain for datasets with large number of attributes. }
-
-\ewu{Need to introduce QFix again as setup for the subsequent experiments}
-\xlw{Note that in both experiments, we omit the results of algorithms without applying tuple-slicing optimization as the these algorithms failed to scale over most of the problems. In the following experiments, we focus on studying the performance of a single \sys setting---incremental with tuple-slicing---on a narrow table setting that contains $N_a = 10$ attributes, and a single corrupt query in the query log.}
+\textit{Takeaways: we find that repair performance is sensitive to 
+the number of attributes and the number of tuples in the database, particularly when the corruption is old. 
+Tuple slicing is essential to solve general problems. Attribute and query slicing show significant gain for datasets with large number of attributes. }
 
 
 \subsubsection{Sensitivity to Query Log}
 \label{sec:experiments:synth}
-\xlw{
-The following set of synthetic experiments evaluates \sys (incremental with tuple-slicing)'s performance while increase the hardness of queries by varying numerous workload parameters such as query type, query complexity, and log size $N_q$. Again, we skip the accuracy figures as \sys achieves near 1 F1 score in the following set of experiments. }
+
+The following experiments evaluate \sys (incremental with all optimizations) under differing query log characteristics.
+We first vary the query type and find that \texttt{UPDATE} queries are the most expensive query type to repair.
+We then focus solely on the more challenging \texttt{UPDATE}-only logs and study \sys's sensitivity to query complexity and predicate dimensionality.
+The database contains $10$ attributes and \ewu{XXX} tuples.
 
 \iffalse
 \emph{Database Size:} \looseness -1
@@ -292,7 +284,8 @@ Figure~\ref{f:indelup_time} shows that while the cost of repairing \texttt{INSER
 remains relatively constant, the cost for \texttt{DELETE}-only and \texttt{UPDATE}-only workloads increase as 
 the corruption happens earlier in the query log---and a much faster rate for \texttt{UPDATE} queries.
 
-\ewu{Probably not needed at this point.  Maybe instead say "This is why we have focused on UPDATE queries in most of our experiments.}  We observe that \texttt{UPDATE} queries translate into more undetermined variables than other query types, and are significantly more expensive to repair. 
+\ewu{Probably not needed at this point.  Maybe instead say "This is why we have focused on UPDATE queries in most of our experiments.}  
+We observe that \texttt{UPDATE} queries translate into more undetermined variables than other query types, and are significantly more expensive to repair. 
 \iffalse
 Based on these results, we focus on the incremental algorithm $inc_1$ and the more difficult \texttt{UPDATE}-only workloads in the rest of the experiments.
 \fi
