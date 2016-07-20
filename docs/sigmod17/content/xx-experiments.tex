@@ -37,6 +37,9 @@ We then evaluate the variations of the incremental algorithm in a wide range of 
 Finally, we evaluate the incremental and basic algorithms on more challenging settings of incomplete complaint sets and multiple query corruptions and discuss why the latter setting is fundamentally difficult (Section~\ref{sec:experiments:synth}).
 All experiments were run on 12x2.66 GHz  machines with 16GB RAM running IBM CPLEX~\cite{cplex2014v12} as the MILP solver on CentOS release 6.6.
 In the following text, \sys refers to the incremental algorithm that uses all slicing optimizations.
+We refer the reader to Appendix~\ref{sec:heuristic} for a study of alternative machine learning-based repair algorithms
+and to our full technical report~\cite{qfixarxiv} for an analysis of the MILP solver, factors that affect the 
+number of complaints, and ambiguous repair situations (e.g., when multiple queries may be repaired to fix the complaint set).
 
 
 % the performance and accuracy
@@ -223,22 +226,70 @@ In these settings, \sys is very effective at reducing the number of constraints 
 \label{sec:experiments:incsec}
 
 This subsection evaluates the efficacy of using each slicing optimization on the incremental algorithm by varying the characteristics of the database and query log.  
+By default, the tuple-slicing optimization is always enabled because none of the algorithms were able to scale without it \ewu{EXPLAIN}.
 We report performance and omit accuracy numbers because the F1 for all settings is nearly 1.
+
+
+\subsubsection{Sensitivity to the Query Log}
+\label{sec:experiments:synth}
+
+The following experiments evaluate \sys (incremental with all optimizations) under differing query log characteristics.
+We first vary the query type and find that \texttt{UPDATE} queries are the most expensive query type to repair.
+We then focus solely on the more challenging \texttt{UPDATE}-only logs and study \sys's sensitivity to query complexity and predicate dimensionality.
+The database contains the default $10$ attributes and $1000$ tuples.
+
+\stitle{Query Type: }\label{sec:indelup}
+This experiment compares \qfix over \texttt{INSERT}, \texttt{DELETE}, or \texttt{UPDATE}-only query logs to test the effect of the query type.
+We increase the number of queries $N_q$ from $1$ to $200$ and corrupt the oldest query in the log.  
+Figure~\ref{f:indelup_time} shows that while the cost of repairing \texttt{INSERT} workloads
+remains relatively constant, the cost for \texttt{DELETE}-only and \texttt{UPDATE}-only workloads increase as 
+the corruption happens earlier in the query log---and a much faster rate for \texttt{UPDATE} queries.
+This is because \texttt{UPDATE} queries translate into more undetermined variables than \texttt{INSERT} or \texttt{DELETE} queries, and are significantly more expensive to repair. 
+For this reason, our subsequent experiments focus specifically on the more challenging \texttt{UPDATE}-only workloads.
+
+\smallskip
+\stitle{Query Clause Type: }
+So far, we have focused on \texttt{UPDATE} queries with constant set clauses and range predicates ({\it Constant/Range}).  
+Figure~\ref{f:qidx_time} compares this against {\it Constant/Point} and {\it Relative/Range} \texttt{UPDATE} query workloads. 
+\ewu{Is this true:} The x-axis varies the number of queries from $1$ to $250$.
+We found that point predicates are easier to solve than range predicates because 
+1) the latter doubles the number of undetermined variables as compared to point predicates and 
+2) point queries are on key attributes, which further reduces the MILP search space.
+In addition, constant set clauses are easier than relative set clauses because
+We believe constant set clauses are simpler than relative set clauses  because the former breaks the causal relationship between input and output records for the overwritten values.
+This both simplifies the difficulty of the constraint problem, and reduces the total number of constraints.
+
+
+\smallskip
+\stitle{Predicate Dimensionality:}
+Figure~\ref{f:where_time} varies the dimensionality of the update queries by increasing the number of predicates in the \texttt{WHERE} clause, while keeping the query cardinality constant (so the number of complaints is fixed).
+The cost increases with the dimensionality because each additional predicate is translated into a new set of constraints and undetermined variables, increasing the problem complexity.
+\ewu{does TPCC/TATP have low dimensionality so it's not a problem?}
+
+\smallskip
+\textit{
+  Takeaways: we find \texttt{UPDATE}-workloads are on average significantly harder than workloads with other types of queries, and that
+  performance is closely related to the complexity and the dimensionality of queries. 
+  In the challenging setting of range \texttt{UPDATE}-only workloads, \sys find a repair within seconds or minutes for ~$200$ queries---particularly if the corruption is recent. 
+}
+
+
+
 
 \subsubsection{Sensitivity to Database Properties}
 
-The following two experiments compares different combinations of the slicing optimizations \emph{tuple/query/attr} under varying database size and schema size settings.  
-By default, tuple-slicing is always enabled because none of the algorithms were able to scale without it \ewu{EXPLAIN}.
+The following two experiments compare different combinations of the slicing optimizations \emph{tuple/query/attr} under varying database size and schema size settings.  
+The query log contains the default $300$ {\it Constant/Range} \texttt{UPDATE} queries.
 Each facet (subplot) in Figure~\ref{f:database} represents the location of the corruption as $q_{50, 200, 300}$.
 
-\stitle{Increasing \# of Attribute :} \looseness -1
+\stitle{\# of Attribute:} \looseness -1
 We first vary the number of attribute ($N_a \in [10, 500]$) under a fixed database size $N_D = 100$.
 As shown in Figure~\ref{f:attr}, when the number of attribute in a table is small (e.g., $N_a=10$) or when the corruption is recent (e.g., $q_{200, 300}$), then all optimizations appear identical. 
 However, increasing the number of attribute exhibits a larger benefit for query and attribute slicing (up to $6.8\times$ reduction compared to tuple-slicing).
 When the table is wide ($N_a = 500$), applying all optimizations ($inc_1-all$) is $40\times$ faster than tuple-slicing alone.  
 
 
-\stitle{Increasing Database Size:} \looseness -1
+\stitle{Database Size:} \looseness -1
 We now vary the database size ($N_D \in [100,5000]$) with a large number of attributes ($N_a = 100$).
 We fix the number of complaints by decreasing the query selectivity in proportion to $N_D$'s increase---the specific mechanism to do so did not affect the findings.
 Figure~\ref{f:attr100} shows that the costs are relatively flat until the corruption occurs in an old query ($q_{50}$).  
@@ -250,76 +301,19 @@ while query-slicing explicitly reduces the number of candidate queries in propor
 Ultimately, combining all three optimizations outperforms tuple-slicing by $2-4\times$.
 
 \smallskip
-\textit{Takeaways: we find that repair performance is sensitive to 
-the number of attributes and the number of tuples in the database, particularly when the corruption is old. 
-Tuple slicing is essential to solve general problems. Attribute and query slicing show significant gain for datasets with large number of attributes. }
+\textit{
+  Takeaways: we find that repair performance is sensitive to 
+  the number of attributes and the number of tuples in the database, particularly when the corruption is old. 
+  Tuple slicing is essential to solve general problems, while attribute and query slicing show significant gain for datasets with large number of attributes.
+}
 
 
-\subsubsection{Sensitivity to Query Log}
-\label{sec:experiments:synth}
 
-The following experiments evaluate \sys (incremental with all optimizations) under differing query log characteristics.
-We first vary the query type and find that \texttt{UPDATE} queries are the most expensive query type to repair.
-We then focus solely on the more challenging \texttt{UPDATE}-only logs and study \sys's sensitivity to query complexity and predicate dimensionality.
-The database contains $10$ attributes and \ewu{XXX} tuples.
-
-\iffalse
-\emph{Database Size:} \looseness -1
-Figure~\ref{f:dbsize_time} varies the database size ($N_D \in [100, 100k]$), and fixes query output cardinality and complaint set size in the same way as the previous scalability experiment.
-In contrast to the previous experiment, the scalabality curve is nearly flat for both corruption query indices.
-The reason is because the solver's implicit pruning optimization is less effective when there are only $10$ attributes: Every query is likely to touch an attribute that affects the complaint set.
-We verified this by applyng query-slicing to the same setting, and found far fewer queries were pruned compared to the previous experiment.
-It takes less than a minute to perfectly repair the recent corruption $q_{200}$,
-and around $4$ minutes for the older corruption $q_{50}$, even as the database size increases.
-At smaller database sizes, the randomness in the workload generator leads to variability in the size of the complaint set, and ultimately a larger and more difficult MILP problem.
-The exponential relationship between solver time and problem difficulty results in the higher average latency for $q_{50}$.
-\fi
-
-
-\stitle{Query Type: }\label{sec:indelup}
-This experiment evaluates the \sys 
-($inc_1-tuple$) on \texttt{INSERT}, \texttt{DELETE}, or \texttt{UPDATE}-only workloads.
-We increase the number of queries from $1$ to $200$ and corrupt the oldest query in the log.  
-Figure~\ref{f:indelup_time} shows that while the cost of repairing \texttt{INSERT} workloads
-remains relatively constant, the cost for \texttt{DELETE}-only and \texttt{UPDATE}-only workloads increase as 
-the corruption happens earlier in the query log---and a much faster rate for \texttt{UPDATE} queries.
-
-\ewu{Probably not needed at this point.  Maybe instead say "This is why we have focused on UPDATE queries in most of our experiments.}  
-We observe that \texttt{UPDATE} queries translate into more undetermined variables than other query types, and are significantly more expensive to repair. 
-\iffalse
-Based on these results, we focus on the incremental algorithm $inc_1$ and the more difficult \texttt{UPDATE}-only workloads in the rest of the experiments.
-\fi
-
-\smallskip
-\stitle{Query Clause Type: }
-So far, we have focused on \texttt{UPDATE} queries with constant set clauses and range predicates.  
-Figure~\ref{f:qidx_time} individually varies each clause and compares against {\it Constant/Point} and {\it Relative/Range} queries. 
-The x-axis varies the index of the corrupted query between $q_1$ and $q_{249}$.
-We find that point predicates and constant set clauses are easier to solve than range predicates and relative set clauses, respectively.
-The reason for the former pair is because range predicates double the number of undetermined variables as compared to point queries.  
-In addition, point queries are on key attributes, thus further reduces the possible search space.  
-We believe the latter pair is because the constant set clauses break the causal relationship between input and output records for the overwritten values.
-This both simplifies the difficulty of the constraint problem, and reduces the total number of constraints.
-
-
-\smallskip
-\stitle{Predicate Dimensionality:}
-Figure~\ref{f:where_time} varies the dimensionality of the update queries by increasing the number of predicates in the \texttt{WHERE} clause, while keeping the query cardinality constant.
-The cost increases with the dimensionality because each additional predicate is translated into a new set of constraints and undetermined variables, increasing the problem complexity.
-\ewu{Mention potential solutions to this issue}
-
-
-\smallskip
-\textit{Takeaways: we find that problems with \texttt{UPDATE}-workloads are significantly harder than problems with other types of queries. In addition, the performance of \sys also closely related to the complexity and the property of queries. 
-\sys is able to solve hard problems (with ~$200$ \texttt{UPDATE}-only queries) in seconds or minutes---particularly if the error is recent. }
-
-
-\subsection{Solving Hard Problems}
+\subsection{More Challenging Repair Settings}
 \label{sec:experiments:hardprob}
 
-\ewu{Is this setion for "solving hard problems", or examining the limitations of basic on multi-query errors?} \xlw{This section is about examining \sys's limitations on two scenarios: incomplete complaint set information \& scalability over multi-query errors. Maybe we can change to section title as: Examining Limitations? or any other suggestions?}
-
-In this section, we further study the performance of \sys in solving hard problems. In particular, we conduct two sets of experiments: the first experiment evaluate \sys with incomplete complaint sets; the second illustrate \sys's capability in handling multiple errors.
+In this section, we further study the performance of \sys in solving hard problems---when the set of complaints is incomplete, and when there is more than one corruption that let to the complaints\footnote{
+Note that even when there are multiple corruptions in the log, the incremental algorithm is still applicable if only one is responsible for the set of complaints.}.
  
 \stitle{Incomplete Complaint Set:} \looseness -1
 The first experiment (Figures~\ref{f:falsenegative_time} and~\ref{f:falsenegative_acc}) varies the fase positive rate in incomplete complaint sets.
