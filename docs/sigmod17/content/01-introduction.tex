@@ -67,13 +67,13 @@ their root cause. There is a need for tools that can use the error
 reports to diagnose and identify the anomalous queries (root causes)
 in the database.
 
+% that may have affected the erroneous records (i.e., query lineage) \alex{is this a recognized term, or did we come up with it?} \alex{also, do we make a distinction between the query log and the query lineage? It's not clear here.}
+
 In this paper, we present \sys, a diagnosis and repair system for data
 errors caused by anomalous DML queries in OLTP applications. Given a
 set of reported errors (\emph{complaints}) about records in the current database state, \sys
-analyzes the sequence of historical queries that may have affected the
-erroneous records (i.e., query lineage) \alex{is this a recognized
-term, or did we come up with it?} \alex{also, do we make a distinction
-between the query log and the query lineage? It's not clear here.} and
+analyzes the sequence of historical queries executed on the database, 
+filters them to those that may have affected the erroneous records,  and
 generates diagnoses by identifying the specific subset of queries that
 most likely introduced the errors. Alongside these diagnoses, \sys also
 proposes repairs for the erroneous queries; these repairs can correct the
@@ -126,12 +126,12 @@ The second form attempts to prevent data errors by guarding against erroneous up
 
 \begin{itemize}[leftmargin=*, topsep=0mm, itemsep=0mm]
 
-\item We formalize the problem of {\it Query Explanation}: diagnosing a set of data errors using the log of update queries over the database.  Given a set of {\it complaints} as representations of data discrepancies in the current database state, \sys determines how to resolve all of the complaints with the minimum number of changes to the query log (Section~\ref{})
+\item We formalize the problem of {\it Query Explanation}: diagnosing a set of data errors using the log of update queries over the database.  Given a set of {\it complaints} as representations of data discrepancies in the current database state, \sys determines how to resolve all of the complaints with the minimum number of changes to the query log (Section~\ref{sec:abstractions})
 
-\item We illustrate how existing synthesis, learning, and cleaning-oriented techniques have difficulty scaling beyond a query log containing a single query.   We then introduce an exact error-diagnosis solution using a novel mixed integer linear programming (MILP) formulation that can be applied to a broad class of OLTP applications.  This approach uses state-of-the-art solvers to identify optimal diagnoses that are guaranteed to resolve all complaints without introducing new errors to the data (Section~\ref{}).
+\item We illustrate how existing synthesis, learning, and cleaning-oriented techniques have difficulty scaling beyond a query log containing a single query.   We then introduce an exact error-diagnosis solution using a novel mixed integer linear programming (MILP) formulation that can be applied to a broad class of OLTP applications.  This approach uses state-of-the-art solvers to identify optimal diagnoses that are guaranteed to resolve all complaints without introducing new errors to the data (Section~\ref{sec:sol}).
 
-\item We present a suite of optimizations that reduce the problem size without affecting the quality of the proposed repairs.  Further, we propose a pragmatic incremental algorithm tailored to cases when the user is looking for individual corrupt queries (in contrast to sets of corruptions), and show how these optimizations can scale to large datasets (100k records) and query logs (up to 10k DML statements), and tolerate incomplete information such as unreported errors (Section~\ref{}).
+\item We present a suite of optimizations that reduce the problem size without affecting the quality of the proposed repairs.  Further, we propose a pragmatic incremental algorithm tailored to cases when the user is looking for individual corrupt queries (in contrast to sets of corruptions), and show how these optimizations can scale to large datasets (100k records) and query logs (up to 10k DML statements), and tolerate incomplete information such as unreported errors (Section~\ref{sec:experiments:hardprob}).
 
-\item We perform a thorough evaluation of the data and query log characteristics that influence \sys's trade-offs between performance and accuracy.  We compare the baseline and optimized algorithms under a controlled, synthetic setting and demonstrate that our optimizations improve response times by up to $40\times$ and exhibit superior accuracy.   We also evaluate QFix on common OLTP benchmarks and show how QFix can propose fully accurate repairs within milliseconds on a scale 1 TPC-C workload with 1500 queries (Section~\ref{}).
+\item We perform a thorough evaluation of the data and query log characteristics that influence \sys's trade-offs between performance and accuracy.  We compare the baseline and optimized algorithms under a controlled, synthetic setting and demonstrate that our optimizations improve response times by up to $40\times$ and exhibit superior accuracy.   We also evaluate QFix on common OLTP benchmarks and show how QFix can propose fully accurate repairs within milliseconds on a scale 1 TPC-C workload with 1500 queries (Section~\ref{sec:experiments:benchmark}).
 
 \end{itemize}
