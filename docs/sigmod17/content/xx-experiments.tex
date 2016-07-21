@@ -235,8 +235,8 @@ We report performance and omit accuracy numbers because the F1 for all settings 
 
 The following experiments evaluate \sys (incremental with all optimizations) under differing query log characteristics.
 We first vary the query type and find that \texttt{UPDATE} queries are the most expensive query type to repair.
-We then focus solely on the more challenging \texttt{UPDATE}-only logs and study \sys's sensitivity to query complexity and predicate dimensionality.
-The database contains the default $10$ attributes and $1000$ tuples.
+We then focus solely on \texttt{UPDATE}-only workloads and vary query complexity and predicate dimensionality.
+The database is set to the default settings ($N_a=10$,$N_D=1000$).
 
 \stitle{Query Type: }\label{sec:indelup}
 This experiment compares \qfix over \texttt{INSERT}, \texttt{DELETE}, or \texttt{UPDATE}-only query logs to test the effect of the query type.
