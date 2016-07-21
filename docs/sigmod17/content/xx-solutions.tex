@@ -1,44 +1,31 @@
 
 \section{A MILP-based Solution}
 \label{sec:sol}
-\xlw{
-In Definition~\ref{def:problem}, we define the \textit{optimize diagnosis} problem as deriving a log repair such that the provided complaints are all resolved by executing the log repair on the initial (clean) database. This definition forces an important requisite for the algorithm that solves this problem: the algorithm must be able to handle query dependencies. However, this requisite render many existing works~\cite{Wu13, Chapman2009} infeasible to solve the problem as they all targets on a single \texttt{SELECT} query revision. Moreover, many of these existing approaches are learning-based. In Appendix~\ref{sec:heuristic}, we further illustrate that these learning-based approaches have major limitations in solving even single OLTP update queries. }
 
-In this section, we introduce a \emph{basic} solver-based approach to 
-resolve the errors reflected in the complaint set. \xlw{This solver-based approach handles
-query dependencies by representing database tuples as variables and queries as undetermined 
-functions that operate on the 
-tuples. It further constructs a mixed-integer linear 
-programming (MILP) problem by linearizing and parameterizing the 
-corrupted query log over the tuples in the database.}
-Briefly, an MILP is a linear program where only a subset of the undetermined variables
-are required to be integers, while the rest are real-valued.
+The {\it Optimal Diagnosis} problem states that a log repair should resolve all complaints when re-executing the repaired log on the initial (possibly empty) database state.
+The key challenge is that solutions must be able to handle data dependencies between queries in the log (e.g., $q_i$ reads what $q_j$ wrote).
+Unfortunately, this challenge renders existing database techniques~\cite{Wu13,Chapman2009}, as well as machine learning-based approaches, infeasible because they are designed to ``repair'' individual non-nested \texttt{SELECT} queries.
+Appendix~\ref{sec:heuristic} uses a decision tree-based approach to highlight why learning-based techniques perform poorly for even a single DML statement, and fail to work for more than one query.
 
-\looseness -1
-Our general strategy is to model each query as a linear equation 
-that computes the output tuple values from the inputs and to transform the
-equation into a set of of linear constraints.   
-In addition, the constant values in the queries are parameterized
-into a set of undetermined variables, while the database state is encoded 
-as constraints on the initial and final tuple values.
-Finally, the undetermined variables are used to construct an objective function
-that prefers value assignments that minimize both the amount that the queries change and
-the number of non-complaint tuples that are affected. 
+To address these cross-query dependencies, we introduce a constraint-based approach to the {\it Optimal Diagnosis} problem.
+To do so, it maps the problem into a mixed-integer linear programming (MILP) problem by linearizing and parameterizing the corrupted query log over the tuples in the database.
+Briefly, a MILP problem involves assigning values to a set of undetermined variables such that they satisfy a set of linear equations and minimize an objective function---it is mixed because the variables may be integers or real numbers.
 
-The rest of this section will first describe the process of linearizing a single query
-and translating it into a set of constraints.  We then extend the process to the entire
-query log and finally define the objective function.
-Subsequent sections introduce optimizations that both
-improve the speed and quality of the results, as well as harness the trade-off between the two. 
-\subsection{MILP}
+Our general strategy is to model each query as a linear equation that computes the output tuple values from the inputs and to transform the equation into a set of of linear constraints.   
+In addition, the constant values in the queries are parameterized into a set of undetermined variables, while the database state before and after the query is encoded as constraints on the initial and final tuple values.
+Finally, the objective function over the undetermined variables prefers assignments that minimize the amount that the queries change and the number of non-complaint tuples that are affected. 
+
+The rest of this section will introduce the properties of MILP solvers, describe how to encode a single query and single tuple attribute, then extend the encoding procedure to the entire database and query log.
+We finally define the objective function.
+Subsequent sections introduce optimizations and variations of the problem.
+
+\subsection{MILP Solvers}
 \label{sec:MILP}
-\xlw{
-Mixed-integer linear programming (MILP) is known as a mathematical optimization problem with both integer and non-integer variables. MILP problem is NP-hard, however, a great amount of optimization and heuristics~\cite{lima2011computational} have been proposed to help improve the efficiency in solving MILP problems: branch and bound~\cite{quesada1992lp} solves the MILP problem by solving a sequence of linear relaxations while tighten the bounds; branch and cut~\cite{stubbs1999branch} improves the efficiency of branch and bound by iteratively cutting searching space; pre-processing and probing optimization~\cite{savelsbergh1994preprocessing} helps further reduce the size of the MILP problem; and many heuristics approaches~\cite{danna2005exploring, rothberg2007evolutionary, achterberg2009scip} solves MILP problems efficiently with reasonable approximation bounds. As a result, many solvers could solve MILP problems in a efficient and effective manner. In addition, 
-solver performance studies~\cite{atamturk2005integer, meindl2012analysis, gearhart2013comparison}, 
-carefully study factors relevant to solver performance and show that \textit{the number of constraints} and \textit{the number of variables} in the MILP problem are normally positive proportional to the actual solving time. Thus, constructing MILP problems with the minimum amount of variables and constraints become one of the \textbf{key} challenges in this paper and are achieved through server slicing-based optimization.  
 
-}
-
+MILP problems are known to be NP-hard with respect to the number of constraints and undetermined variables, however numerous pruning and pre-processing optimizations and heuristics~\cite{lima2011computational} have make solvers very fast~\cite{quesada1992lp,stubbs1999branch,savelsbergh1994preprocessing,danna2005exploring,rothberg2007evolutionary,achterberg2009scip}.  
+As a result, MILP solvers are both quite efficient and widely used in practice\ewu{find some applications to cite!}.
+Modern solver performance is primarily sensitive to the \textit{the number of constraints} and \textit{the number of undetermined variables} in the problem~\cite{atamturk2005integer,meindl2012analysis,gearhart2013comparison}. 
+One of our key contributions in this paper is to use this observation to design a set of optimizations to dramatically reduce the size of the MILP problem---enough so that we can produce repairs for TPC-C workloads within one second.
 
 
 \subsection{Encoding a Single Query}
