@@ -313,15 +313,15 @@ Ultimately, combining all three optimizations outperforms tuple-slicing by $2-4\
 \label{sec:experiments:hardprob}
 
 In this section, we further study the performance of \sys in solving hard problems---when the set of complaints is incomplete, and when there is more than one corruption that let to the complaints\footnote{
-Note that even when there are multiple corruptions in the log, the incremental algorithm is still applicable if only one is responsible for the set of complaints.}.
+\footnotesize Note that even when there are multiple corruptions in the log, the incremental algorithm is still applicable if only one is responsible for the set of complaints.}.
  
 \stitle{Incomplete Complaint Set:} \looseness -1
 The first experiment (Figures~\ref{f:falsenegative_time} and~\ref{f:falsenegative_acc}) varies the fase positive rate in incomplete complaint sets.
 We increase the rate from $0$ ($0\%$ missing in the complaint set) to $.75$ ($75\%$ are missing).  
 We find that reducing the size of the submitted complaint set naturally improves the repair performance,
-however the repair quality, both precision and recall in Figure~\ref{f:falsenegative_acc}, may suffer if the corruption occured in a very old query. 
-This is expected because \sys targets reported complaints, thus unreported complaints may easily be missed and lead to low recall.
-In addition, despite the refinement step of tuple-slicing, the repair may over generalize and ``fix'' the wrong records, leading to low precision.
+however the repair quality  (precision and recall in Figure~\ref{f:falsenegative_acc}) may suffer if the corruption occured in a very old query. 
+This is expected because \sys targets reported complaints, thus unreported complaints may be missed and lead to low recall.
+Also, despite tuple-slicing's refinement step, the repair may over generalize and ``fix'' the wrong records, leading to low precision.
 
 
     
@@ -330,47 +330,34 @@ In addition, despite the refinement step of tuple-slicing, the repair may over g
   \centering
     \begin{subfigure}[t]{.33\textwidth}
       \includegraphics[width = .99\columnwidth]{figures/noise_fn_time} 
+      \vspace*{-.1in}
       \caption{False negatives vs time.}
       \label{f:falsenegative_time} 
     \end{subfigure}
     \\
     \begin{subfigure}[t]{.33\textwidth}
       \includegraphics[width = .99\columnwidth]{figures/noise_fn_acc}
+      \vspace*{-.1in}
       \caption{False negatives vs accuracy.}
       \label{f:falsenegative_acc} 
     \end{subfigure}
     \vspace*{-.1in}
-    \caption{Our analysis highlights limitations of \naive, the value of tuple-slicing, and the high cost of \texttt{UPDATE} queries.}
+    \caption{Incomplete complaint sets improve repair performance due to less complaints; they affect the repair quality when the corruption is old.}
   \end{figure}
 
-\iffalse
-\emph{Skew:} We now study the effects of attribute skew on the algorithms.
-We increase the skew parameter from $0$ (uniform) to $1$ (nearly every attribute is $A_0$) 
-and find a reduction in latency (Figure~\ref{f:skew_time}).
-We believe the reason is because increasing the skew focuses the query predicates over a smaller set of logical attributes, 
-and increases the number of constraints placed on each of the logical attributes used in the query log.  
-Each of these constraints reduces the search space of allowable values for that attribute, and thus simplifies the MILP problem.
-This result suggests that \sys may be well suited for many transaction systems that naturally exhibit query skew.
-Note that the overall number of constraints in the problem is the same, only their distribution over the query attributes has changed.
-\fi
 
 
 \stitle{Multiple Corrupt Queries:} \looseness -1
-In the second experiment, we compare the basic approach (\naive) against 
-each slicing optimization individually($basic-tuple, basic-attr, basic-query$).  
-We use the default settings with $N_D = 1000$ tuples and a sequence of \texttt{UPDATE} queries.
-We generate query logs in 5 different sizes $N_q\in \{10, 20, 30, 40, 50\}$ and corrupt 
-every tenth query starting from oldest query $q_1$,
-up to $q_{41}$.  For example, when the $N_q = {30}$, we corrupt 3 queries: $q_{1,11,21}$. 
-We find that the number of queries greatly affects both the scalabality (Figure~\ref{f:multi_time}) 
-and the accuracy (Figure~\ref{f:multi_acc}) of the algorithms. Specifically, as the number increases,
-the number of possible assignments of the MILP parameters increases exponentially and the solver often takes
-longer than our experimental time limit of $1000$ seconds and returns an infeasibility error.  
-This is a predominant reason why the accuracy degrades past $30$ queries.  For example, 
-when $40$ queries are involved (with $4$ corruptions) 
-and we ignore the infeasible executions, the average execution time is $300$ seconds
-and the precision and recall are greater than $0.94$.  Unfortunately, with $50$ queries ($5$ corruptions),
-all runs exceed the time limit and return infeasibility.
+This experiment studies how the \naive algorithm, along with the slicing optimizations, are able to repair complaints resulting from multiple corrupt queries.
+We use the default settings, generate \texttt{UPDATE}-only query logs in 5 different sizes $N_q\in \{10, 20, 30, 40, 50\}$, and corrupt every tenth query starting from oldest query $q_1$, up to $q_{41}$.  
+For example, when the $N_q = {30}$, we corrupt queries $q_{1,11,21}$. 
+
+We find that all variants of \naive have difficulty scaling beyond $30$ queries (consistent with the case with one corrupt query in Figure~\ref{fig:querysize_vs_time}), although tuple and query slicing modestly improve repair performance and quality.
+In addition, the number of corruptions and queries greatly affect the scalabality (Figure~\ref{f:multi_time}) and the accuracy (Figure~\ref{f:multi_acc}) of the algorithms. 
+Specifically, as the corruptions increase, the number of possible assignments of the MILP parameters increases exponentially and the solver often takes longer than our experimental time limit of $1000$ seconds and returns an empty result.
+We find that problem infeasibility is the predominant explanation for why the accuracy degrades past $30$ queries.  
+For example, with $40$ queries ($4$ corruptions), \naive takes nearly $750$s; however if we ignore the infeasible executions, the average is $300$ seconds and the precision and recall are greater than $0.94$.  
+Unfortunately, with $50$ queries ($5$ corruptions), all runs are infeasible and exceed the time limit.
 
   \begin{figure}[!htb]
   \hspace*{-.1in}
@@ -391,7 +378,26 @@ all runs exceed the time limit and return infeasibility.
     \caption{Our analysis highlights limitations of \naive, the value of tuple-slicing, and the high cost of \texttt{UPDATE} queries.}
   \end{figure}
 
+
+
+\smallskip
+\emph{
+Takeaways: \sys solves recent errors (e.g., errors in most recent 100 queries) efficiently and effectively even with very incomplete complaint information. 
+Also, \naive, even with slicing optimizations, has severe scalability limitations due to the large number of undetermined variables---this is unsurprising as MILP constraint solving is an NP-hard problem.
+This result highlights the value of the incremental algorithm optimization.
+}
+
+
 \iffalse
+\emph{Skew:} We now study the effects of attribute skew on the algorithms.
+We increase the skew parameter from $0$ (uniform) to $1$ (nearly every attribute is $A_0$) 
+and find a reduction in latency (Figure~\ref{f:skew_time}).
+We believe the reason is because increasing the skew focuses the query predicates over a smaller set of logical attributes, 
+and increases the number of constraints placed on each of the logical attributes used in the query log.  
+Each of these constraints reduces the search space of allowable values for that attribute, and thus simplifies the MILP problem.
+This result suggests that \sys may be well suited for many transaction systems that naturally exhibit query skew.
+Note that the overall number of constraints in the problem is the same, only their distribution over the query attributes has changed.
+
 \stitle{Single Corrupt Query:}
 In this experiment, we evaluate the efficacy \sys with tuple slicing and incremental optimization
 in the special case when one query has been corrupted in a much larger query log. 
@@ -408,10 +414,4 @@ A secondary reason is beause the refinement step of  tuple slicing may not gener
 This is why the precision curve is lower than the recall curve for $inc_8-tuple$.
 \fi
 
-
-\smallskip
-\emph{Takeaways: We observe \sys is able to solve recent errors (e.g., errors in most recent 100 queries) efficiently and effectively even with very limited information. Also, we find that basic, even with slicing optimizations, has severe scalability
-limitations due to the large number of undetermined values-this is unsurprising as MILP constraint solving is an NP-hard
-problem.
-}
 
