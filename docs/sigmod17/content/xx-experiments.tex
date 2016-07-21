@@ -32,7 +32,7 @@ controlled synthetic scenarios, as well as use common OLTP query workloads
 from two widely used database benchmarks.
 
 To this end, we first focus on the case of single query corruptions and evaluate
-the optimized \sys incremental algorithm on two OLTP benchmarks (Section~\ref{sec:experiments:benchmar}) and find that \sys can return high quality repairs in interactive speeds.
+the optimized \sys incremental algorithm on two OLTP benchmarks (Section~\ref{sec:experiments:benchmark}) and find that \sys can return high quality repairs in interactive speeds.
 We then evaluate the variations of the incremental algorithm in a wide range of controlled database and query log settings (Section~\ref{sec:experiments:inc})
 Finally, we evaluate the incremental and basic algorithms on more challenging settings of incomplete complaint sets and multiple query corruptions and discuss why the latter setting is fundamentally difficult (Section~\ref{sec:experiments:synth}).
 All experiments were run on 12x2.66 GHz  machines with 16GB RAM running IBM CPLEX~\cite{cplex2014v12} as the MILP solver on CentOS release 6.6.
@@ -223,7 +223,7 @@ In these settings, \sys is very effective at reducing the number of constraints 
 
 
 \subsection{Sensitivity of the Incremental Algorithms}
-\label{sec:experiments:incsec}
+\label{sec:experiments:inc}
 
 This subsection evaluates the efficacy of using each slicing optimization on the incremental algorithm by varying the characteristics of the database and query log.  
 By default, the tuple-slicing optimization is always enabled because none of the algorithms were able to scale without it \ewu{EXPLAIN}.
