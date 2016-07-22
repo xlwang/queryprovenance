@@ -19,12 +19,10 @@ Finally, we evaluate the incremental and basic algorithms on more challenging se
 All experiments were run on 12x2.66 GHz  machines with 16GB RAM running IBM CPLEX~\cite{cplex2014v12} as the MILP solver on CentOS release 6.6.
 In the following text, \sys refers to the incremental algorithm with the tuple-slicing optimization: this setting works well in most OLTP benchmark settings because the tables
 seldom have more than 50 attributes; Section~\ref{sec:experiments:dbproperties} shows how attribute and query-slicing can further improve performance an wide (up to $500$ attributes) tables.
-We refer the reader to Appendix~\ref{sec:heuristic} for a study of alternative machine learning-based repair algorithms.
-
-\iffalse
-and to our full technical report~\cite{qfixarxiv} \alex{SIGMOD IS ANONYMOUS!} for an analysis of the MILP solver, factors that affect the 
-number of complaints, and ambiguous repair situations (e.g., when multiple queries may be repaired to fix the complaint set).
-\fi
+We refer the reader to Appendix~\ref{sec:heuristic} for a study of alternative machine learning-based repair algorithms\footnote{
+Our full technical report[citation removed for submission] provides a thorough analysis of the performance of the MILP solver, 
+factors that affect the number of complaints, and ambiguous repair situations 
+(e.g., when multiple queries may be repaired to fix the complaint set).}.
 
 
 % the performance and accuracy

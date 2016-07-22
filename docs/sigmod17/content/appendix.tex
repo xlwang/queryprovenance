@@ -114,8 +114,50 @@ that applies \dt over more queries is expected to have little hope of succeeding
 
 
 There are three important reasons why \dt, and any approach that focuses on a single query at a 
-time\footnote{Although our incremental approach tries to generate a repair for a single
-query at a time, it encodes all subsequent queries in the log.}, will not perform well.
+time, will not perform well.
+
+\begin{itemize}[itemsep=1pt, leftmargin=5mm]
+\item \textbf{Single Query Limitation: }
+In principle, one could attempt to apply this technique to the
+entire log one query at a time, starting from the most recent query.
+Even ignoring the low repair accuracy shown in Figure~\ref{f:heuristic_acc},
+this approach is infeasible.
+Consider that we generate a labeled training dataset to repair $q_i$ 
+using the query's input and output database states $D_{i-1}$ and $D_i^*$.
+Note that $D_i^*$ is the theoretically \emph{correct} database state assuming no errors in the query log.
+We would need to derive $D_i^*$ by applying the complaint set to $D_n$ to create $D_n^*$, and roll back the database state.
+Unfortunately, \texttt{UPDATE} queries are commonly surjective such
+that their inverses are ambiguous, which means that it is often
+impossible to derive $D_i^*$. In contrast, the incremental version of
+\sys can bypass this problem by encoding subsequent queries in the log
+in a MILP representation.
+
+
+\item \textbf{Structurally Different \texttt{WHERE} Clause Results: } 
+The basic classifier approach simply learns a set of rules to minimize
+classification error, and can derive a clause whose struture is arbitrarily 
+different from the original query's \texttt{WHERE} clause.
+Although it may be possible to incorporate a distance measure as part of the decision tree
+splitting criteria, it is likely to be a heuristic with no guarantees.
+
+
+\item \textbf{High Selectivity, Low Precision: }
+Classifiers try to avoid overfitting by balancing the complexity of the rules with classification accuracy.
+This is problematic for highly selective queries (e.g., primary key updates), because the classifier
+may simply ignore the single incorrect record and generate a rule such as \texttt{FALSE}.
+In fact, this form of severely imbalanced data continues to be a challenge for most major classification algorithms~\cite{he2009learning, galar2012review}. 
+Thus, we believe that alternative classification algorithms would not improve on these results. 
+Compound with the fact that many workloads are primarily composed of
+key update queries~\cite{oltpbench} this issue severely limits the
+applicability of learning-based approaches.
+
+\end{itemize}
+
+
+{\it Takeaways: For the above reasons, we argue that any successful diagnosis or repair procedure must take subsequences of the query log into account.
+Existing techniques work on a query-by-query basis, which fails this requirement.  
+Note that although our incremental approach (Section~\ref{sec:incremental}) also looks for repairs one query at a time, 
+the MILP encoding includes the subsequent queries in the log.}
 
 \iffalse
   \begin{figure*}[t]
@@ -162,46 +204,6 @@ query at a time, it encodes all subsequent queries in the log.}, will not perfor
    \label{f:soltime}
   \end{figure*}
 \fi
-\begin{itemize}[itemsep=1pt, leftmargin=5mm]
-\item \textbf{Single Query Limitation: }
-In principle, one could attempt to apply this technique to the
-entire log one query at a time, starting from the most recent query.
-Even ignoring the low repair accuracy shown in Figure~\ref{f:heuristic_acc},
-this approach is infeasible.
-Consider that we generate a labeled training dataset to repair $q_i$ 
-using the query's input and output database states $D_{i-1}$ and $D_i^*$.
-Note that $D_i^*$ is the theoretically \emph{correct} database state assuming no errors in the query log.
-We would need to derive $D_i^*$ by applying the complaint set to $D_n$ to create $D_n^*$, and roll back the database state.
-Unfortunately, \texttt{UPDATE} queries are commonly surjective such
-that their inverses are ambiguous, which means that it is often
-impossible to derive $D_i^*$. In contrast, the incremental version of
-\sys can bypass this problem by encoding subsequent queries in the log
-in a MILP representation.
-
-
-\item \textbf{Structurally Different \texttt{WHERE} Clause Results: } 
-The basic classifier approach simply learns a set of rules to minimize
-classification error, and can derive a clause whose struture is arbitrarily 
-different from the original query's \texttt{WHERE} clause.
-Although it may be possible to incorporate a distance measure as part of the decision tree
-splitting criteria, it is likely to be a heuristic with no guarantees.
-
-
-\item \textbf{High Selectivity, Low Precision: }
-Classifiers try to avoid overfitting by balancing the complexity of the rules with classification accuracy.
-This is problematic for highly selective queries (e.g., primary key updates), because the classifier
-may simply ignore the single incorrect record and generate a rule such as \texttt{FALSE}.
-In fact, this form of severely imbalanced data continues to be a challenge for most major classification algorithms~\cite{he2009learning, galar2012review}. 
-Thus, we believe that alternative classification algorithms would not improve on these results. 
-Compound with the fact that many workloads are primarily composed of
-key update queries~\cite{oltpbench} this issue severely limits the
-applicability of learning-based approaches.
-
-\end{itemize}
-
-
-
-
 
 \iffalse
 
