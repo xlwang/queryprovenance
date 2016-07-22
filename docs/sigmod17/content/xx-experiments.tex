@@ -330,23 +330,23 @@ Also, despite tuple-slicing's refinement step, the repair may over generalize an
   \hspace*{-.1in}
   \centering
     \begin{subfigure}[t]{.33\textwidth}
-      \includegraphics[width = .99\columnwidth]{figures/noise_fn_time} 
+      %\includegraphics[width = .99\columnwidth]{figures/noise_fn_time} 
       % or full label in 2 lines
-      %\includegraphics[width = .99\columnwidth]{figures/noise_fn_time_fulllabel} 
+      \includegraphics[width = .99\columnwidth]{figures/noise_fn_time_fulllabel} 
       \vspace*{-.1in}
       \caption{False negatives vs time.}
       \label{f:falsenegative_time} 
     \end{subfigure}
     \\
     \begin{subfigure}[t]{.33\textwidth}
-      \includegraphics[width = .99\columnwidth]{figures/noise_fn_acc}
-      %\includegraphics[width = .99\columnwidth]{figures/noise_fn_acc_fulllabel}
+      %\includegraphics[width = .99\columnwidth]{figures/noise_fn_acc}
+      \includegraphics[width = .99\columnwidth]{figures/noise_fn_acc_fulllabel}
       \vspace*{-.1in}
       \caption{False negatives vs accuracy.}
       \label{f:falsenegative_acc} 
     \end{subfigure}
     \vspace*{-.1in}
-    \caption{Incomplete complaint sets improve repair performance due to less complaints; they affect the repair quality when the corruption is old. \xlw{(C. Age is short for Corruption Age.), legend does not fit one line with full label, replace with commented out lines for alternative figures.}}
+    \caption{Incomplete complaint sets improve repair speed due to less complaints, but degrade repair quality for older corruption. }
   \end{figure}
 
 
