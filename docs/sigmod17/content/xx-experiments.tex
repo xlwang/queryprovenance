@@ -281,7 +281,7 @@ The cost increases with the dimensionality because each additional predicate is 
 
 The following two experiments compare different combinations of the slicing optimizations \emph{tuple/query/attr} under varying database size and schema size settings.  
 The query log contains the default $N_q = 300$ {\it Constant/Range} \texttt{UPDATE} queries.
-Each facet (subplot) in Figure~\ref{f:database} represents the location of the corruption as $q_{50,200,300}$ (a.k.a.$\#\ of\ Queries = \{250,100,0\}$).
+Each facet (subplot) in Figure~\ref{f:database} represents the location of the corruption as $q_{N_q-250}, q_{N_q-100}, q_{N_q-0}$.
 
 \stitle{\# of Attribute:} \looseness -1
 We first vary the number of attribute ($N_a \in [10, 500]$) under a fixed database size $N_D = 100$.
@@ -293,7 +293,7 @@ When the table is wide ($N_a = 500$), applying all optimizations ($inc_1-all$) i
 \stitle{Database Size:} \looseness -1
 We now vary the database size ($N_D \in [100,5000]$) with a large number of attributes ($N_a = 100$).
 We fix the number of complaints by decreasing the query selectivity in proportion to $N_D$'s increase---the specific mechanism to do so did not affect the findings.
-Figure~\ref{f:attr100} shows that the costs are relatively flat until the corruption occurs in an old query ($q_{50}$).  
+Figure~\ref{f:attr100} shows that the costs are relatively flat until the corruption occurs in an old query ($Corruption\ Age = 250$).  
 In addition, we find that the cost is highly correlated with the number of candidate queries that are encoded in the MILP problem.
 The increase in cost despite tuple-slicing is due to the increasing number of candidate queries in the system; 
 we believe this increasing trend is due to the solver's ability to prune constraints that correspond to queries that clearly will not affect the complaint set---an implicit form of query slicing.  
@@ -331,6 +331,8 @@ Also, despite tuple-slicing's refinement step, the repair may over generalize an
   \centering
     \begin{subfigure}[t]{.33\textwidth}
       \includegraphics[width = .99\columnwidth]{figures/noise_fn_time} 
+      % or full label in 2 lines
+      %\includegraphics[width = .99\columnwidth]{figures/noise_fn_time_fulllabel} 
       \vspace*{-.1in}
       \caption{False negatives vs time.}
       \label{f:falsenegative_time} 
@@ -338,12 +340,13 @@ Also, despite tuple-slicing's refinement step, the repair may over generalize an
     \\
     \begin{subfigure}[t]{.33\textwidth}
       \includegraphics[width = .99\columnwidth]{figures/noise_fn_acc}
+      %\includegraphics[width = .99\columnwidth]{figures/noise_fn_acc_fulllabel}
       \vspace*{-.1in}
       \caption{False negatives vs accuracy.}
       \label{f:falsenegative_acc} 
     \end{subfigure}
     \vspace*{-.1in}
-    \caption{Incomplete complaint sets improve repair performance due to less complaints; they affect the repair quality when the corruption is old.}
+    \caption{Incomplete complaint sets improve repair performance due to less complaints; they affect the repair quality when the corruption is old. \xlw{(C. Age is short for Corruption Age.), legend does not fit one line with full label, replace with commented out lines for alternative figures.}}
   \end{figure}
 
 
