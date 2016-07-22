@@ -24,6 +24,7 @@ Subsequent sections introduce optimizations and variations of the problem.
 \subsection{MILP Solvers}
 \label{sec:MILP}
 
+\looseness -1
 MILP problems are known to be NP-hard with respect to the number of constraints and undetermined variables, however numerous pruning and pre-processing optimizations and heuristics~\cite{lima2011computational} have made solvers very fast~\cite{quesada1992lp,stubbs1999branch,savelsbergh1994preprocessing,danna2005exploring,rothberg2007evolutionary,achterberg2009scip}.  
 As a result, MILP solvers are both quite efficient and widely used in practice for applications such as trajectory planning~\cite{Ma2006, Richards02_JGCD, Kuwata2005a}, assembly and scheduling processes~\cite{Floudas2005, Sawik2011, Sawik2000}, and general decision support~\cite{Sabater2009, Milan2013}.
 Modern solver performance is primarily sensitive to \textit{the number of constraints} and \textit{the number of undetermined variables} in the problem~\cite{atamturk2005integer,meindl2012analysis,gearhart2013comparison}. 

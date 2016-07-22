@@ -241,26 +241,6 @@ We propose \emph{attribute slicing} optimization that only encodes constraints f
 We find that this type of slicing can be effective for wide tables along with queries that focus on a small subset of attributes. 
 
 
-\subsection{Incremental Repairs}\label{sec:incremental}
-
-
-
-\looseness -1
-Even with the slicing optimizations, the number of undetermined variables can remain high, resulting in slow solver runtime.  
-The red bars in Figure~\ref{fig:querysize_vs_time} showed the exponential cost of parameterizing the entire query log as compared to only solving for a single query (blue bars).
-These results suggest that it is \emph{faster} to run many small MILP problems than a single large one, and motivates our incremental algorithm.
-
- \looseness -1
-Our \emph{$Inc_k$} approach (Algorithm~\ref{alg:incalg}) focuses on the case where there is a single corrupted query to repair.
-It does so by linearizing the full query log, including any slicing optimizations, but only parameterizing and repairing a batch of $k$ consecutive queries at a time. 
-This procedure first attempts to repair the $k$ most recent queries, and continues to the next $k$ queries if a repair was not generated.
-The algorithm internally calls a modified version of the \emph{basic} approach that takes extra parameters $\{q_i, q_{i+k}\}$, only parameterizes those queries, and fixes the values of all other variables.
-
-The incremental approach prioritizes repairs for complaints that are due to more recent corruptions.
-Given that the \emph{basic} algorithm simply fails beyond a small log size, we believe this is a natural and pragmatic assumption to use, and results in 
-a $10\times$ scalability improvement.
-Our experiments further evaluate different batching level $k$ in the incremental algorithm and show that it is impractical from both a performance and accuracy to have $k > 1$.
-
 \begin{algorithm}[t]
 \scriptsize
 \caption{$FullImpact:$ Algorithm for finding $\mathcal{F}(q)$.}
@@ -294,6 +274,29 @@ Our experiments further evaluate different batching level $k$ in the incremental
 \ENDFOR
 \end{algorithmic}
 \end{algorithm}
+
+
+
+\subsection{Incremental Repairs}\label{sec:incremental}
+
+
+
+\looseness -1
+Even with the slicing optimizations, the number of undetermined variables can remain high, resulting in slow solver runtime.  
+The red bars in Figure~\ref{fig:querysize_vs_time} showed the exponential cost of parameterizing the entire query log as compared to only solving for a single query (blue bars).
+These results suggest that it is \emph{faster} to run many small MILP problems than a single large one, and motivates our incremental algorithm.
+
+ \looseness -1
+Our \emph{$Inc_k$} approach (Algorithm~\ref{alg:incalg}) focuses on the case where there is a single corrupted query to repair.
+It does so by linearizing the full query log, including any slicing optimizations, but only parameterizing and repairing a batch of $k$ consecutive queries at a time. 
+This procedure first attempts to repair the $k$ most recent queries, and continues to the next $k$ queries if a repair was not generated.
+The algorithm internally calls a modified version of the \emph{basic} approach that takes extra parameters $\{q_i, q_{i+k}\}$, only parameterizes those queries, and fixes the values of all other variables.
+
+The incremental approach prioritizes repairs for complaints that are due to more recent corruptions.
+Given that the \emph{basic} algorithm simply fails beyond a small log size, we believe this is a natural and pragmatic assumption to use, and results in 
+a $10\times$ scalability improvement.
+Our experiments further evaluate different batching level $k$ in the incremental algorithm and show that it is impractical from both a performance and accuracy to have $k > 1$.
+
 
 
 

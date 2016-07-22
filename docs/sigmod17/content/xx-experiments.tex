@@ -19,10 +19,10 @@ Finally, we evaluate the incremental and basic algorithms on more challenging se
 All experiments were run on 12x2.66 GHz  machines with 16GB RAM running IBM CPLEX~\cite{cplex2014v12} as the MILP solver on CentOS release 6.6.
 In the following text, \sys refers to the incremental algorithm with the tuple-slicing optimization: this setting works well in most OLTP benchmark settings because the tables
 seldom have more than 50 attributes; Section~\ref{sec:experiments:dbproperties} shows how attribute and query-slicing can further improve performance an wide (up to $500$ attributes) tables.
-We refer the reader to Appendix~\ref{sec:heuristic} for a study of alternative machine learning-based repair algorithms\footnote{
-Our full technical report[citation removed for submission] provides a thorough analysis of the performance of the MILP solver, 
+We refer the reader to Appendix~\ref{sec:heuristic} for a study of alternative machine learning-based repair algorithms.\footnote{
+Our full technical report [citation removed for anonymity] provides a thorough analysis of the performance of the MILP solver, 
 factors that affect the number of complaints, and ambiguous repair situations 
-(e.g., when multiple queries may be repaired to fix the complaint set).}.
+(e.g., when multiple queries may be repaired to fix the complaint set).}
 
 
 % the performance and accuracy
@@ -102,7 +102,7 @@ and F1 measure (the harmonic mean of precision and recall).
 We report the average across 20 runs.
 We describe the experimental parameters in the context of the datasets and workloads below.
 
-  \begin{figure*}[!htb]
+  \begin{figure*}[t]
     \hspace*{-.1in}
     \centering
      \begin{subfigure}[t]{.33\textwidth}
@@ -188,7 +188,7 @@ In contraist, TATP only contains \texttt{UPDATE}s, which are harder to solve tha
 Note that these experiments stripped out read-only queries from the workload, which account for $8$ and $80\%$ of the queries in TPC-C and TATP, respectively.
 Finally, \sys repairs Example~\ref{ex:taxes} in Figure~\ref{fig:example} within 35 milliseconds. 
 
-\begin{figure}[h]
+\begin{figure}[t]
 \centering
   \includegraphics[width = .75\columnwidth]{figures/benchmark_time}
   \vspace*{-.2in}
@@ -316,7 +316,7 @@ In this section, we further study the performance of \sys in solving hard proble
  
 \stitle{Incomplete Complaint Set:} \looseness -1
 The first experiment (Figures~\ref{f:falsenegative_time} and~\ref{f:falsenegative_acc}) varies the fase positive rate in incomplete complaint sets.
-We increase the rate from $0$ ($0\%$ missing in the complaint set) to $.75$ ($75\%$ are missing).  
+We increase the rate from $0$ ($0\%$ missing in the complaint set) to $0.75$ ($75\%$ are missing).  
 We find that reducing the size of the submitted complaint set naturally improves the repair performance,
 however the repair quality  (precision and recall in Figure~\ref{f:falsenegative_acc}) may suffer if the corruption occured in a very old query. 
 This is expected because \sys targets reported complaints, thus unreported complaints may be missed and lead to low recall.
@@ -324,7 +324,7 @@ Also, despite tuple-slicing's refinement step, the repair may over generalize an
 
 
     
-\begin{figure}[!htb]
+\begin{figure}[t]
   \hspace*{-.1in}
   \centering
     \begin{subfigure}[t]{.33\textwidth}
@@ -363,7 +363,7 @@ We find that problem infeasibility is the predominant explanation for why the ac
 For example, with $40$ queries ($4$ corruptions), \naive takes nearly $750$s; however if we ignore the infeasible executions, the average is $300$ seconds and the precision and recall are greater than $0.94$.  
 Unfortunately, with $50$ queries ($5$ corruptions), all runs are infeasible and exceed the time limit.
 
-  \begin{figure}[!htb]
+  \begin{figure}[t]
   \hspace*{-.1in}
   \centering
     \vspace*{-.2in}
