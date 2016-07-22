@@ -72,7 +72,10 @@ the query to change its outcome. Skyline
 refinement~\cite{tran2010conquer} focuses specifically on refinements
 that use skyline queries, while semi-automatic SQL
 debugging~\cite{tzompanaki14semi} revises a given query to make it
-return specified tuple groups in its output. All these approaches are
+return specified tuple groups in its output.  Furthermore, Query-by-example~\cite{zloof1977query} 
+and query correction~\cite{abouzied2012dataplay} are similar problems that generate or modify
+queries based on user interaction such as desired result records.
+All these approaches are
 limited to selection predicates of \texttt{SELECT} queries, and they
 only typically consider one query at a time. In contrast, \sys handles
 update workloads, processes large query histories, and can model
