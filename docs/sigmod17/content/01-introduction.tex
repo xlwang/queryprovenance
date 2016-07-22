@@ -117,7 +117,7 @@ semi-automated means (e.g., denial constraints~\cite{ChuIP13}, value
 imputation). Unfortunately, this has the following problems: (a)~it targets the symptom (incorrect
 database state) rather than the underlying cause (incorrect queries),
 (b)~it can be expensive to perform, (c)~it may introduce errors if
-the automated corrections are not perfect, and (d)~it may make it harder to identify other data affected by the bad query.
+the automated corrections are not perfect~\cite{cleaningbenchmark}, and (d)~it may make it harder to identify other data affected by the bad query.
 
 The second form attempts to prevent data errors by guarding against erroneous updates.  For example, integrity constraints~\cite{Khoussainova2006} reject some improper updates, but only if the data falls outside rigid, predefined ranges.  In addition, data entry errors such as in the tax example will satisfy the integrity constraints and not be rejected, despite being incorrect.  Certificate-based verification~\cite{Chen2011} is less rigid, but it is impractical and non-scalable as it requires users to answer challenge questions before allowing each update.
 

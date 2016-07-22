@@ -209,10 +209,11 @@ challenge is that $D_n^*$ is unknown, unless we know that the
 complaint set is complete. 
 
 \subsubsection*{Problem scope and solution outline}
-In this work, we assume basic data manipulation queries with no subqueries, aggregations, or joins; these operations are not as common in update workloads. 
+In this work, we focus on handling data manipulation queries with simple, basic query structures without subqueries, aggregations, nor joins.
 \sys supports queries with WHERE clauses containing conjunctions and disjunctions of predicates.
 Expressions (in predicates and SET clauses) may be over linear combinations of constants and a single attribute, and we do not support arbitrary user defined functions.
-We study the impact of the number of predicates in the WHERE clause in Section~\ref{sec:experiments:synth}.
+We find that the queries that we focus on are applicable to a broad range of user-facing web applications (e.g., conference attendee scheduling, voting,  data entry) and OLTP benchmarks, and that complex query structures and operations are less common than in read-oriented analytical workloads.
+%We study the impact of the number of predicates in the WHERE clause in Section~\ref{sec:experiments:synth}.
 
 
 
