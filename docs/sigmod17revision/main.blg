@@ -1,0 +1,53 @@
+This is BibTeX, Version 0.99d (TeX Live 2015)
+Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
+The top-level auxiliary file: main.aux
+The style file: abbrv.bst
+Database file #1: main.bib
+Name 1 in "Rahm, Erhard, and Hong Hai Do." has a comma at the end for entry rahm00
+while executing---line 1049 of file abbrv.bst
+Warning--empty journal in lima2011computational
+Name 1 in "Rahm, Erhard, and Hong Hai Do." has a comma at the end for entry rahm00
+while executing---line 1090 of file abbrv.bst
+Warning--empty year in tzompanaki14semi
+You've used 93 entries,
+            2118 wiz_defined-function locations,
+            915 strings with 17119 characters,
+and the built_in function-call counts, 26805 in all, are:
+= -- 2386
+> -- 1380
+< -- 3
++ -- 559
+- -- 458
+* -- 1609
+:= -- 4381
+add.period$ -- 261
+call.type$ -- 93
+change.case$ -- 522
+chr.to.int$ -- 0
+cite$ -- 95
+duplicate$ -- 1125
+empty$ -- 2430
+format.name$ -- 458
+if$ -- 5681
+int.to.chr$ -- 0
+int.to.str$ -- 93
+missing$ -- 75
+newline$ -- 450
+num.names$ -- 156
+pop$ -- 762
+preamble$ -- 1
+purify$ -- 429
+quote$ -- 0
+skip$ -- 746
+stack$ -- 0
+substring$ -- 917
+swap$ -- 173
+text.length$ -- 3
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 370
+warning$ -- 2
+while$ -- 193
+width$ -- 95
+write$ -- 899
+(There were 2 error messages)

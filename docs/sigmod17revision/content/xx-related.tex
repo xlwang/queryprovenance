@@ -1,0 +1,34 @@
+
+\section{Related Work}
+\label{s:related}
+\sys tackles the problem of diagnosis and repair in relational query
+histories (query logs). It does not aim to correct errors in the data
+directly, but rather to find the underlying reason for reported errors
+in the queries that operated on the data. This contrasts with
+traditional data 
+cleaning~\cite{dallachiesa2013nadeef,Abiteboul99,Koudas2006,Galhardas2000
+} which oftentimes focuses on identifying and correcting data
+``in-place.'' as well as cleaning techniques that provide repairs for the
+identified errors~\cite{Fan2008b, ChuIP13, Beskales2010, Cong2007, Chalamalla2014}.
+By analyzing the process that generate the errors,  \sys can help detect and repair systemic 
+errors that have not been explicitly identified.
+
+Several tools~\cite{GolabKKS10, wang2015} explore systemic reasons for errors 
+and generate feature sets or patterns of attributes that characterize those errors.
+However, such techniques are oblivious to the actual executed queries and do not provide fixes. 
+
+The topic of query revisions has been studied in the context of
+why-not explanations~\cite{Chapman2009, tran2010conquer,tzompanaki14semi } and explaining query ouputs~\cite{Wu13,GebalyAGKS14,Roy2014}. 
+But all these approaches are
+limited to selection predicates of \texttt{SELECT} queries, and they
+only typically consider one query at a time.
+
+Finally, as \sys traces errors in the queries that manipulate data, it
+has connections to the field of \emph{data and workflow provenance}.
+our algorithms build on several formalisms introduced by work in this
+domain. These formalisms express why a particular data item appears in
+a query result, or how that query result was produced in relation to
+input data~\cite{BunemanKT01,GKT07-semirings, CheneyCT09, CuiWW00
+}.
+
+

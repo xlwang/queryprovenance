@@ -1,0 +1,137 @@
+%!TEX root = ../main.tex
+
+\section{Introduction}
+
+\label{s:intro}
+
+
+In spite of the growing importance of big data, sensors, and automated
+data collection, manual data entry continues to be a primary source of
+high-value data across organizations of all sizes, industries, and
+applications: sales representatives manage lead and sales data through
+SaaS applications~\cite{salesforce}; human resources, accounting, and
+finance departments manage employee and corporate information through
+terminal or internal browser-based applications~\cite{sap}; driver
+data is updated and managed by representatives throughout local DMV
+departments~\cite{dmv,dmvsystem}; consumer banking and investment data
+is managed through web or mobile-based
+applications~\cite{betterment,chase}. In all of these examples, the
+database is updated by translating form-based human inputs into
+INSERT, DELETE or UPDATE query parameters that run over the backend
+database---in essence, these are instances of OLTP applications that
+translate human input into stored procedure parameters. Unfortunately,
+numerous studies~\cite{kandel2012,krishnan2016hilda,Barchard20111834},
+reports~\cite{citibank,Yates10,Grady13,Robeznieks05} and citizen
+journalists~\cite{iquantnyc} have consistently found evidence that
+human-generated data is both error-prone, and can significantly
+corrupt downstream data analyses~\cite{iquantnycnypd}. Thus, even if
+systems assume that data import pipelines are error-free, queries of
+human-driven applications continue to be a significant source of data
+errors, and there is a pressing need for solutions to diagnose and
+repair these errors. Consider the following representative toy example
+that we will use throughout this paper:
+
+\begin{example}[Tax bracket adjustment]\label{ex:taxes}
+Tax brackets determine tax rates for different income levels and are
+often adjusted. Accounting firms implement these changes to their
+databases by appropriately updating the tax rates of their customers.
+Figure~\ref{fig:example} shows a simplified tax rate adjustment
+scenario and highlights how a single error to the predicate in update
+query $q_1$ can introduce errors in the \texttt{owed} attribute, and a
+benign query $q_3$ can then propagate the error to affect the
+\texttt{pay} attribute.
+\end{example}
+
+\input{content/example2}
+
+This type of data entry error can be found throughout information management systems. 
+In 2012, there were nearly 90,000 local governments in the United States, each responsible for tracking taxation information such as the tax rate, regulatory penalties, and the amount each citizen owes. 
+Government employees manage this information using form-based accounting systems~\cite{reutersmanagement} and are ultimately susceptible to form entry error.  
+A cursory search of the news finds numerous reports of how data entry errors resulted in utility companies overcharging cities by millions of dollars~\cite{powercompany}, a state attorney prosecuting the wrong people~\cite{mosby}, and the Boston Police paying tens of millions of dollars for a new records system to combat data entry errors that ``riddled'' the previous system, which contained ``highly scrutinized stop-and-frisk information''~\cite{bostonpolice}.
+In addition, numerous articles describe how clerical errors by local governments~\cite{twinfalls} and the CRA~\cite{cra} affect citizen tax bills and returns calculations.
+
+% Most recently in 2015, a tax mistake, affecting taxpayers in 37 states impacted thousands of lower-income Americans~\cite{nyt-tax-article}: about 20\% of the forms mailed by the federal government contained incorrect premiums on health insurance plans, which in turn affected the amount of tax credits each taxpayer could claim.  
+% 
+% Although the federal government found the root cause in this high
+% profile case \alex{This is not quite true; they just mailed out corrected forms, but didn't find out what caused this (according to the article).  How do we want to say this?}, 
+In real-world cases like these,
+data errors are typically identified and reported by
+individuals to departments that do not have the resources nor the
+capability to deeply investigate the reports. Instead, the standard
+course of action is to correct mistakes on a case-by-case basis for
+each complaint. As a result, unreported errors can remain in the
+database indefinitely, and their cause becomes harder to trace as
+further queries modify the database, propagate the errors, and obscure
+their root cause. There is a need for tools that can use the error
+reports to diagnose and identify the anomalous queries (root causes)
+in the database.
+
+% that may have affected the erroneous records (i.e., query lineage) \alex{is this a recognized term, or did we come up with it?} \alex{also, do we make a distinction between the query log and the query lineage? It's not clear here.}
+
+\looseness -1
+In this paper, we present \sys, a diagnosis and repair system for data
+errors caused by anomalous DML queries in OLTP applications. Given a
+set of reported errors (\emph{complaints}) about records in the current database state, \sys
+analyzes the sequence of historical queries executed on the database, 
+filters them to those that may have affected the erroneous records,  and
+generates diagnoses by identifying the specific subset of queries that
+most likely introduced the errors. Alongside these diagnoses, \sys also
+proposes repairs for the erroneous queries; these repairs can correct the
+reported errors, as well as potentially identify and fix 
+additional errors in the data that would have otherwise remained
+undetected. To derive these diagnoses and repairs, we must address three
+key characteristics, which make this problem both difficult to solve
+and unsuitable to existing techniques:
+\begin{description}[leftmargin=*, topsep=0mm, itemsep=0mm, parsep=1mm]
+\item[Obscurity.] Handling data errors directly often leads to partial
+fixes that further complicate the eventual diagnosis and resolution of
+the problem. For example, a transaction implementing a change in the
+state tax law updated tax rates using the wrong rate, affecting a
+large number of consumers. This causes a large number of complaints to
+a call center, but each customer agent usually fixes each problem
+individually, which ends up obscuring the source of the problem.
+
+\item[Large impact.] Erroneous queries cause errors at a large scale.
+The potential impact of the errors is high, as manifested in several
+real-world cases~\cite{Yates10, Grady13, sakalerrors}. Further, errors
+that remain undetected for a significant amount of time can instigate
+additional errors, even through valid updates. This increases both
+their impact, and their obscurity.
+
+\item[Systemic errors.] The errors created by bad queries are
+\emph{systemic}: they have common characteristics, as they share the
+same cause. The link between the resulting data errors is the query
+that created them; cleaning techniques should leverage this connection
+to diagnose and fix the problem. Diagnosing the cause of the errors
+will achieve systemic fixes that will correct all relevant errors,
+even if they have not been explicitly identified. 
+
+\end{description}
+% 
+Traditional approaches to data errors take two main forms. The first
+uses a combination of detection algorithms (e.g., human reporting,
+outlier detection, constraint violations) to identify a candidate set
+of error values that are corrected through
+human-based~\cite{haasclamshell,Gokhale:2014wv,Kandel:2011vj} or
+semi-automated means (e.g., denial constraints~\cite{ChuIP13}, value
+imputation). Unfortunately, this has the following problems: (a)~it targets the symptom (incorrect
+database state) rather than the underlying cause (incorrect queries),
+(b)~it can be expensive to perform, (c)~it may introduce errors if
+the automated corrections are not perfect~\cite{cleaningbenchmark}, and (d)~it may make it harder to identify other data affected by the bad query.
+
+The second form attempts to prevent data errors by guarding against erroneous updates.  For example, integrity constraints~\cite{Khoussainova2006} reject some improper updates, but only if the data falls outside rigid, predefined ranges.  In addition, data entry errors such as in the tax example will satisfy the integrity constraints and not be rejected, despite being incorrect.  Certificate-based verification~\cite{Chen2011} is less rigid, but it is impractical and non-scalable as it requires users to answer challenge questions before allowing each update.
+
+% \looseness -1
+\sys is complementary to existing techniques: it does not prevent errors from entering the database, and its primary goal is not to identify errors in the data.  Rather, given some reported data errors, \sys analyzes query histories to determine how the errors entered the database. Determining the root cause of data errors can in turn help identify additional data errors that are due to the same cause, and which would have potentially remained unidentified.  Specifically, in this paper, we make the following contributions:
+
+\begin{itemize}[leftmargin=*, topsep=0mm, itemsep=0mm]
+
+\item We formalize the problem of \emph{Query Explanation}: diagnosing a set of data errors using the log of update queries over the database.  Given a set of \emph{complaints} as representations of data discrepancies in the current database state, \sys determines how to resolve all of the complaints with the minimum number of changes to the query log (Section~\ref{sec:abstractions})
+
+\item We illustrate how existing synthesis, learning, and cleaning-oriented techniques have difficulty scaling beyond a query log containing a single query.   We then introduce an exact error-diagnosis solution using a novel mixed integer linear programming (MILP) formulation that can be applied to a broad class of OLTP applications.  This approach uses state-of-the-art solvers to identify optimal diagnoses that are guaranteed to resolve all complaints without introducing new errors to the data (Section~\ref{sec:sol}).
+
+\item We present a suite of optimizations that reduce the problem size without affecting the quality of the proposed repairs.  Further, we propose a pragmatic incremental algorithm tailored to cases when the user is looking for individual corrupt queries (in contrast to sets of corruptions), and show how these optimizations can scale to large datasets (100K records) and query logs (up to 2K DML statements), and tolerate incomplete information such as unreported errors (Section~\ref{sec:experiments:hardprob}).
+
+\item We perform a thorough evaluation of the data and query log characteristics that influence \sys's trade-offs between performance and accuracy.  We compare the baseline and optimized algorithms under a controlled, synthetic setting and demonstrate that our optimizations improve response times by up to $40\times$ and exhibit superior accuracy.   We also evaluate QFix on common OLTP benchmarks and show how QFix can propose fully accurate repairs within milliseconds on a scale 1 TPC-C workload with 2000 queries (Section~\ref{sec:experiments:benchmark}).
+
+\end{itemize}

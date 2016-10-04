@@ -1,0 +1,501 @@
+\begin{thebibliography}{10}
+
+\bibitem{cleaningbenchmark}
+Z.~Abedjan, X.~Chu, D.~Deng, R.~C. Fernandez, I.~F. Ilyas, M.~Ouzzani,
+  P.~Papotti, M.~Stonebraker, and N.~Tang.
+\newblock Detecting data errors: Where are we and what needs to be done?
+\newblock {\em VLDB}, 2016.
+
+\bibitem{Abiteboul99}
+S.~Abiteboul, S.~Cluet, T.~Milo, P.~Mogilevsky, J.~Sim{\'e}on, and S.~Zohar.
+\newblock Tools for data translation and integration.
+\newblock In {\em IEEE Data Engineering Bulletin}, 1999.
+
+\bibitem{abouzied2012dataplay}
+A.~Abouzied, J.~Hellerstein, and A.~Silberschatz.
+\newblock Dataplay: interactive tweaking and example-driven correction of
+  graphical database queries.
+\newblock In {\em UIST}, 2012.
+
+\bibitem{twinfalls}
+Accounting mistake could mean new tax bills for twin falls county.
+\newblock
+  \url{http://magicvalley.com/news/local/accounting-mistake-could-mean-new-tax-bills-for-twin-falls/article_24904ffe-003d-51d0-b536-60d9210e2116.html}.
+
+\bibitem{achterberg2009scip}
+T.~Achterberg.
+\newblock Scip: solving constraint integer programs.
+\newblock {\em Mathematical Programming Computation}, 1(1):1--41, 2009.
+
+\bibitem{Amsterdamer2011}
+Y.~Amsterdamer, S.~B. Davidson, D.~Deutch, T.~Milo, J.~Stoyanovich, and
+  V.~Tannen.
+\newblock Putting lipstick on pig: Enabling database-style workflow provenance.
+\newblock In {\em PVLDB}, 2011.
+
+\bibitem{dmvsystem}
+Annual report of the california dui management information system.
+\newblock
+  \url{https://www.dmv.ca.gov/portal/wcm/connect/ea06d0a4-a73f-4b2d-b6f1-257029275629/S5-246.pdf?CACHEID=ea06d0a4-a73f-4b2d-b6f1-257029275629},
+  2014.
+
+\bibitem{atamturk2005integer}
+A.~Atamt{\"u}rk and M.~W. Savelsbergh.
+\newblock Integer-programming software systems.
+\newblock {\em Annals of Operations Research}, 140(1):67--124, 2005.
+
+\bibitem{Barchard20111834}
+K.~A. Barchard and L.~A. Pace.
+\newblock Preventing human error: The impact of data entry methods on data
+  accuracy and statistical results.
+\newblock {\em Computers in Human Behavior}, 2011.
+
+\bibitem{Bender14}
+G.~Bender, L.~Kot, and J.~Gehrke.
+\newblock Explainable security for relational databases.
+\newblock In {\em SIGMOD}, 2014.
+
+\bibitem{Beskales2010}
+G.~Beskales, I.~F. Ilyas, and L.~Golab.
+\newblock Sampling the repairs of functional dependency violations under hard
+  constraints.
+\newblock In {\em PVLDB}, 2010.
+
+\bibitem{betterment}
+Betterment.
+\newblock \url{https://www.betterment.com/}.
+
+\bibitem{bostonpolice}
+Boston police to update traffic stop database.
+\newblock
+  \url{http://www.govtech.com/public-safety/Boston-Police-to-Update-Traffic-Stop-Database.html}.
+
+\bibitem{BunemanKT01}
+P.~Buneman, S.~Khanna, and W.~C. Tan.
+\newblock Why and where: A characterization of data provenance.
+\newblock In {\em ICDT}, 2001.
+
+\bibitem{dmv}
+California department of motor vehicles.
+\newblock \url{https://www.dmv.ca.gov}.
+
+\bibitem{Chapman2009}
+A.~Chapman and H.~V. Jagadish.
+\newblock Why not?
+\newblock In {\em SIGMOD}, 2009.
+
+\bibitem{chase}
+Chase online banking.
+\newblock \url{https://www.chase.com/online/digital/online-banking.html}.
+
+\bibitem{Chen2011}
+S.~Chen, X.~L. Dong, L.~V. Lakshmanan, and D.~Srivastava.
+\newblock We challenge you to certify your updates.
+\newblock In {\em SIGMOD}, 2011.
+
+\bibitem{CheneyCT09}
+J.~Cheney, L.~Chiticariu, and W.~C. Tan.
+\newblock Provenance in databases: Why, how, and where.
+\newblock In {\em Foundations and Trends in Databases}, 2009.
+
+\bibitem{ChuIP13}
+X.~Chu, I.~F. Ilyas, and P.~Papotti.
+\newblock Holistic data cleaning: Putting violations into context.
+\newblock In {\em ICDE}, 2013.
+
+\bibitem{powercompany}
+City of buffalo overcharged \$1 million by power company.
+\newblock
+  \url{http://www.buffalonews.com/business/city-of-buffalo-overcharged-1-million-by-power-company-20160209}.
+
+\bibitem{Cong2007}
+G.~Cong, W.~Fan, F.~Geerts, X.~Jia, and S.~Ma.
+\newblock Improving data quality: Consistency and accuracy.
+\newblock In {\em VLDB}, 2007.
+
+\bibitem{tpcc}
+T.~T.~P. Council.
+\newblock Benchmark c: Standard specification (revision 5.9.0), 2014.
+
+\bibitem{cplex2014v12}
+I.~CPLEX.
+\newblock High-performance software for mathematical programming and
+  optimization, 2005.
+
+\bibitem{CuiWW00}
+Y.~Cui, J.~Widom, and J.~L. Wiener.
+\newblock Tracing the lineage of view data in a warehousing environment.
+\newblock In {\em ACM Transactions on Database Systems}, 2000.
+
+\bibitem{dallachiesa2013nadeef}
+M.~Dallachiesa, A.~Ebaid, A.~Eldawy, A.~Elmagarmid, I.~F. Ilyas, M.~Ouzzani,
+  and N.~Tang.
+\newblock Nadeef: a commodity data cleaning system.
+\newblock In {\em SIGMOD}, 2013.
+
+\bibitem{danna2005exploring}
+E.~Danna, E.~Rothberg, and C.~Le~Pape.
+\newblock Exploring relaxation induced neighborhoods to improve mip solutions.
+\newblock {\em Mathematical Programming}, 102(1):71--90, 2005.
+
+\bibitem{Das2011}
+M.~Das, S.~Amer-Yahia, G.~Das, and C.~Yu.
+\newblock Mri: Meaningful interpretations of collaborative ratings.
+\newblock In {\em PVLDB}, 2011.
+
+\bibitem{difallah2013oltp}
+D.~E. Difallah, A.~Pavlo, C.~Curino, and P.~Cudre-Mauroux.
+\newblock Oltp-bench: An extensible testbed for benchmarking relational
+  databases.
+\newblock In {\em VLDB}, 2013.
+
+\bibitem{oltpbench}
+D.~E. Difallah, A.~Pavlo, C.~Curino, and P.~Cudre-Mauroux.
+\newblock Oltp-bench: An extensible testbed for benchmarking relational
+  databases.
+\newblock In {\em VLDB}, 2013.
+
+\bibitem{DN09}
+X.~L. Dong and F.~Naumann.
+\newblock Data fusion--resolving data conflicts for integration.
+\newblock In {\em PVLDB}, 2009.
+
+\bibitem{Fabbri2011}
+D.~Fabbri and K.~LeFevre.
+\newblock Explanation-based auditing.
+\newblock In {\em PVLDB}, 2011.
+
+\bibitem{Fan2008b}
+W.~Fan, F.~Geerts, X.~Jia, and A.~Kementsietsidis.
+\newblock Conditional functional dependencies for capturing data
+  inconsistencies.
+\newblock In {\em ACM Transactions on Database Systems}, 2008.
+
+\bibitem{Floudas2005}
+C.~A. Floudas and X.~Lin.
+\newblock Mixed integer linear programming in process scheduling: Modeling,
+  algorithms, and applications.
+\newblock {\em Annals of Operations Research}, 139(1):131--162, 2005.
+
+\bibitem{galar2012review}
+M.~Galar, A.~Fernandez, E.~Barrenechea, H.~Bustince, and F.~Herrera.
+\newblock A review on ensembles for the class imbalance problem: bagging-,
+  boosting-, and hybrid-based approaches.
+\newblock {\em Systems, Man, and Cybernetics, Part C: Applications and Reviews,
+  IEEE Transactions on}, 42(4):463--484, 2012.
+
+\bibitem{Galhardas2000}
+H.~Galhardas, D.~Florescu, D.~Shasha, and E.~Simon.
+\newblock Ajax: An extensible data cleaning tool.
+\newblock In {\em SIGMOD}, 2000.
+
+\bibitem{Sabater2009}
+J.~P. Garcia-Sabater.
+\newblock A decision support system for aggregate production planning based on
+  milp: A case study from the automotive industry.
+\newblock In {\em International Conference on Computers and Industrial
+  Engineering}, pages 366--371, 2009.
+
+\bibitem{gearhart2013comparison}
+J.~L. Gearhart, K.~L. Adair, R.~J. Detry, J.~D. Durfee, K.~A. Jones, and
+  N.~Martin.
+\newblock Comparison of open-source linear programming solvers.
+\newblock Technical report, Sandia National Laboratories (SNL-NM), Albuquerque,
+  NM (United States), 2013.
+
+\bibitem{GebalyAGKS14}
+K.~E. Gebaly, P.~Agrawal, L.~Golab, F.~Korn, and D.~Srivastava.
+\newblock Interpretable and informative explanations of outcomes.
+\newblock In {\em PVLDB}, 2014.
+
+\bibitem{Gokhale:2014wv}
+C.~Gokhale et~al.
+\newblock {Corleone: hands-off crowdsourcing for entity matching.}
+\newblock {\em SIGMOD}, 2014.
+
+\bibitem{Golab2008}
+L.~Golab, H.~Karloff, F.~Korn, D.~Srivastava, and B.~Yu.
+\newblock On generating near-optimal tableaux for conditional functional
+  dependencies.
+\newblock In {\em PVLDB}, 2008.
+
+\bibitem{GolabKKS10}
+L.~Golab, H.~J. Karloff, F.~Korn, and D.~Srivastava.
+\newblock Data auditor: Exploring data quality and semantics using pattern
+  tableaux.
+\newblock In {\em PVLDB}, 2010.
+
+\bibitem{Grady13}
+B.~Grady.
+\newblock Oakland unified makes \$7.6{M} accounting error in budget; asking
+  schools not to count on it.
+\newblock In {\em Oakland}, 2013.
+
+\bibitem{GKT07-semirings}
+T.~J. Green, G.~Karvounarakis, and V.~Tannen.
+\newblock Provenance semirings.
+\newblock In {\em PODS}, 2007.
+
+\bibitem{GruenheidDS14}
+A.~Gruenheid, X.~L. Dong, and D.~Srivastava.
+\newblock Incremental record linkage.
+\newblock In {\em PVLDB}, 2014.
+
+\bibitem{haasclamshell}
+D.~Haas, J.~Wang, E.~Wu, and M.~J. Franklin.
+\newblock Clamshell: Speeding up crowds for low-latency data labeling.
+\newblock {\em VLDB}, 2015.
+
+\bibitem{he2009learning}
+H.~He and E.~A. Garcia.
+\newblock Learning from imbalanced data.
+\newblock {\em Knowledge and Data Engineering, IEEE Transactions on},
+  21(9):1263--1284, 2009.
+
+\bibitem{cra}
+How to object to a cra notice of assessment.
+\newblock
+  \url{http://www.newsoptimist.ca/opinion/columnists/how-to-object-to-a-cra-notice-of-assessment-1.2280680}.
+
+\bibitem{iquantnyc}
+{I Quant NY}.
+\newblock \url{http://iquantny.tumblr.com/}.
+
+\bibitem{Kalashnikov06}
+D.~V. Kalashnikov and S.~Mehrotra.
+\newblock Domain-independent data cleaning via analysis of entity-relationship
+  graph.
+\newblock In {\em ACM Transactions on Database Systems}, 2006.
+
+\bibitem{Kandel:2011vj}
+S.~Kandel, A.~Paepcke, J.~M. Hellerstein, and J.~Heer.
+\newblock {Wrangler: interactive visual specification of data transformation
+  scripts.}
+\newblock {\em CHI}, 2011.
+
+\bibitem{kandel2012}
+S.~Kandel, A.~Paepcke, J.~M. Hellerstein, and J.~Heer.
+\newblock Enterprise data analysis and visualization: An interview study.
+\newblock In {\em TVCG}, 2012.
+
+\bibitem{Khoussainova2006}
+N.~Khoussainova, M.~Balazinska, and D.~Suciu.
+\newblock Towards correcting input data errors probabilistically using
+  integrity constraints.
+\newblock In {\em MobiDE}, 2006.
+
+\bibitem{Khoussainova2012}
+N.~Khoussainova, M.~Balazinska, and D.~Suciu.
+\newblock Perfxplain: debugging mapreduce job performance.
+\newblock In {\em VLDB}, 2012.
+
+\bibitem{Koudas2006}
+N.~Koudas, S.~Sarawagi, and D.~Srivastava.
+\newblock Record linkage: Similarity measures and algorithms.
+\newblock In {\em SIGMOD}, 2006.
+
+\bibitem{krishnan2016hilda}
+S.~Krishnan, D.~Haas, M.~J. Franklin, and E.~Wu.
+\newblock Towards reliable interactive data cleaning: A user survey and
+  recommendations.
+\newblock In {\em HILDA}, 2016.
+
+\bibitem{Kuwata2005a}
+Y.~Kuwata and J.~P. How.
+\newblock {Receding horizon implementation of MILP for vehicle guidance}.
+\newblock In {\em American Control Conference (ACC)}, pages 2684--2685, June
+  2005.
+
+\bibitem{lima2011computational}
+R.~M. Lima and I.~E. Grossmann.
+\newblock Computational advances in solving mixed integer linear programming
+  problems.
+\newblock 2011.
+
+\bibitem{Milan2013}
+E.~Lopez-Milan and L.~M. Pla-Aragones.
+\newblock A decision support system to manage the supply chain of sugar cane.
+\newblock {\em Annals of Operations Research}, 219(1):285--297, 2013.
+
+\bibitem{Ma2006}
+C.-S. Ma and R.~H. Miller.
+\newblock Milp optimal path planning for real-time applications.
+\newblock In {\em American Control Conference (ACC)}, pages 4945--4950, 2006.
+
+\bibitem{sap}
+Manage the modern workforce with our hcm software.
+\newblock \url{http://go.sap.com/solution/lob/human-resources-hcm.html}.
+
+\bibitem{mosby}
+Marilyn mosby's office got two names wrong when filing charges.
+\newblock
+  \url{http://www.mediaite.com/tv/marilyn-mosbys-office-got-two-names-wrong-when-filing-charges-cnn-panel-piles-on/}.
+
+\bibitem{meindl2012analysis}
+B.~Meindl and M.~Templ.
+\newblock Analysis of commercial and free and open source solvers for linear
+  optimization problems.
+\newblock {\em Eurostat and Statistics Netherlands within the project ESSnet on
+  common tools and harmonised methodology for SDC in the ESS}, 2012.
+
+\bibitem{tiresias}
+A.~Meliou and D.~Suciu.
+\newblock Tiresias: The database oracle for how-to queries.
+\newblock In {\em SIGMOD}, 2012.
+
+\bibitem{reutersmanagement}
+New systems for government revenue management.
+\newblock
+  \url{https://tax.thomsonreuters.com/new-systems-for-government-revenue-management}.
+
+\bibitem{iquantnycnypd}
+Open data reveals \$791 million error in newly adopted nyc budget.
+\newblock
+  \url{http://iquantny.tumblr.com/post/147446103684/open-data-reveals-791-million-error-in-newly},
+  2016.
+
+\bibitem{quesada1992lp}
+I.~Quesada and I.~E. Grossmann.
+\newblock An lp/nlp based branch and bound algorithm for convex minlp
+  optimization problems.
+\newblock {\em Computers \& chemical engineering}, 16(10):937--947, 1992.
+
+\bibitem{quinlan1987}
+J.~R. Quinlan.
+\newblock Simplifying decision trees.
+\newblock {\em International journal of man-machine studies}, 27(3):221--234,
+  1987.
+
+\bibitem{rahm00}
+E.~Rahm and H.~H. Do.
+\newblock Data cleaning: Problems and current approaches.
+\newblock In {\em IEEE Data Engineering Bulletin}, 2000.
+
+\bibitem{Raman01}
+V.~Raman and J.~M. Hellerstein.
+\newblock Potter's wheel: An interactive data cleaning system.
+\newblock In {\em VLDB}, 2001.
+
+\bibitem{Richards02_JGCD}
+A.~Richards, T.~Schouwenaars, J.~P. How, and E.~Feron.
+\newblock Spacecraft trajectory planning with avoidance constraints using
+  mixed-integer linear programming.
+\newblock {\em AIAA Journal on Guidance, Control, and Dynamics},
+  25(4):755--764, July-August 2002.
+
+\bibitem{Robeznieks05}
+A.~Robeznieks.
+\newblock Data entry is a top cause of medication errors.
+\newblock In {\em American Medical News}, 2005.
+
+\bibitem{rothberg2007evolutionary}
+E.~Rothberg.
+\newblock An evolutionary algorithm for polishing mixed integer programming
+  solutions.
+\newblock {\em INFORMS Journal on Computing}, 19(4):534--541, 2007.
+
+\bibitem{Roy2014}
+S.~Roy and D.~Suciu.
+\newblock A formal approach to finding explanations for database queries.
+\newblock In {\em SIGMOD}, 2014.
+
+\bibitem{sakalerrors}
+M.~Sakal and L.~Rakovi{\'{c}}.
+\newblock Errors in building and using electronic tables: Financial
+  consequences and minimisation techniques.
+\newblock In {\em Strategic Management}, 2012.
+
+\bibitem{salesforce}
+Salesforce.
+\newblock \url{https://www.salesforce.com/}.
+
+\bibitem{savelsbergh1994preprocessing}
+M.~W. Savelsbergh.
+\newblock Preprocessing and probing techniques for mixed integer programming
+  problems.
+\newblock {\em ORSA Journal on Computing}, 6(4):445--454, 1994.
+
+\bibitem{Sawik2000}
+T.~Sawik.
+\newblock Mixed integer programming for scheduling flexible flow lines with
+  limited intermediate buffers.
+\newblock {\em Mathematical and Computer Modelling}, 31(13):39--52, 2000.
+
+\bibitem{Sawik2011}
+T.~Sawik.
+\newblock {\em Scheduling in Supply Chains Using Mixed Integer Programming}.
+\newblock Wiley, 2011.
+
+\bibitem{citibank}
+Stock selloff may have been triggered by a trader error.
+\newblock \url{http://www.cnbc.com/id/36999483}.
+
+\bibitem{stubbs1999branch}
+R.~A. Stubbs and S.~Mehrotra.
+\newblock A branch-and-cut method for 0-1 mixed convex programming.
+\newblock {\em Mathematical programming}, 86(3):515--532, 1999.
+
+\bibitem{tenCate2015}
+B.~ten Cate, C.~Civili, E.~Sherkhonov, and W.-C. Tan.
+\newblock High-level why-not explanations using ontologies.
+\newblock In {\em PODS}, 2015.
+
+\bibitem{Thirumuruganathan2012}
+S.~Thirumuruganathan, M.~Das, S.~Desai, S.~Amer-Yahia, G.~Das, and C.~Yu.
+\newblock Maprat: meaningful explanation, interactive exploration and
+  geo-visualization of collaborative ratings.
+\newblock In {\em PVLDB}, 2012.
+
+\bibitem{tran2010conquer}
+Q.~T. Tran and C.-Y. Chan.
+\newblock How to conquer why-not questions.
+\newblock In {\em SIGMOD}, 2010.
+
+\bibitem{tzompanaki14semi}
+K.~Tzompanaki, N.~Bidoit, and M.~Herschel.
+\newblock Semi-automatic sql debugging and fixing to solve the missing-answers
+  problem.
+\newblock In {\em VLDB PhD Workshop}.
+
+\bibitem{wang2015}
+X.~Wang, X.~L. Dong, and A.~Meliou.
+\newblock Data x-ray: A diagnostic tool for data errors.
+\newblock In {\em SIGMOD}, 2015.
+
+\bibitem{tatp}
+A.~Wolski.
+\newblock Tatp benchmark description (version 1.0), 2009.
+
+\bibitem{Wu13}
+E.~Wu and S.~Madden.
+\newblock Scorpion: Explaining away outliers in aggregate queries.
+\newblock In {\em PVLDB}, 2013.
+
+\bibitem{Yakout}
+M.~Yakout, A.~K. Elmagarmid, J.~Neville, M.~Ouzzani, and I.~F. Ilyas.
+\newblock Guided data repair.
+\newblock In {\em PVLDB}, 2011.
+
+\bibitem{Yates10}
+J.~Yates.
+\newblock Data entry error wipes out life insurance coverage.
+\newblock In {\em Chicago Tribune}, 2005.
+
+\bibitem{yin2008truth}
+X.~Yin, J.~Han, and P.~S. Yu.
+\newblock Truth discovery with multiple conflicting information providers on
+  the web.
+\newblock In {\em KDD}, 2007.
+
+\bibitem{ltm2012}
+B.~Zhao, B.~I.~P. Rubinstein, J.~Gemmell, and J.~Han.
+\newblock A {B}ayesian approach to discovering truth from conflicting sources
+  for data integration.
+\newblock In {\em PVLDB}, 2012.
+
+\bibitem{zloof1977query}
+M.~M. Zloof.
+\newblock Query-by-example: A data base language.
+\newblock {\em IBM systems Journal}, 1977.
+
+\end{thebibliography}
