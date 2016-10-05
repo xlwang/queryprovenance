@@ -145,7 +145,7 @@ method from~\cite{tiresias}: We introduce two variables $u.A_j$ and
 $v.A_j$ to represent the two terms of
 Equation~\eqref{eq:linearization}: $u.A_j=x_{q_i, t}\otimes
 \mu_{q_i}(t).A_j$ and $v.A_j=(1-x_{q_i, t})\otimes t.A_j$. Assuming a
-number $M$ as the upper bound of the domain of $t.A_j$, we get the
+number $M$ is a large enough value~\cite{bazaraa2011linear} that is out of the domain of $t.A_j$, we get the
 following constraints:
 \begin{align}
 \label{eq:uv}
@@ -164,7 +164,7 @@ t.A_j' = u.A_j + v.A_j
 
 \noindent\texttt{INSERT:}\looseness -1
 An insert query adds a new tuple $t_{new}$ to the database.  If the query were 
-corrupted, then the inserted values need repair. We use a binary variable $x$ to model whether the query is correct.  Each attribute of the newly inserted tuple ($t'.A_j$) may take one of two values: the value specified by the insertion query ($t_{new}.A_j$) if the query is correct ($x=1$), or an undetermined value ($u.A_j$) if the query is incorrect ($x=0$).  Thus, similar with Equation~\eqref{eq:linearization}, we write:
+corrupted, then the inserted values need repair. We use a binary variable $x$ to model whether the query is correct.  Each attribute of the newly inserted tuple ($t'.A_j$) may take one of two values: the value specified by the insertion query ($t_{new}.A_j$) if the query is correct ($x=1$), or an undetermined value ($v.A_j$) if the query is incorrect ($x=0$).  Thus, similar with Equation~\eqref{eq:linearization}, we write:
 \begin{eqnarray}
 \label{eq:insert}
 t'.A_j = x \otimes t_{new}.A_j + (1-x) \otimes v.A_j 
@@ -177,12 +177,12 @@ t'.A_j = x \otimes t_{new}.A_j + (1-x) \otimes v.A_j
 A delete query removes a set of tuples from the database.  
 Since the MILP problem doesn't have a way to express a non-existent value, 
 we encode a deleted tuple by setting its attributes to a value
-outside of the attribute domain $M^+$.  In this way, subsequent conditional functions
-on the attribute will return false, so it will not have an effect on subsequent queries encoded
+out of the attribute domain $M^-$ as well. In this way, subsequent conditional functions
+on the attribute will return false. \xlw{Note that although the subsequent condition functions may be true initially, but any solutions having such positive conditions will have an associated objective-function value that is exceedingly large. Thus the MILP solver will always assign false to the subsequent condition functions.} So the $M^-$ assignment will not have an effect on subsequent queries encoded
 in the MILP problem:
 \begin{eqnarray}
 \label{eq:delete}
-t'.A_j &=& x_{q_i, t} \otimes M^+ + (1-x_{q_i, t}) \otimes t.A_j \\
+t'.A_j &=& x_{q_i, t} \otimes M^- + (1-x_{q_i, t}) \otimes t.A_j \\
 x_{q_i, t} &=& \sigma_{q_i}(t)\nonumber 
 \end{eqnarray}
 This expression is further linearized using the same method as Equation~\eqref{eq:uv}.

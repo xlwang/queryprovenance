@@ -10,7 +10,7 @@ This increase has a large impact on the running time of the solver, since it nee
 assignment of all undetermined variables (exponential with the number of undetermined variables).
 This is depicted in Figure~\ref{fig:querysize_vs_time}, which increases the query log size over a database of $1000$ tuples.  
 The red bars encode the problem using  the \emph{basic} algorithm that parameterizes all queries, while the blue bars show the potential gain of only parameterising the oldest query that we assume is incorrect.
-At a log size of $80$, the solver for \emph{basic} failed to produce an answer within $1000$ seconds.
+\xlw{At a log size of $80$, the solver for \emph{basic} \textbf{failed} to produce an answer within $1000$ seconds.}
 Although MILP solvers exhibit empirical performance variation,
 this experiment illustrates the performance limitation of the \emph{basic} approach. 
 
@@ -108,7 +108,7 @@ Figure~\ref{fig:groups}(b) highlights such a case where the dirty and truth inte
 \indent In both of these cases, the objective function will ensure that the repair
 does not over-generalize the upper bound towards the right because that strictly increases the objective function.
 Therefore, our main concern is to refine the repair interval to exclude those non-complaint tuples in case (b).
-Note that in the case of incomplete complaint sets, the user may opt to no execute the refinement step if she believes
+Note that in the case of incomplete complaint sets, the user may \xlw{choose not to} execute the refinement step if she believes
 that the non-complaint records are indeed in error.
 
 \smallskip
@@ -134,7 +134,7 @@ $t \in \mathcal{NC}$ that are matched by the solution.
 In our experiments, we find that this second MILP iteration adds
 minimal overhead ($0.1-0.5\%$) with respect to the initial MILP
 problem. 
-\xlw{\emph{Tuple-slicing} optimization is primary applied on fixing workload with \textit{range predicates}. The probability of making an incorrect log repair due to tuple-slicing is very low: A failure case only happens when there exists a different set of queries (other than the actual incorrect queries) in the workload that modifies every tuple in the complaint set. In fact, the probability of having such a case in our synthetic datasets is lower than $0.001\%$. For workloads with \textit{point predicates} (a.k.a only a small set of tuples---$1-2$ are updated by each individual query), including most benchmark workloads, with the help of other optimization, queries that might result in a incorrect repair are already pruned ahead, thus applying \emph{tuple-slicing} is guaranteed to be correct.
+\xlw{\emph{Tuple-slicing} optimization is primary applied on fixing workload with \textit{range predicates}. The probability of making an incorrect log repair due to tuple-slicing is very low: A failure case only happens when there exists a different set of queries (other than the actual incorrect queries) in the workload that modifies every tuple in the complaint set. In fact, the probability of having such a case in our synthetic datasets is lower than $0.001\%$ but could be higher with less attributes in the database and fewer tuples. For workloads with \textit{point predicates} (a.k.a only a small set of tuples---$1-2$ are updated by each individual query), including most benchmark workloads, with the help of other optimization, queries that might result in a incorrect repair are already pruned ahead , thus applying \emph{tuple-slicing} is guaranteed to be correct.
 In summary, \emph{tuple-slicing} is an effective method to improve the performance of the \emph{basic} approach, without compromising, and often improving, repair quality.
 }
 
@@ -205,7 +205,7 @@ This is the foundation of our \emph{query-slicing} optimization.
     condition function $\sigma_{q_i}$.
     We derive the \textbf{full-impact}, $\mathcal{F}(q_i)$, of a query $q_i$ by propagating its direct impact through subsequent queries in the log (Algorithm~\ref{alg:fullimpact}):
     \[
-    \mathcal{F}(q_i)=\mathcal{I}(q_i)\bigcup_{\substack{j=i+1\\ \mathcal{F}(q_i)\cap \mathcal{P}(q_j) \neq \emptyset}}^n \mathcal{F}(q_j)
+    \mathcal{F}(q_i)=\mathcal{I}(q_i)\bigcup_{\substack{j=i+1\\ \mathcal{F}(q_{j-1})\cap \mathcal{P}(q_j) \neq \emptyset}}^n \mathcal{F}(q_j)
     \]
 \end{definition}
 

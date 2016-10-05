@@ -138,9 +138,9 @@ particular tuple in the final database state $D_n^*$, and identifies
 that tuple's correct value assignment. We formally define complaints
 below:
 \begin{definition}[Complaint]
-    A complaint $c$ is a mapping between two tuples: $c: t\mapsto t^*$, such that $t$ and $t^*$ have the same schema, $t\in D_n\cup\{\bot\}$, and $t\neq t^*$. A complaint defines a
+    A complaint $c$ is a mapping between two tuples: $c: t\mapsto t^*$, such that $t$ and $t^*$ have the same schema, \xlw{$t, t^*\in D_n\cup\{\bot\}$}, and $t\neq t^*$. A complaint defines a
     transformation $\mathcal{T}_c$ on a database state $D$: $\mathcal{T}_c(D)
-    = (D\setminus\{t\})\cup\{t^*\}$.
+    = (D\setminus\{t\})\cup\{t^*\}$ \xlw{that replaces $t$ by $t^*$}.
 \end{definition}
 
 In the example of Figure~\ref{fig:example}, two complaints are reported on the final database state $D_3$: 
@@ -150,6 +150,8 @@ where $t_3^*=(86000,21500,64500)$ and $t_4^*=(86500,21625,\linebreak 64875)$.
 For both these cases, each complaint denotes a \textbf{value correction} for a tuple in $D_3$.  Complaints can also model the \textbf{addition} or \textbf{removal} of tuples: $c: \bot\mapsto t^*$ means that $t^*$ should be added to the database, whereas $c: t\mapsto \bot$
 means that $t$ should be removed from the database.
 
+\xlw{Ideally, a complaint should cover a \textbf{complete value correction} such that the exact fix value for all attributes are included. This is because a complete value correction helps reducing the searching space and improves the diagnosis quality. In this paper, we use complaints with complete value correction in our experiments, however, the proposed
+algorithm can be easily extended to handle problems with missing value correction. }
 
 \smallskip
 \noindent
