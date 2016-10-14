@@ -319,7 +319,7 @@ Ultimately, combining all three optimizations outperforms tuple-slicing by $2-4\
 \label{sec:experiments:hardprob}
 
 In this section, we further study the performance of \sys in solving hard problems---when the set of complaints is incomplete, and when there is more than one corruption that led to the complaints\footnote{
-\footnotesize Note that even when there are multiple corruptions in the log, the incremental algorithm is still applicable if only one is responsible for the set of complaints.}.
+\footnotesize Note that even when there are multiple corruptions in the log, the incremental algorithm may still be applicable if only one is responsible for the set of complaints.  We leave this study to future work.}.
  
 \stitle{Incomplete Complaint Set:} \looseness -1
 The first experiment (Figures~\ref{f:falsenegative_time} and~\ref{f:falsenegative_acc}) varies the false negative rate in incomplete complaint sets.
