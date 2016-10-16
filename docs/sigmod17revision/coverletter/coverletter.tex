@@ -1,0 +1,242 @@
+
+\documentclass{vldb}
+\usepackage{balance}  
+\usepackage{graphicx} 
+\usepackage[hyphens]{url}      
+\usepackage{amsmath}
+\usepackage{color}
+\usepackage{cancel}
+\usepackage{listings}
+\usepackage[normalem]{ulem}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\setlength{\abovecaptionskip}{10pt plus 3pt minus 2pt}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage[ruled,vlined,algonl,boxed]{algorithm2e}
+\usepackage{algorithmic}
+\usepackage{wrapfig}
+\usepackage{enumitem}
+\usepackage{xspace}
+\usepackage{xcolor}
+\usepackage{colortbl}
+\usepackage[T1]{fontenc}
+\usepackage{fancyvrb}
+
+
+\usepackage[nocompress]{cite}
+\usepackage{microtype}
+\usepackage[section]{placeins}
+
+\makeatletter
+\def\url@leostyle{
+  \@ifundefined{selectfont}{\def\UrlFont{\sf}}{\def\UrlFont{\small\bf\ttfamily}}}
+\makeatother
+\urlstyle{leo}
+
+\makeatletter
+\def\@copyrightspace{\relax}
+\makeatother
+
+\def\pprw{8.5in}
+\def\pprh{11in}
+\special{papersize=\pprw,\pprh}
+\setlength{\paperwidth}{\pprw}
+\setlength{\paperheight}{\pprh}
+\setlength{\pdfpagewidth}{\pprw}
+\setlength{\pdfpageheight}{\pprh}
+
+\newtheorem{definition}{Definition}
+\newtheorem{proposition}[definition]{Proposition}
+\newtheorem{lemma}[definition]{Lemma}
+\newtheorem{remark}[definition]{Remark}
+\newtheorem{corollary}[definition]{Corollary}
+\newtheorem{claim}[definition]{Claim}
+\newtheorem{theorem}[definition]{Theorem}
+\newtheorem{heuristic}[definition]{Heuristic}
+\newtheorem{example}[definition]{Example}
+\newtheorem{dimension}{Dimension}
+\newcounter{prob}
+\newtheorem{problem}[prob]{Problem}
+\newtheorem{conjecture}[definition]{Conjecture}
+\newtheorem{reduction}[definition]{Reduction}
+\newtheorem{property}[definition]{Property}
+\newtheorem{axiom}[definition]{Axiom}
+
+
+
+
+
+
+
+
+
+
+
+\usepackage[pdftex]{hyperref}
+\hypersetup{
+  colorlinks=false,
+  linkcolor=darkred,
+  citecolor=darkgreen,
+  urlcolor=darkblue
+}
+
+
+
+\widowpenalty=10000
+\clubpenalty=10000
+
+
+\definecolor{light-gray}{gray}{0.95}
+\definecolor{mid-gray}{gray}{0.85}
+\definecolor{darkred}{rgb}{0.7,0.25,0.25}
+\definecolor{darkgreen}{rgb}{0.15,0.55,0.15}
+\definecolor{darkblue}{rgb}{0.1,0.1,0.5}
+\definecolor{blue}{rgb}{0.19,0.58,1}
+
+\newcommand{\red}[1]{\textcolor{red}{#1}}
+\newcommand{\green}[1]{\textcolor{green}{#1}}
+\newcommand{\blue}[1]{\textcolor{blue}{#1}}
+\newcommand{\orange}[1]{\textcolor{orange}{#1}}
+\newcommand{\darkred}[1]{\textcolor{darkred}{#1}}
+\newcommand{\darkgreen}[1]{\textcolor{darkgreen}{#1}}
+\newcommand{\darkblue}[1]{\textcolor{darkblue}{#1}}
+
+\makeatletter
+\setlength{\@fptop}{0pt}
+\makeatother
+
+
+
+\widowpenalty 10000
+\clubpenalty 10000
+
+
+\newcommand{\papertext}[1]{#1}
+\newcommand{\techreport}[1]{#1}
+
+
+\newcommand{\alex}[1]{\noindent{\color{darkgreen}{[Alexandra: #1]}}}
+\newcommand{\xlw}[1]{\noindent{\color{blue}{Xiaolan: #1}}}
+\newcommand{\ewu}[1]{\noindent{\color{red}{EWu: #1}}}
+
+\newcommand{\xxx}[1]{{\fontsize{13pt}{13pt}\selectfont\textcolor{red}{#1}}}
+\newcommand{\codesize}{\fontsize{7}{8}}
+\newcommand{\stitle}[1]{\vspace{0.5em}\noindent\textbf{#1}}
+\newcommand{\calF}[0]{$\cal{F}$}
+
+\newcommand{\ind}{\hspace{\algorithmicindent}}
+
+\newcommand{\deprecate}[1]{\noindent{\color{light-gray}{#1}}}
+
+\newcommand{\prob}{{\sc Log-Corruption}\xspace}
+\newcommand{\exact}{{\sc EXACTSOL}\xspace}
+\newcommand{\qfix}{{\sc SingleQueryFix}\xspace}
+\newcommand{\density}{{\sc DENSITY}\xspace}
+
+
+\newcommand{\milpall}{\textsc{MILP-NAIVE}\xspace}
+\newcommand{\milptuple}{\textsc{MILP-COMPL}\xspace}
+\newcommand{\milptuplestopearly}{\textsc{MILP-COMPL-STOPEARLY}\xspace}
+\newcommand{\milpadvtuple}{\textsc{MILP-ADV-TUPLE}\xspace}
+\newcommand{\milpadvall}{\textsc{MILP-ADV-ALL}\xspace}
+\newcommand{\heurstic}{\textsc{HEURISTIC}\xspace}
+
+\pagenumbering{arabic}
+
+\makeatletter
+\def\maketag@@@#1{\hbox{\m@th\normalfont\normalsize#1}}
+\DeclareRobustCommand*\textsubscript[1]{
+          \@textsubscript{\selectfont#1}}
+        \def\@textsubscript#1{
+          {\m@th\ensuremath{_{\mbox{\fontsize\sf@size\z@#1}}}}}
+\makeatother
+
+\newcommand{\sysname}{\textsc{QueryFix}}
+\newcommand{\sys}{QFix\xspace}
+\newcommand{\naive}{\emph{basic}\xspace}
+\newcommand{\tslice}{\sys-{\it tuple}\xspace}
+\newcommand{\qslice}{\sys-{\it query}\xspace}
+\newcommand{\aslice}{\sys-{\it attr}\xspace}
+\newcommand{\incremental}{\sys-{\it inc}\xspace}
+\newcommand{\dt}{DecTree\xspace}
+
+
+\setlength\floatsep{0.8\baselineskip plus 3pt minus 2pt}
+\setlength\textfloatsep{0.9\baselineskip plus 3pt minus 2pt}
+\setlength\intextsep{1\baselineskip plus 3pt minus 2 pt}
+
+
+\begin{document}
+
+\subsection*{Meta Review Details}
+\noindent \textbf{R1: Discuss and clarify the soundness of slicing techniques.}
+
+(add text)
+
+\noindent \textbf{R2 Clarify the assumptions, their interaction, and why they are realistic in practice. clarify that the system is not repairing the update queries, but the affected data (i.e., query is not correct and errors can still happen).}
+
+(add text)
+
+\noindent \textbf{R3 Add experiment with larger data size, or clarify why they cannot be done.}
+
+(add text)
+
+\noindent \textbf{R4 Investigate how many of the errors exhibit interesting patterns (such as a later update masking the effect of an earlier erroneous one). If there are already lots of examples of this, compare effectiveness on the "simple" errors with the "complex" ones; otherwise, you should improve the test data generator.}
+
+(add text)
+
+\noindent \textbf{R5 Implementation of a baseline (described in the review) or explain why such baselines would fail in the context, to convince readers that complex patterns can be handled only by this new system.}
+
+(add text)
+\subsection*{Reviewer 1 Details}
+\noindent \textbf{R1.1 What are the soundness/correctness properties needed for the slicing heuristics to be applicable/useful? It seems they can be useful even if not sound, but showing this is the case on non-synthetic data would help. I appreciate that realistic benchmarks may not be available though.}
+
+(add text)
+
+\noindent \textbf{R1.2 Please correct definition 6.}
+
+(add text)
+
+\noindent \textbf{R1.3 Do the experiments substantiate the claim of scalability to "large" databases of 100k records? If so the experimental evaluation needs to explain this more clearly. If not the introduction must avoid overselling this point.}
+
+(add text)
+
+\noindent \textbf{R1.4 It's also not entirely clear why it is correct to use a "large/unused" value $M^+$ for attributes of deleted tuples. Please spell this out.}
+
+(add text)
+\subsection*{Reviewer 2 Details}
+\noindent \textbf{R2.1 Given that the paper considers a novel problem, I believe it could trigger quite some follow-up work. However, to do so, I personally think that further technical details or detailed theoretical discussion are necessary. }
+
+(add text)
+
+\noindent \textbf{R2.2 I find the experimental evaluation rather preliminary and would appreciate experiments on larger data sets or some real data set.}
+
+(add text)
+\subsection*{Reviewer 3 Details}
+
+\noindent \textbf{R3.1 The problem is indeed difficult with several sources of complexity. It is challenging to find the right setting to handle it and assumptions must be put in place to solve it with some degree of confidence. However, right now assumptions are scattered all around the paper, and some of them should probably be revised.
+My first suggestion is to collect all the restrictions or hypothesis in a unified discussion and try to assess how close is the ultimate setting to the real world scenarios.} 
+
+(add text)
+
+\noindent \textbf{R3.2 Errors are indeed in the queries, but are ultimately data errors that are considered here (no structural errors in the query). It seems related, existing solutions [73,88, Chalamalla et al SIGMOD 2014, Meliou et al SIGMOD 2011] can be directly applied by modelling the query data as source data + SELECT queries. In fact, queries data can be modelled as sources with a new attribute representing the query id, and the data in this papers is the view in previous work. Once identified the problems in the view (as done in all papers) evidence can be carried back to the sources and mined to find the explanations. If the errors are coming from one query (as assumed in most of the exp in this work), I am confident the query attribute will be identified and the explanation will point to that query. I understand that the implementation of such baselines may go behind the scope of the revision, but I believe it would be great if the author can precisely explain why such baselines would fail in their context. ( i suspect the reason is discussed in point 5). }
+
+(add text)
+
+\noindent \textbf{R3.3 Most of the technical contributions are on the scalability aspect, but relatively small datasets are tested. I suggest to explicitly test the scalability until the bottlenecks of the solutions become clear (the MILP module?)}
+
+(add text)
+
+\noindent \textbf{R3.4 I cannot grasp from the experiments section if the authors are counting the number of errors correctly identified or correctly fixed. Usually these are considered two different metrics in data repair. For example, given the problem of income >= 85700, do they consider it correctly fixed with any value that lead to repair of the identified problems or they require to get exactly 87500? 
+I believe it must be the former as I don’t see how they can always recover the correct value in general. If this is the case, this clearly explain the big drop in precision and recall when the complain set is incomplete. Unfortunately this implies that even complete complain sets do NOT guarantee that the query is correctly fixed and future errors will not occur (e.g. the system may discover 87200 as the correct fix, it covers all case, but it does not cover new data)}
+
+(add text)
+
+\noindent \textbf{R3.5 I believe the way that errors are introduced can be improved. Randomly introducing errors do not guarantee that complex patterns (such as the one in Figure 1) happen in the test datasets. In fact, what make the problem challenging is the interaction of the queries. I suggest to have an experiment where this interaction is enforced in the noise injection so that the approach can really show its power wrt to simpler techniques (such as point 2 above). 
+Unfortunately having some guarantee on the way that errors are introduced can be a challenging problem, a recent paper discusses this topic (Arocena et al, PVLDB 15).}
+
+(add text)
+
+
+\end{document}
