@@ -35,7 +35,7 @@ the cost to the left side of Figure~\ref{fig:querysize_vs_time}.
     \centering
     \includegraphics[width=0.35\textwidth]{figures/qsize_time_badscale}
     \vspace*{-0.1in}
-    \caption{Log size vs. execution time for 1000 records. Beyond $80$ queries, the solver exceeds the $1000$sec time limit.}
+    \caption{Log size vs. execution time for 1000 records. \xlw{Beyond $80$ queries, the solver exceeds the $1000$sec time limit.}}
     \label{fig:querysize_vs_time}
 \end{figure}
 
@@ -229,8 +229,8 @@ for this important problem setting.
 Finally, we use $Rel\mathcal{(Q)}$ to denote the set of relevant
 queries that are candidates for repair.
 
-This optimization only linearizes the queries in $Rel\mathcal{(Q)}$ which is a conservative estimate of all queries that may have affected the user complaints.  
-Since this set is typically much smaller than the entire query log, this optimization leads to smaller problems than \emph{basic} without any loss of accuracy.
+\xlw{This optimization only linearizes the queries in $Rel\mathcal{(Q)}$ which is a conservative estimate of all queries that may have affected the user complaints.  
+Since this set is typically much smaller than the entire query log, this optimization leads to smaller problems than \emph{basic} without any loss of accuracy.}
 
 \subsection{Attribute Slicing: Reducing Attributes}
 
@@ -240,7 +240,7 @@ $Rel\mathcal{(A)} = \cup_{q_i \in Rel\mathcal{Q}} (\mathcal{F}(q_i)\cup \mathcal
 We propose \emph{attribute slicing} optimization that only encodes constraints for attributes in $Rel\mathcal{(A)}$.
 We find that this type of slicing can be effective for wide tables along with queries that focus on a small subset of attributes.  
 
-Similar to query slicing, this optimization simply removes irrelevant attributes through static analysis of the query log.  Thus it reduces the problem size without any loss of accuracy.
+\xlw{Similar to query slicing, this optimization simply removes irrelevant attributes through static analysis of the query log.  Thus it reduces the problem size without any loss of accuracy.}
 
 
 \subsection{Incremental Repairs}\label{sec:incremental}
