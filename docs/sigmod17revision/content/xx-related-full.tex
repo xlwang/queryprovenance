@@ -3,9 +3,14 @@
 \section{Related Work}
 \label{s:related} 
 \sys tackles the problem of diagnosis and repair in relational query
-histories (query logs). It does not aim to correct errors in the data
+histories (query logs). 
+\xlw{Due to our assumption that the query structures are fixed, it is possible to view our problem as a data repair problem.  DESCRIBE}
+
+
+It does not aim to correct errors in the data
 directly, but rather to find the underlying reason for reported errors
-in the queries that operated on the data. This is in contrast to
+in the queries that operated on the data. 
+This is in contrast to
 traditional data 
 cleaning~\cite{dallachiesa2013nadeef, rahm00, Raman01, Kalashnikov06, Fan2008b
 } which focuses on identifying and correcting data
