@@ -238,12 +238,9 @@ In addition to removing irrelevant queries, we additionally avoid encoding irrel
 Given $Rel\mathcal{(Q)}$, the relevant attributes can be defined as:
 $Rel\mathcal{(A)} = \cup_{q_i \in Rel\mathcal{Q}} (\mathcal{F}(q_i)\cup \mathcal{P}(q_i))$
 We propose \emph{attribute slicing} optimization that only encodes constraints for attributes in $Rel\mathcal{(A)}$.
-We find that this type of slicing can be effective for wide tables along with queries that focus on a small subset of attributes. 
+We find that this type of slicing can be effective for wide tables along with queries that focus on a small subset of attributes.  
 
-\xlw{Similar to \emph{query slicing}, \emph{attribute slicing} optimization identifies irrelevant attributes by carefully analyzing incorrect attribute(s)
-and their provenance. Thus, applying \emph{attribute slicing} optimization leads to smaller problems and 
-\textbf{guarantees the correctness at the same time}. }
-
+Similar to query slicing, this optimization simply removes irrelevant attributes through static analysis of the query log.  Thus it reduces the problem size without any loss of accuracy.
 
 
 \subsection{Incremental Repairs}\label{sec:incremental}
