@@ -145,7 +145,7 @@ method from~\cite{tiresias}: We introduce two variables $u.A_j$ and
 $v.A_j$ to represent the two terms of
 Equation~\eqref{eq:linearization}: $u.A_j=x_{q_i, t}\otimes
 \mu_{q_i}(t).A_j$ and $v.A_j=(1-x_{q_i, t})\otimes t.A_j$. Assuming a
-number $M$ is a large enough value~\cite{bazaraa2011linear} that is out of the domain of $t.A_j$, we get the
+number $M$ is a large enough value~\cite{bazaraa2011linear} that is outside of the domain of $t.A_j$, we get the
 following constraints:
 \begin{align}
 \label{eq:uv}
@@ -176,10 +176,12 @@ t'.A_j = x \otimes t_{new}.A_j + (1-x) \otimes v.A_j
 \texttt{DELETE:}
 A delete query removes a set of tuples from the database.  
 Since the MILP problem doesn't have a way to express a non-existent value, 
-we encode a deleted tuple by setting its attributes to a value
-out of the attribute domain $M^-$ as well. In this way, subsequent conditional functions
-on the attribute will return false. \xlw{Note that although the subsequent condition functions may be true initially, but any solutions having such positive conditions will have an associated objective-function value that is exceedingly large. Thus the MILP solver will always assign false to the subsequent condition functions.} So the $M^-$ assignment will not have an effect on subsequent queries encoded
-in the MILP problem:
+we encode a deleted tuple by setting its attributes to a large value $M^-$ 
+outside of the attribute domain. In this way, subsequent conditional functions on the attribute will return false. 
+\xlw{There are nuances to how $M^-$ is set.  In particular, it cannot be set to $M$ because it biases the solver towards repairing \texttt{UPDATE} queries in lieu of \texttt{DELETE} queries (e.g., the solver repair an \texttt{UPDATE} query to set the tuple's values to $M$ rather than repair the \texttt{DELETE} query to delet the tuple).  If set to $>M$, the constraint expressions will become infeasible and the solver will fail to find a solution. Setting $M^- < M$ ensures that the generated constraint problem will be feasible and unbiased towards \texttt{UPDATE} queries. }
+So the $M^-$ assignment will not have an effect on subsequent queries encoded in the MILP problem:
+
+% \xlw{Note that although the subsequent condition functions may be true initially, but any solutions having such positive conditions will have an associated objective-function value that is exceedingly large. Thus the MILP solver will always assign false to the subsequent condition functions.} 
 \begin{eqnarray}
 \label{eq:delete}
 t'.A_j &=& x_{q_i, t} \otimes M^- + (1-x_{q_i, t}) \otimes t.A_j \\
