@@ -150,8 +150,11 @@ where $t_3^*=(86000,21500,64500)$ and $t_4^*=(86500,21625,\linebreak 64875)$.
 For both these cases, each complaint denotes a \textbf{value correction} for a tuple in $D_3$.  Complaints can also model the \textbf{addition} or \textbf{removal} of tuples: $c: \bot\mapsto t^*$ means that $t^*$ should be added to the database, whereas $c: t\mapsto \bot$
 means that $t$ should be removed from the database.
 
-\xlw{Ideally, a complaint should cover a \textbf{complete value correction} such that the exact fix value for all attributes are included. This is because a complete value correction helps reducing the searching space and improves the diagnosis quality. In this paper, we use complaints with complete value correction in our experiments, however, the proposed
-algorithm can be easily extended to handle problems with missing value correction. }
+\xlw{Ideally, each complaint will denote a \textbf{complete value correction} in that the {\emph correct} values are provided for {\emph all} tuple attributes.  
+This constrains the research space to more quickly produce higher quality diagnoses.  
+We assume such a setting in this paper and leave relaxations of this constraint to future work.}
+
+% \xlw{Ideally, a complaint should cover a \textbf{complete value correction} such that the exact fix value for all attributes are included. This is because a complete value correction helps reducing the searching space and improves the diagnosis quality. In this paper, we use complaints with complete value correction in our experiments, however, the proposed algorithm can be easily extended to handle problems with missing value correction. }
 
 \smallskip
 \noindent
@@ -213,8 +216,11 @@ complaint set is complete.
 \subsubsection*{Problem scope and solution outline}
 In this work, we focus on handling data manipulation queries with simple, basic query structures without subqueries, aggregations, nor joins. \xlw{Starting with an empty or clean database, \sys supports queries with WHERE clauses containing conjunctions and disjunctions of predicates.}
 Expressions (in predicates and SET clauses) may be over linear combinations of constants and a single attribute, and we do not support arbitrary user defined functions.
-We find that the queries that we focus on are applicable to a broad range of user-facing web applications (e.g., conference attendee scheduling, voting,  data entry) and OLTP benchmarks, and that complex query structures and operations are less common than in read-oriented analytical workloads. \xlw{In this paper, we rely on complaint set
-with valid information and mainly target at solving workloads with a single error. At this point, we plan to focus our future work on solving more complex workloads with multiple errors and inconsistent complaints efficiently and effectively.}
+We find that the queries that we focus on are applicable to a broad range of user-facing web applications (e.g., conference attendee scheduling, voting,  data entry) and OLTP benchmarks, and that complex query structures and operations are less common than in read-oriented analytical workloads. 
+\xlw{In addition, we target a setting where that the complaint set contains complete value corrections, and are derived from a single query corruption.  
+Future work will study efficient techniques for multiple corrupt queries and incomplete value corrections.}
+
+% \xlw{In this paper, we rely on complaint set with valid information and mainly target at solving workloads with a single error. At this point, we plan to focus our future work on solving more complex workloads with multiple errors and inconsistent complaints efficiently and effectively.} 
 %We study the impact of the number of predicates in the WHERE clause in Section~\ref{sec:experiments:synth}.
 
 
