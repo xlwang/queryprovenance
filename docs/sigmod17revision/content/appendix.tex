@@ -96,23 +96,15 @@ In this case, we execute a second repair step.
     \vspace*{-.25in}
     \caption{Correct repair ratio vs. database sizes}
     \label{f:dbsizeratio} 
-    \end{subfigure}\\
+    \end{subfigure}
     \begin{subfigure} [t]{.3\textwidth}
-    \includegraphics[width = .99\columnwidth]{figures/indelup_fixcount}
+    \includegraphics[width = .99\columnwidth]{figures/noise_fn_acc_idx}
     \vspace*{-.25in}
     \caption{Top-k vs. query types. }
     \vspace*{-.1in}
-    \label{f:querytypefixcount} 
+    \label{f:noiseratio} 
     \end{subfigure}
-    \begin{subfigure} [t]{.3\textwidth}
-    \includegraphics[width = .99\columnwidth]{figures/dbsize_fixcount}
-    \vspace*{-.25in}
-    \caption{Top-k vs. database sizes. }
-    \vspace*{-.1in}
-    \label{f:dbsizecount} 
-    \end{subfigure}
-   \caption{Correct repair ratio and number of candidate fixes of \sys varies on different types of workloads and false negative rate but remain 
-   stable for with increasing number of tuples on \texttt{UPDATE} workload.}
+   \caption{ \sys maintains 1.0 correct repair ratio with complete complaint set. }
    \vspace*{-.1in}
    \label{fig:truerate}
   \end{figure*}
@@ -151,6 +143,76 @@ that applies \dt over more queries is expected to have little hope of succeeding
 There are three important reasons why \dt, and any approach that focuses on a single query at a 
 time\footnote{Although our incremental approach tries to generate a repair for a single
 query at a time, it encodes all subsequent queries in the log.}, will not perform well.
+
+\begin{itemize}[itemsep=1pt, leftmargin=5mm]
+\item \textbf{Single Query Limitation: }
+In principle, one could attempt to apply this technique to the
+entire log one query at a time, starting from the most recent query.
+Even ignoring the low repair accuracy shown in Figure~\ref{f:heuristic_acc},
+this approach is infeasible.
+Consider that we generate a labeled training dataset to repair $q_i$ 
+using the query's input and output database states $D_{i-1}$ and $D_i^*$.
+Note that $D_i^*$ is the theoretically \emph{correct} database state assuming no errors in the query log.
+We would need to derive $D_i^*$ by applying the complaint set to $D_n$ to create $D_n^*$, and roll back the database state.
+Unfortunately, \texttt{UPDATE} queries are commonly surjective such
+that their inverses are ambiguous, which means that it is often
+impossible to derive $D_i^*$. In contrast, the incremental version of
+\sys can bypass this problem by encoding subsequent queries in the log
+in a MILP representation.
+
+
+\item \textbf{Structurally Different \texttt{WHERE} Clause Results: } 
+The basic classifier approach simply learns a set of rules to minimize
+classification error, and can derive a clause whose struture is arbitrarily 
+different from the original query's \texttt{WHERE} clause.
+Although it may be possible to incorporate a distance measure as part of the decision tree
+splitting criteria, it is likely to be a heuristic with no guarantees.
+
+
+\item \textbf{High Selectivity, Low Precision: }
+Classifiers try to avoid overfitting by balancing the complexity of the rules with classification accuracy.
+This is problematic for highly selective queries (e.g., primary key updates), because the classifier
+may simply ignore the single incorrect record and generate a rule such as \texttt{FALSE}.
+In fact, this form of severely imbalanced data continues to be a challenge for most major classification algorithms~\cite{he2009learning, galar2012review}. 
+Thus, we believe that alternative classification algorithms would not improve on these results. 
+Compound with the fact that many workloads are primarily composed of
+key update queries~\cite{oltpbench} this issue severely limits the
+applicability of learning-based approaches.
+
+\end{itemize}
+
+% \input{content/example3.tex}
+\xlw{
+\section{Repairing the Correct Query}
+\label{app:index}
+
+The experimental section (Section~\ref{sec:experiments}) primarily focused on performance and accuracy measures of the repairs, and for space constraints, ignored 
+whether the proposed repair fixes the true query (it is possible we fix an incorrect query in a way that resolves the complaint set).
+Although we found in most circumstances we identify the correct query to fix, we now turn our attention to better understand 
+the conditions when we may fix the incorrect query. 
+
+
+\subsection{Experimental Results}
+To evaluate \sys's ability in identifying the correct query to fix, we summarize our results using \textit{Correct repair ratio}, $p_{correct}$, which is the number fixes on the true query divided by total number of runs.
+
+\textbf{Complete Complaint Set: } We first evaluate three types of workloads with increasing corruption age. The database is set to the default setting and conclude the average $p_{correct}$ across 20 random runs. In Figure~\ref{f:querytyperatio}, we first evaluate $p_{correct}$ rate on three types of workloads: \sys identifies the correct query to fix ($p_{correct} = 1.0$) for all three types of workloads, \texttt{UPDATE},  \texttt{INSERT}, and \texttt{DELETE} workloads. We next narrow down to \texttt{UPDATE} workload and evaluate \sys's behavior with increasing amount of tuples in the database. We observe $p_{correct} = 1$ on different corrupt indexes in all database sizes (Figure~\ref{f:dbsizeratio}). 
+
+\textbf{Incomplete Complaint Set: } In Figure~\ref{f:noiseratio}, we study the performance of \sys with increasing false negative rate in the incomplete complaint set. Similar to the precision and recall performance in Figure~\ref{f:falsenegative_acc}, $p_{correct}$ also drops for problems with old corrupted query and high false negative rate. This is expected since with insufficient information, \sys tends to fix the wrong query with better objective function value as long as all the reported errors are all resolved. 
+}
+
+%%%%%%%%%%%% %%%%%%%%%%%%%%
+%%%%%%%%%% the end %%%%%%%%%%%%
+%%%%%%%%%%%% %%%%%%%%%%%%%%
+
+\iffalse
+
+
+\section{MILP Solver Performance}
+\label{app:solvtime}
+
+Some background about why we are runnig these experiments.  What is known about MILP solvers already.
+
+\subsection{Factors Relevant to Solver Performance}
 
 \iffalse
   \begin{figure*}[t]
@@ -197,56 +259,6 @@ query at a time, it encodes all subsequent queries in the log.}, will not perfor
    \label{f:soltime}
   \end{figure*}
 \fi
-\begin{itemize}[itemsep=1pt, leftmargin=5mm]
-\item \textbf{Single Query Limitation: }
-In principle, one could attempt to apply this technique to the
-entire log one query at a time, starting from the most recent query.
-Even ignoring the low repair accuracy shown in Figure~\ref{f:heuristic_acc},
-this approach is infeasible.
-Consider that we generate a labeled training dataset to repair $q_i$ 
-using the query's input and output database states $D_{i-1}$ and $D_i^*$.
-Note that $D_i^*$ is the theoretically \emph{correct} database state assuming no errors in the query log.
-We would need to derive $D_i^*$ by applying the complaint set to $D_n$ to create $D_n^*$, and roll back the database state.
-Unfortunately, \texttt{UPDATE} queries are commonly surjective such
-that their inverses are ambiguous, which means that it is often
-impossible to derive $D_i^*$. In contrast, the incremental version of
-\sys can bypass this problem by encoding subsequent queries in the log
-in a MILP representation.
-
-
-\item \textbf{Structurally Different \texttt{WHERE} Clause Results: } 
-The basic classifier approach simply learns a set of rules to minimize
-classification error, and can derive a clause whose struture is arbitrarily 
-different from the original query's \texttt{WHERE} clause.
-Although it may be possible to incorporate a distance measure as part of the decision tree
-splitting criteria, it is likely to be a heuristic with no guarantees.
-
-
-\item \textbf{High Selectivity, Low Precision: }
-Classifiers try to avoid overfitting by balancing the complexity of the rules with classification accuracy.
-This is problematic for highly selective queries (e.g., primary key updates), because the classifier
-may simply ignore the single incorrect record and generate a rule such as \texttt{FALSE}.
-In fact, this form of severely imbalanced data continues to be a challenge for most major classification algorithms~\cite{he2009learning, galar2012review}. 
-Thus, we believe that alternative classification algorithms would not improve on these results. 
-Compound with the fact that many workloads are primarily composed of
-key update queries~\cite{oltpbench} this issue severely limits the
-applicability of learning-based approaches.
-
-\end{itemize}
-
-
-
-
-\iffalse
-
-
-\section{MILP Solver Performance}
-\label{app:solvtime}
-
-Some background about why we are runnig these experiments.  What is known about MILP solvers already.
-
-\subsection{Factors Relevant to Solver Performance}
-
 \ewu{reference other constraint performance papers}
 In this section, we study factors that influence the MILP solver solving time. In this paper, we
 use IBM CPLEX~\cite{cplex2014v12} as a black box to solve the constructed MILP problems.  \ewu{describe MILP problems to justify why we focus on num constraints and num variables.} Similar to many solver performance studies~\cite{atamturk2005integer, meindl2012analysis, gearhart2013comparison}, 
@@ -331,29 +343,3 @@ then increases the number of other tuples affected.
 
 \fi
 
-% \input{content/example3.tex}
-\section{Repairing the Correct Query}
-\label{app:index}
-
-The experimental section (Section~\ref{sec:experiments}) primarily focused on performance and accuracy measures of the repairs, and for space constraints, ignored 
-whether the proposed repair was actually the correct query (it is possible we fix an incorrect query in a way that resolves the complaint set).
-Although we found in most circumstances we identify the correct query to fix, we now turn our attention to better understand 
-the conditions when we may fix the incorrect query. 
-
-
-\subsection{Experimental Results}
-To evaluate \sys's ability in identifying the correct query to fix, we execute QFix over 20 random runs and summarize our results using two evaluation metrics:
-The first $p_{correct}$ computes the ratio between the number of runs where \sys correctly repairs the corrupt query and where \sys
-repairs the wrong query; The second metric $topk$ measures the number of repairs that \sys proposes before repairing the true corrupt query.
-The second metric is useful to quantify the extent that \sys's repairs are false positives (though they may correctly resolve the complaint set).
-A small $topk$ value suggests that \sys is still effective at providing repair \emph{recommendations} as part of a diagnostic interface.
-
-\textbf{Correct repair ratio vs. query types: } In Figure~\ref{f:querytyperatio}, we first evaluate $p_{correct}$ rate on three types of workloads: \sys identifies the correct query to fix ($p_{correct} = 1.0$ and $topk = 1$) for \texttt{UPDATE} and \texttt{INSERT} workloads but unstable and much lower rate for \texttt{DELETE} workload. This is expected since more information of the actual incorrectness get maintained through \texttt{UPDATE} queries by the updated tuple values. \ewu{Is this because the problem is fundamentally underconstrained?  if so, explain in those terms and describe why.} However, such information get lost and obscured for \texttt{DELETE} queries as those deleted tuples no longer exist in the database. As a result, actual incorrect queries in \texttt{UPDATE} workloads are much easier to identify than those in \texttt{DELETE} workloads. \texttt{INSERT} workloads are easy to fix by natural since each \texttt{INSERT} query only touches one tuple. 
-
-To further illustrate this, we present the following toy example (Figure~\ref{fig:example2}) of two simple query logs, one for \texttt{DELETE} workload and one for \texttt{UPDATE} workload, that operate on the same initial database state and with the exact same \texttt{WHERE} clauses. 
-
-In the above example, we find that there exist two candidate fixes for the \texttt{DELETE} workload $\mathcal{Q}_{del}$: one can either modify the \texttt{WHERE} clause of $Q2$ to $[12, 12]$ or the \texttt{WHERE} clause of $Q1$ to $[4, 4]$. In addition, the two candidate fixes achieve the exact same final database state. However, there only exists one candidate fix for the \texttt{UPDATE} workload $\mathcal{Q}_{up}$ since values in every attribute must satisfy with the desired database state. According to the converted constraints, modifying $Q2$ cannot solve the problem since it would not fix the value in the incorrect attribute $a_1$.  
-
-\textbf{Top-k vs. query types: } In Figure~\ref{f:querytypefixcount}, we observe the same trend: the $topk$ count for \texttt{UPDATE} and \texttt{INSERT} workloads remain $1$ across all query indexes while the $topk$ count shows unstable and much higher value for \texttt{DELETE} workloads. Overall, we find \sys above is able to find the true repair within 3 diagnosis over more than 85\% of all random runs. 
-
-\textbf{Correct repair ratio \& top-k vs. database sizes: } We next narrow down to \texttt{UPDATE} workload and evaluate \sys's behavior with increasing amount of tuples in the database. We observe $p_{correct} = 1$ and $topk = 1$ on different corrupt indexes in all database sizes (Figure~\ref{f:dbsizeratio}~\ref{f:dbsizecount}). 
