@@ -82,6 +82,41 @@ In this case, we execute a second repair step.
  \label{f:heuristic}
 \end{figure}
 
+
+   \begin{figure*}[t]
+  \centering
+  \begin{subfigure} [t]{.3\textwidth}
+    \includegraphics[width = .99\columnwidth]{figures/indelup_acc_idx}
+    \vspace*{-.25in}
+    \caption{Correct repair ratio vs. query types}
+    \label{f:querytyperatio} 
+    \end{subfigure}
+    \begin{subfigure} [t]{.3\textwidth}
+    \includegraphics[width = .99\columnwidth]{figures/dbsize_acc_idx}
+    \vspace*{-.25in}
+    \caption{Correct repair ratio vs. database sizes}
+    \label{f:dbsizeratio} 
+    \end{subfigure}\\
+    \begin{subfigure} [t]{.3\textwidth}
+    \includegraphics[width = .99\columnwidth]{figures/indelup_fixcount}
+    \vspace*{-.25in}
+    \caption{Top-k vs. query types. }
+    \vspace*{-.1in}
+    \label{f:querytypefixcount} 
+    \end{subfigure}
+    \begin{subfigure} [t]{.3\textwidth}
+    \includegraphics[width = .99\columnwidth]{figures/dbsize_fixcount}
+    \vspace*{-.25in}
+    \caption{Top-k vs. database sizes. }
+    \vspace*{-.1in}
+    \label{f:dbsizecount} 
+    \end{subfigure}
+   \caption{Correct repair ratio and number of candidate fixes of \sys varies on different types of workloads and false negative rate but remain 
+   stable for with increasing number of tuples on \texttt{UPDATE} workload.}
+   \vspace*{-.1in}
+   \label{fig:truerate}
+  \end{figure*}
+
 We model the errors as a simple linear system of equations: 
 each expression in the \texttt{SET} clause is translated into a
 linear equation in the same fashion as described in Section~\ref{sec:sol}.
@@ -202,7 +237,6 @@ applicability of learning-based approaches.
 
 
 
-
 \iffalse
 
 
@@ -295,7 +329,9 @@ overwriting it with a constant value.  The clustering of data values due to quer
 then increases the number of other tuples affected.
 }
 
-\input{content/example3.tex}
+\fi
+
+% \input{content/example3.tex}
 \section{Repairing the Correct Query}
 \label{app:index}
 
@@ -303,53 +339,6 @@ The experimental section (Section~\ref{sec:experiments}) primarily focused on pe
 whether the proposed repair was actually the correct query (it is possible we fix an incorrect query in a way that resolves the complaint set).
 Although we found in most circumstances we identify the correct query to fix, we now turn our attention to better understand 
 the conditions when we may fix the incorrect query. 
-
-   \begin{figure*}[t]
-  \centering
-  \begin{subfigure} [t]{.3\textwidth}
-    \includegraphics[width = .99\columnwidth]{figures/indelup_acc_idx}
-    \vspace*{-.25in}
-    \caption{Correct repair ratio vs. query types}
-    \label{f:querytyperatio} 
-    \end{subfigure}
-    \begin{subfigure} [t]{.3\textwidth}
-    \includegraphics[width = .99\columnwidth]{figures/dbsize_acc_idx}
-    \vspace*{-.25in}
-    \caption{Correct repair ratio vs. database sizes}
-    \label{f:dbsizeratio} 
-    \end{subfigure}
-    \begin{subfigure} [t]{.3\textwidth}
-    \includegraphics[width = .99\columnwidth]{figures/noise_fn_acc_idx}
-    \vspace*{-.25in}
-    \caption{Correct repair ratio vs. false negatives}
-    \label{f:fnratio} 
-    \end{subfigure} \\
-    \begin{subfigure} [t]{.3\textwidth}
-    \includegraphics[width = .99\columnwidth]{figures/indelup_fixcount}
-    \vspace*{-.25in}
-    \caption{Top-k vs. query types. }
-    \vspace*{-.1in}
-    \label{f:querytypefixcount} 
-    \end{subfigure}
-    \begin{subfigure} [t]{.3\textwidth}
-    \includegraphics[width = .99\columnwidth]{figures/dbsize_fixcount}
-    \vspace*{-.25in}
-    \caption{Top-k vs. database sizes. }
-    \vspace*{-.1in}
-    \label{f:dbsizecount} 
-    \end{subfigure}
-    \begin{subfigure} [t]{.3\textwidth}
-    \includegraphics[width = .99\columnwidth]{figures/noise_fn_acc_idx}
-    \vspace*{-.25in}
-    \caption{Top-k vs. false negatives (\color{red}{not complete!})}
-    \vspace*{-.1in}
-    \label{f:fnfixcount} 
-    \end{subfigure}
-   \caption{Correct repair ratio and number of candidate fixes of \sys varies on different types of workloads and false negative rate but remain 
-   stable for with increasing number of tuples on \texttt{UPDATE} workload.}
-   \vspace*{-.1in}
-   \label{fig:truerate}
-  \end{figure*}
 
 
 \subsection{Experimental Results}
@@ -368,6 +357,3 @@ In the above example, we find that there exist two candidate fixes for the \text
 \textbf{Top-k vs. query types: } In Figure~\ref{f:querytypefixcount}, we observe the same trend: the $topk$ count for \texttt{UPDATE} and \texttt{INSERT} workloads remain $1$ across all query indexes while the $topk$ count shows unstable and much higher value for \texttt{DELETE} workloads. Overall, we find \sys above is able to find the true repair within 3 diagnosis over more than 85\% of all random runs. 
 
 \textbf{Correct repair ratio \& top-k vs. database sizes: } We next narrow down to \texttt{UPDATE} workload and evaluate \sys's behavior with increasing amount of tuples in the database. We observe $p_{correct} = 1$ and $topk = 1$ on different corrupt indexes in all database sizes (Figure~\ref{f:dbsizeratio}~\ref{f:dbsizecount}). 
-
-\textbf{Correct repair ratio \& top-k vs. false negatives: } We finally evaluate \sys on \texttt{UPDATE} workload with increasing false negative rates. Similar to the quality drop in Figure~\ref{f:falsenegative_acc}, we observe the $p_{correct}$ (Figure~\ref{f:fnratio}) rate also suffers from less submitted complaints when errors happen early in the query log. However, \sys achieves above $0.75$ $p_{correct}$ rate for more recent errors (corrupt index is 300 and 200) even with high false negative rate. The $topk$ behaves similar to $p_{correct}$ in which $topk$ increasing with the false negative rate (Figure~\ref{f:fnfixcount}).  
-\fi
