@@ -197,7 +197,7 @@ This is the foundation of our \emph{query-slicing} optimization.
 \end{definition} 
 
 
-\begin{definition}[Query dependency \& impact]
+\begin{definition}[Query dependency \& impact] \label{eq:dependency}
     Query $q_i$ has \textbf{direct-impact}, $\mathcal{I}(q_i)$, which is
     the set of attributes updated in its modifier function $\mu_{q_i}$
     (e.g., \texttt{SET} clause). Its \textbf{dependency},
