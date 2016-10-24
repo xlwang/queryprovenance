@@ -1,0 +1,26 @@
+\BOOKMARK [1][-]{section.1}{Introduction}{}% 1
+\BOOKMARK [1][-]{section.2}{Modeling abstractions}{}% 2
+\BOOKMARK [2][-]{subsection.2.1}{Error Modeling}{section.2}% 3
+\BOOKMARK [1][-]{section.3}{A MILP-based Solution}{}% 4
+\BOOKMARK [2][-]{subsection.3.1}{MILP Solvers}{section.3}% 5
+\BOOKMARK [2][-]{subsection.3.2}{Encoding a Single Query}{section.3}% 6
+\BOOKMARK [2][-]{subsection.3.3}{Encoding and Repairing the Query Log}{section.3}% 7
+\BOOKMARK [2][-]{subsection.3.4}{The Objective Function}{section.3}% 8
+\BOOKMARK [1][-]{section.4}{Optimizing the Basic Approach}{}% 9
+\BOOKMARK [2][-]{subsection.4.1}{Tuple Slicing: Reducing Tuples}{section.4}% 10
+\BOOKMARK [2][-]{subsection.4.2}{Query Slicing: Reducing Queries}{section.4}% 11
+\BOOKMARK [2][-]{subsection.4.3}{Attribute Slicing: Reducing Attributes}{section.4}% 12
+\BOOKMARK [2][-]{subsection.4.4}{Incremental Repairs}{section.4}% 13
+\BOOKMARK [1][-]{section.5}{Noisy Complaint Sets}{}% 14
+\BOOKMARK [1][-]{section.6}{Experiments}{}% 15
+\BOOKMARK [2][-]{subsection.6.1}{Experimental Setup}{section.6}% 16
+\BOOKMARK [2][-]{subsection.6.2}{Benchmarks}{section.6}% 17
+\BOOKMARK [2][-]{subsection.6.3}{Sensitivity of the Incremental Algorithms}{section.6}% 18
+\BOOKMARK [3][-]{subsubsection.6.3.1}{Sensitivity to the Query Log}{subsection.6.3}% 19
+\BOOKMARK [3][-]{subsubsection.6.3.2}{Sensitivity to Database Properties}{subsection.6.3}% 20
+\BOOKMARK [2][-]{subsection.6.4}{More Challenging Repair Settings}{section.6}% 21
+\BOOKMARK [1][-]{section.7}{Related Work}{}% 22
+\BOOKMARK [1][-]{section.8}{Summary and discussion}{}% 23
+\BOOKMARK [1][-]{appendix.A}{A Learning-based Approach}{}% 24
+\BOOKMARK [2][-]{subsection.A.1}{Modeling Repairs with Decision Trees}{appendix.A}% 25
+\BOOKMARK [2][-]{subsection.A.2}{Experimental Results}{appendix.A}% 26

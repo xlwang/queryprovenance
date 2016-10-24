@@ -205,7 +205,7 @@ This is the foundation of our \emph{query-slicing} optimization.
     condition function $\sigma_{q_i}$.
     We derive the \textbf{full-impact}, $\mathcal{F}(q_i)$, of a query $q_i$ by propagating its direct impact through subsequent queries in the log (Algorithm~\ref{alg:fullimpact}):
     \[
-    \mathcal{F}(q_i)=\mathcal{I}(q_i)\bigcup_{\substack{j=i+1\\ \mathcal{F}(q_{j-1})\cap \mathcal{P}(q_j) \neq \emptyset}}^n \mathcal{F}(q_j)
+    \mathcal{F}(q_i)=\mathcal{I}(q_i)\bigcup_{\substack{j=i+1\\ \mathcal{F}(q_{i})\cap \mathcal{P}(q_j) \neq \emptyset}}^n \mathcal{F}(q_j)
     \]
 \end{definition}
 
