@@ -13,7 +13,9 @@ We thank the reviewers for the helpful feedback on our paper. We addressed all o
 
 We propose tuple, query, and attribute-slicing optimization to improve \sys's performance. 
 
-Tuple-slicing optimization is primary applied on fixing workload with range predicates. The probability of making an incorrect log repair due to tuple-slicing is very low: A failure case only happens when there exists a different set of queries (other than the actual incorrect queries) in the workload that modifies every tuple in the complaint set. In fact, the probability of having such a case in our synthetic datasets is lower than 0.001\% but could be higher with less attributes in the database and fewer tuples. For workloads with point predicates (a.k.a only a small set of tuples---$1-2$ are updated by each individual query), including most benchmark workloads, with the help of other optimization, queries that might result in a incorrect repair are already pruned ahead , thus applying tuple-slicing is most likely to be correct. In summary, tuple-slicing is an effective method to improve the performance of the basic approach, without compromising, and often improving, repair quality.
+Tuple-slicing optimization is primary applied on fixing workload with range predicates. The probability of making an incorrect log repair due to tuple-slicing is very low: A failure case only happens when there exists a different set of queries (other than the actual incorrect queries) in the workload that modifies every tuple in the complaint set. \ewu{ADD A SIMPLE EXAMPLE}
+
+In fact, the probability of having such a case in our synthetic datasets is lower than 0.001\% but could be higher with less attributes in the database and fewer tuples. For workloads with point predicates (a.k.a only a small set of tuples---$1-2$ are updated by each individual query), including most benchmark workloads, with the help of other optimization, queries that might result in a incorrect repair are already pruned ahead , thus applying tuple-slicing is most likely to be correct. In summary, tuple-slicing is an effective method to improve the performance of the basic approach, without compromising, and often improving, repair quality.
 
 Attribute-slicing and query-slicing remove irrelevant attributes and queries according to whether or not they would affect the incorrect values in the complaints, thus they are guaranteed to be correct. 
 
@@ -36,7 +38,9 @@ There are many factors that may affect the level of query interactions. In gener
 
 \noindent \textbf{R5 Implementation of a baseline (described in the review) or explain why such baselines would fail in the context, to convince readers that complex patterns can be handled only by this new system.}
 
-In this paper, \sys solves two problems: 1. it finds the root reason(s) in the query history that causing database errors, and 2. it fixed the incorrectness by proposing a query log repair. Existing works~\cite{Wu13, roy2014formal, chalamalla2014,meliou2011tracing} mentioned by reviewer 3 study highly corrected problems: in general, they all target at explaining erroneous or undesired query results by tracing back data source input and reporting either particular input tuples or common input patterns. After carefully analysis, we conclude that none of these existing works could fix the incorrect queries (problem 2) nor solve the error identification task (problem 1) effectively and efficiently. Please refer to R3.2 for details.
+In this paper, \sys solves two problems: 1. it finds the root reason(s) in the query history that causing database errors, and 2. it fixed the incorrectness by proposing a query log repair. Existing works~\cite{Wu13, roy2014formal, chalamalla2014,meliou2011tracing} mentioned by reviewer 3 study highly corrected problems: in general, they all target at explaining erroneous or undesired query results by tracing back data source input and reporting either particular input tuples or common input patterns. After carefully analysis, we conclude that none of these existing works could fix the incorrect queries (problem 2) nor solve the error identification task (problem 1) effectively and efficiently.  Please refer to R3.2 for details regarding this analysis.
+
+In addition, Appendix~\ref{sec:heuristic} highlights a comparison against a machine-learning-oriented approach, which although faster, fails to produce accurate repairs for even a single \texttt{UPDATE} range query.  
 
 
 \subsection*{Reviewer 1 Details}
@@ -61,7 +65,7 @@ Thus the full-impact of $q_1$ is $\{t.A, u.B, v.C\}$.
 
 \noindent \textbf{R1.3 Do the experiments substantiate the claim of scalability to "large" databases of 100k records? If so the experimental evaluation needs to explain this more clearly. If not the introduction must avoid overselling this point.}
 
-We evaluate performance of \sys compare to a heuristic approach on databases of $100k$ records (in Appendix~\ref{sec:heuristic}) and further extend our experiment in Figure~\ref{f:attr100} to databases with $100k$ records. 
+We have extended our scalability experiment in Figure~\ref{f:attr100} to databases with $100k$ records. In addition, the comparison against the machine-learning heuristic approach in Appendix~\ref{sec:heuristic} uses databases of $100k$ records.
 
 \noindent \textbf{R1.4 It's also not entirely clear why it is correct to use a "large/unused" value $M^+$ for attributes of deleted tuples. Please spell this out.}
 
