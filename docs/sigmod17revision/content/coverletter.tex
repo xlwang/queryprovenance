@@ -92,7 +92,7 @@ We improve our experimental evaluation in three folds: we first extend our exper
 \noindent \textbf{R3.1 The problem is indeed difficult with several sources of complexity. It is challenging to find the right setting to handle it and assumptions must be put in place to solve it with some degree of confidence. However, right now assumptions are scattered all around the paper, and some of them should probably be revised.
 My first suggestion is to collect all the restrictions or hypothesis in a unified discussion and try to assess how close is the ultimate setting to the real world scenarios.} 
 
-{Refer to R2}
+We covered this in R2. 
 
 \noindent \textbf{R3.2 Errors are indeed in the queries, but are ultimately data errors that are considered here (no structural errors in the query). It seems related, existing solutions~\cite{Wu13, roy2014formal, chalamalla2014,meliou2011tracing} can be directly applied by modelling the query data as source data + SELECT queries. In fact, queries data can be modelled as sources with a new attribute representing the query id, and the data in this papers is the view in previous work. Once identified the problems in the view (as done in all papers) evidence can be carried back to the sources and mined to find the explanations. If the errors are coming from one query (as assumed in most of the exp in this work), I am confident the query attribute will be identified and the explanation will point to that query. I understand that the implementation of such baselines may go behind the scope of the revision, but I believe it would be great if the author can precisely explain why such baselines would fail in their context. ( i suspect the reason is discussed in point 5). }
 
@@ -224,6 +224,7 @@ In our experiment, we measure \sys's accuracy as whether all complaints are corr
 \noindent \textbf{R3.5 I believe the way that errors are introduced can be improved. Randomly introducing errors do not guarantee that complex patterns (such as the one in Figure 1) happen in the test datasets. In fact, what make the problem challenging is the interaction of the queries. I suggest to have an experiment where this interaction is enforced in the noise injection so that the approach can really show its power wrt to simpler techniques (such as point 2 above). 
 Unfortunately having some guarantee on the way that errors are introduced can be a challenging problem, a recent paper discusses this topic (Arocena et al, PVLDB 15).}
 
+We covered this in R4. 
 
 
 \pagebreak
