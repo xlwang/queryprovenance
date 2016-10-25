@@ -92,18 +92,8 @@ All these approaches are
 limited to selection predicates of \texttt{SELECT} queries, and they
 only typically consider one query at a time. In contrast, \sys handles
 update workloads, processes large query histories, and can model
-several steps in the dataset's evolution.
-
-Existing work on explaining query outputs~\cite{GebalyAGKS14} is also
-limited in its applicability. The Scorpion system~\cite{Wu13}
-processes a set of outlier points in an aggregate to identify
-predicates on the input data as explanations. Roy and
-Suciu~\cite{Roy2014} extended explanations with a formal framework
-that handles complex SQL queries and database schemas involving
-multiple relations and functional dependencies, but again their focus
-is on \texttt{SELECT} workloads, rather than evolving datasets, and
-they often target specific application domains~\cite{Khoussainova2012, Thirumuruganathan2012, Das2011, Fabbri2011, Bender14
-}.
+several steps in the dataset's evolution. \xlw{Besides, other explanation works~\cite{GebalyAGKS14, Khoussainova2012, Thirumuruganathan2012, Das2011, Fabbri2011, Bender14} are also limited in their applicability as many of them target on specific application domains. }
+\xlw{Scorpion and Roy's explanation work conflict with newly added paraphraph on data source+select query. So I remove them here.  }
 
 Finally, as \sys traces errors in the queries that manipulate data, it
 has connections to the field of \emph{data and workflow provenance}.
