@@ -1,3 +1,4 @@
+%!TEX root = ../main.tex
 
 \section{Modeling abstractions}
 \label{sec:abstractions}
@@ -138,9 +139,9 @@ particular tuple in the final database state $D_n^*$, and identifies
 that tuple's correct value assignment. We formally define complaints
 below:
 \begin{definition}[Complaint]
-    A complaint $c$ is a mapping between two tuples: $c: t\mapsto t^*$, such that $t$ and $t^*$ have the same schema, \xlw{$t, t^*\in D_n\cup\{\bot\}$}, and $t\neq t^*$. A complaint defines a
-    transformation $\mathcal{T}_c$ on a database state $D$: $\mathcal{T}_c(D)
-    = (D\setminus\{t\})\cup\{t^*\}$ \xlw{that replaces $t$ by $t^*$}.
+    A complaint $c$ is a mapping between two tuples: $c: t\mapsto t^*$, such that $t$ and $t^*$ have the same schema, \newtext{$t, t^*\in D_n\cup\{\bot\}$}, and $t\neq t^*$. A complaint defines a
+    transformation $\mathcal{T}_c$ on \newtext{the final database state $D_n$: $\mathcal{T}_c(D_n)
+    = (D_n\setminus\{t\})\cup\{t^*\}$, which replaces $t$ in $D_n$ with $t^*$}.
 \end{definition}
 
 In the example of Figure~\ref{fig:example}, two complaints are reported on the final database state $D_3$: 
