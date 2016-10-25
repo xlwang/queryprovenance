@@ -38,7 +38,9 @@ There are many factors that may affect the level of query interactions. In gener
 
 \noindent \textbf{R5 Implementation of a baseline (described in the review) or explain why such baselines would fail in the context, to convince readers that complex patterns can be handled only by this new system.}
 
-In this paper, \sys solves two problems: 1. it finds the root reason(s) in the query history that causing database errors, and 2. it fixed the incorrectness by proposing a query log repair. Existing works~\cite{Wu13, roy2014formal, chalamalla2014,meliou2011tracing} mentioned by reviewer 3 study highly corrected problems: in general, they all target at explaining erroneous or undesired query results by tracing back data source input and reporting either particular input tuples or common input patterns. After carefully analysis, we conclude that none of these existing works could fix the incorrect queries (problem 2) nor solve the error identification task (problem 1) effectively and efficiently. Please refer to R3.2 for details.
+In this paper, \sys solves two problems: 1. it finds the root reason(s) in the query history that causing database errors, and 2. it fixed the incorrectness by proposing a query log repair. Existing works~\cite{Wu13, roy2014formal, chalamalla2014,meliou2011tracing} mentioned by reviewer 3 study highly corrected problems: in general, they all target at explaining erroneous or undesired query results by tracing back data source input and reporting either particular input tuples or common input patterns. After carefully analysis, we conclude that none of these existing works could fix the incorrect queries (problem 2) nor solve the error identification task (problem 1) effectively and efficiently.  Please refer to R3.2 for details regarding this analysis.
+
+In addition, Appendix~\ref{sec:heuristic} highlights a comparison against a machine-learning-oriented approach, which although faster, fails to produce accurate repairs for even a single \texttt{UPDATE} range query.  
 
 
 \subsection*{Reviewer 1 Details}
