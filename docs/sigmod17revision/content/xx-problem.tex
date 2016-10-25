@@ -212,7 +212,7 @@ challenge is that $D_n^*$ is unknown, unless we know that the
 complaint set is complete. 
 
 \subsubsection*{Problem scope and solution outline}
-In this work, we focus on handling data manipulation queries with simple, basic query structures without subqueries, aggregations, nor joins. \xlw{Starting with an empty or clean database, \sys supports queries with WHERE clauses containing conjunctions and disjunctions of predicates.}
+In this work, we focus on handling data manipulation queries\footnote{\xlw{We avoid the term \textit{update queries} in distinguish with \texttt{UPDATE} query type.}} with simple, basic query structures without subqueries, aggregations, nor joins. \xlw{Starting with an empty or clean database, \sys supports queries with WHERE clauses containing conjunctions and disjunctions of predicates.}
 Expressions (in predicates and SET clauses) may be over linear combinations of constants and a single attribute, and we do not support arbitrary user defined functions.
 We find that the queries that we focus on are applicable to a broad range of user-facing web applications (e.g., conference attendee scheduling, voting,  data entry) and OLTP benchmarks, and that complex query structures and operations are less common than in read-oriented analytical workloads. 
 \xlw{In addition, we target a setting where that the complaint set contains complete value corrections and are mostly derived from a single query corruption. 

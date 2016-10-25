@@ -13,9 +13,19 @@ We thank the reviewers for the helpful feedback on our paper. We addressed all o
 
 We propose tuple, query, and attribute-slicing optimization to improve \sys's performance. 
 
-\emph{Tuple-slicing} is a \textbf{heuristic} that breaks down a large MILP problem into two, often much smaller, MILP problems. It works effectively in practice and greatly helps improving \sys's performance, especially when the ratio of complaint set size and the database size is small. However, it it possible that \emph{tuple-slicing} fixes the incorrect query and introduce noises to the query log repair. \xlw{ADD example}
+\emph{Tuple-slicing} is a \textbf{heuristic} that breaks down a large MILP problem into two, often much smaller, MILP problems. It works effectively in practice and greatly helps improving \sys's performance, especially when the ratio of complaint set size and the database size is small. However, it it possible that \emph{tuple-slicing} fixes the incorrect query and introduce noises to the query log repair. 
 
-For problems with complete complaint set, by further enforcing \textbf{no non-complaint tuples} in the refinement step (disallow above zero objective-function value for the refinement MILP problem), we ensure the correctness of tuples that are not in the complaint. In this paper, we mainly focus on problems with single corruption and complete complaint set, under this setting, \emph{tuple-slicing} is an effective method to improve the performance of the \emph{basic} approach, without compromising, and often improving, repair quality.  
+Here we show a simple example when \emph{tuple-slicing} may fail:
+
+
+\indent \textit{$q_1$ writes $t_1$ (incorrect query); \\
+\indent $q_2$ writes $t_2$;\\
+\indent $q_3$ writes $t_1, t_3$.}\\
+A workload with three queries where $q_1$ is the incorrect query updates tuple $t_1$. Another query $q_3$ covers the impact of $q_1$ and updates tuple $t_1$ and $t_3$. When only considering tuples in the complaint set, \sys may fix $q_3$ instead of $q_1$ while modifying an additional tuple $t_3$. In this case, \emph{tuple-slicing} introduces noises, however, could be identified by a non-empty non-complaint set. 
+
+In addition, \emph{tuple-slicing} suffers from higher risk when applying to workloads with nested updating queries where tuples are no longer independent to each other, e.g., query update one tuple by reading from another tuple. This is because queries may read from non-complaint tuples and update tuples in the complaint. Without including variables from non-complaints, the constructed MILP problem become loosely constrained and noises are more likely to be introduced. 
+ 
+However, for problems with complete complaint set, by further enforcing \textbf{no non-complaint tuples} in the refinement step (disallow above zero objective-function value for the refinement MILP problem), we ensure the correctness of tuples that are not in the complaint. In this paper, since we mainly focus on problems with single corruption and complete complaint set, \emph{tuple-slicing} is an effective method to improve the performance of the \emph{basic} approach, without compromising, and often improving, repair quality.  
 
 Attribute-slicing and query-slicing remove irrelevant attributes and queries according to whether or not they would affect the incorrect values in the complaints, thus they are guaranteed to be correct. 
 
@@ -58,7 +68,7 @@ With initial impact $\mathcal{F}_i(q_i)  = \mathcal{I}(q_i)$. The full-impact of
 	\mathcal{F}(q_i)=\mathcal{F}_n(q_i) = \mathcal{I}_(q_i)\bigcup_{\substack{j = i+1 \\ \mathcal{F}_{j-1}(q_i)\cap \mathcal{P}(q_j) \neq \emptyset}}^n \mathcal{I}(q_j),
 \] 
 
-For example, in the following query log:\\
+\noindent For example, in the following query log:\\
 \textit{q1 writes t.A; \\
 q2 reads t.A and writes u.B; \\
 q3 reads u.B and writes v.C.}\\
