@@ -98,8 +98,7 @@ Is it realistic to assume a safe checkpoint?
 }
 \end{quote}
 This is a fair question: a trivial setting is to assume the checkpoint is the initial, empty database.
-The consequence of this assumption is that the checkpoint should be before the corrupt query that the user complains about.  
-If the corruption was very very old, then more recent checkpoints would not work, however most databases make periodic checkpoints and in this case, we may take checkpoints at exponentially increasing intervals.  If the corruption was very old then it likely would have been detected (and repaired) earlier.  Otherwise, it is likely not widespread, does not affect many tuples, and thus may be a candidate for the slicing techniques described in the paper.
+Technically, the checkpoint only needs to be clean with respect to the tuples that would affect the complaints, thus we do not require that the {\it entire} database is error-free.  
 
 \begin{quote}
 \reviewer{
