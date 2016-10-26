@@ -14,13 +14,10 @@
 \end{figure}
 
 
-In this section, we carefully study the sensitivity of the
-basic, optimized and incremental variations of the \sys algorithm 
+We now study the sensitivity of the basic, optimized and incremental variations of the \sys algorithm 
 to changes in the database and query log characteristics.
 Due to the difficulty of collecting corrupt query logs from active deployments, 
-our goal instead is to understand these trade-offs in
-controlled synthetic scenarios, as well as use common OLTP query workloads
-from two widely used database benchmarks.
+we try to understand these trade-offs in controlled synthetic scenarios, as well as for queries from two widely used OLTP benchmarks.
 
 To this end, we first focus on the case of single query corruptions and evaluate
 the optimized \sys incremental algorithm on two OLTP benchmarks (Section~\ref{sec:experiments:benchmark}) and find that \sys can return high quality repairs in interactive speeds.
