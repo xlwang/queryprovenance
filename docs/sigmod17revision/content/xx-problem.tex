@@ -220,11 +220,15 @@ complaint set is complete.
 
 \subsubsection*{Problem scope and solution outline}
 In this work, we focus on handling data manipulation \newtext{statements (\texttt{UPDATE}, \texttt{INSERT}, and
-\texttt{DELETE} queries)} with simple, basic query structures without subqueries, aggregations, nor joins. \xlw{Starting with an empty or clean database, \sys supports queries with WHERE clauses containing conjunctions and disjunctions of predicates.}
+\texttt{DELETE} queries)} with simple, basic query structures without subqueries, aggregations, or joins.
 Expressions (in predicates and SET clauses) may be over linear combinations of constants and a single attribute, and we do not support arbitrary user defined functions.
-We find that the queries that we focus on are applicable to a broad range of user-facing web applications (e.g., conference attendee scheduling, voting,  data entry) and OLTP benchmarks, and that complex query structures and operations are less common than in read-oriented analytical workloads. 
-\xlw{In addition, we target a setting where that the complaint set contains complete value corrections and are mostly derived from a single query corruption. 
-We demonstrate that \sys is able to solve problems with multiple corrupt queries and incomplete value corrections, but also suffer from scalability and accuracy limitations. We leave effective and efficient techniques for solving problem in more complex settings as our future work. }
+We find that the queries that we focus on are applicable to a broad range of user-facing web applications (e.g., conference attendee scheduling, voting,  data entry) and OLTP benchmarks, and that complex query structures and operations are less common than in read-oriented analytical workloads.
+
+\newtext{Given a query log and a set of complaints, \sys proposes repairs as
+modifications of values in one or more queries. \sys does not modify the
+structure of queries, and makes the implicit assumption that the log starts
+either with an empty or a clean database.
+We demonstrate that \sys can solve problems with corruptions in multiple queries, but its scalability in this setting is limited (up to about 50 queries in the log).  For cases where corruptions are restricted to a single query, \sys can scale to large data and log sizes.}
 
 % \xlw{In this paper, we rely on complaint set with valid information and mainly target at solving workloads with a single error. At this point, we plan to focus our future work on solving more complex workloads with multiple errors and inconsistent complaints efficiently and effectively.} 
 %We study the impact of the number of predicates in the WHERE clause in Section~\ref{sec:experiments:synth}.
