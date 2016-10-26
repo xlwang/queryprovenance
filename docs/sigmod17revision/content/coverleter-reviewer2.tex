@@ -1,4 +1,4 @@
-
+%!TEX root = ../main.tex
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section*{Comments by Reviewer 2}
@@ -14,16 +14,25 @@ technical details or detailed theoretical discussion are necessary.
 }
 \end{quote}
 
-We clarify the soundness of the proposed optimization and conclude that
-\emph{tuple-slicing} is a highly effective heuristic that greatly improved
-\sys's execution efficiency and unlikely to make mistakes in practice;
-\emph{attribute, query-slicing} follow attribute updating lineage and thus
-guarantee the correctness.
+We have strengthened our technical contributions with a discussion of the
+theoretical guarantees of our slicing optimization methods. We demonstrate
+that query and attribute slicing are sound: they improve the efficiency of
+\sys without compromising accuracy. The third slicing technique, tuple
+slicing, is heuristic in the general case, and could potentially introduce
+incorrect repairs. However, it is highly effective in practice, and unlikely
+to make mistakes in many problem settings. In particular, we also show that
+\emph{tuple slicing is sound in certain settings}, namely, when the complaint
+set is complete and if corruptions are limited to a single query. In these
+cases, by using incremental repair (Section~\ref{sec:incremental}) and by
+disallowing all non-complaint tuples in the refinement step (e.g., by
+restricting the value of the objective function in the refinement MILP to
+zero), the solver will be forced to pick the correct repair.
+
 
 \comskip
 
 \noindent
-\textbf{Comment \#2:} Additional experiments
+\textbf{Comment \#2:} Evaluation improvements
 \begin{quote}
 \reviewer{
 W2) I find the experimental evaluation rather preliminary and would appreciate
@@ -31,12 +40,20 @@ experiments on larger data sets or some real data set.
 }
 \end{quote}
 
-We improve our experimental evaluation in three ways: we first extend our
-experiment with larger database sizes to up to $100k$ records in
-Figure~\ref{f:attr100}; we also evaluate \sys's ability in identifying the
-actual incorrect query in Appendix~\ref{app:index} and demonstrate that \sys
-always fixes the actual incorrect query when the complaint set is complete; we
-further study \sys's performance across different level of query interactions
-and include additional experiments on query selectivity in
-Appendix~\ref{app:selectivity}. Unfortunately, we are unable to get real data
-set and we put such evaluation to our future work.
+In the revision, we have augmented our experimental evaluation in three ways:
+(1)~We extend the experiment in Figure~\ref{f:attr100} to larger data sizes,
+up to $100K$ records. This experiment uses the most complex setting
+(\texttt{UPDATE} queries with \textit{range} \texttt{WHERE} clause), and shows
+that \sys is efficient for datasets of $100K$ records, even when the query
+corruption is not recent.
+(2)~We analyze the repairs produced by \sys to measure how frequently it
+selects an incorrect query for a repair. Our evaluation examines different
+types of workload and varies corruption ages, data size, and incompleteness of
+complaints (Figure~\ref{fig:truerate}).
+(3)~We study the performance of \sys under variations of query interactions
+and include additional experiments varying query selectivity in
+Appendix~\ref{app:selectivity}. 
+
+We agree that testing \sys on real-world data is highly desirable. We were not
+able to find a suitable public dataset. We used publicly available benchmarks
+as the next best choice.
