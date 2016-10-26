@@ -73,12 +73,23 @@ how do the assumptions interact with each other in practice
 }
 \end{quote}
 
-We divide the above hard assumptions into three groups: assumption to error types (i.e., query data instead of query structure);
-assumptions to query complexity (i.e., no subqueries, aggregation, join, or UDFs); assumption to 
-a safe checkpoint (i.e., clean initial database state). Assumptions do not interact across groups. 
-Assumptions to the query complexity are strongly interact with each other, for example, subqueries and join 
-are highly correlated. However, detailed analysis towards relaxing these assumptions is out of the scope of this paper and 
-we consider it as our future work. 
+
+We organize our strong assumptions into three groups:
+\begin{itemize}
+\item The source of the error: we assume that the parameters are in error rather than the structure of the query.
+\item The query complexity: the structure does not currently support subqueries, aggregation, joins, nor UDFs
+\item Clean checkpoint: we assume that the database starts from an error-free state.
+\end{itemize}
+These classes of assumptions do not interact with each other because they are all disallowed.  
+
+However, our experiments do study the interactions between other factors such as the size of the query log, the database size, type of query (range update, point update, delete, insert), the size of the complaint set, and incomplete complaint sets.
+
+% We divide the above hard assumptions into three groups: assumption to error types (i.e., query data instead of query structure);
+% assumptions to query complexity (i.e., no subqueries, aggregation, join, or UDFs); assumption to 
+% a safe checkpoint (i.e., clean initial database state). Assumptions do not interact across groups. 
+% Assumptions to the query complexity are strongly interact with each other, for example, subqueries and join 
+% are highly correlated. However, detailed analysis towards relaxing these assumptions is out of the scope of this paper and 
+% we consider it as our future work. 
 
 
 \begin{quote}
@@ -86,8 +97,9 @@ we consider it as our future work.
 Is it realistic to assume a safe checkpoint? 
 }
 \end{quote}
-It is realistic to assume a safe checkpoint because there always exists a safe checkpoint ---
-an empty database with each tuple corresponding to an \texttt{INSERT} query. 
+This is a fair question: a trivial setting is to assume the checkpoint is the initial, empty database.
+The consequence of this assumption is that the checkpoint should be before the corrupt query that the user complains about.  
+If the corruption was very very old, then more recent checkpoints would not work, however most databases make periodic checkpoints and in this case, we may take checkpoints at exponentially increasing intervals.  If the corruption was very old then it likely would have been detected (and repaired) earlier.  Otherwise, it is likely not widespread, does not affect many tuples, and thus may be a candidate for the slicing techniques described in the paper.
 
 \begin{quote}
 \reviewer{
