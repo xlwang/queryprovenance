@@ -143,17 +143,16 @@ tuples).
 }
 \end{quote}
 
-Again, we apologize for inconsistency between our scalability statement and
-experiments in the main text and our statement was based on experiments in
-Appendix~\ref{sec:heuristic}.
+We apologize for the apparent inconsistency between the text and the graphs in
+the experiments. In our original submission, the graphs depicting the
+experiments on larger datasets were in the appendix
+(Appendix~\ref{sec:heuristic}).
 
-In addition, we extend our scalability experiment in Figure~\ref{f:attr100} to
-databases with $100k$ records and demonstrate that even with the most complex
-setting, \texttt{UPDATE} queries with \textit{range} \texttt{WHERE} clause,
-\sys scales to databases with $100k$ records when the corruption age is as old
-as $250$.
-
-\alex{Say more about the inconsistency between intro and evaluation.}
+For the revision, we further extended our experiments and augmented
+Figure~\ref{f:attr100} to datasets of up to $100K$ records. This experiment
+uses the most complex setting (\texttt{UPDATE} queries with \textit{range}
+\texttt{WHERE} clause), and shows that \sys is efficient for datasets of
+$100K$ records, even when the query corruption is not recent.
 
 
 \comskip
@@ -174,37 +173,26 @@ case and if so, why it is correct. \dots for example if the test is ``t.A > 5'' 
 
 \alex{Make sure to address both points!}
 
-For clarification we rename the former variable $M^+$ as $M^-$ to distinguish
-from $M$ and emphasis its relationship with $M$ as $M^- \leq M$. $M^-$ is set
-to a large enough number outside the attribute domain in order to guarantee
-that \sys would fix the incorrect \texttt{DELETE} query instead of its
-consecutive \texttt{UPDATE} queries. Recall our MILP encoding in Equation 6,
-to ensure that the attribute value of tuple is set to $M^-$ in a
-\texttt{DELETE} query, one need to set $x_{q_i,t} = 1$ which only requires
-variable adjustment in the \texttt{WHERE} clause such that $\sigma_{q_i}(t) =
-1$. Alternatively, it may also feasible to manipulate the consecutive
-\texttt{UPDATE} query such that the \texttt{SET} clause updates the tuple to
-$M^-$ as $\mu_{q_i}(t) = M^-$ (according to Equation 4). Modifying
-\texttt{DELETE} query or \texttt{UPDATE} query may all lead to feasible
-solution, however, different objective-function values are associated with
-them. By setting $M^-$ to a ``sufficiently large'' number, we force the
-objective-function value of the \texttt{UPDATE} query modification exceedingly
-large than the \texttt{DELETE} query's. Thus it is guaranteed that \sys will
-always fix the incorrect \texttt{DELETE} query instead of its consecutive
-\texttt{UPDATE} queries. In addition, we set $M^- \leq M$ to avoid generating
-infeasibility conditions.
+In this paper, we introduce a \emph{``ghost''} value, 
+$M^-$\footnote{For clarification we rename the former variable $M^+$ as $M^-$ to distinguish
+from $M$ and emphasis its relationship with $M$ since $M^- \leq M$.}, outside of the attribute domain
+to encode the deleted tuple.
+Since $M^-$ is outside of the attribute domain, any subsequent conditional functions will
+evaluate to false, so subsequent queries do not affect ghost tuples. There are
+nuances to how $M^-$ is set. It needs to be sufficiently large, for the MILP
+problem to prioritize a modification to the \texttt{WHERE} clause of the
+\texttt{DELETE} query ($\sigma_{q_i}(t) = 0/1$), compared to a modification of
+the \texttt{SET} clause of an \texttt{UPDATE} query to the ghost value
+($\mu_{q_i}(t.A_j) = M^-$). However, it should be $M^- \leq M $ to ensure the
+constraints remain feasible (Equation~\ref{eq:uv}). These considerations
+ensure that the ghost assignment will not affect subsequent queries.
 
 Note that for workloads with both \texttt{DELETE} and \texttt{UPDATE} queries.
 The assignment of $x_{q_i, t}$ in a \texttt{UPDATE} query 
-(with no \texttt{WHERE} clause) requires the following change:
-\begin{align}
-\label{eq:x2}
-x_{q_i, t} = x'_{q_i, t} \otimes 0 + (1-x'_{q_i, t}) \otimes \sigma_{q_i}(t) \nonumber \\
-x'_{q_i, t}= (t.A_j = M^-) \wedge (t.A_j^* = M^-) 
-\end{align}
-This arrangement avoid generating invalid MILP problems:
-by doing so, a deleted tuple having $t.A_j = M^-$ on all attributes leads to 
-$x'_{q_i, t} = 1$ and $x_{q_i, t}  = 0$ on all the following \texttt{UPDATE} queries. 
+requires the following changes:
+$x_{q_i, t} = x'_{q_i, t} \otimes 0 + (1-x'_{q_i, t}) \otimes \sigma_{q_i}(t)$ and
+$x'_{q_i, t}= (t.A_j = M^-) \wedge (t.A_j^* = M^-)$.
+This arrangement ensures a deleted tuple will not be updated by the following \texttt{UPDATE} queries. 
 In the example in reviewer mentioned in $p5$, suppose a tuple is deleted and values in all attributes are assigned to $M^-$. 
 The boolean variable $x'_{q_i, t}$ is set to $1$ and $x_{q_i, t} $ to $0$ for any following \texttt{UPDATE} queries regardless
 of their \texttt{WHERE} predicate. Thus, \texttt{UPDATE} queries won't updates values for already deleted tuples. 
