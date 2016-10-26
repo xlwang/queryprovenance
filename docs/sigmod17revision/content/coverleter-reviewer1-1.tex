@@ -104,26 +104,21 @@ Suppose we have three queries \dots
 }
 \end{quote}
 
-\alex{The definition needs to be corrected, and more details should be added
-here.}
-
-We apologize for the unclear definition and we have clarified it in Definition~\ref{eq:dependency}.
-The impact of a query covers a set of attributes that may updated by 
-the query. We trace the query 
-history to search and expand the impact of a query. More specifically, given a query 
-$q_i$, we compute its full-impact $\mathcal{F}(q_i)$ by explicitly 
-comparing with each query in the query history in their execution order. 
-
-\noindent In the example reviewer suggested:\\
+We thank the reviewer for noting the error in the formula of
+Definition~\ref{eq:dependency}. We have revised it, and we have added an
+example to clarify the computation of full impact.
+In the example suggested by the reviewer, we have the following query log: \\
 \textit{\indent $q_1$ writes t.A; \\
 \indent $q_2$ reads t.A and writes u.B; \\
 \indent $q_3$ reads u.B and writes v.C.}\\
-When computing the full-impact of query $q_1$, we start from the impact of $q_1$
-on $q_1$, $\mathcal{F}_1(q_1) = \{t.A\}$; and then we move to the next query $q_2$. 
-Since $\mathcal{F}_1(q_1)  \cap\mathcal{P}(q_2) \neq \emptyset$, we extend the impact 
-of $q_1$ on $q_2$ as $\mathcal{F}_2(q_1) = \{t.A, u.B\}$. Similarly, with 
-$\mathcal{F}_2(q_1)  \cap\mathcal{P}(q_3) \neq \emptyset$, we conclude the full-impact
-of $q_1$ as $\{t.A, u.B, v.C\}$.
+The direct impact of $q_1$ is $\mathcal{I}(q_1)=\mathcal{F}_1(q_1) = \{t.A\}$.
+The impact of $q_1$ after considering query $q_2$ becomes $\mathcal{F}_2(q_1)
+= \{t.A, u.B\}$, since $\mathcal{F}_1(q_1) \cap\mathcal{P}(q_2) \neq
+\emptyset$. And finally, after considering $q_3$, the full impact of $q_1$ is
+$\mathcal{F}(q_1)=\{t.A, u.B, v.C\}$, since $\mathcal{F}_2(q_1)
+\cap\mathcal{P}(q_3) \neq \emptyset$.
+
+
 
 
 \comskip
@@ -149,10 +144,10 @@ tuples).
 }
 \end{quote}
 
-We apologize for the apparent inconsistency between the text and the graphs in
-the experiments. In our original submission, the graphs depicting the
-experiments on larger datasets were in the appendix
-(Appendix~\ref{sec:heuristic}).
+We apologize for the apparent inconsistency between the statements in our
+introduction and the graphs in the experimental section. In our original
+submission, the graphs depicting the experiments on the larger datasets were
+in the appendix (Appendix~\ref{sec:heuristic}).
 
 For the revision, we further extended our experiments and augmented
 Figure~\ref{f:attr100} to datasets of up to $100K$ records. This experiment
@@ -160,6 +155,9 @@ uses the most complex setting (\texttt{UPDATE} queries with \textit{range}
 \texttt{WHERE} clause), and shows that \sys is efficient for datasets of
 $100K$ records, even when the query corruption is not recent.
 
+The figures that depict experiments on databases of $100K$ records are:
+Figure~\ref{f:attr100}, Figure~\ref{f:heuristic}, and
+Figure~\ref{f:dbsizeratio}.
 
 \comskip
 
