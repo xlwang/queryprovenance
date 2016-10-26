@@ -5,7 +5,7 @@
 \section{Experiments}
 \label{sec:experiments}
 
-\begin{figure}[!htb]
+\begin{figure}[t]
 \centering
   \includegraphics[width = .75\columnwidth]{figures/benchmark_time}
   \vspace*{-.2in}
@@ -13,26 +13,7 @@
   \label{f:tpcctatp} 
 \end{figure}
 
-\begin{figure*}[!htb] 
-  \hspace*{-.1in}
-  \centering
-   \begin{subfigure}[t]{.33\textwidth}
-    \includegraphics[width = .99\columnwidth]{figures/indelup_time}
-    \caption{Performance for different query types.}
-    \label{f:indelup_time} 
-  \end{subfigure}
-  \begin{subfigure}[t]{.33\textwidth}
-    \includegraphics[width = .99\columnwidth]{figures/pointrelv_time}
-    \caption{Performance of diff. query clause types.}
-    \label{f:qidx_time} 
-  \end{subfigure}
-  \begin{subfigure}[t]{.33\textwidth}
-    \includegraphics[width = .99\columnwidth]{figures/where_time}
-    \caption{Query dimensionality vs time.}
-    \label{f:where_time} 
-  \end{subfigure}
-  \caption{ \sys can repair \texttt{INSERT} and \texttt{DELETE} workloads quickly; complex \texttt{UPDATE} queries are more expensive to repair.}
-\end{figure*}
+
 In this section, we carefully study the sensitivity of the
 basic, optimized and incremental variations of the \sys algorithm 
 to changes in the database and query log characteristics.
@@ -75,7 +56,26 @@ number of complaints, and ambiguous repair situations (e.g., when multiple queri
 % All experiments were run on 12x2.66 GHz  machines with 16GB RAM running IBM CPLEX~\cite{cplex2014v12} as the MILP solver on CentOS release 6.6.
 % 
 
-
+\begin{figure*}[t] 
+  \hspace*{-.1in}
+  \centering
+   \begin{subfigure}[t]{.33\textwidth}
+    \includegraphics[width = .99\columnwidth]{figures/indelup_time}
+    \caption{Performance for different query types.}
+    \label{f:indelup_time} 
+  \end{subfigure}
+  \begin{subfigure}[t]{.33\textwidth}
+    \includegraphics[width = .99\columnwidth]{figures/pointrelv_time}
+    \caption{Performance of diff. query clause types.}
+    \label{f:qidx_time} 
+  \end{subfigure}
+  \begin{subfigure}[t]{.33\textwidth}
+    \includegraphics[width = .99\columnwidth]{figures/where_time}
+    \caption{Query dimensionality vs time.}
+    \label{f:where_time} 
+  \end{subfigure}
+  \caption{ \sys can repair \texttt{INSERT} and \texttt{DELETE} workloads quickly; complex \texttt{UPDATE} queries are more expensive to repair.}
+\end{figure*}
 
 \subsection{Experimental Setup} \label{sec:setup}
 
