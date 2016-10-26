@@ -73,12 +73,23 @@ how do the assumptions interact with each other in practice
 }
 \end{quote}
 
-We divide the above hard assumptions into three groups: assumption to error types (i.e., query data instead of query structure);
-assumptions to query complexity (i.e., no subqueries, aggregation, join, or UDFs); assumption to 
-a safe checkpoint (i.e., clean initial database state). Assumptions do not interact across groups. 
-Assumptions to the query complexity are strongly interact with each other, for example, subqueries and join 
-are highly correlated. However, detailed analysis towards relaxing these assumptions is out of the scope of this paper and 
-we consider it as our future work. 
+
+We organize our strong assumptions into three groups:
+\begin{itemize}
+\item The source of the error: we assume that the parameters are in error rather than the structure of the query.
+\item The query complexity: the structure does not currently support subqueries, aggregation, joins, nor UDFs
+\item Clean checkpoint: we assume that the database starts from an error-free state.
+\end{itemize}
+These classes of assumptions do not interact with each other because they are all disallowed.  
+
+However, our experiments do study the interactions between other factors such as the size of the query log, the database size, type of query (range update, point update, delete, insert), the size of the complaint set, and incomplete complaint sets.
+
+% We divide the above hard assumptions into three groups: assumption to error types (i.e., query data instead of query structure);
+% assumptions to query complexity (i.e., no subqueries, aggregation, join, or UDFs); assumption to 
+% a safe checkpoint (i.e., clean initial database state). Assumptions do not interact across groups. 
+% Assumptions to the query complexity are strongly interact with each other, for example, subqueries and join 
+% are highly correlated. However, detailed analysis towards relaxing these assumptions is out of the scope of this paper and 
+% we consider it as our future work. 
 
 
 \begin{quote}
@@ -86,8 +97,9 @@ we consider it as our future work.
 Is it realistic to assume a safe checkpoint? 
 }
 \end{quote}
-It is realistic to assume a safe checkpoint because there always exists a safe checkpoint ---
-an empty database with each tuple corresponding to an \texttt{INSERT} query. 
+This is a fair question: a trivial setting is to assume the checkpoint is the initial, empty database.
+Technically, the checkpoint only needs to be clean with respect to the tuples that would affect the complaints, thus we do not require that the {\it entire} database is error-free.  In OLTP applications, update queries often do not touch many tuples, so this may be a reasonable assumption.  
+Regardless, studying extensions to be resiliant to unclean checkpoints is a very interesting direction.
 
 \begin{quote}
 \reviewer{
@@ -96,10 +108,8 @@ Is it realistic to have at least 25\% of the errors detected?
 \end{quote}
 
 Under our default setting, the full complaint set size for a single corruption is $~20-25$, thus 
-25\% deleted errors means only $5-7$ complaints are proceeded to \sys. Since queries
-are heavily interact with each other in our test data, having $5-7$ complaints is essential 
-to solve problems even with more recent corruptions. 
-We target to relax this requirement in our future work.
+25\% deleted errors means only $5-7$ complaints are proceeded to \sys. 
+In addition, we used range updates with random ranges, thus they are very likely to interact with each other, thus having $5-7$ complaints was important to deal with these interactions.  In many OLTP applications, the updates are primarily small, non-overlapping range updates, or even point updates, and we expect the needed number of complaints to be lower.  Ways to relax this requirement is a plan for future work.
 
 \alex{We need to be detailed, and not just refer to another answer. This
 reviewer is asking very specific questions, not just collecting the
