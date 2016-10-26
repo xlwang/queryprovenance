@@ -389,8 +389,7 @@ always fix the incorrect \texttt{DELETE} query instead of its consecutive
 \texttt{UPDATE} queries. In addition, we set $M^- \leq M$ to avoid generating
 infeasibility conditions.
 
-Note that for workloads with both \texttt{DELETE} and \texttt{UPDATE} queries
-while there exist \texttt{UPDATE} queries without a \texttt{WHERE} clause. 
+Note that for workloads with both \texttt{DELETE} and \texttt{UPDATE} queries.
 The assignment of $x_{q_i, t}$ in a \texttt{UPDATE} query 
 (with no \texttt{WHERE} clause) requires the following change:
 \begin{align}
@@ -398,13 +397,12 @@ The assignment of $x_{q_i, t}$ in a \texttt{UPDATE} query
 x_{q_i, t} = x'_{q_i, t} \otimes 0 + (1-x'_{q_i, t}) \otimes \sigma_{q_i}(t) \nonumber \\
 x'_{q_i, t}= (t.A_j = M^-) \wedge (t.A_j^* = M^-) 
 \end{align}
-This arrangement avoid generating invalid MILP problems where a deleted tuple with $(t.A_j = M^-) \wedge (t.A_j^* = M^-)$
-is further updated by \texttt{UPDATE} queries due to the original assignment of $x_{q_i, t}  = 1$.
-
-In the example in $p5$, suppose a tuple is deleted and values in all attributes are assigned to $M^-$. 
-The boolean variable $x'_{q_i, t}$ is set to $1$ for any following \texttt{UPDATE} queries (regardless
-of there \texttt{WHERE} predicate) and 
-thus \texttt{UPDATE} queries won't updates values for deleted tuples. 
+This arrangement avoid generating invalid MILP problems:
+by doing so, a deleted tuple having $t.A_j = M^-$ on all attributes leads to 
+$x'_{q_i, t} = 1$ and $x_{q_i, t}  = 0$ on all the following \texttt{UPDATE} queries. 
+In the example in reviewer mentioned in $p5$, suppose a tuple is deleted and values in all attributes are assigned to $M^-$. 
+The boolean variable $x'_{q_i, t}$ is set to $1$ and $x_{q_i, t} $ to $0$ for any following \texttt{UPDATE} queries regardless
+of their \texttt{WHERE} predicate. Thus, \texttt{UPDATE} queries won't updates values for already deleted tuples. 
 
 \comskip
 
@@ -544,8 +542,7 @@ p7. ``Figure 3 showed the exponential cost'' - the scaling from 40 to 60 to 80 l
 \end{quote}
 We apologize for not stating it clear. In Figure~\ref{fig:querysize_vs_time}, \naive fails to produce an answer
  for problems with $\geq 80$ queries within 1000 sec and \naive shows exponential cost for problems with $20$, $40$, and $60$ queries. 
-\alex{What is the answer here?} \xlw{We add a sentence in the caption to clarify this. Instead of fixing problems with 80 queries in 1000 sec, 
-baisc fails to derive a result in 1000sec. }
+\alex{What is the answer here?}
 
 
 \begin{quote}
@@ -639,21 +636,55 @@ set and we put such evaluation to our future work.
 \dots
 
 The problem is indeed difficult \dots and assumptions must be put in place
-
-\dots
-
-how do the assumptions interact with each other in practice 
-
-\dots
-
-Is it realistic to assume a safe checkpoint? 
-
-\dots
-
-Is it realistic to have at least 25\% of the errors detected?
  
 }
 \end{quote}
+
+We thank the reviewer for suggesting a summary of assumptions applied to this paper. We implement this in Section~\ref{sec:abstractions} and 
+conclude the assumptions as follows:  \sys identifies errors and proposes query repairs 
+for query data but not on query structures and solves 
+OLTP queries with no subqueries, aggregation, joins, and user-defined functions (UDFs); 
+In addition, \sys assumes a setting where no errors are exist in the data before importing into the database, i.e., 
+the initial database state always starts from empty or a clean checkpoint. 
+We demonstrate that \sys can solve problems with corruptions in multiple queries, but its scalability in 
+this setting is limited (up to about 50 queries in the log).  \sys also solves problems with incomplete
+complaint set, but it is more likely to make mistakes for older corruptions with higher amount of missing complaints. 
+For cases where corruptions are restricted to a single query with complete complaint, 
+\sys can scale to large data and log sizes.
+
+\begin{quote}
+\reviewer{
+how do the assumptions interact with each other in practice 
+}
+\end{quote}
+
+We divide the above hard assumptions into three groups: assumption to error types (i.e., query data instead of query structure);
+assumptions to query complexity (i.e., no subqueries, aggregation, join, or UDFs); assumption to 
+a safe checkpoint (i.e., clean initial database state). Assumptions do not interact across groups. 
+Assumptions to the query complexity are strongly interact with each other, for example, subqueries and join 
+are highly correlated. However, detailed analysis towards relaxing these assumptions is out of the scope of this paper and 
+we consider it as our future work. 
+
+
+\begin{quote}
+\reviewer{
+Is it realistic to assume a safe checkpoint? 
+}
+\end{quote}
+It is realistic to assume a safe checkpoint because there always exists a safe checkpoint ---
+an empty database with each tuple corresponding to an \texttt{INSERT} query. 
+
+\begin{quote}
+\reviewer{
+Is it realistic to have at least 25\% of the errors detected?
+}
+\end{quote}
+
+Under our default setting, the full complaint set size for a single corruption is $~20-25$, thus 
+25\% deleted errors means only $5-7$ complaints are proceeded to \sys. Since queries
+are heavily interact with each other in our test data, having $5-7$ complaints is essential 
+to solve problems even with more recent corruptions. 
+We target to relax this requirement in our future work.
 
 \alex{We need to be detailed, and not just refer to another answer. This
 reviewer is asking very specific questions, not just collecting the
@@ -870,6 +901,13 @@ We extend our experiment with larger database size in Figure~\ref{f:attr100}
 and observe that with all optimization, \sys requires $~300$ sec to solve
 problems with $100k$ tuples and a corruption age of $250$ queries.
 
+There exists two scalability bottlenecks: the bottleneck of \sys in generating MILP problem that is solvable in 
+reasonable amount of time; and the bottleneck of memory limitation in the hardware we use for experiments. 
+These two bottlenecks are closely interact with each other as better hardware solves harder MILP problem in 
+shorter amount of time. Problems with $100$ attributes with more than $100k$ records with more than $250$ queries already 
+reach the upper bound of our experimental machines, thus we did not further extend \sys to larger database sizes. 
+
+
 \alex{I am afraid that we are not answering the second part of this reviewer's
 question.}
 
@@ -914,6 +952,24 @@ be a challenging problem \dots
 }
 \end{quote}
 
+In this paper, we introduce a synthetic data generator in Section~\ref{sec:setup}
+with multiple adjustable parameters, including query type, workload and
+database size, and query selectivity.  These parameters allow us to generate 
+synthetic workloads on \texttt{UPDATE}, \texttt{INSERT}, and \texttt{DELETE} queries and
+further helps manipulating level of query interaction for \texttt{UDPATE}-workloads. 
+We found that \texttt{UPDATE} queries has higher level of query interaction and thus
+requires longer time to solve than \texttt{INSERT} and \texttt{DELETE} queries 
+(Figure~\ref{f:indelup_time}). Under our default setting, \texttt{UPDATE} queries with 
+\textit{range} predicates and \textit{relative} \texttt{SET} clauses have higher level of query
+ interaction than \textit{point} predicates and \textit{constant} 
+\texttt{SET} clauses respectively, thus problems with the former settings are 
+harder to solve than the latter settings (Figure~\ref{f:qidx_time}). 
+In addition, we also study the \sys's performance over two parameters that 
+contributes to the query interaction probability: the number of attributes, $N_a$, in 
+Figure~\ref{f:attr} and percentage of query selectivity in Appendix~\ref{app:selectivity}.
+Our experiment confirms that higher level of query interaction leads to 
+harder problems (requires longer time to solve). 
+
 \alex{We should talk about this here.}
 
 
@@ -929,4 +985,9 @@ in data repair. This can be clarified.
 }
 \end{quote}
 
-\alex{Have we done something for this?}
+We thank the reviewer for mentioning these data repairs works. In fact, 
+\sys adopt similar intuition in these data repair works, 
+which seek for minimum repair on data, 
+to the query repair problem we studied in this paper. 
+
+\alex{Have we done something for this?} \xlw{let's cite these papers when explaining def 4. }
