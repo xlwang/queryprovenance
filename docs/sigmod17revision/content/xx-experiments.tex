@@ -301,12 +301,12 @@ When the table is wide ($N_a = 500$), applying all optimizations ($inc_1-all$) i
 
 
 \stitle{Database Size:} \looseness -1
-\xlw{We now vary the database size ($N_D \in [1k, 100k]$) with a large number of attributes ($N_a = 100$).
+\newtext{We vary the database size ($N_D \in [1k, 100k]$) with a large number of attributes ($N_a = 100$).
 We fix the number of complaints by decreasing the query selectivity in proportion to $N_D$'s increase---the specific mechanism to do so did not affect the findings.
 Figure~\ref{f:attr100} shows that the costs are relatively flat until the corruption occurs in an old query ($Corruption\ Age = 250$).  
 In addition, we find that the cost is highly correlated with the number of candidate queries and attributes that are encoded in the MILP problem.
 The increase in cost despite tuple-slicing is due to the increasing number of candidate queries and attributes in the system; 
-we believe this increasing trend limits solver's ability to prune constraints that correspond to queries and attributes that 
+we believe this increasing trend limits the solver's ability to prune constraints that correspond to queries and attributes that 
 clearly will not affect the complaint set---an implicit form of query and attribute slicing.  
 Ultimately, combining all three optimizations outperforms tuple-slicing by $2-3\times$.}
 
