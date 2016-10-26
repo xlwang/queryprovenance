@@ -1,36 +1,11 @@
 %!TEX root = ../main.tex
 
-\begin{figure}[t]
-\centering
-  \includegraphics[width = .75\columnwidth]{figures/benchmark_time}
-  \vspace*{-.2in}
-  \caption{\sys quickly produces repairs for OLTP workloads.}
-  \label{f:tpcctatp} 
-\end{figure}
+
 
 
 \section{Experiments}
 \label{sec:experiments}
-  \begin{figure*}[ht] 
-    \hspace*{-.1in}
-    \centering
-     \begin{subfigure}[t]{.33\textwidth}
-      \includegraphics[width = .99\columnwidth]{figures/indelup_time}
-      \caption{Performance for different query types.}
-      \label{f:indelup_time} 
-    \end{subfigure}
-    \begin{subfigure}[t]{.33\textwidth}
-      \includegraphics[width = .99\columnwidth]{figures/pointrelv_time}
-      \caption{Performance of diff. query clause types.}
-      \label{f:qidx_time} 
-    \end{subfigure}
-    \begin{subfigure}[t]{.33\textwidth}
-      \includegraphics[width = .99\columnwidth]{figures/where_time}
-      \caption{Query dimensionality vs time.}
-      \label{f:where_time} 
-    \end{subfigure}
-    \caption{ \sys can repair \texttt{INSERT} and \texttt{DELETE} workloads quickly; complex \texttt{UPDATE} queries are more expensive to repair.}
-  \end{figure*}
+
 In this section, we carefully study the sensitivity of the
 basic, optimized and incremental variations of the \sys algorithm 
 to changes in the database and query log characteristics.
@@ -128,7 +103,7 @@ time between submitting a complaint set and the system terminating after retriev
 Accuracy is reported as the repair's precision (percentage of repaired tuples that were correctly fixed), 
 recall (the percentage of the full complaint set that was repaired), 
 and F1 measure (the harmonic mean of precision and recall). 
-Note that the reported accuracy measures whether or not the complaint tuples are correctly repaired, thus the repaired query is allowed to differ from the true query. 
+Note that the reported accuracy measures whether the complaint tuples are correctly repaired, and the repaired query is allowed to differ from the true query. 
 However, we study the latter issue in Appendix~\ref{app:index} and find that \xlw{\sys always fixes the true query with complete complaint set, and \sys tends to 
 fix wrong queries for problems with incomplete complaints where the false negative rates $>0$ on old corruption(s) with age $250$.}
 We report the average across 20 runs.
@@ -191,6 +166,35 @@ We call this parameter the {\it Corruption Age}.
 
 %\xlw{We finally introduce the query corruption(s) at multiple query indexes $q_{N-idx}, idx \in [50, 300]$. We denote the number of queries executed after the first corruption as $N_{Q}$ ($\#\ of\ Queries$), $N_{Q} = N-idx$ and it measures the hardness of the synthetic problem.} 
 
+\begin{figure}[t]
+\centering
+  \includegraphics[width = .75\columnwidth]{figures/benchmark_time}
+  \vspace*{-.2in}
+  \caption{\sys quickly produces repairs for OLTP workloads.}
+  \label{f:tpcctatp} 
+\end{figure}
+
+
+\begin{figure*}[ht] 
+  \hspace*{-.1in}
+  \centering
+   \begin{subfigure}[t]{.33\textwidth}
+    \includegraphics[width = .99\columnwidth]{figures/indelup_time}
+    \caption{Performance for different query types.}
+    \label{f:indelup_time} 
+  \end{subfigure}
+  \begin{subfigure}[t]{.33\textwidth}
+    \includegraphics[width = .99\columnwidth]{figures/pointrelv_time}
+    \caption{Performance of diff. query clause types.}
+    \label{f:qidx_time} 
+  \end{subfigure}
+  \begin{subfigure}[t]{.33\textwidth}
+    \includegraphics[width = .99\columnwidth]{figures/where_time}
+    \caption{Query dimensionality vs time.}
+    \label{f:where_time} 
+  \end{subfigure}
+  \caption{ \sys can repair \texttt{INSERT} and \texttt{DELETE} workloads quickly; complex \texttt{UPDATE} queries are more expensive to repair.}
+\end{figure*}
 
 \subsection{Benchmark Results}
 \label{sec:experiments:benchmark}

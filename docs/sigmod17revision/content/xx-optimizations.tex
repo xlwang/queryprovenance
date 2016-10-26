@@ -1,3 +1,5 @@
+%!TEX root = ../main.tex
+
 
 \section{Optimizing the Basic Approach}
 \label{sec:opt}
@@ -9,7 +11,7 @@ grows quadratically with respect to the database and the query log.
 This increase has a large impact on the running time of the solver, since it needs to find a (near)-optimal 
 assignment of all undetermined variables (exponential with the number of undetermined variables).
 This is depicted in Figure~\ref{fig:querysize_vs_time}, which increases the query log size over a database of $1000$ tuples.  
-The red bars encode the problem using  the \emph{basic} algorithm that parameterizes all queries, while the blue bars show the potential gain of only parameterising the oldest query that we assume is incorrect.
+The red bars encode the problem using  the \emph{basic} algorithm that parameterizes all queries, while the blue bars show the potential gain of only parameterizing the oldest query that we assume is incorrect.
 Beyond $80$ queries, \emph{basic} fails to produce an answer within $1000$ seconds.
 Although MILP solvers exhibit empirical performance variation,
 this experiment illustrates the performance limitation of the \emph{basic} approach. 
@@ -35,7 +37,7 @@ the cost to the left side of Figure~\ref{fig:querysize_vs_time}.
     \centering
     \includegraphics[width=0.35\textwidth]{figures/qsize_time_badscale}
     \vspace*{-0.1in}
-    \caption{Log size vs. execution time for 1000 records. \xlw{Beyond $80$ queries, the solver exceeds the $1000$sec time limit.}}
+    \caption{Log size vs.\ execution time for 1000 records. \newtext{The basic approach failed to complete by the time limit of 1000sec for a log of $80$ queries.}}
     \label{fig:querysize_vs_time}
 \end{figure}
 
@@ -134,8 +136,22 @@ $t \in \mathcal{NC}$ that are matched by the solution.
 In our experiments, we find that this second MILP iteration adds
 minimal overhead ($0.1-0.5\%$) with respect to the initial MILP
 problem.   
-\xlw{
-\emph{Tuple-slicing} is a \textbf{heuristic} that breaks down a large MILP problem into two, often much smaller, MILP problems. It works effectively in practice and greatly helps improving \sys's performance, especially when the ratio of complaint set size and the database size is small. However, it it possible that \emph{tuple-slicing} fixes the incorrect query and introduce noises to the query log repair. For problems with complete complaint set, by further enforcing \textbf{no non-complaint tuples} in the refinement step (disallow above zero objective-function value for the refinement MILP problem), we ensure the correctness of tuples that are not in the complaint. In this paper, we mainly focus on problems with single corruption and complete complaint set, under this setting, \emph{tuple-slicing} is an effective method to improve the performance of the \emph{basic} approach, without compromising, and often improving, repair quality.  
+\newtext{
+\emph{Tuple-slicing} is a \textbf{heuristic} method that decomposes a large
+MILP problem into two, typically much smaller, MILP problems. It is effective
+in practice and greatly helps improve \sys performance, especially when the
+ratio of the complaint set size and the database size is small. In general,
+this heuristic can result in incorrect repairs. However, if corruptions are
+restricted to a single query, the complaint set is complete, and incremental repair is employed (Section~\ref{sec:incremental}), we can
+guarantee that tuple slicing will not lead to loss of accuracy using a small
+modification: By \emph{disallowing non-complaint tuples} in the refinement
+step (e.g., by restricting the value of the objective function in the
+refinement MILP to zero), the solver will be forced to pick the correct
+repair. 
+% 
+% \begin{lemma}
+%     If $\mathbb{R}$ is a set of repairs that \sys produces under no slicing optimizations and the given complaint set is complete, then \sys will produce the same repairs $\mathbb{R}$ under tuple slicing if non-complaint tuples are ....
+% \end{lemma}
 } 
 
 
@@ -240,7 +256,17 @@ $Rel\mathcal{(A)} = \cup_{q_i \in Rel\mathcal{Q}} (\mathcal{F}(q_i)\cup \mathcal
 We propose \emph{attribute slicing} optimization that only encodes constraints for attributes in $Rel\mathcal{(A)}$.
 We find that this type of slicing can be effective for wide tables along with queries that focus on a small subset of attributes.  
 
-\xlw{Similar to query slicing, this optimization simply removes irrelevant attributes through static analysis of the query log.  Thus it reduces the problem size without any loss of accuracy.}
+\newtext{Similar to query slicing, this optimization removes only non-relevant
+attributes through static analysis of the query log. Thus, it reduces the problem
+size without loss of accuracy. We formalize the soundness of the query and
+attribute slicing in the following lemma.
+% 
+\begin{lemma}
+    If $\mathbf{R}$ is a set of repairs that \sys produces under no slicing
+    optimizations, then \sys will produce the same repairs $\mathbf{R}$ under
+    query and attribute slicing.
+\end{lemma}
+}
 
 
 \subsection{Incremental Repairs}\label{sec:incremental}
