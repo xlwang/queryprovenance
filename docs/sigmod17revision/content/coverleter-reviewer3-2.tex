@@ -1,4 +1,4 @@
-
+%!TEX root = ../main.tex
 
 \noindent
 \textbf{Comment \#3:} Scalability 
@@ -15,11 +15,14 @@ uses the most complex setting (\texttt{UPDATE} queries with \textit{range}
 \texttt{WHERE} clause), and shows that \sys is efficient for datasets of
 $100K$ records, even when the query corruption is not recent.
 
-In fact, there exists two scalability bottlenecks: the bottleneck of \sys in generating MILP problem that is solvable in 
-a reasonable time; and the bottleneck of hardware we use to operate \sys. 
-These two bottlenecks are closely interact with each other as better hardware solves harder MILP problem faster. 
-Problems with $100$ attributes, $100k$ records, and $250$ queries already 
-reach the memory limitation of machines we used, thus we did not further extend \sys to even larger database sizes. 
+\sys has two scalability bottlenecks: (1)~The MILP solvers have limitations
+that do not allow them to scale to very large problem sizes. Our optimizations
+ameliorate this issue, but ultimately, \sys still relies on MILP solvers to
+derive repairs. (2)~\sys is memory-intensive in its generation of the MILP
+variables and constraints; its memory requirements increase with the data and
+log size. We observed that problems with $100$ attributes, $100k$ records, and
+$250$ queries already come close to the memory limitations of the commodity
+machines we used.
 
 
 
@@ -37,22 +40,49 @@ is correctly fixed and future errors will not occur \dots
 }
 \end{quote}
 
-We apologize for the confusion and we have explained our accuracy metrics in Section~\ref{sec:setup}.
+The reviewer is correct that even complete complaint sets do not guarantee
+that the correct query will be repaired. Query interactions can be complex,
+and even complete complaint sets cannot always provide sufficient information
+to reverse-engineer even the correct query. As a simple example, consider a
+tuple with $t.A=5$ and two \texttt{UPDATE} queries: $q_1$ sets $t.A=t.A+1$,
+and $q_2$ sets $t.A=t.A+2$. The complaint $t^*.A=10$ is not sufficient to
+determine whether $q_1$ or $q_2$ should be repaired. In practice, we rarely
+run into this issue with complete complaints, because typically we have more
+data points (more tuples and more queries). This avoids under-specification
+and, typically, \sys can correctly identify the proper query to repair.
 
-The accuracy metrics in Section~\ref{sec:experiments} measure whether the complaint tuples 
-are repaired correctly, but it is possible that the repaired query differs from the true query. 
-In the example, both $income \geq 87200$ and $income \geq 87500$ 
-resolves all the complaints and thus we consider them with the same accuracy. 
 
-We have extended our experiment (Appendix~\ref{app:index}) and separately evaluate 
-whether \sys selects the right query to repair. 
-We find that \sys always fixes the right query when the complaint 
-set is complete  However, the less complete the complaint set, and the older 
-the corruption, the more likely it is that \sys will repair the wrong query.
+However, it is not generally possible to determine the exact value of query
+predicates. In the example, $income \geq 87200$ and $income \geq 87500$ both
+correct all complaints. Since there is no way to distinguish between these two
+repairs in practice, in our main evaluation, we measure the effectiveness of
+\sys based on the tuples that the chosen query repair revises correctly. We
+have also extended our experiments (Appendix~\ref{app:index}) to separately
+evaluate how often \sys corrects the wrong query. We find that \sys always
+fixes the right query when the complaint set is complete. However, the less
+complete the complaint set, and the older the corruption, the more likely it
+is that \sys will select the wrong query to repair.
 
-At current stage, \sys does not guarantee to derive query repair that is
-exactly same as the true query, however, \sys is able to identify the incorrect query
-and suggest reasonable query repair. 
+In the current problem specification, \sys does not guarantee to derive a
+query repair that is exactly same as the true query\,---\,there is simply not enough information to do this\,---\,however, \sys is able to
+identify the incorrect query and suggest a reasonable repair.
+
+% We apologize for the confusion and we have explained our accuracy metrics in Section~\ref{sec:setup}.
+% 
+% The accuracy metrics in Section~\ref{sec:experiments} measure whether the complaint tuples 
+% are repaired correctly, but it is possible that the repaired query differs from the true query. 
+% In the example, both $income \geq 87200$ and $income \geq 87500$ 
+% resolves all the complaints and thus we consider them with the same accuracy. 
+% 
+% We have extended our experiment (Appendix~\ref{app:index}) and separately evaluate 
+% whether \sys selects the right query to repair. 
+% We find that \sys always fixes the right query when the complaint 
+% set is complete  However, the less complete the complaint set, and the older 
+% the corruption, the more likely it is that \sys will repair the wrong query.
+% 
+% At current stage, \sys does not guarantee to derive query repair that is
+% exactly same as the true query, however, \sys is able to identify the incorrect query
+% and suggest reasonable query repair. 
 
 \comskip
 
@@ -68,25 +98,50 @@ be a challenging problem \dots
 }
 \end{quote}
 
-In this paper, we introduce a synthetic data generator in Section~\ref{sec:setup}
-with multiple adjustable parameters, including query type, workload and
-database size, and query selectivity.  These parameters allow us to generate 
-synthetic workloads on \texttt{UPDATE}, \texttt{INSERT}, and \texttt{DELETE} queries and
-further helps manipulating level of query interaction for \texttt{UDPATE}-workloads. 
-We found that \texttt{UPDATE} queries has higher level of query interaction and thus
-requires longer time to solve than \texttt{INSERT} and \texttt{DELETE} queries 
-(Figure~\ref{f:indelup_time}). Under our default setting, \texttt{UPDATE} queries with 
-\textit{range} predicates and \textit{relative} \texttt{SET} clauses have higher level of query
- interaction than \textit{point} predicates and \textit{constant} 
-\texttt{SET} clauses respectively, thus problems with the former settings are 
-harder to solve than the latter settings (Figure~\ref{f:qidx_time}). 
-In addition, we also study the \sys's performance over two parameters that 
-contributes to the query interaction probability: the number of attributes, $N_a$, in 
-Figure~\ref{f:attr} and percentage of query selectivity in Appendix~\ref{app:selectivity}.
-Our experiment confirms that higher level of query interaction leads to 
-harder problems (requires longer time to solve). 
+We have added a new section in the appendix (Appendix~\ref{app:selectivity}),
+that analyzes the interactions of the queries we synthetically generate. Our
+synthetic data generator does not directly control the degree of interaction
+among queries in the log, but parameters such as the number of attributes and
+the dataset size impact this directly. We show that the probability that any
+two \texttt{UPDATE} queries with range predicates interact (i.e., the
+intersection of the tuples they update is non-empty) is actually quite high
+under the default settings of our data generator (about 0.31).
 
-\alex{We should talk about this here.}
+The level of query interactions greatly influences the hardness of the problem
+as errors may propagate differently under different scenarios. There are many
+factors that may affect the level of query interactions. In general,
+\texttt{UPDATE} queries interact with each other more than \texttt{INSERT} or
+\texttt{DELETE} queries. Figure~\ref{f:indelup_time} shows that \sys is less
+efficient in \texttt{UPDATE} workloads. This is in large part because the
+query interactions in this setting are more complex. Within the class of
+\texttt{UPDATE} queries, larger range selectivities also result in more
+interactions, thus increasing runtime (Figure~\ref{f:qidx_time}). Another
+factor that affects query interactions is the number of attributes in the
+schema. With fewer attributes, updates are more likely to interact, again
+affecting runtime Figure~\ref{f:attr}. We also evaluate \sys over different
+query selectivities. In Figure~\ref{f:selectivityvstime}, we observe that the
+execution time of \sys increases with larger query ranges, which results in
+higher query interaction.
+
+% In this paper, we introduce a synthetic data generator in Section~\ref{sec:setup}
+% with multiple adjustable parameters, including query type, workload and
+% database size, and query selectivity.  These parameters allow us to generate 
+% synthetic workloads on \texttt{UPDATE}, \texttt{INSERT}, and \texttt{DELETE} queries and
+% further helps manipulating level of query interaction for \texttt{UDPATE}-workloads. 
+% We found that \texttt{UPDATE} queries has higher level of query interaction and thus
+% requires longer time to solve than \texttt{INSERT} and \texttt{DELETE} queries 
+% (Figure~\ref{f:indelup_time}). Under our default setting, \texttt{UPDATE} queries with 
+% \textit{range} predicates and \textit{relative} \texttt{SET} clauses have higher level of query
+%  interaction than \textit{point} predicates and \textit{constant} 
+% \texttt{SET} clauses respectively, thus problems with the former settings are 
+% harder to solve than the latter settings (Figure~\ref{f:qidx_time}). 
+% In addition, we also study the \sys's performance over two parameters that 
+% contributes to the query interaction probability: the number of attributes, $N_a$, in 
+% Figure~\ref{f:attr} and percentage of query selectivity in Appendix~\ref{app:selectivity}.
+% Our experiment confirms that higher level of query interaction leads to 
+% harder problems (requires longer time to solve). 
+% 
+% \alex{We should talk about this here.}
 
 
 \comskip
