@@ -264,7 +264,7 @@ Thus, in Figure~\ref{fig:example-cover}, the explanation $D_0.A = 3$ is an equal
 In addition, ~\cite{chalamalla2014} relies on the assumption that there is a causal relationship between erroneous output and their lineage, and propogates responsibility through the output's lineage.
 This assumption does not hold if the incorrect query {\it did not} update a tuple that should have been updated.  In this case, the incorrect parameter value would {\it not} be in the lineage, and thus not identified. Ultimately, neither approach correctly solves the detection problem.
 
-\noindent \textbf{[Meliou et al. SIGMOD 2011]} \\
+\noindent \textbf{Class 2: [Meliou et al. SIGMOD 2011]} \\
 
 {\it TLDR: When using~\cite{meliou2011tracing}, the size of the generated SAT expression 
 increases exponentially with respect to the number of queries in the log. 
