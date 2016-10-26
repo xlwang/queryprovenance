@@ -49,13 +49,13 @@ t* should be allowed to range over $D \cup \{\bot\}$ also to allow for deletion
 }
 \end{quote}
 
-We have corrected Definition~\ref{eq:delete} by allowing the range of $t$ and $t^*$ as $D_n \cup \{\bot\}$. 
+We correct our definition on range of $t$ and $t^*$ as $D \cup \{\bot\}$. The transformation of 
+a database state $\mathcal{T}_c(D)$ excludes the complaint tuple $\{t\}$ and replace it with 
+$t^*$ with correct values. If $t = \bot$, it means tuple $t$ does not exist in the original
+database and should be added into the database; similarly if $t^* = \bot$, the tuple $t$ is in
+the original database but should be removed. 
 
-The transformation of 
-a database state $\mathcal{T}_c(D_n)$ excludes the complaint tuple $\{t\}$ (``$\setminus$'' is the set minus operation) 
-and replace it with correct tuple $t^*$. More specifically, when $t = \bot$, it means tuple $t$ does not exist in the original
-database and should be added into the database; similarly when $t^* = \bot$, the tuple $t$ is in
-the original database while it should be removed. 
+\alex{Have we done anything about this?}
 
 \begin{quote}
 \reviewer{
@@ -65,10 +65,12 @@ self-contradictory to me (a query reads, an update writes). Perhaps just
 }
 \end{quote}
 
-We have changed the term as ``data manipulation statements'' (includes \texttt{UPDATE},
-\texttt{INSERT}, and \texttt{DELETE} queries) to avoid confusion. In fact, 
-we intentionally avoid the term ``update queries'' in order to distinguish it from the 
-specific \texttt{UPDATE} queries. 
+We change it as ``data manipulation statements'' that include \texttt{UPDATE},
+\texttt{INSERT}, and \texttt{DELETE} queries. We intentionally avoid naming 
+them ``update queries'' in order to distinguish from the \texttt{UPDATE} query. 
+
+\alex{This term is only used once in the paper. How about we just change it to
+data manipulation statements?}
 
 
 \begin{quote}
@@ -80,16 +82,18 @@ problems?
 }
 \end{quote}
 
-We set $M$ to a value that is outside of the domain range in order to 
-avoid generating conflict constraints. 
-For example, attribute \textit{human age} has a domain range of $[0, 200]$, 
-in which case $M$ must be set to a value that is above $200$. 
-Besides, in order to maintain the feasibility for workloads with \texttt{DELETE}
-queries, $M$ must be set to a value that is greater than or equal to $M^-$ (we have explained
-the setting of $M^-$ in Section~\ref{sec:linearize}). 
-In conclude, we typically set $M$ to a sufficiently large number which can be 
-much smaller than the upper bound of a numeric field. Otherwise, we may
-have overflow problems.
+To guarantee the correctness of the \texttt{UPDATE} queries, $M$ must 
+be assigned to a value outside the domain range of the corresponding attribute 
+because constraints in ~\ref{eq:uv} will be self-contradictory otherwise. For example, 
+attribute \textit{human age} has a domain range of $[0, 200]$, in which case $M$ must be 
+set to a value that is above $200$. 
+In addition, in order to maintain the feasibility for workloads with \texttt{DELETE}
+queries, $M$ must be set to a value that is $\geq M^-$ (we explained
+the setting of $M^-$ in Comment\# 4), but not necessary a 
+upper bound of the given numeric field. 
+
+\alex{Have we done anything about this?}
+
 
 \begin{quote}
 \reviewer{
@@ -97,15 +101,18 @@ p5. In (5), should v be u?
 }
 \end{quote}
 
-We thank the reviewer for noting this, we have corrected this typo in the paper. 
+We thank the reviewer for noting this, we correct this typo in the paper. 
+\alex{(5) does not seem to have changed. If it does not need to be changed, we
+should explain here why.} 
+
 
 \begin{quote}
 \reviewer{
 p7. ``Figure 3 showed the exponential cost'' - the scaling from 40 to 60 to 80 looked linear to me, just with a high coefficient.}
 \end{quote}
-We apologize for not explaining it clear. In Figure~\ref{fig:querysize_vs_time}, \naive fails to produce an answer
-for problems with $\geq 80$ queries within 1000 sec as we terminate \naive once it reaches a time limit of 1000 sec. 
-In fact, the execution cost of \naive shows exponential growth with $10$, $20$, $40$, and $60$ queries. 
+We apologize for not stating it clear. In Figure~\ref{fig:querysize_vs_time}, \naive fails to produce an answer
+ for problems with $\geq 80$ queries within 1000 sec and \naive shows exponential cost for problems with $20$, $40$, and $60$ queries. 
+\alex{What is the answer here?}
 
 
 \begin{quote}
@@ -114,7 +121,7 @@ p10. Fig. 8 - please add 0.75 (the largest x-axis value) to the x-axis, better y
 }
 \end{quote}
 
-We thank the reviewer for the detailed suggestion and we have replaced Figure~\ref{f:falsenegative} with suggested x-axis labels. 
+We thank the reviewer for the detailed suggestion and we implement this in our main text. 
 
 \begin{quote}
 \reviewer{
@@ -124,15 +131,11 @@ p10. ``may over-generalize'' - again, are you speculating or interpreting the re
 }
 \end{quote}
 
-We apologize for the imprecise wording and we have revised analysis for Figure~\ref{f:falsenegative}.
+We observe from Figure~\ref{f:falsenegative_acc} that \sys derives inaccurate log repairs when the corruption occured in 
+very old query  \textit{corruption age = 250}). Also, if there are insufficient complaints, then it is possible that the 
+repair will over-generalize to  ``repair'' the wrong records and lead to lower precision.
 
-From Figure~\ref{f:falsenegative}, we find that reducing the number of reported complaints lowers the
-runtime; however, we observe a small reduction in repair quality (precision
-and recall in Figure~\ref{f:falsenegative_acc}) for recent corruptions and a
-significant drop for older ones. This is expected: the less information we
-have on the problem (fewer complaints), the lower our ability to fix it
-correctly. In the extreme case where very few complaints are available, the
-problem can be under-specified, and the true repair harder to identify.
+\alex{What have we done for this?} \xlw{We added some clarification in the text. }
 
 \begin{quote}
 \reviewer{
@@ -140,10 +143,11 @@ p10, footnote: this seems like a strong assumption! I guess this means that deal
 }
 \end{quote}
 
-We have clarified this assumption in Section~\ref{sec:abstractions}. Currently, 
-we cannot apply incremental algorithm 
-on problems with multiple corruptions since errors may scattered across the entire query history.
-Thus, \sys does not scale over problems with large workload size and we leave further improvement in our future work.
+We clarify this assumption in Section~\ref{sec:abstractions}. Currently, we cannot apply incremental algorithm 
+on problems with multiple corruptions since errors may spread across the entire query history, \sys 
+does not scale over problems with more than 40 queries. We leave further improvement in our future work.
+
+\alex{We need to say something here.  Have we clarified this assumption early in the paper?}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
