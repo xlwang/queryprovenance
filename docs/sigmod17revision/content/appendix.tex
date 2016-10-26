@@ -66,7 +66,7 @@ forms a disjunction of rules that constitute the repaired \texttt{WHERE} clause.
 The \texttt{WHERE} clause repair proposed by the classifier may not completely repair 
 the complaints if there was also an error in the \texttt{SET} clause. 
 In this case, we execute a second repair step.
-\begin{figure}[t]
+\begin{figure}[!thb]
 \centering
   \begin{subfigure} [t]{.75\columnwidth}
   \includegraphics[width = \columnwidth]{figures/heuristictime}
@@ -83,32 +83,6 @@ In this case, we execute a second repair step.
  \label{f:heuristic}
 \end{figure}
 
-
-   \begin{figure*}[t]
-  \centering
-  \begin{subfigure} [t]{.3\textwidth}
-    \includegraphics[width = .99\columnwidth]{figures/indelup_acc_idx}
-    \vspace*{-.25in}
-    \caption{Correct repair ratio vs. query types}
-    \label{f:querytyperatio} 
-    \end{subfigure}
-    \begin{subfigure} [t]{.3\textwidth}
-    \includegraphics[width = .99\columnwidth]{figures/dbsize_acc_idx}
-    \vspace*{-.25in}
-    \caption{Correct repair ratio vs. database sizes}
-    \label{f:dbsizeratio} 
-    \end{subfigure}
-    \begin{subfigure} [t]{.3\textwidth}
-    \includegraphics[width = .99\columnwidth]{figures/noise_fn_acc_idx}
-    \vspace*{-.25in}
-    \caption{Top-k vs. query types. }
-    \vspace*{-.1in}
-    \label{f:noiseratio} 
-    \end{subfigure}
-   \caption{ \sys maintains 1.0 correct repair ratio with complete complaint set. }
-   \vspace*{-.1in}
-   \label{fig:truerate}
-  \end{figure*}
 
 We model the errors as a simple linear system of equations: 
 each expression in the \texttt{SET} clause is translated into a
@@ -181,8 +155,6 @@ applicability of learning-based approaches.
 
 \end{itemize}
 
-% \input{content/example3.tex}
-
 \newtext{
 \section{Repairing the Correct Query}
 \label{app:index}
@@ -206,6 +178,31 @@ focus on the \texttt{UPDATE} workload and three ages of corruption, while
 increasing the database size. Again, \sys is accurate in every case
 (Figure~\ref{f:dbsizeratio}).
 
+   \begin{figure*}[!thb]
+  \centering
+  \begin{subfigure} [t]{.3\textwidth}
+    \includegraphics[width = .99\columnwidth]{figures/indelup_acc_idx}
+    \vspace*{-.25in}
+    \caption{Correct repair ratio vs. query types}
+    \label{f:querytyperatio} 
+    \end{subfigure}
+    \begin{subfigure} [t]{.3\textwidth}
+    \includegraphics[width = .99\columnwidth]{figures/dbsize_acc_idx}
+    \vspace*{-.25in}
+    \caption{Correct repair ratio vs. database sizes}
+    \label{f:dbsizeratio} 
+    \end{subfigure}
+    \begin{subfigure} [t]{.3\textwidth}
+    \includegraphics[width = .99\columnwidth]{figures/noise_fn_acc_idx}
+    \vspace*{-.25in}
+    \caption{Top-k vs. query types. }
+    \vspace*{-.1in}
+    \label{f:noiseratio} 
+    \end{subfigure}
+   \caption{ \sys maintains 1.0 correct repair ratio with complete complaint set. }
+   \vspace*{-.1in}
+   \label{fig:truerate}
+  \end{figure*}
 
 Finally, we study the effect of incomplete complaints in
 Figure~\ref{f:noiseratio}. Increasing the false negative rate means that more
