@@ -1,3 +1,5 @@
+%!TEX root = ../main.tex
+
 \section*{Comments by Reviewer 1}
 
 \noindent
@@ -15,8 +17,10 @@ benchmark data.
 
 \dots
 
-p6. Why is tuple slicing sound? It sounds like it will amount to modeling only
-the tuples that are subject to a complaint...
+p6. Why is tuple slicing sound?\dots This will work if most updates are
+independent \dots if one update contributes to a complaint tuple by reading
+from a non-complaint tuple, then it seems like the variables for the tuples
+not in C will be under-specified
 
 \dots
 
@@ -39,10 +43,10 @@ effective in practice and greatly helps improve \sys performance, especially
 when the ratio of the complaint set size and the database size is small. In
 general, this heuristic can result in incorrect repairs. This is possible if a
 query $q$ succeeds an erroneous query $q_e$, and $q$ overwrites all changes by
-$q_e$. Under a more complex scenario, where tuples are dependent to 
-each other (as mentioned in comments ``p6...''), tuple-slicing is more likely 
-to make mistakes as it under-specify many dependent tuples that are 
-not in the complaint set. 
+$q_e$. So, the reviewer is correct, that under a more complex scenario, where
+an update uses information from non-complaint tuples, tuple-slicing is more
+likely to make mistakes as it under-specifies dependent tuples that are not in
+the complaint set.
 However, \emph{tuple slicing is sound in certain settings}, namely,
 when the complaint set is complete and if corruptions are limited to a single
 query. In these cases, by using incremental repair
@@ -51,13 +55,13 @@ the refinement step (e.g., by restricting the value of the objective function
 in the refinement MILP to zero), the solver will be forced to pick the correct
 repair.
 
-To conclude, \emph{tuple-slicing} is heuristic method that often helps   
-improving execution efficiency of \sys in solving workloads with diverse properties. 
-Although we don't have any realistic workload data, by examining various  
-simulation benchmarks in different application domains~\cite{oltpbench}, we found most of them
-share the same properties as we evaluated in Section~\ref{sec:experiments:benchmark}. 
-Thus, we believe tuple-slicing does not limit to synthetic / randomly
-generated benchmark workloads, instead, it could be applied on realistic workloads as well. 
+Even though tuple slicing is heuristic in general, it performs well in
+practice for workloads with diverse properties. Unfortunately, we do not have
+access to suitable real-world data, but studying simulation benchmarks in
+different application domains~\cite{oltpbench}, we found that most share the
+properties used in our evaluation (Section~\ref{sec:experiments:benchmark}).
+% Thus, we believe tuple-slicing does not limit to synthetic / randomly
+% generated benchmark workloads, instead, it could be applied on realistic workloads as well. 
 
 
 
@@ -76,11 +80,13 @@ slicing summarizes all attributes that may have been modified by or define
 predicates in queries in the history. Any attributes that are not on this list
 can be safely ignored. Thus, applying query or attribute slicing will never
 reduce the accuracy of \sys. We formalize this result in
-Lemma~\ref{lem:sound}.
+Lemma~\ref{lem:sound}. We also edited the discussion of full impact in
+Section~\ref{sec:opt:query}, to clarify the conditions under which a query is
+a candidate for repair.
 
 
-\alex{Add details, not just references to different responses, as it is hard
-for reviewers to go back and forth.}
+% \alex{Add details, not just references to different responses, as it is hard
+% for reviewers to go back and forth.}
 
 
 \comskip
