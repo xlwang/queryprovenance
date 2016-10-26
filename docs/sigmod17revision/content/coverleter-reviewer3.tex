@@ -54,7 +54,7 @@
 }
 \end{quote}
 
-We thank the reviewer and have summarized out assumptions in one place (Section~\ref{sec:abstractions}).
+We thank the reviewer and have summarized our assumptions in one place (Section~\ref{sec:abstractions}).
 In short, our assumptions are as follows:
 
 \begin{itemize}
@@ -111,10 +111,6 @@ Under our default setting, the full complaint set size for a single corruption i
 25\% deleted errors means only $5-7$ complaints are proceeded to \sys. 
 In addition, we used range updates with random ranges, thus they are very likely to interact with each other, thus having $5-7$ complaints was important to deal with these interactions.  In many OLTP applications, the updates are primarily small, non-overlapping range updates, or even point updates, and we expect the needed number of complaints to be lower.  Ways to relax this requirement is a plan for future work.
 
-\alex{We need to be detailed, and not just refer to another answer. This
-reviewer is asking very specific questions, not just collecting the
-assumptions to one place!}
-
 
 \comskip
 
@@ -134,26 +130,32 @@ fail in their context.
 }
 \end{quote}
 
-\alex{Good arguments here, but this needs to be cleaned up.}
+The observation that this can be modeled as a data repair or explanation problem is very astute.  
+Given our assumptions that the query structures are fixed, it is possible to view the query log
+as a very large nested query that is joined with a parameter table.  We will clarify how this may be
+done, and why existing data-oriented solutions are ineffective and why our solution, which explicitly
+represents the query log, is necessary.
 
-In this paper, \sys solves two problems: 1. it finds the root reason(s) in the
-query history that causing database errors, and 2. it fixed the incorrectness
-by proposing a query log repair. Existing works mentioned above study highly
-corrected problems: in general, they all target at explaining erroneous or
-undesired query results by tracing back data source input and reporting either
-particular input tuples or common input patterns. After carefully analysis, we
-conclude that none of these existing works could fix the incorrectness nor
-solve the error identification task effectively and efficiently.
 
-In order to use these works to diagnose query history, we first convert the
-\textsc{Optimal Diagnosis} problem in Definition 4 as \textsc{Source data +
+
+This paper solves two problems: 1. it finds the root causes in the
+query history that result in the user-specified complaints, and 2. it generates repairs 
+that ameliorate these complaints.  In effect, \sys is a detection and repair tool.  
+
+The existing work mentioned above (and in the expanded related work) study highly relevent problems with respect to {\it detection}, and none focus on repair.
+Specifically, they focus on explaining erroneous or undesired query results by tracing from the result errors back to the input relations and either reporting suspicious input tuples most related to the result errors, or summarizing them as e.g., predicate statements.
+We summarize below our analysis of these approaches and we conclude that none of these alternative can solve the detection {\it nor} the repair problems effectively and efficiently.
+
+To adopt the existing work to our problem, we will first convert the
+\textsc{Optimal Diagnosis} problem in Definition 4 as a \textsc{Source data +
 SELECT queries} problem: Given database states $D_0$ and $D_n$, a query log
-$\mathcal{Q} = \{q_i\}$ such that $\mathcal{Q}(D_0) = D_n$, and a desired
-database state $D_n^*$ with no errors, we model the \textsc{Source data +
-SELECT queries} problem by creating a table $P$ for under-determined
-parameters in $\mathcal{Q}$ and table $D_0$ as source tables; and a single
-nested SELECT query $q_n'$ for queries in $\mathcal{Q}$. We demonstrate an
-abstract example in Example~\ref{fig:example}.
+$\mathcal{Q} = \{q_i | i \in [1, n]\}$ such that $\mathcal{Q}(D_0) = D_n$, and a desired
+database state $D_n^*$ without any errors.
+We model the \textsc{Source data + SELECT queries} problem by creating two source tables: 
+table $P$ for the under-determined parameters in $\mathcal{Q}$, and table $D_0$ for the initial database state.
+Finally, we rewrite the queries in $\mathcal{Q}$ to use these two source tables and represent a rewritten query as $q_i'$.
+Figure~\ref{fig:example-cover} shows a concrete example with two queries, we will then outline how the two primary classes 
+of related work may be used to solve the detection problem.
 
 \begin{figure}[t]
 The \textsc{Optimal Diagnosis} problem:\\
@@ -241,48 +243,48 @@ The \textsc{Source data + SELECT queries} problem: \\
 \label{fig:example-cover}
 \end{figure}
 
-\noindent \textbf{[Roy et al. SIGMOD 2014, Wu et al. VLDB 2013, Chalamalla et al. SIGMOD 2014]} \\
-TLDR: These papers quantify responsibility of input data to errors in the
-output, however responsibility
+\noindent \textbf{Class 1: [Roy et al. SIGMOD 2014, Wu et al. VLDB 2013, Chalamalla et al. SIGMOD 2014]} \\
+
+{\it
+TLDR: These papers either do not fit the structure of our problem~\cite{Wu13,roy2014formal}, or 
+are based on assumptions that do not hold in \sys's problem setting~\cite{chalamalla2014}.
+}
 
 
-These papers focus on detecting and summarizing the likely source tuples by
-propagating ``responsibility'' from annotated output error tuples to sources.
-~\cite{Wu13} targets at explaining a set of SELECT query results by a
-conjunction of predicates on attributes where the SELECT clause in each query
-is restricted to a single aggregate operator. Similarly, ~\cite{roy2014formal}
-explains a group-by SQL query with a single aggregate function. Since there is
-no obvious mapping between complaints and a particular aggregate function,
-both algorithms cannot solve the error identification problem. Instead of
-aggregation results, ~\cite{chalamalla2014} searches for explanations for data
-quality rule violations. Even though complaints can be expressed as data
-quality rules, the algorithm does not distinguish the actual input source
-error (in $D_0$) and query parameter error (in $P$). Thus, in
-Example~\ref{fig:example}, the explanation $D_0.A = 3$ on table $D_0$ is also
-a valid explanation. Besides, ~\cite{chalamalla2014} relies on the causality
-relationship between erroneous data and their lineage, which is invalid for
-incorrect parameters in the update workload. Thus, this work cannot
-effectively solve the error identification problem either.
+These papers focus on detecting and summarizing the likely source tuples in error by
+propagating ``responsibility'' from error result tuples (aka complaints) to the sources.
+~\cite{Wu13,roy2014formal} explain a errors in the output of group-by aggregation queries by constructing 
+a conjunction of predicate clauses over the input table attributes. 
+These predicates are designed to match sets of input tuples using sensitivity analysis-style approaches, which are unlikely to precisely identify the specific parameter tuple and value that it should be set to.
+In addition, in our problem setting, aggregations in update statements are uncommon and so these papers solve a different problem.
+
+Instead of aggregation results, ~\cite{chalamalla2014} generates explanations for data quality rule violations. 
+Even though complaints can be expressed as data quality rules, the algorithm does not distinguish between the two source tables (input data in $D_0$ and the parameters in $P$).
+Thus, in Figure~\ref{fig:example-cover}, the explanation $D_0.A = 3$ is an equally valid explanation. 
+In addition, ~\cite{chalamalla2014} relies on the assumption that there is a causal relationship between erroneous output and their lineage, and propogates responsibility through the output's lineage.
+This assumption does not hold if the incorrect query {\it did not} update a tuple that should have been updated.  In this case, the incorrect parameter value would {\it not} be in the lineage, and thus not identified. Ultimately, neither approach correctly solves the detection problem.
 
 \noindent \textbf{[Meliou et al. SIGMOD 2011]} \\
-TLDR: The number of disjunctions in the generated SAT expression increases
-exponentially with respect to the number of queries in the log. For instance,
-if the database contained 100 tuples and 10 queries, the number of
-disjunctions would be $\cdot 2^{10}$ and thus the number of lineage
-expressions would be $100\cdot 2^{100}$.
+
+{\it TLDR: When using~\cite{meliou2011tracing}, the size of the generated SAT expression 
+increases exponentially with respect to the number of queries in the log. 
+For instance, if the database contained 100 tuples and 10 queries, there is one lineage expression (described below) for each tuple, 
+however the size of the expression would be $2^{10}$.  
+Furthermore, the transformation from lineage expressions to conjunctive normal form for the SAT solver is potentially also exponential. 
+}
 
 The View-Conditioned Causality(VCC) work takes a set of input variables
 $\mathbf{X}$, a transformation $\mathbf{\Phi} =\{\Phi_1, \dots , \Phi_m\}$
-computing the output values $\mathbf{z}$, and a ground truth
-$\hat{\mathbf{z}}$, and detects input variables that are responsible for data
+that computes output values $\mathbf{z}$ (possibly with errors), and a ground truth
+$\hat{\mathbf{z}}$, and detects the input variables that are responsible for data
 errors $\mathbf{z}|\hat{\mathbf{z}}$. The \textsc{Source data + SELECT
 queries} problem can be expressed as a VCC problem where cells in $P$ form the
 input variables $\mathbf{X}$ and each tuple $t_i$ in $D_0$ and the SELECT
 query $q_n'$ is translated into a lineage expression $\Phi_i$. In each lineage
 expression $\Phi_i$, tuple values in $D_0$ and $D_n^*$ are further converted
-into constant variables. By doing so, only variables in $P$ will be selected
-to explain data errors. In Example~\ref{fig:example}, lineage expression
-$\Phi_3$ for tuple $t_3$ is as following:
+into constant variables. By doing so, only variables in $P$ will be candidates
+to explain data errors. In Example~\ref{fig:example}, the lineage expression
+$\Phi_3$ for tuple $t_3$ is as follows:
 
 {\small
 \begin{eqnarray*}
@@ -292,23 +294,21 @@ $\Phi_3$ for tuple $t_3$ is as following:
 &\vee (\neg(3 > p_2 \wedge 3 < p_3) \wedge \neg(3 > p_5 \wedge 3 < p_6) \wedge (5 = 6))&
 \end{eqnarray*}
 }
-Each row corresponding to the satisfactory condition for where clauses in $Q$.
-The first row, for example, means the where condition is true for both $q_1$
-and $q_2$. The ground truth output values for $\mathbf{\Phi}$ are all set to
-\textit{True}. By solving the VCC problem, one can identify incorrect
-parameters in the query log. However, as you may notice, the lineage
-expressions for tuples in $D_0$ are composed by disjunctive sub-expressions
-with exponential cardinality to the number of queries in $Q$. Since the
-execution efficiency is highly correlated to the complexity of lineage
-expressions, VCC solves the error detection task but cannot solve it
-efficiently.
+Each row corresponds to a condition that satisfies the WHERE clauses in $\mathcal{Q}$.
+The first row, for example, means that the WHERE condition is true for both $q_1$ and $q_2$. 
+We fix the output values for all $\mathbf{\Phi}_i$ to \textit{True}. 
+Solving this VCC problem can identify the incorrect parameters in the query log. 
 
-To conclude, none of these highly correlated works could handle both problems
-addressed by \sys: ~\cite{meliou2011tracing} solves the error detection
-problem with low efficiency; ~\cite{chalamalla2014} may solve the error
-detection problem but fail to distinguish data source errors and query errors;
-~\cite{Wu13} and ~\cite{roy2014formal} restricted to aggregations, thus cannot
-solve either problems.
+However, the lineage expressions for tuples in $D_0$ are composed of disjunctive sub-expressions whose cardinality increases exponentially with the number of queries in $\mathcal{Q}$. 
+Further, translating the expressions to a SAT problem may also increase the size exponentially.
+Thus, although VCC can solve the error detection task, it does not solve it efficiently except for the simplest settings (handful of tuples, very few queries).
+
+{\it Summary: \sys deals with detection and repair.  
+For the detection problem,  ~\cite{meliou2011tracing} solves it but is infeasibly slow, 
+~\cite{chalamalla2014} relies on assumptions that do not hold in our setting, 
+and ~\cite{Wu13,roy2014formal} are limited to aggregation queries do not fit our problem setting.
+In addition, none solve the repair problem.
+}
 
 
 \comskip
