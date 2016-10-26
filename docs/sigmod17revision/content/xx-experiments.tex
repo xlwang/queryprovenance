@@ -103,10 +103,9 @@ time between submitting a complaint set and the system terminating after retriev
 Accuracy is reported as the repair's precision (percentage of repaired tuples that were correctly fixed), 
 recall (the percentage of the full complaint set that was repaired), 
 and F1 measure (the harmonic mean of precision and recall). 
-Note that the reported accuracy measures whether the complaint tuples are correctly repaired, and the repaired query is allowed to differ from the true query. 
-However, we study the latter issue in Appendix~\ref{app:index} and find that \xlw{\sys always fixes the true query with complete complaint set, and \sys tends to 
-fix wrong queries for problems with incomplete complaints where the false negative rates $>0$ on old corruption(s) with age $250$.}
-We report the average across 20 runs.
+\newtext{These metrics measure whether the complaint tuples are repaired correctly, but it is possible that the repaired query differs from the true query. 
+We separately evaluate whether \sys selects the right query to repair; these results are included in Appendix~\ref{app:index}.  In summary, we find that \sys always fixes the right query when the complaint set is complete.  However, the less complete the complaint set, and the older the corruption, the more likely it is that \sys will repair the wrong query.}
+Our experiments report averages across 20 runs.
 We describe the experimental parameters in the context of the datasets and workloads below. 
 
 % \xlw{Note that we consider a log repair accurate as 
@@ -330,11 +329,15 @@ In this section, we further study the performance of \sys in solving hard proble
  
 \stitle{Incomplete Complaint Set:} \looseness -1
 The first experiment (Figures~\ref{f:falsenegative_time} and~\ref{f:falsenegative_acc}) varies the false negative rate in incomplete complaint sets.
-We increase the rate from $0$ ($0\%$ missing in the complaint set) to $.75$ ($75\%$ are missing).  
-We find that reducing the size of the submitted complaint set naturally improves the repair performance,
-however the repair quality  (precision and recall in Figure~\ref{f:falsenegative_acc}) may suffer if the corruption occured in a very old query. 
-This is expected because \sys targets reported complaints, thus unreported complaints may be missed and lead to low recall.
-\xlw{Finally, if there are insufficient complaints, then it is possible that the repair will over-generalize to  ``repair'' the wrong records and lead to lower precision.}
+We increase the rate from $0$ ($0\%$ missing in the complaint set) to $0.75$ ($75\%$ are missing).  
+\newtext{We find that reducing the number of reported complaints lowers the
+runtime; however, we observe a small reduction in repair quality (precision
+and recall in Figure~\ref{f:falsenegative_acc}) for recent corruptions and a
+significant drop for older ones. This is expected: the less information we
+have on the problem (fewer complaints), the lower our ability to fix it
+correctly. In the extreme case where very few complaints are available, the
+problem can be under-specified, and the true repair harder to identify.
+}
 
 
     

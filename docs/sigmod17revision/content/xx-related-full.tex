@@ -4,16 +4,27 @@
 \label{s:related} 
 \sys tackles the problem of diagnosis and repair in relational query
 histories (query logs). 
-\xlw{Due to our assumption that the query structures are fixed, it is possible to view our problem as a data diagnosis and repair problem 
-by creating a table for parameters in the query log and converting the query histories into a single nested \texttt{SELECT} query.
-The data diagnosis problem focuses on detecting and summarizing source tuples that are responsible for the annotated errors in the result. Even though
-there exist multiple works solving the data diagnosis problem, none of them could solve the data repair problem or address the corresponding data diagnosis problem effectively and efficiently:
-~\cite{Wu13, roy2014formal} identify source tuples for aggregated \texttt{SELECT} queries only, thus could not applied to identify errors in the query log since there
-is no direct mapping between an aggregate function and individual error tuples.  ~\cite{chalamalla2014} 
-traces source tuples that have the highest coverage of the output errors based on their lineages. Clearly, it cannot solve the data diagnosis problem in \sys effectively 
-since there is no casual relationship between data errors and their update lineage.  
-~\cite{meliou2011tracing} solves the data diagnosis problem but the problem size grows exponentially with the query histories sizes, thus cannot solve the data diagnosis 
-problem efficiently. 
+\newtext{However, since \sys does not modify the query structure, one could
+frame this as a data diagnosis and repair problem: Queries are represented in
+a relation $R_q$ where each tuple is a record of a query and its parameters,
+and the log is modeled as a single nested \texttt{SELECT} query over $R_q$ and
+$D_0$. The result of this query is a view representing the final database
+state $D_n$ and complaints are errors annotated on this view. Prior work has
+focused on the problem of identifying the source tuples responsible for errors
+in the output. However, the existing techniques are not effective for this
+problem:
+Some of the existing work focuses on aggregate queries~\cite{Wu13,
+roy2014formal} and there is no direct mapping between an aggregate function
+and individual error tuples. Descriptive and prescriptive
+cleaning~\cite{chalamalla2014} uses the lineage of output errors to identify
+the input tuples that are connected to most errors. This intuition is not
+suitable for our problem setting, because there is no causal relationship
+between the coverage of an update and the likelihood of error (a query that
+updates the entire database is no more likely to be incorrect than a query
+that updates a single tuple).
+Finally, causality techniques~\cite{meliou2011tracing} are inefficient and
+cannot scale because the problem size grows exponentially. Moreover, they do
+not produce repairs.
 }
 
 
@@ -92,8 +103,8 @@ All these approaches are
 limited to selection predicates of \texttt{SELECT} queries, and they
 only typically consider one query at a time. In contrast, \sys handles
 update workloads, processes large query histories, and can model
-several steps in the dataset's evolution. \xlw{Besides, other explanation works~\cite{GebalyAGKS14, Khoussainova2012, Thirumuruganathan2012, Das2011, Fabbri2011, Bender14} are also limited in their applicability as many of them target on specific application domains. }
-\xlw{Scorpion and Roy's explanation work conflict with newly added paraphraph on data source+select query. So I remove them here.  }
+several steps in the dataset's evolution. \newtext{A lot of explanation work~\cite{GebalyAGKS14, Khoussainova2012, Thirumuruganathan2012, Das2011, Fabbri2011, Bender14} targets specific application domains, limiting its applicability to our setting. }
+% \xlw{Scorpion and Roy's explanation work conflict with newly added paraphraph on data source+select query. So I remove them here.  }
 
 Finally, as \sys traces errors in the queries that manipulate data, it
 has connections to the field of \emph{data and workflow provenance}.
