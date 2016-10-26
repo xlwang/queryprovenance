@@ -238,7 +238,7 @@ This is the foundation of our \emph{query-slicing} optimization.
 \xlw{The logic behind the calculation of \textbf{full-impact} is straightforward: it traces the query history and continuously extend the impact of a query 
 so that it includes every attribute that may updated by the query. Thus, the \textbf{full-impact} of a query may also extend to another query that 
 has disjoint set of attributes in both \texttt{SET} and \texttt{WHERE} clauses, e.g., in a query log of $\{q_1$ writes $A$; $q_2$ reads $A$ writes $B$, $q_3$ reads $B$ writes $C\}$, 
-the full-impact of $q_1$ covers all three attributes, $\{A, B, C\}$.}
+the impact of $q_1$ extends from $\{A\}$, to $\{A,B\}$(at $q_2$) and finally $\{A, B, C\}$(at $q_3$, full-impact).}
 
 By computing the full-impact of $q$, we can determine the extent that it affects $\mathcal{C}$
 based on its overlap with the complaint attributes.
