@@ -138,7 +138,7 @@ data errors as \emph{complaints}. A complaint corresponds to a
 particular tuple in the final database state $D_n^*$, and identifies
 that tuple's correct value assignment. We formally define complaints
 below:
-\begin{definition}[Complaint]
+\begin{definition}[Complaint]\label{def:complaint}
     A complaint $c$ is a mapping between two tuples: $c: t\mapsto t^*$, such that $t$ and $t^*$ have the same schema, \newtext{$t, t^*\in D_n\cup\{\bot\}$}, and $t\neq t^*$. A complaint defines a
     transformation $\mathcal{T}_c$ on \newtext{the final database state $D_n$: $\mathcal{T}_c(D_n)
     = (D_n\setminus\{t\})\cup\{t^*\}$, which replaces $t$ in $D_n$ with $t^*$}.

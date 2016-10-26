@@ -31,8 +31,10 @@ simple (no subqueries, complex expressions, UDFs, aggregations, nor joins)
 single-query transactions with clauses composed of linear functions, and
 complaint sets without false positives.
 In future work, we hope to extend our techniques to relax these limitations towards more complex query structures and towards support for CRUD-type web application logic.
-In addition, we plan to investigate additional methods of scaling the constraint analysis, 
-as well as techniques that can adapt the benefits of single-query analysis to errors in multiple queries.
+%In addition, we plan to investigate additional methods of scaling the constraint analysis, 
+% as well as techniques that can adapt the benefits of single-query analysis to errors in multiple queries. 
+\newtext{In addition, we plan to investigate additional methods of scaling the constraint analysis and we expect
+the improvement of MILP solvers and hardwares, so that \sys can break its current bottleneck and solve harder problems effectively and efficiently. }
 
 
 % \ewu{Say that this was largely simulated, and we want to move towards more realistic applications that have more complex query expressions, and how the queries interact with (simple) application logic is e.g., CRUD web applications}
