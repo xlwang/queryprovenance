@@ -1,4 +1,5 @@
 
+
 \noindent
 \textbf{Comment \#3:} Scalability 
 \begin{quote}
@@ -41,26 +42,17 @@ We apologize for the confusion and we have explained our accuracy metrics in Sec
 The accuracy metrics in Section~\ref{sec:experiments} measure whether the complaint tuples 
 are repaired correctly, but it is possible that the repaired query differs from the true query. 
 In the example, both $income \geq 87200$ and $income \geq 87500$ 
-resolves all the complaints and thus have the same accuracy. 
-We separately evaluate whether \sys selects the right query to repair; 
-these results are included in Appendix~\ref{app:index}.  
-In summary, we find that \sys always fixes the right query when the complaint 
-set is complete.  However, the less complete the complaint set, and the older 
+resolves all the complaints and thus we consider them with the same accuracy. 
+
+We have extended our experiment (Appendix~\ref{app:index}) and separately evaluate 
+whether \sys selects the right query to repair. 
+We find that \sys always fixes the right query when the complaint 
+set is complete  However, the less complete the complaint set, and the older 
 the corruption, the more likely it is that \sys will repair the wrong query.
-At current stage, \sys does not guarantee to derive query repairs that are 
-exactly same as the true query even in problems with complete complaint sets. 
 
-In the example, we also consider $income >= 87200$ as a
-correct query repair as it resolves all the reported complaints. In addition,
-the repaired query is allowed to differ from the true query. However, this is
-very rare in practice and we show that \sys always pick the correct query to
-fix when the complaint set is complete. Though \sys dos not guarantee to
-propose a query log repair that is exactly the same with the original true
-query log, it identifies the incorrect query and provides a reasonable
-suggestion of how to fix the problem.
-
-These metrics measure whether the complaint tuples are repaired correctly, but it is possible that the repaired query differs from the true query. 
-We separately evaluate whether \sys selects the right query to repair; these results are included in Appendix~\ref{app:index}.  In summary, we find that \sys always fixes the right query when the complaint set is complete.  However, the less complete the complaint set, and the older the corruption, the more likely it is that \sys will repair the wrong query.
+At current stage, \sys does not guarantee to derive query repair that is
+exactly same as the true query, however, \sys is able to identify the incorrect query
+and suggest reasonable query repair. 
 
 \comskip
 
