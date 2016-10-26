@@ -1,3 +1,6 @@
+%!TEX root = ../main.tex
+
+
 \section*{Comments by Meta-Reviewer}
 
 \noindent
@@ -56,20 +59,39 @@ Lemma~\ref{lem:sound}.
 Clarify the assumptions, their interaction, and why they are realistic in practice. clarify that the system is not repairing the update queries, but the affected data (i.e., query is not correct and errors can still happen).}
 \end{quote}
 
-In this paper, we propose a framework \sys that identifies errors in query history and generates query log repair. 
-We assume errors are only in \textbf{query data instead their structures}. In addition, we focus on relatively 
-``simple'' OLTP queries with \textbf{no subqueries, aggregation, joins, and user-defined functions (UDFs)}. 
-We concentrate on a setting where no errors are exist in the data before importing into the database, i.e., 
-the initial database state always starts from empty or a clean checkpoint. \sys is not restricted to consistent 
-complaint set and we evaluate \sys's performance with incomplete complaint set in Figure~\ref{f:falsenegative}. 
-We leave the improvement on other types of inconsistency (e.g., false positive complaints, incomplete correct
-values) into our future work. Besides, \sys does not require single query corruption either, however, \sys 
-suffers from severe scalability limitation using current MILP solvers. We expect future improvement on \sys
-as well as MILP solvers and hardware to solve problems with multiple corruptions efficiently. 
+We have edited the text in Section~\ref{sec:abstractions} to emphasize all assumptions used by \sys.  We summarize the main points here.
 
-We also summarize all these assumptions in Section~\ref{sec:abstractions}.
+The first set of assumptions pertain to the focus of our system: \sys
+identifies and repairs errors in query parameters, but does not modify the
+query structure. Further, it is restricted to relatively simple OLTP queries
+with no subqueries, aggregation, joins, or user-defined functions (UDFs).
+These restrictions are realistic for a broad range of user-facing web
+applications and OLTP benchmarks, as complex query structures and operations
+are less common in update workloads than in read-oriented analytical
+workloads. In addition, \sys makes the implicit assumption that the log starts
+either with an empty or a clean database. While \sys can still be employed in
+settings where this assumption does not hold, it would not be able to resolve
+complaints that pertain to errors that existed before the start of the query
+history.
 
-\alex{We should give some details here.}
+We have also clarified in Sections~\ref{sec:abstractions} and~\ref{sec:opt}
+the role of two additional restrictions in our framework: completeness of the
+complaint set, and single-query corruptions. Under these assumptions, \sys can
+take advantage of powerful optimizations. However, \sys is not restricted to
+settings where these assumptions hold, and can handle cases of multiple query
+corruptions and incomplete complaints. The effectiveness and efficiency of
+\sys can be limited in these settings, mostly due to limitations of the MILP
+solvers. Improvements in MILP technologies will also improve \sys's
+capabilities. In our evaluation, we study these cases empirically, and we have
+included experiments with incomplete complaints and multiple query corruptions
+(Section~\ref{sec:experiments:hardprob}).
+
+Finally, we have also clarified in Section~\ref{sec:abstractions}, that while
+we define complaints as complete records, we do so only for ease of
+exposition. This is not an inherent restriction of \sys and definitions and
+algorithms can be trivially extended to handle unknown values.
+
+
 
 \comskip
 
