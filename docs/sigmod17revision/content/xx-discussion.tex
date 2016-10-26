@@ -3,25 +3,24 @@
 
 \section{Summary and discussion}
 
-The general problem of data errors is highly complex, and exacerbated by its highly contextual nature.
-We believe that an approach that explains and repairs such data errors based on operations performed by the application or user is a promising step towards incorporating contextual hints into the analysis process.
+The general problem of data errors is complex, and exacerbated by its highly contextual nature.
+We believe that an approach to explain and repair such data errors, based on operations performed by the application or user, is a promising step towards incorporating contextual hints into the analysis process.
 
-Towards this goal, we presented \sys, the first framework to diagnose and
+Towards this goal, \sys is the first framework to diagnose and
 repair errors in the queries that operate on the data.
 Datasets are typically dynamic: even if a dataset starts clean,
-updates may introduce new errors. \sys can
-analyze OLTP query logs to trace reported errors to the queries that
+updates may introduce new errors. \sys 
+analyzes OLTP query logs to trace reported errors to the queries that
 introduced them. This in turn helps identify additional errors
 in the data that may have been missed and gone unreported.
 
-We proposed a basic algorithm, \texttt{basic}, that uses non-trivial transformation rules to
-encode information from the data and the query log as a MILP problem. We further improve 
-\texttt{basic} with two types of optimizations: 
+We proposed \texttt{basic} which uses non-trivial transformation rules to
+encode the data and query log as a MILP problem. We further 
+presented two types of optimizations: 
 (1)~slicing-based optimizations that reduce the problem
-size without compromising the accuracy, but rather often improving it, and 
-(2)~an incremental approach that analyzes a single query at a time. 
-Our experiments show that the latter
-optimization significantly increases the scalability and latency for repairing single-query corruptions---at interactive speeds for OLTP benchmarks such as TPC-C---without significant reduction in accuracy.
+size and often improve, rather than compromise accuracy, and 
+(2)~an incremental approach that analyzes one query at a time. 
+Our experiments show that the latter significantly increases the scalability and latency of repairing single-query corruptions---at interactive speeds for OLTP benchmarks such as TPC-C---without significant reduction in accuracy.
 
 To the best of our knowledge, \sys is the first formalization and solution to the diagnosis
 and repair of errors using past executed queries. 
