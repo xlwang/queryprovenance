@@ -66,7 +66,7 @@ forms a disjunction of rules that constitute the repaired \texttt{WHERE} clause.
 The \texttt{WHERE} clause repair proposed by the classifier may not completely repair 
 the complaints if there was also an error in the \texttt{SET} clause. 
 In this case, we execute a second repair step.
-\begin{figure}[!thb]
+\begin{figure}[t]
 \centering
   \begin{subfigure} [t]{.75\columnwidth}
   \includegraphics[width = \columnwidth]{figures/heuristictime}
@@ -178,7 +178,7 @@ focus on the \texttt{UPDATE} workload and three ages of corruption, while
 increasing the database size. Again, \sys is accurate in every case
 (Figure~\ref{f:dbsizeratio}).
 
-   \begin{figure*}[!thb]
+   \begin{figure*}[t]
   \centering
   \begin{subfigure} [t]{.3\textwidth}
     \includegraphics[width = .99\columnwidth]{figures/indelup_acc_idx}
@@ -394,7 +394,7 @@ the skew and range parameters to study how they affect the size of the complaint
 
 
 
-\begin{figure}[h]
+\begin{figure}[t]
 \centering
 \includegraphics[width = 3in]{figures/qidxsimulation/qidx_v_ncomplaints_20attrs_const}
 \caption{Corrupt query index, skew, range vs complaint set size for \textit{constant} \texttt{SET} clauses.}
