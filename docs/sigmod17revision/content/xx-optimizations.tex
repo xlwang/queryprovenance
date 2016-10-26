@@ -218,7 +218,6 @@ attributes it modifies), and its full impact (the set of attributes it may
 affect through all subsequent queries).
 
 \begin{definition}[Query dependency \& impact] \label{eq:dependency}
-   \looseness -1
     Query $q_i$ has \textbf{direct impact}, $\mathcal{I}(q_i)$, which is
     the set of attributes updated in its modifier function $\mu_{q_i}$,
     % (e.g., \texttt{SET} clause). 
@@ -251,7 +250,6 @@ affect through all subsequent queries).
 % \vspace*{-0.2in}
 
 \newtext{
-\looseness -1
 Full impact is a form of forward provenance: it traces the query history
 toward more recent queries and extending the impact of a query to include
 every attribute that may have been affected by it. For example, assume the
