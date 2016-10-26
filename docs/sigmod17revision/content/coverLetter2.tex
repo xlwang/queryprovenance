@@ -42,19 +42,6 @@ into two, often much smaller, MILP problems. It works effectively in practice an
 greatly helps improving \sys's performance, especially when the ratio of complaint 
 set size and the database size is small. However, it it possible that \emph{tuple-slicing} 
 fixes the incorrect query and introduce noises to the query log repair. 
-
-Here we show a simple example when \emph{tuple-slicing} may fail:
-
-
-\indent \textit{$q_1$ writes $t_1$ (incorrect query); \\
-\indent $q_2$ writes $t_2$;\\
-\indent $q_3$ writes $t_1, t_3$.}\\
-A workload with three queries where $q_1$ is the incorrect query updates tuple $t_1$. 
-Another query $q_3$ covers the impact of $q_1$ and updates tuple $t_1$ and $t_3$. 
-When only considering tuples in the complaint set, \sys may fix $q_3$ instead of $q_1$ 
-while modifying an additional tuple $t_3$. In this case, \emph{tuple-slicing} introduces 
-noises, however, such noise could be identified by the non empty non-complaint set. 
-
 In addition, \emph{tuple-slicing} suffers from higher risk when applying to workloads 
 with nested updating queries where tuples are no longer independent to each other, 
 e.g., query update one tuple by reading from another tuple. This is because queries 
@@ -63,11 +50,24 @@ variables from non-complaints, the constructed MILP problem become loosely const
 and noises are more likely to be introduced. 
  
 However, for problems with complete complaint set, by further enforcing \textbf{no non-complaint tuples}
- in the refinement step (disallow above zero objective-function value for the refinement MILP problem), 
- we ensure the correctness of tuples that are not in the complaint. In this paper, since we 
- mainly focus on problems with single corruption and complete complaint set, 
- \emph{tuple-slicing} is an effective method to improve the performance of the \emph{basic} 
- approach, without compromising, and often improving, repair quality.  
+in the refinement step (disallow above zero objective-function value for the refinement MILP problem), 
+we ensure the correctness of tuples that are not in the complaint. In this paper, since we 
+mainly focus on problems with single corruption and complete complaint set, 
+\emph{tuple-slicing} is an effective method to improve the performance of the \emph{basic} 
+approach, without compromising, and often improving, repair quality.  
+ 
+Here we show a simple example when \emph{tuple-slicing} may fail:
+
+\indent \textit{$q_1$ writes $t_1$ (incorrect query); \\
+\indent $q_2$ writes $t_2$;\\
+\indent $q_3$ writes $t_1, t_3$.}\\
+A workload with three queries where $q_1$ is the incorrect query updates tuple $t_1$. 
+Another query $q_3$ covers the impact of $q_1$ and updates tuple $t_1$ and $t_3$. 
+When only considering tuples in the complaint set, \sys may fix $q_3$ instead of $q_1$ 
+while modifying an additional tuple $t_3$. In this case, \emph{tuple-slicing} introduces 
+noises, however, such noise could be identified by the non empty non-complaint set. In case
+where the $t_1$ is guaranteed as the only erroneous tuple, such noise could be further avoided 
+by enforcing empty non-complaint set.
  
 \emph{Query-slicing} and \emph{attribute-slicing} remove irrelevant queries and attributes 
 according to whether or not they would affect the incorrect values in the complaints. More specifically,
@@ -203,7 +203,8 @@ undesired query results by tracing back data source input and reporting either
 particular input tuples or common input patterns. After carefully analysis, we
 conclude that none of these existing works could fix the incorrect queries
 (problem 2) nor solve the error identification task (problem 1) effectively
-and efficiently. Please refer to R3.2 for details regarding this analysis.
+and efficiently. We provide detailed analysis for each works in Reviewer 3's
+\# comment 2.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -226,7 +227,7 @@ benchmark data.
 \dots
 
 p6. Why is tuple slicing sound? It sounds like it will amount to modeling only
-the tuples that are subject to a complaint.
+the tuples that are subject to a complaint...
 
 \dots
 
@@ -237,6 +238,33 @@ this requires proof
 
 }
 \end{quote}
+
+\emph{Tuple-slicing} is a \textbf{heuristic} that breaks down a large MILP problem 
+into two, often much smaller, MILP problems. It works effectively in practice and 
+greatly helps improving \sys's performance, especially when the ratio of complaint 
+set size and the database size is small. However, it it possible that \emph{tuple-slicing} 
+fixes the incorrect query and introduce noises to the query log repair. In addition, 
+under more complex settings where tuples are no longer independent 
+(also mentioned in the review ``p6 ...''), \emph{tuple-slicing} 
+is more likely to make mistakes. 
+
+In cases where the complaint set is complete,
+\sys is able avoid mistakes due to \emph{tuple-slicing} by enforcing empty non-complaint set
+in the refinement step. Even with incomplete complaint set, one can adjust constrains 
+in the refinement step on the non-complaint set size to control noise introduced by \emph{tuple-slicing}.
+To conclude, \emph{tuple-slicing} is safe as long the complaint set is complete on both synthetic / randomly
+generated benchmark workload and realistic workload. We plan to improve \sys for handling 
+inconsistent complaints, including incomplete complaint set, in our future work.
+
+\emph{Query-slicing} and \emph{attribute-slicing} remove irrelevant queries and attributes 
+according to whether or not they would affect the incorrect values in the complaints. 
+\sys conducts a throughout analysis by tracing forward the query history and identifies
+queries that are not able to modify incorrect attributes in the complaint set. Since adjustment
+to such queries has no impact on the erroneous values, it is safe to apply \emph{query-slicing}. 
+Similar to \emph{query-slicing}, \emph{attribute-slicing} searches for all attributes that may
+modified by queries in the workload (or a subset of queries after applying \emph{query-slicing}) and
+avoids encoding attributes that are not in the list into the MILP problem. Thus, \emph{attribute-slicing}
+is also safe. 
 
 \alex{Add details, not just references to different responses, as it is hard
 for reviewers to go back and forth.}
@@ -275,10 +303,10 @@ $\mathcal{F}_n(q_i)$: \[ \mathcal{F}(q_i)=\mathcal{F}_n(q_i) =
 \mathcal{I}_(q_i)\bigcup_{\substack{j = i+1 \\ \mathcal{F}_{j-1}(q_i)\cap
 \mathcal{P}(q_j) \neq \emptyset}}^n \mathcal{I}(q_j), \]
 
-For example, in the following query log:\\
-\textit{q1 writes t.A; \\
-q2 reads t.A and writes u.B; \\
-q3 reads u.B and writes v.C.}\\
+For example, in the following query log (example mentioned in reviews):\\
+\textit{\indent q1 writes t.A; \\
+\indent q2 reads t.A and writes u.B; \\
+\indent q3 reads u.B and writes v.C.}\\
 \[\mathcal{F}_1(q_1) = \{t.A\};\] 
 \[\mathcal{F}_2(q_1) = \{t.A\} \bigcup_{\mathcal{F}_1(q_1) \cap \{t.A\} \neq \emptyset} \{u.B\} = \{t.A, u.B\};\]
 \[\mathcal{F}_3(q_1) = \{t.A, u.B\}\bigcup_{\mathcal{F}_2(q_2) \cap \{u.B\} \neq \emptyset} \{v.C\} = \{t.A, u.B, v.C\}.\]
@@ -310,10 +338,15 @@ tuples).
 }
 \end{quote}
 
-We have extended our scalability experiment in Figure~\ref{f:attr100} to
-databases with $100k$ records. In addition, the comparison against the
-machine-learning heuristic approach in Appendix~\ref{sec:heuristic} uses
-databases of $100k$ records.
+Again, we apologize for inconsistency between our scalability statement and
+experiments in the main text and our statement was based on experiments in
+Appendix~\ref{sec:heuristic}.
+
+In addition, we extend our scalability experiment in Figure~\ref{f:attr100} to
+databases with $100k$ records and demonstrate that even with the most complex
+setting, \texttt{UPDATE} queries with \textit{range} \texttt{WHERE} clause,
+\sys scales to databases with $100k$ records when the corruption age is as old
+as $250$.
 
 \alex{Say more about the inconsistency between intro and evaluation.}
 
@@ -321,7 +354,7 @@ databases of $100k$ records.
 \comskip
 
 \noindent
-\textbf{Comment \#4:} Experiments on large datasets
+\textbf{Comment \#4:} Why $M^+$ in \texttt{DELETE} query?
 \begin{quote}
 \reviewer{
 It's also not entirely clear why it is correct to use a ``large/unused'' value $M^+$ for attributes of deleted tuples.
@@ -356,7 +389,22 @@ always fix the incorrect \texttt{DELETE} query instead of its consecutive
 \texttt{UPDATE} queries. In addition, we set $M^- \leq M$ to avoid generating
 infeasibility conditions.
 
+Note that for workloads with both \texttt{DELETE} and \texttt{UPDATE} queries
+while there exist \texttt{UPDATE} queries without a \texttt{WHERE} clause. 
+The assignment of $x_{q_i, t}$ in a \texttt{UPDATE} query 
+(with no \texttt{WHERE} clause) requires the following change:
+\begin{align}
+\label{eq:x2}
+x_{q_i, t} = x'_{q_i, t} \otimes 0 + (1-x'_{q_i, t}) \otimes \sigma_{q_i}(t) \nonumber \\
+x'_{q_i, t}= (t.A_j = M^-) \wedge (t.A_j^* = M^-) 
+\end{align}
+This arrangement avoid generating invalid MILP problems where a deleted tuple with $(t.A_j = M^-) \wedge (t.A_j^* = M^-)$
+is further updated by \texttt{UPDATE} queries due to the original assignment of $x_{q_i, t}  = 1$.
 
+In the example in $p5$, suppose a tuple is deleted and values in all attributes are assigned to $M^-$. 
+The boolean variable $x'_{q_i, t}$ is set to $1$ for any following \texttt{UPDATE} queries (regardless
+of there \texttt{WHERE} predicate) and 
+thus \texttt{UPDATE} queries won't updates values for deleted tuples. 
 
 \comskip
 
@@ -421,7 +469,8 @@ mu and sigma are from a limited language (e.g. arithmetic).
 }
 \end{quote}
 
-\alex{Have we done anything about this?}
+\alex{Have we done anything about this?} \xlw{The explanation and definition is
+quite close. We give def and then description. Maybe we should switch the order?}
 
 
 \begin{quote}
@@ -448,6 +497,10 @@ self-contradictory to me (a query reads, an update writes). Perhaps just
 }
 \end{quote}
 
+We change it as ``data manipulation statements'' that include \texttt{UPDATE},
+\texttt{INSERT}, and \texttt{DELETE} queries. We intentionally avoid naming 
+them ``update queries'' in order to distinguish from the \texttt{UPDATE} query. 
+
 \alex{This term is only used once in the paper. How about we just change it to
 data manipulation statements?}
 
@@ -461,6 +514,16 @@ problems?
 }
 \end{quote}
 
+To guarantee the correctness of the \texttt{UPDATE} queries, $M$ must 
+be assigned to a value outside the domain range of the corresponding attribute 
+because constraints in ~\ref{eq:uv} will be self-contradictory otherwise. For example, 
+attribute \textit{human age} has a domain range of $[0, 200]$, in which case $M$ must be 
+set to a value that is above $200$. 
+In addition, in order to maintain the feasibility for workloads with \texttt{DELETE}
+queries, $M$ must be set to a value that is $\geq M^-$ (we explained
+the setting of $M^-$ in Comment\# 4), but not necessary a 
+upper bound of the given numeric field. 
+
 \alex{Have we done anything about this?}
 
 
@@ -470,7 +533,7 @@ p5. In (5), should v be u?
 }
 \end{quote}
 
-Thank you for noting this, we correct this typo in the paper. 
+We thank the reviewer for noting this, we correct this typo in the paper. 
 \alex{(5) does not seem to have changed. If it does not need to be changed, we
 should explain here why.} 
 
@@ -480,8 +543,8 @@ should explain here why.}
 p7. ``Figure 3 showed the exponential cost'' - the scaling from 40 to 60 to 80 looked linear to me, just with a high coefficient.}
 \end{quote}
 We apologize for not stating it clear. In Figure~\ref{fig:querysize_vs_time}, \naive fails to produce an answer
- for problems with $\geq 80$ queries within 1000sec and \naive shows exponential cost for problems with $20$, $40$, and $60$ queries. 
-\alex{What is the answer here?} \xlw{We add a sentence in the caption to clarify this. Instead of fixing problems with 80 queries in 1000sec, 
+ for problems with $\geq 80$ queries within 1000 sec and \naive shows exponential cost for problems with $20$, $40$, and $60$ queries. 
+\alex{What is the answer here?} \xlw{We add a sentence in the caption to clarify this. Instead of fixing problems with 80 queries in 1000 sec, 
 baisc fails to derive a result in 1000sec. }
 
 
@@ -491,7 +554,7 @@ p10. Fig. 8 - please add 0.75 (the largest x-axis value) to the x-axis, better y
 }
 \end{quote}
 
-\alex{You have not done this.} \xlw{modified. }
+We thank the reviewer for the detailed suggestion and we implement this in our main text. 
 
 \begin{quote}
 \reviewer{
@@ -501,6 +564,10 @@ p10. ``may over-generalize'' - again, are you speculating or interpreting the re
 }
 \end{quote}
 
+We observe from Figure~\ref{f:falsenegative_acc} that \sys derives inaccurate log repairs when the corruption occured in 
+very old query  \textit{corruption age = 250}). Also, if there are insufficient complaints, then it is possible that the 
+repair will over-generalize to  ``repair'' the wrong records and lead to lower precision.
+
 \alex{What have we done for this?} \xlw{We added some clarification in the text. }
 
 \begin{quote}
@@ -508,6 +575,10 @@ p10. ``may over-generalize'' - again, are you speculating or interpreting the re
 p10, footnote: this seems like a strong assumption! I guess this means that dealing with multiple errors that interact with each other is future work...
 }
 \end{quote}
+
+We clarify this assumption in Section~\ref{sec:abstractions}. Currently, we cannot apply incremental algorithm 
+on problems with multiple corruptions since errors may spread across the entire query history, \sys 
+does not scale over problems with more than 40 queries. We leave further improvement in our future work.
 
 \alex{We need to say something here.  Have we clarified this assumption early in the paper?}
 
