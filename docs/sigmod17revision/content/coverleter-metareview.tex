@@ -104,20 +104,21 @@ Add experiment with larger data size, or clarify why they cannot be done.}
 
 % We extend our experiment with larger database sizes in Figure~\ref{f:attr100}
 % with up to $100k$ tuples.
-We apologize for the inconsistency between our scalability statement and the experiments 
-in our main content as the statement actually refers to our experiments in Appendix~\ref{sec:heuristic}, . 
+We apologize for the apparent inconsistency between the text and the graphs in
+the experiments. In our original submission, the graphs depicting the
+experiments on larger datasets were in the appendix
+(Appendix~\ref{sec:heuristic}).
 
-In this revision, we further extend our experiments and augment
-Figure~\ref{f:attr100} to database with up to $100k$ records. 
-We demonstrate that even with the most complex
-setting, \texttt{UPDATE} queries with \textit{range} \texttt{WHERE} clause,
-\sys scales to databases with $100k$ records when the corruption age is as old
-as $250$.
+For the revision, we further extended our experiments and augmented
+Figure~\ref{f:attr100} to datasets of up to $100K$ records. This experiment
+uses the most complex setting (\texttt{UPDATE} queries with \textit{range}
+\texttt{WHERE} clause), and shows that \sys is efficient for datasets of
+$100K$ records, even when the query corruption is not recent.
 
-\alex{We should add a couple more sentences here to apologize for the
-apparent inconsistency, and say that the 100k experiments were in the
-appendix, but they are now in the main paper. Did we just move an experiment,
-or did we augment the presented results?}
+% \alex{We should add a couple more sentences here to apologize for the
+% apparent inconsistency, and say that the 100k experiments were in the
+% appendix, but they are now in the main paper. Did we just move an experiment,
+% or did we augment the presented results?}
 
 
 \comskip
