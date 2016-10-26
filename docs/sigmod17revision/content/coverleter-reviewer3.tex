@@ -1,42 +1,42 @@
 
 
-\noindent
-\textbf{Comment \#1:} Improvements
-\begin{quote}
-\reviewer{
-W1) Given that the paper considers a novel problem, I believe it could trigger
-quite some follow-up work. However, to do so, I personally think that further
-technical details or detailed theoretical discussion are necessary.
- 
-}
-\end{quote}
-
-We clarify the soundness of the proposed optimization and conclude that
-\emph{tuple-slicing} is a highly effective heuristic that greatly improved
-\sys's execution efficiency and unlikely to make mistakes in practice;
-\emph{attribute, query-slicing} follow attribute updating lineage and thus
-guarantee the correctness.
-
-\comskip
-
-\noindent
-\textbf{Comment \#2:} Additional experiments
-\begin{quote}
-\reviewer{
-W2) I find the experimental evaluation rather preliminary and would appreciate
-experiments on larger data sets or some real data set.
-}
-\end{quote}
-
-We improve our experimental evaluation in three ways: we first extend our
-experiment with larger database sizes to up to $100k$ records in
-Figure~\ref{f:attr100}; we also evaluate \sys's ability in identifying the
-actual incorrect query in Appendix~\ref{app:index} and demonstrate that \sys
-always fixes the actual incorrect query when the complaint set is complete; we
-further study \sys's performance across different level of query interactions
-and include additional experiments on query selectivity in
-Appendix~\ref{app:selectivity}. Unfortunately, we are unable to get real data
-set and we put such evaluation to our future work.
+% \noindent
+% \textbf{Comment \#1:} Improvements
+% \begin{quote}
+% \reviewer{
+% W1) Given that the paper considers a novel problem, I believe it could trigger
+% quite some follow-up work. However, to do so, I personally think that further
+% technical details or detailed theoretical discussion are necessary.
+%  
+% }
+% \end{quote}
+% 
+% We clarify the soundness of the proposed optimization and conclude that
+% \emph{tuple-slicing} is a highly effective heuristic that greatly improved
+% \sys's execution efficiency and unlikely to make mistakes in practice;
+% \emph{attribute, query-slicing} follow attribute updating lineage and thus
+% guarantee the correctness.
+% 
+% \comskip
+% 
+% \noindent
+% \textbf{Comment \#2:} Additional experiments
+% \begin{quote}
+% \reviewer{
+% W2) I find the experimental evaluation rather preliminary and would appreciate
+% experiments on larger data sets or some real data set.
+% }
+% \end{quote}
+% 
+% We improve our experimental evaluation in three ways: we first extend our
+% experiment with larger database sizes to up to $100k$ records in
+% Figure~\ref{f:attr100}; we also evaluate \sys's ability in identifying the
+% actual incorrect query in Appendix~\ref{app:index} and demonstrate that \sys
+% always fixes the actual incorrect query when the complaint set is complete; we
+% further study \sys's performance across different level of query interactions
+% and include additional experiments on query selectivity in
+% Appendix~\ref{app:selectivity}. Unfortunately, we are unable to get real data
+% set and we put such evaluation to our future work.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
