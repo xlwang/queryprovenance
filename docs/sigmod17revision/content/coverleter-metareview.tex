@@ -127,7 +127,7 @@ $100K$ records, even when the query corruption is not recent.
 \textbf{Comment \#4:} Error generation
 \begin{quote}
 \reviewer{
-investigate how many of the errors exhibit interesting patterns (such as a
+Investigate how many of the errors exhibit interesting patterns (such as a
 later update masking the effect of an earlier erroneous one). If there are
 already lots of examples of this, compare effectiveness on the ``simple''
 errors with the ``complex'' ones; otherwise, you should improve the test data
@@ -135,39 +135,64 @@ generator.
 }
 \end{quote}
 
+We have added a new section in the appendix (Appendix~\ref{app:selectivity}),
+that analyzes the interactions of the queries we synthetically generate. Our
+synthetic data generator does not directly control the degree of interaction
+among queries in the log, but parameters such as the number of attributes and
+the dataset size impact this directly. We show that the probability that any
+two \texttt{UPDATE} queries with range predicates interact (i.e., the
+intersection of the tuples they update is non-empty) is actually quite high
+under the default settings of our data generator (about 0.31).
 
-To carefully evaluate \sys's performance over problems with different
-properties, we introduce a synthetic data generator in Section~\ref{sec:setup}
-with multiple adjustable parameters, including query type, workload and
-database size, and query selectivity. With the help of these parameters, we
-are able to control one of the key properties in the workload, the interaction
-of the queries, and thus to better understand \sys's performance. The level of
-query interactions greatly influences to the hardness of the problem as errors
-may propagate differently under different scenarios.
+The level of query interactions greatly influences the hardness of the problem
+as errors may propagate differently under different scenarios. There are many
+factors that may affect the level of query interactions. In general,
+\texttt{UPDATE} queries interact with each other more than \texttt{INSERT} or
+\texttt{DELETE} queries. Figure~\ref{f:indelup_time} shows that \sys is less
+efficient in \texttt{UPDATE} workloads. This is in large part because the
+query interactions in this setting are more complex. Within the class of
+\texttt{UPDATE} queries, larger range selectivities also result in more
+interactions, thus increasing runtime (Figure~\ref{f:qidx_time}). Another
+factor that affects query interactions is the number of attributes in the
+schema. With fewer attributes, updates are more likely to interact, again
+affecting runtime Figure~\ref{f:attr}. We also evaluate \sys over different
+query selectivities. In Figure~\ref{f:selectivityvstime}, we observe that the
+execution time of \sys increases with larger query ranges, which results in
+higher query interaction.
 
-There are many factors that may affect the level of query interactions. In
-general, \texttt{UPDATE} queries are heavily interact with each other than
-\texttt{INSERT} or \texttt{DELETE} queries since tuples persist in the
-database and may be continuously updated by the following \texttt{UPDATE}
-queries. We demonstrate this in Figure~\ref{f:indelup_time} and observe that
-under the same corruption age, \texttt{UPDATE}-workload requires longer time
-to solve than \texttt{DELETE} and \texttt{INSERT}-workloads. For
-\texttt{UPDATE} queries, \textit{constant} \texttt{SET} clauses do not require
-former attribute value(s), and thus have less query interaction compare to
-queries with \textit{relative} \texttt{SET} clauses
-(Figure~\ref{f:qidx_time}). Under default parameters, \texttt{UPDATE} queries
-with \textit{point} \texttt{WHERE} clauses update less amount of tuples than
-queries with \textit{range} \texttt{WHERE} clauses. Thus, the first type
-oftentimes has lower level of query interaction and easier to solve in
-practice (Figure~\ref{f:qidx_time}). For \texttt{UPDATE} queries with
-\textit{range} \texttt{WHERE} clauses, we found that both the number of
-attributes $N_a$ and query selectivity $s$ may strongly influence the level of
-query interaction (Appendix~\ref{app:selectivity}). Under our default setting,
-increase the number of attribute $N_a$ reduces the query interaction and thus
-we observe that problems with larger number of $N_a$ are easier to solve in
-Figure~\ref{f:attr}. On the other hand, increasing query selectivity $s$ means
-more tuples are updated by each query and thus leads to higher level of query
-interaction. Thus, higher query selectivity leads to longer solving time.
+
+% To carefully evaluate \sys's performance over problems with different
+% properties, we introduce a synthetic data generator in Section~\ref{sec:setup}
+% with multiple adjustable parameters, including query type, workload and
+% database size, and query selectivity. With the help of these parameters, we
+% are able to control one of the key properties in the workload, the interaction
+% of the queries, and thus to better understand \sys's performance. The level of
+% query interactions greatly influences to the hardness of the problem as errors
+% may propagate differently under different scenarios.
+
+% There are many factors that may affect the level of query interactions. In
+% general, \texttt{UPDATE} queries are heavily interact with each other than
+% \texttt{INSERT} or \texttt{DELETE} queries since tuples persist in the
+% database and may be continuously updated by the following \texttt{UPDATE}
+% queries. We demonstrate this in Figure~\ref{f:indelup_time} and observe that
+% under the same corruption age, \texttt{UPDATE}-workload requires longer time
+% to solve than \texttt{DELETE} and \texttt{INSERT}-workloads. For
+% \texttt{UPDATE} queries, \textit{constant} \texttt{SET} clauses do not require
+% former attribute value(s), and thus have less query interaction compare to
+% queries with \textit{relative} \texttt{SET} clauses
+% (Figure~\ref{f:qidx_time}). Under default parameters, \texttt{UPDATE} queries
+% with \textit{point} \texttt{WHERE} clauses update less amount of tuples than
+% queries with \textit{range} \texttt{WHERE} clauses. Thus, the first type
+% oftentimes has lower level of query interaction and easier to solve in
+% practice (Figure~\ref{f:qidx_time}). For \texttt{UPDATE} queries with
+% \textit{range} \texttt{WHERE} clauses, we found that both the number of
+% attributes $N_a$ and query selectivity $s$ may strongly influence the level of
+% query interaction (Appendix~\ref{app:selectivity}). Under our default setting,
+% increase the number of attribute $N_a$ reduces the query interaction and thus
+% we observe that problems with larger number of $N_a$ are easier to solve in
+% Figure~\ref{f:attr}. On the other hand, increasing query selectivity $s$ means
+% more tuples are updated by each query and thus leads to higher level of query
+% interaction. Thus, higher query selectivity leads to longer solving time.
 
 
 
