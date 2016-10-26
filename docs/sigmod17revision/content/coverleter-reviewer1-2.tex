@@ -1,0 +1,153 @@
+\noindent
+\textbf{Comment \#6:} Additional corrections and clarifications
+
+\smallskip
+
+We thank the reviewers for the many detailed comments. We have corrected the
+typos, and reworded confusing sentences. We also provide some further notes on
+some of the detailed comments below.
+
+\begin{quote}
+\reviewer{
+p2. Although it is just an example, it does seem like questionable design for
+the tax rates for different salary levels to be stored in the query rather
+than in the database.
+}
+\end{quote}
+
+The example is emulating a form-based entry of the tax-rate information, but
+we agree that in practice the design would be much more complex. We chose a
+substantial simplification to make the example easy to follow and to allow us
+to more easily highlight the contributions of our work.
+
+\begin{quote}
+\reviewer{
+p2. The figures in the example seem wrong (ironically) \dots
+}
+\end{quote}
+
+Thank you for noting this mistake. We corrected the figure to have the
+correct numbers.
+
+
+\begin{quote}
+\reviewer{
+p3. This is explained later, but please clarify that the expressions used in
+mu and sigma are from a limited language (e.g. arithmetic).
+}
+\end{quote}
+
+\alex{Have we done anything about this?} \xlw{The explanation and definition is
+quite close. We give def and then description. Maybe we should switch the order?}
+
+
+\begin{quote}
+\reviewer{
+p3. What does notation ``$D \setminus\{t\}$'' mean (in def 3) if $t = \bot$? No-op? Also,
+t* should be allowed to range over $D \cup \{\bot\}$ also to allow for deletion
+(as discussed on the next page).
+}
+\end{quote}
+
+We correct our definition on range of $t$ and $t^*$ as $D \cup \{\bot\}$. The transformation of 
+a database state $\mathcal{T}_c(D)$ excludes the complaint tuple $\{t\}$ and replace it with 
+$t^*$ with correct values. If $t = \bot$, it means tuple $t$ does not exist in the original
+database and should be added into the database; similarly if $t^* = \bot$, the tuple $t$ is in
+the original database but should be removed. 
+
+\alex{Have we done anything about this?}
+
+\begin{quote}
+\reviewer{
+p4. The paper often refers to ``data manipulation queries'', which sounds
+self-contradictory to me (a query reads, an update writes). Perhaps just
+``updates'' instead of ``data manipulation queries'' ?
+}
+\end{quote}
+
+We change it as ``data manipulation statements'' that include \texttt{UPDATE},
+\texttt{INSERT}, and \texttt{DELETE} queries. We intentionally avoid naming 
+them ``update queries'' in order to distinguish from the \texttt{UPDATE} query. 
+
+\alex{This term is only used once in the paper. How about we just change it to
+data manipulation statements?}
+
+
+\begin{quote}
+\reviewer{
+p5. How strongly does the performance of the MILP solver depend on M (the
+upper bound chosen on the value of a given numeric field)? Presumably,
+choosing the largest machine-representable number would lead to overflow
+problems?
+}
+\end{quote}
+
+To guarantee the correctness of the \texttt{UPDATE} queries, $M$ must 
+be assigned to a value outside the domain range of the corresponding attribute 
+because constraints in ~\ref{eq:uv} will be self-contradictory otherwise. For example, 
+attribute \textit{human age} has a domain range of $[0, 200]$, in which case $M$ must be 
+set to a value that is above $200$. 
+In addition, in order to maintain the feasibility for workloads with \texttt{DELETE}
+queries, $M$ must be set to a value that is $\geq M^-$ (we explained
+the setting of $M^-$ in Comment\# 4), but not necessary a 
+upper bound of the given numeric field. 
+
+\alex{Have we done anything about this?}
+
+
+\begin{quote}
+\reviewer{
+p5. In (5), should v be u?
+}
+\end{quote}
+
+We thank the reviewer for noting this, we correct this typo in the paper. 
+\alex{(5) does not seem to have changed. If it does not need to be changed, we
+should explain here why.} 
+
+
+\begin{quote}
+\reviewer{
+p7. ``Figure 3 showed the exponential cost'' - the scaling from 40 to 60 to 80 looked linear to me, just with a high coefficient.}
+\end{quote}
+We apologize for not stating it clear. In Figure~\ref{fig:querysize_vs_time}, \naive fails to produce an answer
+ for problems with $\geq 80$ queries within 1000 sec and \naive shows exponential cost for problems with $20$, $40$, and $60$ queries. 
+\alex{What is the answer here?}
+
+
+\begin{quote}
+\reviewer{
+p10. Fig. 8 - please add 0.75 (the largest x-axis value) to the x-axis, better yet, label the x-axis with the rate values that correspond to data points.
+}
+\end{quote}
+
+We thank the reviewer for the detailed suggestion and we implement this in our main text. 
+
+\begin{quote}
+\reviewer{
+p10. ``may suffer if the corruption occured in a very old query'' - does it (and are you saying fig. 8 supports this claim)?
+
+p10. ``may over-generalize'' - again, are you speculating or interpreting the results here?
+}
+\end{quote}
+
+We observe from Figure~\ref{f:falsenegative_acc} that \sys derives inaccurate log repairs when the corruption occured in 
+very old query  \textit{corruption age = 250}). Also, if there are insufficient complaints, then it is possible that the 
+repair will over-generalize to  ``repair'' the wrong records and lead to lower precision.
+
+\alex{What have we done for this?} \xlw{We added some clarification in the text. }
+
+\begin{quote}
+\reviewer{
+p10, footnote: this seems like a strong assumption! I guess this means that dealing with multiple errors that interact with each other is future work...
+}
+\end{quote}
+
+We clarify this assumption in Section~\ref{sec:abstractions}. Currently, we cannot apply incremental algorithm 
+on problems with multiple corruptions since errors may spread across the entire query history, \sys 
+does not scale over problems with more than 40 queries. We leave further improvement in our future work.
+
+\alex{We need to say something here.  Have we clarified this assumption early in the paper?}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
