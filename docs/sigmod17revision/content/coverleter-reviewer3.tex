@@ -63,8 +63,8 @@ In short, our assumptions are as follows:
 \item \sys assumes that the database starts (before the first query in the log) from an error-free or empty state. 
 \end{itemize}
 
-We demonstrated that \sys can solve problems with corruptions in multiple queries, but it exhibits scalability limitations (up to about 50 queries in the log).  \sys also solves problems with incomplete
-complaint sets (not all complaints are submitted), but it is more likely to make mistakes when the corruption is very old.  \ewu{for older corruptions with higher amount of missing complaints.   Are you saying that older queries result in more complaints and so we missed more complains in the repair??}
+We demonstrated that \sys can solve problems with corruptions in multiple queries, but it exhibits scalability limitations (up to about 50 queries in the log).  
+\sys also supports problems with incomplete complaint sets (not all complaints are submitted), but it is more likely to make mistakes when the corruption is to a very old query.
 For cases where a single query is corrupted, and all complaints in the complaint set are submitted, we showed \sys can scale to datasets with 100k tuples and logs with up to 250 DML statements.
 
 \begin{quote}
