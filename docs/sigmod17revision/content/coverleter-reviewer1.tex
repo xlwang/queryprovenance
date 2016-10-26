@@ -77,31 +77,23 @@ Suppose we have three queries \dots
 \alex{The definition needs to be corrected, and more details should be added
 here.}
 
-\xlw{Original def. 6 seems misleading, let's verify it.}
+We apologize for the unclear definition and we clarify it in Definition~\ref{eq:dependency}.
+The impact of a query covers a set of attributes that may updated by 
+the query. We trace the query 
+history to search and expand the impact of a query. More specifically, given a query 
+$q_i$, we compute its full-impact $\mathcal{F}(q_i)$ by explicitly 
+comparing with each query in the query history in their execution order. 
 
-The \textbf{full-impact}, $\mathcal{F}(q_i)$, of a query $q_i$ includes all
-attributes that may modified by the query $q_i$ and it is calculate by the
-intermediate-impact of all its consecutive queries. Let us denote
-$\mathcal{F}_j(q_i)$ as the intermediate-impact of query $q_i$ on query $q_j$
-($j > i$) and $\mathcal{F}_j(q_i)$ is defined as follows. \[
-\mathcal{F}_j(q_i)=\mathcal{F}_{j-1}(q_i)\bigcup_{\substack{\mathcal{F}_{j-1}(q_i)\cap
-\mathcal{P}(q_j) \neq \emptyset}} \mathcal{I}(q_j), \] With initial impact
-$\mathcal{F}_i(q_i) = \mathcal{I}(q_i)$. The full-impact of $q_i$,
-$\mathcal{F}(q_i)$ is indeed the impact on the final query $q_n$,
-$\mathcal{F}_n(q_i)$: \[ \mathcal{F}(q_i)=\mathcal{F}_n(q_i) =
-\mathcal{I}_(q_i)\bigcup_{\substack{j = i+1 \\ \mathcal{F}_{j-1}(q_i)\cap
-\mathcal{P}(q_j) \neq \emptyset}}^n \mathcal{I}(q_j), \]
-
-For example, in the following query log (example mentioned in reviews):\\
-\textit{\indent q1 writes t.A; \\
-\indent q2 reads t.A and writes u.B; \\
-\indent q3 reads u.B and writes v.C.}\\
-\[\mathcal{F}_1(q_1) = \{t.A\};\] 
-\[\mathcal{F}_2(q_1) = \{t.A\} \bigcup_{\mathcal{F}_1(q_1) \cap \{t.A\} \neq \emptyset} \{u.B\} = \{t.A, u.B\};\]
-\[\mathcal{F}_3(q_1) = \{t.A, u.B\}\bigcup_{\mathcal{F}_2(q_2) \cap \{u.B\} \neq \emptyset} \{v.C\} = \{t.A, u.B, v.C\}.\]
-Thus the full-impact of $q_1$ is $\{t.A, u.B, v.C\}$.
-
-
+\noindent In the example reviewer suggested:\\
+\textit{\indent $q_1$ writes t.A; \\
+\indent $q_2$ reads t.A and writes u.B; \\
+\indent $q_3$ reads u.B and writes v.C.}\\
+When computing the full-impact of query $q_1$, we start from the impact of $q_1$
+on $q_1$, $\mathcal{F}_1(q_1) = \{t.A\}$; and then we move to the next query $q_2$. 
+Since $\mathcal{F}_1(q_1)  \cap\mathcal{P}(q_2) \neq \emptyset$, we extend the impact 
+of $q_1$ on $q_2$ as $\mathcal{F}_2(q_1) = \{t.A, u.B\}$. Similarly, with 
+$\mathcal{F}_2(q_1)  \cap\mathcal{P}(q_3) \neq \emptyset$, we conclude the full-impact
+of $q_1$ as $\{t.A, u.B, v.C\}$.
 
 
 \comskip
