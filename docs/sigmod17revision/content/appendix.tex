@@ -1,3 +1,4 @@
+%!TEX root = ../main.tex
 
 \appendix
 
@@ -141,8 +142,7 @@ that applies \dt over more queries is expected to have little hope of succeeding
 
 
 There are three important reasons why \dt, and any approach that focuses on a single query at a 
-time\footnote{Although our incremental approach tries to generate a repair for a single
-query at a time, it encodes all subsequent queries in the log.}, will not perform well.
+time\footnote{Although our incremental approach tries to generate a repair for a single query at a time, it encodes all subsequent queries in the log.}, will not perform well.
 
 \begin{itemize}[itemsep=1pt, leftmargin=5mm]
 \item \textbf{Single Query Limitation: }
@@ -182,58 +182,114 @@ applicability of learning-based approaches.
 \end{itemize}
 
 % \input{content/example3.tex}
-\xlw{
+
+\newtext{
 \section{Repairing the Correct Query}
 \label{app:index}
 
-The experimental section (Section~\ref{sec:experiments}) primarily focused on performance and accuracy measures of the repairs, and for space constraints, ignored 
-whether the proposed repair fixes the true query (it is possible we fix an incorrect query in a way that resolves the complaint set).
-Although we found in most circumstances we identify the correct query to fix, we now turn our attention to better understand 
-the conditions when we may fix the incorrect query. 
+
+Our experiments in Section~\ref{sec:experiments} measure the accuracy of \sys
+based on the effect of the repairs to the dataset. However, it is possible to
+correctly resolve the reported complaints by modifying a query that was not
+corrupted. Here we augment our evaluation to study how often \sys chooses the
+right query to repair.  For each setting, we compute the \emph{correct repair
+ratio} $p_correct$ over 20 runs: $p_correct$ is the portion of runs where \sys
+chose the correct query to repair.
+
+In Figure~\ref{f:querytyperatio}, we evaluate \qfix with three types of
+workloads (\texttt{UPDATE}, \texttt{INSERT}, and \texttt{DELETE}) over
+increasing corruption age: corruption age 1 means that the most recent query
+was corrupted, while corruption age 250 means that the corruption occurred 250
+queries in the past. In this experiment, we assume complete knowledge of the
+complaint set. \sys selects the correct query to repair in all cases. We next
+focus on the \texttt{UPDATE} workload and three ages of corruption, while
+increasing the database size. Again, \sys is accurate in every case
+(Figure~\ref{f:dbsizeratio}).
 
 
-\subsection{Experimental Results}
-To evaluate \sys's ability in identifying the correct query to fix, we summarize our results using \textit{Correct repair ratio}, $p_{correct}$, which is the number fixes on the true query divided by total number of runs.
+Finally, we study the effect of incomplete complaints in
+Figure~\ref{f:noiseratio}. Increasing the false negative rate means that more
+complaints are not reported. Similar to the precision and recall performance
+in Figure~\ref{f:falsenegative_acc}, $p_{correct}$ also drops for problems
+with old corruptions and high false negative rates. This is expected since
+with insufficient information, there is a larger number of queries that offer
+valid fixes and \sys simply chooses the one with the lowest objective. 
+}
 
-\textbf{Complete Complaint Set: } We first evaluate three types of workloads with increasing corruption age. The database is set to the default setting and conclude the average $p_{correct}$ across 20 random runs. In Figure~\ref{f:querytyperatio}, we first evaluate $p_{correct}$ rate on three types of workloads: \sys identifies the correct query to fix ($p_{correct} = 1.0$) for all three types of workloads, \texttt{UPDATE},  \texttt{INSERT}, and \texttt{DELETE} workloads. We next narrow down to \texttt{UPDATE} workload and evaluate \sys's behavior with increasing amount of tuples in the database. We observe $p_{correct} = 1$ on different corrupt indexes in all database sizes (Figure~\ref{f:dbsizeratio}). 
-
-\textbf{Incomplete Complaint Set: } In Figure~\ref{f:noiseratio}, we study the performance of \sys with increasing false negative rate in the incomplete complaint set. Similar to the precision and recall performance in Figure~\ref{f:falsenegative_acc}, $p_{correct}$ also drops for problems with old corrupted query and high false negative rate. This is expected since with insufficient information, \sys tends to fix the wrong query with better objective function value as long as all the reported errors are all resolved. 
 
 
+
+
+% \subsection{Experimental Results}
+% To evaluate \sys's ability in identifying the correct query to fix, we summarize our results using \textit{Correct repair ratio}, $p_{correct}$, which is the number fixes on the true query divided by total number of runs.
+% 
+% \textbf{Complete Complaint Set: } We first evaluate three types of workloads with increasing corruption age. The database is set to the default setting and conclude the average $p_{correct}$ across 20 random runs. In Figure~\ref{f:querytyperatio}, we first evaluate $p_{correct}$ rate on three types of workloads: \sys identifies the correct query to fix ($p_{correct} = 1.0$) for all three types of workloads, \texttt{UPDATE},  \texttt{INSERT}, and \texttt{DELETE} workloads. We next narrow down to \texttt{UPDATE} workload and evaluate \sys's behavior with increasing amount of tuples in the database. We observe $p_{correct} = 1$ on different corrupt indexes in all database sizes (Figure~\ref{f:dbsizeratio}). 
+% 
+% \textbf{Incomplete Complaint Set: } In Figure~\ref{f:noiseratio}, we study the performance of \sys with increasing false negative rate in the incomplete complaint set. Similar to the precision and recall performance in Figure~\ref{f:falsenegative_acc}, $p_{correct}$ also drops for problems with old corrupted query and high false negative rate. This is expected since with insufficient information, \sys tends to fix the wrong query with better objective function value as long as all the reported errors are all resolved. 
+
+\newtext{
 \section{Sensitivity to Query Interaction} \label{app:selectivity}
+
 \begin{figure}[t]
 \centering
   \includegraphics[width =.75\columnwidth]{figures/rangevstime}
- \caption{\sys on increasing }
+ \caption{ Increasing query selectivity leads to longer \sys execution time.}
   \label{f:selectivityvstime} 
 \end{figure}
-We introduce a synthetic data generator in Section~\ref{sec:setup} with multiple adjustable parameters, including
-query type, workload and database size, and query selectivity, to simulate the workloads with diverse properties. 
-With the help of these parameters, we are able to control one of the key properties in the workload, the interaction of the queries, 
-and thus to better understand \sys's performance. 
 
-In this section, we measure the interaction of queries as whether these queries update the same set of tuples and we further 
-narrow down the query log size into two for simplification. For a \texttt{UPDATE}-only workload with \textit{range} \texttt{WHERE} clauses, 
-the probability that two queries, $q_i$ and $q_j$, update a non-empty set of tuples is as as follows.
+One of the challenges that motivates our work on \sys is that the progression
+of queries in the log obscures and propagates errors, as subsequent queries
+interact with tuples affected by a prior erroneous query. Our synthetic data
+generator (Section~\ref{sec:setup}) does not directly control the degree of
+interaction among queries in the log, but parameters such as the number of
+attributes and the dataset size impact this directly. Here we compute the
+probability that any two tuples in the log interact, through the random
+generation process. We assume two \texttt{UPDATE} queries, $q_i$ and $q_j$,
+with range \texttt{WHERE} predicates.  The probability that $q_i$ and $q_j$ interact (i.e., the intersection of the tuples they update is non-empty) is:
 \begin{multline*}
 Pr(q_i\cap q_j \neq \emptyset) =\\ 
 Pr(\sigma_{q_i}.A= \sigma_{q_j}.A)Pr(q_i\cap q_j \neq \emptyset |\sigma_{q_i}.A= \sigma_{q_j}.A) \\
 + Pr(\sigma_{q_i}.A\neq \sigma_{q_j}.A)Pr(q_i\cap q_j \neq \emptyset |\sigma_{q_i}.A\neq \sigma_{q_j}.A), 
 \end{multline*}
-Where $Pr(\sigma_{q_i}.A= \sigma_{q_j}.A)$ is the probability that the \texttt{WHERE} clauses of two queries are on the same attribute with probability $\frac{1}{N_a}$
-where $N_a$ is the number of attributes in the database. When two queries select tuples based on the same attribute, 
-the probability of non-empty interaction is equivalent to the probability 
-that their \texttt{WHERE} clause ranges intersect with each other. Thus, $Pr(q_i\cap q_j \neq \emptyset |\sigma_{q_i}.A= \sigma_{q_j}.A) = 2*s$, where
- $s$ is the query selectivity percentage. In addition, $Pr(\sigma_{q_i}.A\neq  \sigma_{q_j}.A) = \frac{N_a-1}{N_a}$ is the probability that the \texttt{WHERE} clauses
-of $q_i$ and $q_j$ select different attributes.  Assuming tuple values are evenly distributed in arbitrary attribute, the number of tuples selected by each query is roughly $n = N_d \cdot s$ where $N_d$ is the number of tuples in the database. Thus, the probability that these two queries update at least one common tuple is $Pr(q_i\cap q_j \neq \emptyset |\sigma_{q_i}.A\neq \sigma_{q_j}.A) = 1 - \frac{C(N_d - n, n)}{C(N_d, n)}$ where $C$ is the \textit{Combinations function}\footnote{Combinations function: $C(n,r) = \frac{n!}{r!(n-r)!}$}. In conclude, the probability that two queries have non-empty interaction is estimated as follows.
+
+
+
+Here, $Pr(\sigma_{q_i}.A= \sigma_{q_j}.A)$ is the probability that the
+\texttt{WHERE} clauses of the two queries have predicates on the same
+attribute; $Pr(\sigma_{q_i}.A= \sigma_{q_j}.A)=\frac{1}{N_a}$, where $N_a$ is
+the number of attributes in the database. The probability that the
+\texttt{WHERE} clause ranges of the two queries intersect is $Pr(q_i\cap q_j
+\neq \emptyset |\sigma_{q_i}.A= \sigma_{q_j}.A) = 2*s$, where $s$ is the
+predicate selectivity. Similarly for the second term, $Pr(\sigma_{q_i}.A\neq
+\sigma_{q_j}.A) = \frac{N_a-1}{N_a}$ is the probability that the
+\texttt{WHERE} clauses of $q_i$ and $q_j$ use different attributes. Assuming
+tuple values are evenly distributed, the number of tuples selected by each
+query is roughly $n = N_d \cdot s$, where $N_d$ is the number of tuples in the
+database. Thus, the probability that these two queries update at least one
+common tuple is $Pr(q_i\cap q_j \neq \emptyset |\sigma_{q_i}.A\neq
+\sigma_{q_j}.A) = 1 - \frac{C(N_d - n, n)}{C(N_d, n)}$, where $C$ computes the
+combinations $C(n,r) = \frac{n!}{r!(n-r)!}$. Therefore, the probability that
+two queries in our dataset interact is:
 \begin{multline} \label{eq:pr}
 Pr(q_i\cap q_j \neq \emptyset) = \frac{2s}{N_a} + \frac{N_a-1}{N_a} \cdot (1 - \frac{C(N_d - n, n)}{C(N_d, n)}), 
 \end{multline}
-Where $n = N_d \cdot s$.
+Where $n = N_d \cdot s$. Based on this result, the probability that any two
+queries interact with each other with the default parameter settings of our
+generator is about $0.31$.
 
-In Section~\ref{sec:experiments:dbproperties}, we study the influence of number of attribute $N_a$ on \sys performance (Figure~\ref{f:attr}) and observe that larger number of attributes requires less execution time with \sys with all optimization. This is expected since with the default parameter settings $Pr(q_i\cap q_j \neq \emptyset)$ is negative proportional to the number of attributes.
+In Section~\ref{sec:experiments:dbproperties}, we study the influence of the
+number of attributes $N_a$ on \sys performance (Figure~\ref{f:attr}) and
+observe that more attributes result in faster execution time with all
+optimizations. This is expected as $Pr(q_i\cap q_j \neq \emptyset)$ is
+inversely proportional to the number of attributes, which means that there are
+fewer interactions. Therefore, fewer interactions lead to faster runtimes.
 
-In addition to the number of attribute, we evaluate \sys performance over query selectivity $s$ in this section. According to Equation~\ref{eq:pr},  the probability that two queries interact with each other is $~0.31$ under default parameter settings and increases with the query selectivity $s$. As shown in Figure~\ref{f:selectivityvstime}, the execution time of \sys also increases with higher query selectivity or higher query interaction. 
+We also evaluate \sys over different query selectivities. In
+Figure~\ref{f:selectivityvstime}, we observe that the execution time of \sys
+increases with higher query selectivity, which results in higher query
+interaction.
+
+
 
 }
 
