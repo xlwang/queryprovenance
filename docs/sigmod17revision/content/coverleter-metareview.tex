@@ -208,14 +208,20 @@ can be handled only by this new system.
 }
 \end{quote}
 
-In this paper, \sys solves two problems: 1. it finds the root reason(s) in the
-query history that causing database errors, and 2. it fixed the incorrectness
-by proposing a query log repair. Existing works~\cite{Wu13, roy2014formal,
-chalamalla2014,meliou2011tracing} mentioned by reviewer 3 study highly
-corrected problems: in general, they all target at explaining erroneous or
-undesired query results by tracing back data source input and reporting either
-particular input tuples or common input patterns. After carefully analysis, we
-conclude that none of these existing works could fix the incorrect queries
-(problem 2) nor solve the error identification task (problem 1) effectively
-and efficiently. We provide detailed analysis for each works in Reviewer 3's
-\# comment 2.
+\sys solves two challenges in combination: (1)~it traces the cause of a set of
+errors (complaints) to parameters of the queries in the log, and (2)~it
+produces a query repair that revises all complaints to their correct values. The
+existing work suggested by Reviewer 3~\cite{Wu13, roy2014formal,
+chalamalla2014,meliou2011tracing} has strong connections to the first of these
+two challenges: under certain problem settings, all of these techniques focus on
+explaining or finding the causes of query results from the input data. While
+this exhibits strong connections with the problem setting of \sys, we found
+that none of these approaches can be used in our setting, either because of
+prohibitive assumptions, or because of extreme explosion in the problem
+size~(\cite{meliou2011tracing}). We provide a detailed explanation for each of
+these techniques in our response to Reviewer 3\# Comment 2. In addition, none
+of these methods addresses the second problem, of producing repairs.
+
+We have augmented our related work to highlight these points.
+
+
