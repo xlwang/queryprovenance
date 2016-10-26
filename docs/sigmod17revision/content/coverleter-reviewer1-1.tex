@@ -212,7 +212,21 @@ p3. Please clarify whether a complaint needs to specify exact fix values for all
 }
 \end{quote}
 
-While in the paper we use exact fix values for all fields of a complaint, we
+We have edited the text in Section~\ref{sec:abstractions} to emphasize all assumptions used by \sys.  We summarize the main points here.
+
+We have also clarified in Sections~\ref{sec:abstractions} and~\ref{sec:opt}
+the role of two additional restrictions in our framework: completeness of the
+complaint set, and single-query corruptions. Under these assumptions, \sys can
+take advantage of powerful optimizations. However, \sys is not restricted to
+settings where these assumptions hold, and can handle cases of multiple query
+corruptions and incomplete complaints. The effectiveness and efficiency of
+\sys can be limited in these settings, mostly due to limitations of the MILP
+solvers. Improvements in MILP technologies will also improve \sys's
+capabilities. In our evaluation, we study these cases empirically, and we have
+included experiments with incomplete complaints and multiple query corruptions
+(Section~\ref{sec:experiments:hardprob}).
+
+In addition, in the paper we use exact fix values for all fields of a complaint, we
 only do so for ease of exposition, and this is actually not a limitation in
 our techniques. We have added clarification about this in
 Section~\ref{sec:model}.
