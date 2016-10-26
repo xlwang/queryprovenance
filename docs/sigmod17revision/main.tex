@@ -27,7 +27,6 @@
 \usepackage[nocompress]{cite}
 \usepackage{microtype}
 \usepackage[section]{placeins}
-\usepackage[bottom]{footmisc}
 
 \makeatletter
 \def\url@leostyle{
@@ -169,9 +168,39 @@
 \setlength\textfloatsep{0.9\baselineskip plus 3pt minus 2pt}
 \setlength\intextsep{1\baselineskip plus 3pt minus 2 pt}
 
+\interfootnotelinepenalty=10000
+\raggedbottom
 
 \begin{document}
-\include{content/coverletter2}
+
+\twocolumn[
+\begin{center}
+    {\LARGE \textbf{Cover Letter}}
+\end{center}
+\bigskip
+]
+
+\definecolor{commentColor}{HTML}{0000FF}
+
+\newcommand{\reviewer}[1]{\itshape{{\color{commentColor} #1}}}
+\newcommand{\comskip}{\bigskip}
+
+
+\renewenvironment{quote}
+{\vspace{-1mm}\list{}{\rightmargin=0cm \leftmargin=0cm}%
+\item\relax}
+{\endlist}
+
+We thank the reviewers and meta-reviewer for their insightful comments on our
+SIGMOD 2017 submission and their suggestions on how to strengthen our work. We
+used their comments, questions, and suggestions to revise and improve our
+paper. We provide here a summary of the revisions based on the reviews. We
+quote reviewer comments in blue, above our responses.
+
+\input{content/coverleter-metareview}
+\input{content/coverleter-reviewer1}
+\input{content/coverleter-reviewer2}
+\input{content/coverleter-reviewer3}
 % \include{content/coverletter}
 
 % reset all numbering
