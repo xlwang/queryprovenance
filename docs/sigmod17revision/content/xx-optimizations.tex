@@ -212,51 +212,81 @@ This is the foundation of our \emph{query-slicing} optimization.
 	\[\mathcal{A}(\mathcal{C}) = \{A_i | t.A_i \neq t^*.A_i, c(t,t^*) \in \mathcal{C}\}\]
 \end{definition} 
 
+\newtext{
+We proceed to define the impact that a query has directly (the set of
+attributes it modifies), and its full impact (the set of attributes it may
+affect through all subsequent queries).
 
 \begin{definition}[Query dependency \& impact] \label{eq:dependency}
-    Query $q_i$ has \textbf{direct-impact}, $\mathcal{I}(q_i)$, which is
-    the set of attributes updated in its modifier function $\mu_{q_i}$
-    (e.g., \texttt{SET} clause). Its \textbf{dependency},
-    $\mathcal{P}(q_i)$, is the set of attributes involved in its
+    Query $q_i$ has \textbf{direct impact}, $\mathcal{I}(q_i)$, which is
+    the set of attributes updated in its modifier function $\mu_{q_i}$,
+    % (e.g., \texttt{SET} clause). 
+    and \textbf{dependency},
+    $\mathcal{P}(q_i)$, which is the set of attributes involved in its
     condition function $\sigma_{q_i}$.
-    \xlw{The \textbf{impact} of a query $q_i$ is the set of attributes that may updated due to $q_i$
-    and we denote $\mathcal{F}_j(q_i)$ as the impact of query $q_i$
-    after performing queries from $q_{i}$ to $q_j$. The impact of a query $\mathcal{F}_j(q_i)$ is calculated by propagating its direct impact through subsequent queries in the log:
-    \[
-      \mathcal{F}_j(q_i)=\mathcal{F}_{j-1}(q_i)\bigcup_{\substack{\mathcal{F}_{j-1}(q_i)\cap \mathcal{P}(q_j) \neq \emptyset}} \mathcal{I}(q_j), 
-    \]
-    Here the impact of query $q_i$ after itself is the direct-impact of $q_i$: $\mathcal{F}_i(q_i) = \mathcal{I}(q_i)$.
-    
-    The \textbf{full-impact}, $\mathcal{F}(q_i)$, of a query $q_i$ is the impact of $q_i$ until the last query $q_n$ (Algorithm~\ref{alg:fullimpact}). 
+    Query $q_i$ has \textbf{full impact}, $\mathcal{F}(q_i)$, which is the set of attributes it may affect through all subsequent queries in the log:
     \[
     \mathcal{F}(q_i)=\mathcal{I}(q_i)\bigcup_{\substack{j=i+1\\ \mathcal{F}_{j-1}(q_{i})\cap \mathcal{P}(q_j) \neq \emptyset}}^n \mathcal{I}(q_j)
-    \]}
+    \]
+    In this formula, $\mathcal{F}_j(q_i)$ denotes the impact of $q_i$ (set of attributes affected by $q_i$) through queries up to $q_j$:
+    \\    $\mathcal{F}_j(q_i)\!=\!\mathcal{F}_{j-1}(q_i)\bigcup_{\substack{\mathcal{F}_{j-1}(q_i)\cap \mathcal{P}(q_j) \neq \emptyset}} \mathcal{I}(q_j)$, and $\mathcal{F}_i(q_i)\! =\! \mathcal{I}(q_i)$.
+    
+    
+    % The \textbf{impact} of a query $q_i$ is the set of attributes that may updated due to $q_i$
+    % and we denote $\mathcal{F}_j(q_i)$ as the impact of query $q_i$
+    % after performing queries from $q_{i}$ to $q_j$. The impact of a query $\mathcal{F}_j(q_i)$ is calculated by propagating its direct impact through subsequent queries in the log:
+    % \[
+    %   \mathcal{F}_j(q_i)=\mathcal{F}_{j-1}(q_i)\bigcup_{\substack{\mathcal{F}_{j-1}(q_i)\cap \mathcal{P}(q_j) \neq \emptyset}} \mathcal{I}(q_j), 
+    % \]
+    % Here the impact of query $q_i$ after itself is the direct-impact of $q_i$: $\mathcal{F}_i(q_i) = \mathcal{I}(q_i)$.
+    % 
+    % The \textbf{full-impact}, $\mathcal{F}(q_i)$, of a query $q_i$ is the impact of $q_i$ until the last query $q_n$ (Algorithm~\ref{alg:fullimpact}). 
+    % \[
+    % \mathcal{F}(q_i)=\mathcal{I}(q_i)\bigcup_{\substack{j=i+1\\ \mathcal{F}_{j-1}(q_{i})\cap \mathcal{P}(q_j) \neq \emptyset}}^n \mathcal{I}(q_j)
+    % \]
 \end{definition}
 
-\vspace*{-0.2in}
+}
+% \vspace*{-0.2in}
 
-\xlw{The logic behind the calculation of \textbf{full-impact} is straightforward: it traces the query history and continuously extend the impact of a query 
-so that it includes every attribute that may updated by the query. Thus, the \textbf{full-impact} of a query may also extend to another query that 
-has disjoint set of attributes in both \texttt{SET} and \texttt{WHERE} clauses, e.g., in a query log of $\{q_1$ writes $A$; $q_2$ reads $A$ writes $B$, $q_3$ reads $B$ writes $C\}$, 
-the impact of $q_1$ extends from $\{A\}$, to $\{A,B\}$(at $q_2$) and finally $\{A, B, C\}$(at $q_3$, full-impact).}
+\newtext{
+Full impact is a form of forward provenance: it traces the query history
+toward more recent queries and extending the impact of a query to include
+every attribute that may have been affected by it. For example, assume the
+following query log: $\{q_1$ writes $A$; $q_2$ reads $A$ writes $B$, $q_3$
+reads $B$ writes $C\}$. The direct impact of $q_1$ is $\{A\}$. Through $q_2$,
+it extends to $\{A,B\}$, and it's full impact (after $q_3$) is $\{A, B, C\}$.
 
-By computing the full-impact of $q$, we can determine the extent that it affects $\mathcal{C}$
-based on its overlap with the complaint attributes.
-Specifically, 
-when $|\mathcal{F}(q) \cap \mathcal{A}(C)|=|\mathcal{A}(C)|$, $q$ may affect all complaint attributes and is a candidate for repair; 
-when $0 < |\mathcal{F}(q) \cap \mathcal{A}(C)| < |\mathcal{A}(C)|$, 
-$q$ contributed to a subset of the complaint attributes and is a candidate for repair;
-when $|\mathcal{F}(q) \cap \mathcal{A}(C)|=0$, $q$ is irrelevant 
-and can be ignored during the repair process.
-We distinguish between the first and second conditions in the special case where we are repairing a \emph{single} 
-corrupted query in the query log.  In this case, only queries in the first conditions are candidates for repair because 
-the single query must have caused errors in all of the complaint attributes.  This enables \sys to scale significantly better
-for this important problem setting. 
-Finally, we use $Rel\mathcal{(Q)}$ to denote the set of relevant
+Based on the full impact of $q$, we can determine if it affects the complaints
+$\mathcal{C}$ and is a candidate for repair. Specifically, if $\mathcal{F}(q)
+\cap \mathcal{A}(C)=\emptyset$, then $q$ does not contribute to the complaints
+and can be ignored in the repair process; otherwise, it is a candidate for
+repair. In the case of \emph{single-query corruptions}, $q$ is a candidate for
+repair only if $\mathcal{F}(q) \cap \mathcal{A}(C)=\mathcal{A}(C)$, which
+makes this optimization even more effective.
+}
+
+% By computing the full-impact of $q$, we can determine the extent that it affects $\mathcal{C}$
+% based on its overlap with the complaint attributes.
+% Specifically, 
+% when $|\mathcal{F}(q) \cap \mathcal{A}(C)|=|\mathcal{A}(C)|$, $q$ may affect all complaint attributes and is a candidate for repair; 
+% when $0 < |\mathcal{F}(q) \cap \mathcal{A}(C)| < |\mathcal{A}(C)|$, 
+% $q$ contributed to a subset of the complaint attributes and is a candidate for repair;
+% when $|\mathcal{F}(q) \cap \mathcal{A}(C)|=0$, $q$ is irrelevant 
+% and can be ignored during the repair process.
+% We distinguish between the first and second conditions in the special case where we are repairing a \emph{single} 
+% corrupted query in the query log.  In this case, only queries in the first conditions are candidates for repair because 
+% the single query must have caused errors in all of the complaint attributes.  This enables \sys to scale significantly better
+% for this important problem setting. 
+% Finally, 
+
+We use $Rel\mathcal{(Q)}$ to denote the set of
 queries that are candidates for repair.
-
-\xlw{This optimization only linearizes the queries in $Rel\mathcal{(Q)}$ which is a conservative estimate of all queries that may have affected the user complaints.  
-Since this set is typically much smaller than the entire query log, this optimization leads to smaller problems than \emph{basic} without any loss of accuracy.}
+\newtext{Query slicing only linearizes the queries in $Rel\mathcal{(Q)}$ which
+is a conservative estimate of all queries that may have affected the user
+complaints. Since this set is typically much smaller than the entire query
+log, this optimization leads to smaller problems than \emph{basic} without any
+loss of accuracy.  We formalize this result in Lemma~\ref{lem:sound}.}
 
 \subsection{Attribute Slicing: Reducing Attributes}\label{sec:opt:attslice}
 
