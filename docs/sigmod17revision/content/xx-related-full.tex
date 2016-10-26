@@ -70,10 +70,9 @@ erroneous updates. Diagnosing the cause of the errors, will achieve
 systematic fixes that will correct all relevant errors, even if they
 have not been explicitly identified.
 
-Closer to exploring systemic reasons and patterns for errors are
-techniques such as Data Auditor~\cite{GolabKKS10, Golab2008
-} and Data
-X-Ray~\cite{wang2015}. Both tools tools identify features, which can
+Closer to exploring systemic reasons and patterns for errors e.g.,
+ Data Auditor~\cite{GolabKKS10, Golab2008
+} and Data X-Ray~\cite{wang2015}. Both tools tools identify features, which can
 be selected from the tuple attributes, that best summarize or describe
 groups of tuples (or specifically errors). While these tools can
 generate feature sets or patterns of attributes that characterize
@@ -85,8 +84,8 @@ and Data X-Ray can provide high-level clues for potential problems in
 the data derivation process. However, both approaches are oblivious to
 the actual queries that operated on the data, and they do not provide
 particular fixes. Ontology-based why-not
-explanations~\cite{tenCate2015} is very similar to Data X-Ray, but is
-only relevant to absent tuples (deletions), and again does not
+explanations~\cite{tenCate2015} is similar to Data X-Ray, but 
+only relevant to absent tuples (deletions), and does not
 consider the query history.
 
 The topic of query revisions has been studied in the context of
