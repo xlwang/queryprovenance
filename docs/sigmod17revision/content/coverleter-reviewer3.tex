@@ -98,7 +98,8 @@ Is it realistic to assume a safe checkpoint?
 }
 \end{quote}
 This is a fair question: a trivial setting is to assume the checkpoint is the initial, empty database.
-Technically, the checkpoint only needs to be clean with respect to the tuples that would affect the complaints, thus we do not require that the {\it entire} database is error-free.  
+Technically, the checkpoint only needs to be clean with respect to the tuples that would affect the complaints, thus we do not require that the {\it entire} database is error-free.  In OLTP applications, update queries often do not touch many tuples, so this may be a reasonable assumption.  
+Regardless, studying extensions to be resiliant to unclean checkpoints is a very interesting direction.
 
 \begin{quote}
 \reviewer{
