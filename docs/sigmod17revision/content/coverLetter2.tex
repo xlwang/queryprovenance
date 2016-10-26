@@ -34,48 +34,44 @@ Discuss and clarify the soundness of slicing techniques.
 }
 \end{quote}
 
-We propose tuple, query, and attribute-slicing optimization to improve \sys's
-performance.
+We have added discussion in Sections~\ref{sec:opt:tbsize},
+\ref{sec:opt:query}, and~\ref{sec:opt:attslice} on the soundness of the three
+slicing methods.  We give the summary here:
 
-\emph{Tuple-slicing} is a \textbf{heuristic} that breaks down a large MILP problem 
-into two, often much smaller, MILP problems. It works effectively in practice and 
-greatly helps improving \sys's performance, especially when the ratio of complaint 
-set size and the database size is small. However, it it possible that \emph{tuple-slicing} 
-fixes the incorrect query and introduce noises to the query log repair. 
-In addition, \emph{tuple-slicing} suffers from higher mistake risk when applying to workloads 
-with nested updating queries where tuples are no longer independent to each other, 
-e.g., query update one tuple by reading from another tuple. This is because queries 
-may read from non-complaint tuples and update tuples in the complaint. Without including 
-variables from non-complaints, the constructed MILP problem become loosely constrained 
-and noises are more likely to be introduced. 
- 
-However, for problems with single query corruption and complete complaint set, 
-by incorporating with the \textit{incremental repair} optimization and further enforcing \textbf{no non-complaint tuples}
-in the refinement step, we ensure the correctness of tuples that are not in the complaint.
- 
-Here we show a simple example when \emph{tuple-slicing} may fail:
+In the general case, tuple slicing is a heuristic method. It decomposes a
+large MILP problem into two, typically much smaller, MILP problems. It is
+effective in practice and greatly helps improve \sys performance, especially
+when the ratio of the complaint set size and the database size is small. In
+general, this heuristic can result in incorrect repairs. This is possible if a
+query $q$ succeeds an erroneous query $q_e$, and $q$ overwrites all changes by
+$q_e$. However, \emph{tuple slicing is sound in certain settings}, namely,
+when the complaint set is complete and if corruptions are limited to a single
+query. In these cases, by using incremental repair
+(Section~\ref{sec:incremental}) and by disallowing all non-complaint tuples in
+the refinement step (e.g., by restricting the value of the objective function
+in the refinement MILP to zero), the solver will be forced to pick the correct
+repair.
 
-\indent \textit{$q_1$ writes $t_1$ (incorrect query); \\
-\indent $q_2$ writes $t_2$;\\
-\indent $q_3$ writes $t_1, t_3$.}\\
-A workload with three queries where $q_1$ is the incorrect query updates tuple $t_1$. 
-Another query $q_3$ covers the impact of $q_1$ and updates tuple $t_1$ and $t_3$. 
-When only considering tuples in the complaint set, \sys may fix $q_3$ instead of $q_1$ 
-while modifying an additional tuple $t_3$. In this case, \emph{tuple-slicing} introduces 
-noises, however, such noise could be identified by the non empty non-complaint set. In case
-where the $t_1$ is guaranteed as the only erroneous tuple, such noise could be further avoided 
-by enforcing empty non-complaint set.
- 
-\emph{Query-slicing} and \emph{attribute-slicing} remove irrelevant queries and attributes 
-according to whether or not they would affect the incorrect values in the complaints. More specifically,
-\emph{query-slicing} generates the \textbf{full-impact} of each query by tracing forward the 
-query history and searching for all attributes that may modified by the current query. Thus, 
-when the \textbf{full-impact} of a query does not intersect with incorrect attributes in the 
-complaint set, the query is guaranteed irrelevant to the errors reported in the complaint set. 
-Similarly, given a set of candidate queries that may contribute to the errors (the whole
-query history without \emph{query-slicing}), \emph{attribute-slicing} summarizes all attributes 
-that may modified by these queries and removes attributes that are not in the previous list.
-Thus, both \emph{query-slicing} and \emph{attribute-slicing} are guaranteed to be correct. 
+
+
+The query and attribute slicing optimizations are always sound, in the sense
+that \sys will produce the same repairs when these optimizations are applied
+as when they are not. These slicing methods remove from the problem any
+queries and attributes, respectively, that could not have have had an impact
+to the incorrect values in the complaints. More specifically,
+\emph{query-slicing} computes the \emph{full-impact} of each query, which is a
+form of forward provenance: starting at query $q$, and tracing the log forward
+(toward more recent queries) we keep track of all attributes that may have
+been modified by $q$. If the full-impact of $q$ does not intersect with any
+incorrect attributes in the complaint set, it is guaranteed that $q$ does not
+affect any of the errors reported in the complaint set. Similarly, attribute
+slicing summarizes all attributes that may have been modified by or define
+predicates in queries in the history. Any attributes that are not on this list
+can be safely ignored. Thus, applying query or attribute slicing will never
+reduce the accuracy of \sys. We formalize this result in
+Lemma~\ref{lem:sound}.
+
+
  
 \comskip
 

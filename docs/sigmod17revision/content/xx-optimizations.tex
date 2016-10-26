@@ -248,7 +248,7 @@ queries that are candidates for repair.
 \xlw{This optimization only linearizes the queries in $Rel\mathcal{(Q)}$ which is a conservative estimate of all queries that may have affected the user complaints.  
 Since this set is typically much smaller than the entire query log, this optimization leads to smaller problems than \emph{basic} without any loss of accuracy.}
 
-\subsection{Attribute Slicing: Reducing Attributes}
+\subsection{Attribute Slicing: Reducing Attributes}\label{sec:opt:attslice}
 
 In addition to removing irrelevant queries, we additionally avoid encoding irrelevant attributes.
 Given $Rel\mathcal{(Q)}$, the relevant attributes can be defined as:
@@ -261,7 +261,7 @@ attributes through static analysis of the query log. Thus, it reduces the proble
 size without loss of accuracy. We formalize the soundness of the query and
 attribute slicing in the following lemma.
 % 
-\begin{lemma}
+\begin{lemma}\label{lem:sound}
     If $\mathbf{R}$ is a set of repairs that \sys produces under no slicing
     optimizations, then \sys will produce the same repairs $\mathbf{R}$ under
     query and attribute slicing.
