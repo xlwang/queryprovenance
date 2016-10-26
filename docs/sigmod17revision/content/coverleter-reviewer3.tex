@@ -1,0 +1,409 @@
+
+
+\noindent
+\textbf{Comment \#1:} Improvements
+\begin{quote}
+\reviewer{
+W1) Given that the paper considers a novel problem, I believe it could trigger
+quite some follow-up work. However, to do so, I personally think that further
+technical details or detailed theoretical discussion are necessary.
+ 
+}
+\end{quote}
+
+We clarify the soundness of the proposed optimization and conclude that
+\emph{tuple-slicing} is a highly effective heuristic that greatly improved
+\sys's execution efficiency and unlikely to make mistakes in practice;
+\emph{attribute, query-slicing} follow attribute updating lineage and thus
+guarantee the correctness.
+
+\comskip
+
+\noindent
+\textbf{Comment \#2:} Additional experiments
+\begin{quote}
+\reviewer{
+W2) I find the experimental evaluation rather preliminary and would appreciate
+experiments on larger data sets or some real data set.
+}
+\end{quote}
+
+We improve our experimental evaluation in three ways: we first extend our
+experiment with larger database sizes to up to $100k$ records in
+Figure~\ref{f:attr100}; we also evaluate \sys's ability in identifying the
+actual incorrect query in Appendix~\ref{app:index} and demonstrate that \sys
+always fixes the actual incorrect query when the complaint set is complete; we
+further study \sys's performance across different level of query interactions
+and include additional experiments on query selectivity in
+Appendix~\ref{app:selectivity}. Unfortunately, we are unable to get real data
+set and we put such evaluation to our future work.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section*{Comments by Reviewer 3}
+
+\noindent
+\textbf{Comment \#1:} Clarifying assumptions
+\begin{quote}
+\reviewer{
+\dots there is a long list of assumptions scattered around the paper
+
+\dots
+
+The problem is indeed difficult \dots and assumptions must be put in place
+ 
+}
+\end{quote}
+
+We thank the reviewer for suggesting a summary of assumptions applied to this paper. We implement this in Section~\ref{sec:abstractions} and 
+conclude the assumptions as follows:  \sys identifies errors and proposes query repairs 
+for query data but not on query structures and solves 
+OLTP queries with no subqueries, aggregation, joins, and user-defined functions (UDFs); 
+In addition, \sys assumes a setting where no errors are exist in the data before importing into the database, i.e., 
+the initial database state always starts from empty or a clean checkpoint. 
+We demonstrate that \sys can solve problems with corruptions in multiple queries, but its scalability in 
+this setting is limited (up to about 50 queries in the log).  \sys also solves problems with incomplete
+complaint set, but it is more likely to make mistakes for older corruptions with higher amount of missing complaints. 
+For cases where corruptions are restricted to a single query with complete complaint, 
+\sys can scale to large data and log sizes.
+
+\begin{quote}
+\reviewer{
+how do the assumptions interact with each other in practice 
+}
+\end{quote}
+
+We divide the above hard assumptions into three groups: assumption to error types (i.e., query data instead of query structure);
+assumptions to query complexity (i.e., no subqueries, aggregation, join, or UDFs); assumption to 
+a safe checkpoint (i.e., clean initial database state). Assumptions do not interact across groups. 
+Assumptions to the query complexity are strongly interact with each other, for example, subqueries and join 
+are highly correlated. However, detailed analysis towards relaxing these assumptions is out of the scope of this paper and 
+we consider it as our future work. 
+
+
+\begin{quote}
+\reviewer{
+Is it realistic to assume a safe checkpoint? 
+}
+\end{quote}
+It is realistic to assume a safe checkpoint because there always exists a safe checkpoint ---
+an empty database with each tuple corresponding to an \texttt{INSERT} query. 
+
+\begin{quote}
+\reviewer{
+Is it realistic to have at least 25\% of the errors detected?
+}
+\end{quote}
+
+Under our default setting, the full complaint set size for a single corruption is $~20-25$, thus 
+25\% deleted errors means only $5-7$ complaints are proceeded to \sys. Since queries
+are heavily interact with each other in our test data, having $5-7$ complaints is essential 
+to solve problems even with more recent corruptions. 
+We target to relax this requirement in our future work.
+
+\alex{We need to be detailed, and not just refer to another answer. This
+reviewer is asking very specific questions, not just collecting the
+assumptions to one place!}
+
+
+\comskip
+
+\noindent
+\textbf{Comment \#2:} Baseline -- Query errors as data
+\begin{quote}
+\reviewer{
+Errors are indeed in the queries, but are ultimately data errors \dots
+existing solutions \dots can be directly applied by modelling the query data
+as source data + SELECT queries.
+
+\dots
+
+it would be great if the author can precisely explain why such baselines would
+fail in their context.
+
+}
+\end{quote}
+
+\alex{Good arguments here, but this needs to be cleaned up.}
+
+In this paper, \sys solves two problems: 1. it finds the root reason(s) in the
+query history that causing database errors, and 2. it fixed the incorrectness
+by proposing a query log repair. Existing works mentioned above study highly
+corrected problems: in general, they all target at explaining erroneous or
+undesired query results by tracing back data source input and reporting either
+particular input tuples or common input patterns. After carefully analysis, we
+conclude that none of these existing works could fix the incorrectness nor
+solve the error identification task effectively and efficiently.
+
+In order to use these works to diagnose query history, we first convert the
+\textsc{Optimal Diagnosis} problem in Definition 4 as \textsc{Source data +
+SELECT queries} problem: Given database states $D_0$ and $D_n$, a query log
+$\mathcal{Q} = \{q_i\}$ such that $\mathcal{Q}(D_0) = D_n$, and a desired
+database state $D_n^*$ with no errors, we model the \textsc{Source data +
+SELECT queries} problem by creating a table $P$ for under-determined
+parameters in $\mathcal{Q}$ and table $D_0$ as source tables; and a single
+nested SELECT query $q_n'$ for queries in $\mathcal{Q}$. We demonstrate an
+abstract example in Example~\ref{fig:example}.
+
+\begin{figure}[t]
+The \textsc{Optimal Diagnosis} problem:\\
+    \begin{minipage}[t]{0.1\textwidth}
+         \vspace{0pt} 
+         \centering
+        \begin{tabular}{ll}
+            \multicolumn{2}{l}{Table $D_0$}\\
+            \toprule
+            \textbf{A}  & \textbf{B}\\
+            \midrule
+			 1 & 1 \\
+			 2 & 2 \\
+			 3 & 5 \\
+            \bottomrule
+            \\
+        \end{tabular}
+    \end{minipage}
+    \begin{minipage}[t]{0.2\textwidth}
+         \vspace{0pt} 
+         \centering
+        \begin{tabular}{p{26ex}}
+            \multicolumn{1}{l}{\emph{Query log}: $\mathcal{Q}$}\\
+            $q_1$: \texttt{\small UPDATE T SET B=B+1}\\
+            \texttt{\small WHERE A > 2 and a < \sout{5} {\color{red} 3}} \\
+            $q_2$: \texttt{\small UPDATE T SET B=B+3}\\
+                  \texttt{\small WHERE A > 0 and a < 4} \\
+        \end{tabular}
+    \end{minipage}
+    \begin{minipage}[t]{0.16\textwidth}
+         \vspace{0pt} 
+         \centering
+        \begin{tabular}{ll}
+            \multicolumn{2}{l}{Table $D_2^*$}\\
+            \toprule
+            \textbf{A}  & \textbf{B}\\
+            \midrule
+			 1 & 1 \\
+			 2 & 2 \\
+			 3 & {\textbf{6}} \\
+            \bottomrule
+            \\
+        \end{tabular}
+    \end{minipage}
+The \textsc{Source data + SELECT queries} problem: \\
+\begin{minipage}[t]{0.1\textwidth}
+         \vspace{0pt} 
+         \centering
+        \begin{tabular}{ll}
+            \multicolumn{2}{l}{Table $D_0$}\\
+            (same as above) \\
+        \end{tabular}
+    \end{minipage}
+\begin{minipage}[t]{0.36\textwidth}
+         \vspace{0pt} 
+         \centering
+        \begin{tabular}{llllll}
+            \multicolumn{6}{l}{Table $P$}\\
+            \toprule
+            \textbf{$p_1$}  & \textbf{$p_2$} & \textbf{$p_3$} & \textbf{$p_4$}  & \textbf{$p_5$} & \textbf{$p_6$} \\
+            \midrule
+			 1 & 2 & 3 & 3 & 0 & 4\\
+            \bottomrule
+            \\
+        \end{tabular}
+    \end{minipage}\\
+        \begin{minipage}[t]{0.22\textwidth}
+         \vspace{0pt} 
+         \centering
+        \begin{tabular}{p{2ex}p{55ex}}
+         \multicolumn{2}{l}{\emph{Queries}: }\\
+        $q'_1$: &
+        \texttt{\small SELECT $D_0.A$ AS A, $D_0.B$+$p_1$ AS B FROM $P, D_0$ } \\
+        & \texttt{\small WHERE $D_0.A$ > $p_2$ AND $D_0.A$ < $p_3$ UNION ALL}\\
+        & \texttt{\small SELECT $D_0.A$ AS A, $D_0.B$ AS B FROM $P, D_0$ }\\
+        &\texttt{\small  WHERE $\neg$($D_0.A$ > $p_2$ AND $D_0.A$ < $p_3$)} \\
+        $q'_2:$ &
+         \texttt{\small SELECT $D_1.A$ AS A, $D_1.B$+$p_4$ AS B FROM $P, q_1'\ as\ D_1$ } \\
+        & \texttt{\small WHERE $D_1.A$ > $p_5$ AND $D_1.A$ < $p_6$ UNION ALL}\\
+        & \texttt{\small SELECT $D_1.A$ AS A, $D_1.B$ AS B FROM $P, q_1'\ as\ D_1$ }\\
+        &\texttt{\small  WHERE $\neg$($D_1.A$ > $p_5$ AND $D_1.A$ < $p_6$)} \\
+        \end{tabular}
+    \end{minipage}
+    \caption{An abstract example for R3.2. (For simplicity, we use $q_1'$ for the input sub-query when introducing $q_2'$.)}
+\label{fig:example-cover}
+\end{figure}
+
+\noindent \textbf{[Roy et al. SIGMOD 2014, Wu et al. VLDB 2013, Chalamalla et al. SIGMOD 2014]} \\
+TLDR: These papers quantify responsibility of input data to errors in the
+output, however responsibility
+
+
+These papers focus on detecting and summarizing the likely source tuples by
+propagating ``responsibility'' from annotated output error tuples to sources.
+~\cite{Wu13} targets at explaining a set of SELECT query results by a
+conjunction of predicates on attributes where the SELECT clause in each query
+is restricted to a single aggregate operator. Similarly, ~\cite{roy2014formal}
+explains a group-by SQL query with a single aggregate function. Since there is
+no obvious mapping between complaints and a particular aggregate function,
+both algorithms cannot solve the error identification problem. Instead of
+aggregation results, ~\cite{chalamalla2014} searches for explanations for data
+quality rule violations. Even though complaints can be expressed as data
+quality rules, the algorithm does not distinguish the actual input source
+error (in $D_0$) and query parameter error (in $P$). Thus, in
+Example~\ref{fig:example}, the explanation $D_0.A = 3$ on table $D_0$ is also
+a valid explanation. Besides, ~\cite{chalamalla2014} relies on the causality
+relationship between erroneous data and their lineage, which is invalid for
+incorrect parameters in the update workload. Thus, this work cannot
+effectively solve the error identification problem either.
+
+\noindent \textbf{[Meliou et al. SIGMOD 2011]} \\
+TLDR: The number of disjunctions in the generated SAT expression increases
+exponentially with respect to the number of queries in the log. For instance,
+if the database contained 100 tuples and 10 queries, the number of
+disjunctions would be $\cdot 2^{10}$ and thus the number of lineage
+expressions would be $100\cdot 2^{100}$.
+
+The View-Conditioned Causality(VCC) work takes a set of input variables
+$\mathbf{X}$, a transformation $\mathbf{\Phi} =\{\Phi_1, \dots , \Phi_m\}$
+computing the output values $\mathbf{z}$, and a ground truth
+$\hat{\mathbf{z}}$, and detects input variables that are responsible for data
+errors $\mathbf{z}|\hat{\mathbf{z}}$. The \textsc{Source data + SELECT
+queries} problem can be expressed as a VCC problem where cells in $P$ form the
+input variables $\mathbf{X}$ and each tuple $t_i$ in $D_0$ and the SELECT
+query $q_n'$ is translated into a lineage expression $\Phi_i$. In each lineage
+expression $\Phi_i$, tuple values in $D_0$ and $D_n^*$ are further converted
+into constant variables. By doing so, only variables in $P$ will be selected
+to explain data errors. In Example~\ref{fig:example}, lineage expression
+$\Phi_3$ for tuple $t_3$ is as following:
+
+{\small
+\begin{eqnarray*}
+&((3 > p_2 \wedge 3 < p_3) \wedge (3 > p_5 \wedge 3 < p_6) \wedge (5 + p_1+p_4 = 6)) &\\
+&\vee ((3 > p_2 \wedge 3 < p_3) \wedge \neg(3 > p_5 \wedge 3 < p_6) \wedge (5 + p_1= 6))& \\
+&\vee (\neg(3 > p_2 \wedge 3 < p_3) \wedge (3 > p_5 \wedge 3 < p_6) \wedge (5 + p_4= 6))& \\
+&\vee (\neg(3 > p_2 \wedge 3 < p_3) \wedge \neg(3 > p_5 \wedge 3 < p_6) \wedge (5 = 6))&
+\end{eqnarray*}
+}
+Each row corresponding to the satisfactory condition for where clauses in $Q$.
+The first row, for example, means the where condition is true for both $q_1$
+and $q_2$. The ground truth output values for $\mathbf{\Phi}$ are all set to
+\textit{True}. By solving the VCC problem, one can identify incorrect
+parameters in the query log. However, as you may notice, the lineage
+expressions for tuples in $D_0$ are composed by disjunctive sub-expressions
+with exponential cardinality to the number of queries in $Q$. Since the
+execution efficiency is highly correlated to the complexity of lineage
+expressions, VCC solves the error detection task but cannot solve it
+efficiently.
+
+To conclude, none of these highly correlated works could handle both problems
+addressed by \sys: ~\cite{meliou2011tracing} solves the error detection
+problem with low efficiency; ~\cite{chalamalla2014} may solve the error
+detection problem but fail to distinguish data source errors and query errors;
+~\cite{Wu13} and ~\cite{roy2014formal} restricted to aggregations, thus cannot
+solve either problems.
+
+
+\comskip
+
+\noindent
+\textbf{Comment \#3:} Scalability 
+\begin{quote}
+\reviewer{
+\dots relatively small datasets are tested
+\dots I suggest to explicitly test the scalability until the bottlenecks of the solutions become clear (the MILP module?)
+}
+\end{quote}
+
+We extend our experiment with larger database size in Figure~\ref{f:attr100}
+and observe that with all optimization, \sys requires $~300$ sec to solve
+problems with $100k$ tuples and a corruption age of $250$ queries.
+
+There exists two scalability bottlenecks: the bottleneck of \sys in generating MILP problem that is solvable in 
+reasonable amount of time; and the bottleneck of memory limitation in the hardware we use for experiments. 
+These two bottlenecks are closely interact with each other as better hardware solves harder MILP problem in 
+shorter amount of time. Problems with $100$ attributes with more than $100k$ records with more than $250$ queries already 
+reach the upper bound of our experimental machines, thus we did not further extend \sys to larger database sizes. 
+
+
+\alex{I am afraid that we are not answering the second part of this reviewer's
+question.}
+
+
+\comskip
+
+\noindent
+\textbf{Comment \#4:} Accuracy metrics
+\begin{quote}
+\reviewer{
+I cannot grasp from the experiments section if the authors are counting the
+number of errors correctly identified or correctly fixed.
+\dots
+this implies that even complete complain sets do NOT guarantee that the query
+is correctly fixed and future errors will not occur \dots
+}
+\end{quote}
+
+In our experiment, we measure \sys's accuracy as whether all complaints are
+correctly fixed. In the example, we also consider $income >= 87200$ as a
+correct query repair as it resolves all the reported complaints. In addition,
+the repaired query is allowed to differ from the true query. However, this is
+very rare in practice and we show that \sys always pick the correct query to
+fix when the complaint set is complete. Though \sys dos not guarantee to
+propose a query log repair that is exactly the same with the original true
+query log, it identifies the incorrect query and provides a reasonable
+suggestion of how to fix the problem.
+
+
+
+\comskip
+
+\noindent
+\textbf{Comment \#5:} Error generation
+\begin{quote}
+\reviewer{
+I believe the way that errors are introduced can be improved.
+\dots Randomly introducing errors do not guarantee that complex patterns (such as the one in Figure 1) happen 
+\dots
+Unfortunately having some guarantee on the way that errors are introduced can
+be a challenging problem \dots
+}
+\end{quote}
+
+In this paper, we introduce a synthetic data generator in Section~\ref{sec:setup}
+with multiple adjustable parameters, including query type, workload and
+database size, and query selectivity.  These parameters allow us to generate 
+synthetic workloads on \texttt{UPDATE}, \texttt{INSERT}, and \texttt{DELETE} queries and
+further helps manipulating level of query interaction for \texttt{UDPATE}-workloads. 
+We found that \texttt{UPDATE} queries has higher level of query interaction and thus
+requires longer time to solve than \texttt{INSERT} and \texttt{DELETE} queries 
+(Figure~\ref{f:indelup_time}). Under our default setting, \texttt{UPDATE} queries with 
+\textit{range} predicates and \textit{relative} \texttt{SET} clauses have higher level of query
+ interaction than \textit{point} predicates and \textit{constant} 
+\texttt{SET} clauses respectively, thus problems with the former settings are 
+harder to solve than the latter settings (Figure~\ref{f:qidx_time}). 
+In addition, we also study the \sys's performance over two parameters that 
+contributes to the query interaction probability: the number of attributes, $N_a$, in 
+Figure~\ref{f:attr} and percentage of query selectivity in Appendix~\ref{app:selectivity}.
+Our experiment confirms that higher level of query interaction leads to 
+harder problems (requires longer time to solve). 
+
+\alex{We should talk about this here.}
+
+
+\comskip
+
+\noindent
+\textbf{Comment \#6:} Connection to data repair
+\begin{quote}
+\reviewer{
+the MILP formulation reminds me the SAT formulation in [25] and similar works
+for data cleaning. In fact def 4 is very close to the minimal repair concept
+in data repair. This can be clarified.
+}
+\end{quote}
+
+We thank the reviewer for mentioning these data repairs works. In fact, 
+\sys adopt similar intuition in these data repair works, 
+which seek for minimum repair on data, 
+to the query repair problem we studied in this paper. 
+
+\alex{Have we done something for this?} \xlw{let's cite these papers when explaining def 4. }

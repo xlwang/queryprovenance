@@ -1,0 +1,173 @@
+\section*{Comments by Meta-Reviewer}
+
+\noindent
+\textbf{Comment \#1:} Slicing soundness
+\begin{quote}
+\reviewer{
+Discuss and clarify the soundness of slicing techniques.
+}
+\end{quote}
+
+We have added discussion in Sections~\ref{sec:opt:tbsize},
+\ref{sec:opt:query}, and~\ref{sec:opt:attslice} on the soundness of the three
+slicing methods.  We give the summary here:
+
+In the general case, tuple slicing is a heuristic method. It decomposes a
+large MILP problem into two, typically much smaller, MILP problems. It is
+effective in practice and greatly helps improve \sys performance, especially
+when the ratio of the complaint set size and the database size is small. In
+general, this heuristic can result in incorrect repairs. This is possible if a
+query $q$ succeeds an erroneous query $q_e$, and $q$ overwrites all changes by
+$q_e$. However, \emph{tuple slicing is sound in certain settings}, namely,
+when the complaint set is complete and if corruptions are limited to a single
+query. In these cases, by using incremental repair
+(Section~\ref{sec:incremental}) and by disallowing all non-complaint tuples in
+the refinement step (e.g., by restricting the value of the objective function
+in the refinement MILP to zero), the solver will be forced to pick the correct
+repair.
+
+
+
+The query and attribute slicing optimizations are always sound, in the sense
+that \sys will produce the same repairs when these optimizations are applied
+as when they are not. These slicing methods remove from the problem any
+queries and attributes, respectively, that could not have have had an impact
+to the incorrect values in the complaints. More specifically,
+\emph{query-slicing} computes the \emph{full-impact} of each query, which is a
+form of forward provenance: starting at query $q$, and tracing the log forward
+(toward more recent queries) we keep track of all attributes that may have
+been modified by $q$. If the full-impact of $q$ does not intersect with any
+incorrect attributes in the complaint set, it is guaranteed that $q$ does not
+affect any of the errors reported in the complaint set. Similarly, attribute
+slicing summarizes all attributes that may have been modified by or define
+predicates in queries in the history. Any attributes that are not on this list
+can be safely ignored. Thus, applying query or attribute slicing will never
+reduce the accuracy of \sys. We formalize this result in
+Lemma~\ref{lem:sound}.
+
+
+ 
+\comskip
+
+\noindent
+\textbf{Comment \#2:} Clarifications
+\begin{quote}
+\reviewer{
+Clarify the assumptions, their interaction, and why they are realistic in practice. clarify that the system is not repairing the update queries, but the affected data (i.e., query is not correct and errors can still happen).}
+\end{quote}
+
+In this paper, we propose a framework \sys that identifies errors in query history and generates query log repair. 
+We assume errors are only in \textbf{query data instead their structures}. In addition, we focus on relatively 
+``simple'' OLTP queries with \textbf{no subqueries, aggregation, joins, and user-defined functions (UDFs)}. 
+We concentrate on a setting where no errors are exist in the data before importing into the database, i.e., 
+the initial database state always starts from empty or a clean checkpoint. \sys is not restricted to consistent 
+complaint set and we evaluate \sys's performance with incomplete complaint set in Figure~\ref{f:falsenegative}. 
+We leave the improvement on other types of inconsistency (e.g., false positive complaints, incomplete correct
+values) into our future work. Besides, \sys does not require single query corruption either, however, \sys 
+suffers from severe scalability limitation using current MILP solvers. We expect future improvement on \sys
+as well as MILP solvers and hardware to solve problems with multiple corruptions efficiently. 
+
+We also summarize all these assumptions in Section~\ref{sec:abstractions}.
+
+\alex{We should give some details here.}
+
+\comskip
+
+\noindent
+\textbf{Comment \#3:} Larger data sizes
+\begin{quote}
+\reviewer{
+Add experiment with larger data size, or clarify why they cannot be done.}
+\end{quote}
+
+% We extend our experiment with larger database sizes in Figure~\ref{f:attr100}
+% with up to $100k$ tuples.
+We apologize for the inconsistency between our scalability statement and the experiments 
+in our main content as the statement actually refers to our experiments in Appendix~\ref{sec:heuristic}, . 
+
+In this revision, we further extend our experiments and augment
+Figure~\ref{f:attr100} to database with up to $100k$ records. 
+We demonstrate that even with the most complex
+setting, \texttt{UPDATE} queries with \textit{range} \texttt{WHERE} clause,
+\sys scales to databases with $100k$ records when the corruption age is as old
+as $250$.
+
+\alex{We should add a couple more sentences here to apologize for the
+apparent inconsistency, and say that the 100k experiments were in the
+appendix, but they are now in the main paper. Did we just move an experiment,
+or did we augment the presented results?}
+
+
+\comskip
+
+\noindent
+\textbf{Comment \#4:} Error generation
+\begin{quote}
+\reviewer{
+investigate how many of the errors exhibit interesting patterns (such as a
+later update masking the effect of an earlier erroneous one). If there are
+already lots of examples of this, compare effectiveness on the ``simple''
+errors with the ``complex'' ones; otherwise, you should improve the test data
+generator.
+}
+\end{quote}
+
+
+To carefully evaluate \sys's performance over problems with different
+properties, we introduce a synthetic data generator in Section~\ref{sec:setup}
+with multiple adjustable parameters, including query type, workload and
+database size, and query selectivity. With the help of these parameters, we
+are able to control one of the key properties in the workload, the interaction
+of the queries, and thus to better understand \sys's performance. The level of
+query interactions greatly influences to the hardness of the problem as errors
+may propagate differently under different scenarios.
+
+There are many factors that may affect the level of query interactions. In
+general, \texttt{UPDATE} queries are heavily interact with each other than
+\texttt{INSERT} or \texttt{DELETE} queries since tuples persist in the
+database and may be continuously updated by the following \texttt{UPDATE}
+queries. We demonstrate this in Figure~\ref{f:indelup_time} and observe that
+under the same corruption age, \texttt{UPDATE}-workload requires longer time
+to solve than \texttt{DELETE} and \texttt{INSERT}-workloads. For
+\texttt{UPDATE} queries, \textit{constant} \texttt{SET} clauses do not require
+former attribute value(s), and thus have less query interaction compare to
+queries with \textit{relative} \texttt{SET} clauses
+(Figure~\ref{f:qidx_time}). Under default parameters, \texttt{UPDATE} queries
+with \textit{point} \texttt{WHERE} clauses update less amount of tuples than
+queries with \textit{range} \texttt{WHERE} clauses. Thus, the first type
+oftentimes has lower level of query interaction and easier to solve in
+practice (Figure~\ref{f:qidx_time}). For \texttt{UPDATE} queries with
+\textit{range} \texttt{WHERE} clauses, we found that both the number of
+attributes $N_a$ and query selectivity $s$ may strongly influence the level of
+query interaction (Appendix~\ref{app:selectivity}). Under our default setting,
+increase the number of attribute $N_a$ reduces the query interaction and thus
+we observe that problems with larger number of $N_a$ are easier to solve in
+Figure~\ref{f:attr}. On the other hand, increasing query selectivity $s$ means
+more tuples are updated by each query and thus leads to higher level of query
+interaction. Thus, higher query selectivity leads to longer solving time.
+
+
+
+\comskip
+
+\noindent
+\textbf{Comment \#5:} Possible baselines
+\begin{quote}
+\reviewer{
+Implementation of a baseline (described in the review) or explain why such
+baselines would fail in the context, to convince readers that complex patterns
+can be handled only by this new system.
+}
+\end{quote}
+
+In this paper, \sys solves two problems: 1. it finds the root reason(s) in the
+query history that causing database errors, and 2. it fixed the incorrectness
+by proposing a query log repair. Existing works~\cite{Wu13, roy2014formal,
+chalamalla2014,meliou2011tracing} mentioned by reviewer 3 study highly
+corrected problems: in general, they all target at explaining erroneous or
+undesired query results by tracing back data source input and reporting either
+particular input tuples or common input patterns. After carefully analysis, we
+conclude that none of these existing works could fix the incorrect queries
+(problem 2) nor solve the error identification task (problem 1) effectively
+and efficiently. We provide detailed analysis for each works in Reviewer 3's
+\# comment 2.
