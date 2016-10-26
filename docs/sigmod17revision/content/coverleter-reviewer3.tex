@@ -49,24 +49,23 @@
 \reviewer{
 \dots there is a long list of assumptions scattered around the paper
 
-\dots
-
-The problem is indeed difficult \dots and assumptions must be put in place
+\dots The problem is indeed difficult \dots and assumptions must be put in place
  
 }
 \end{quote}
 
-We thank the reviewer for suggesting a summary of assumptions applied to this paper. We implement this in Section~\ref{sec:abstractions} and 
-conclude the assumptions as follows:  \sys identifies errors and proposes query repairs 
-for query data but not on query structures and solves 
-OLTP queries with no subqueries, aggregation, joins, and user-defined functions (UDFs); 
-In addition, \sys assumes a setting where no errors are exist in the data before importing into the database, i.e., 
-the initial database state always starts from empty or a clean checkpoint. 
-We demonstrate that \sys can solve problems with corruptions in multiple queries, but its scalability in 
-this setting is limited (up to about 50 queries in the log).  \sys also solves problems with incomplete
-complaint set, but it is more likely to make mistakes for older corruptions with higher amount of missing complaints. 
-For cases where corruptions are restricted to a single query with complete complaint, 
-\sys can scale to large data and log sizes.
+We thank the reviewer and have summarized out assumptions in one place (Section~\ref{sec:abstractions}).
+In short, our assumptions are as follows:
+
+\begin{itemize}
+\item \sys identifies errors and proposes query repairs for query data but not on query structures.
+\item \sys solves OLTP queries with no subqueries, aggregation, joins, and user-defined functions (UDFs).
+\item \sys assumes that the database starts (before the first query in the log) from an error-free or empty state. 
+\end{itemize}
+
+We demonstrated that \sys can solve problems with corruptions in multiple queries, but it exhibits scalability limitations (up to about 50 queries in the log).  \sys also solves problems with incomplete
+complaint sets (not all complaints are submitted), but it is more likely to make mistakes when the corruption is very old.  \ewu{for older corruptions with higher amount of missing complaints.   Are you saying that older queries result in more complaints and so we missed more complains in the repair??}
+For cases where a single query is corrupted, and all complaints in the complaint set are submitted, we showed \sys can scale to datasets with 100k tuples and logs with up to 250 DML statements.
 
 \begin{quote}
 \reviewer{
