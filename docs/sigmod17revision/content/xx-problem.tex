@@ -100,8 +100,7 @@ The conditional function $\sigma_q(t)$ is a boolean function that represents the
     &\sigma_{q_2}(t)=\texttt{true}
 \end{align*} 
 \fi
-\newtext{
-Note that in this paper, we do not consider sub-queries or aggregation. We clarify all assumptions later in this section.}
+Note that in this paper, we do not consider sub-queries or aggregation. We clarify all assumptions later in this section.
 
 \smallskip
 \noindent
@@ -139,9 +138,9 @@ particular tuple in the final database state $D_n^*$, and identifies
 that tuple's correct value assignment. We formally define complaints
 below:
 \begin{definition}[Complaint]\label{def:complaint}
-    A complaint $c$ is a mapping between two tuples: $c: t\mapsto t^*$, such that $t$ and $t^*$ have the same schema, \newtext{$t, t^*\in D_n\cup\{\bot\}$}, and $t\neq t^*$. A complaint defines a
-    transformation $\mathcal{T}_c$ on \newtext{the final database state $D_n$: $\mathcal{T}_c(D_n)
-    = (D_n\setminus\{t\})\cup\{t^*\}$, which replaces $t$ in $D_n$ with $t^*$}.
+    A complaint $c$ is a mapping between two tuples: $c: t\mapsto t^*$, such that $t$ and $t^*$ have the same schema, $t, t^*\in D_n\cup\{\bot\}$, and $t\neq t^*$. A complaint defines a
+    transformation $\mathcal{T}_c$ on the final database state $D_n$: $\mathcal{T}_c(D_n)
+    = (D_n\setminus\{t\})\cup\{t^*\}$, which replaces $t$ in $D_n$ with $t^*$.
 \end{definition}
 
 In the example of Figure~\ref{fig:example}, two complaints are reported on the final database state $D_3$: 
@@ -151,13 +150,11 @@ where $t_3^*=(86000,21500,64500)$ and $t_4^*=(86500,21625,\linebreak 64875)$.
 For both these cases, each complaint denotes a \textbf{value correction} for a tuple in $D_3$.  Complaints can also model the \textbf{addition} or \textbf{removal} of tuples: $c: \bot\mapsto t^*$ means that $t^*$ should be added to the database, whereas $c: t\mapsto \bot$
 means that $t$ should be removed from the database.
 
-\newtext{
 Note that in this definition, a complaint needs to specify the exact values
 for all fields of a tuple. However, this is done for ease of exposition, and
 it is not an inherent restriction in our approach. The definitions and our
 algorithms can trivially generalize to handle complaints where only some of the
 correct tuple values are known.
-}
 
 % \xlw{Ideally, a complaint should cover a \textbf{complete value correction} such that the exact fix value for all attributes are included. This is because a complete value correction helps reducing the searching space and improves the diagnosis quality. In this paper, we use complaints with complete value correction in our experiments, however, the proposed algorithm can be easily extended to handle problems with missing value correction. }
 
@@ -219,16 +216,16 @@ challenge is that $D_n^*$ is unknown, unless we know that the
 complaint set is complete. 
 
 \subsubsection*{Problem scope and solution outline}
-In this work, we focus on handling data manipulation \newtext{statements (\texttt{UPDATE}, \texttt{INSERT}, and
-\texttt{DELETE} queries)} with simple, basic query structures without subqueries, aggregations, or joins.
+In this work, we focus on handling data manipulation statements (\texttt{UPDATE}, \texttt{INSERT}, and
+\texttt{DELETE} queries) with simple, basic query structures without subqueries, aggregations, or joins.
 Expressions (in predicates and SET clauses) may be over linear combinations of constants and a single attribute, and we do not support arbitrary user defined functions.
 We find that the queries that we focus on are applicable to a broad range of user-facing web applications (e.g., conference attendee scheduling, voting,  data entry) and OLTP benchmarks, and that complex query structures and operations are less common than in read-oriented analytical workloads.
 
-\newtext{Given a query log and a set of complaints, \sys proposes repairs as
+Given a query log and a set of complaints, \sys proposes repairs as
 modifications of values in one or more queries. \sys does not modify the
 structure of queries, and makes the implicit assumption that the log starts
 either with an empty or a clean database.
-We demonstrate that \sys can solve problems with corruptions in multiple queries, but its scalability in this setting is limited (up to about 50 queries in the log).  For cases where corruptions are restricted to a single query, \sys can scale to large data and log sizes.}
+We demonstrate that \sys can solve problems with corruptions in multiple queries, but its scalability in this setting is limited (up to about 50 queries in the log).  For cases where corruptions are restricted to a single query, \sys can scale to large data and log sizes.
 
 % \xlw{In this paper, we rely on complaint set with valid information and mainly target at solving workloads with a single error. At this point, we plan to focus our future work on solving more complex workloads with multiple errors and inconsistent complaints efficiently and effectively.} 
 %We study the impact of the number of predicates in the WHERE clause in Section~\ref{sec:experiments:synth}.

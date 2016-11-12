@@ -107,9 +107,9 @@ conditional function $\sigma_{q_i}(t)$. First, we introduce a binary
 variable $x_{q_i, t}$ to indicate whether $t$ satisfies the
 conditional function of $q_i$: $x_{q_i, t}=1$ if
 $\sigma_{q_i}(t)=\texttt{true}$ and $x_{q_i, t}=0$ otherwise. In a
-slight abuse of notation:\newtext{\footnote{\newtext{To account for tuple deletions, the exact formula is actually more nuanced: $x_{q_i, t} =
+slight abuse of notation:\footnote{To account for tuple deletions, the exact formula is actually more nuanced: $x_{q_i, t} =
 x'_{q_i, t} \otimes 0 + (1-x'_{q_i, t}) \otimes \sigma_{q_i}(t)$, where
-$x'_{q_i, t}= (t.A_j = M^-) \wedge (t.A_j^* = M^-)$, and $M^-$ is a ``ghost'' value assigned to attributes of deleted tuples (see \texttt{DELETE}).}}}
+$x'_{q_i, t}= (t.A_j = M^-) \wedge (t.A_j^* = M^-)$, and $M^-$ is a ``ghost'' value assigned to attributes of deleted tuples (see \texttt{DELETE}).}
 \begin{align}
 \label{eq:x}
 x_{q_i, t} = \sigma_{q_i}(t)
@@ -178,7 +178,7 @@ t'.A_j = x \otimes t_{new}.A_j + (1-x) \otimes v.A_j
 \texttt{DELETE:}
 A delete query removes a set of tuples from the database.  
 Since the MILP problem doesn't have a way to express a non-existent value,
-\newtext{we encode a deleted tuple by setting its attributes to a
+we encode a deleted tuple by setting its attributes to a
 \emph{``ghost''} value, $M^-$, outside of the attribute domain. Since $M^-$ is
 outside of the attribute domain, any subsequent conditional functions will
 evaluate to false, so subsequent queries do not affect ghost tuples. There are
@@ -188,7 +188,7 @@ problem to prioritize a modification to the \texttt{WHERE} clause of the
 the \texttt{SET} clause of an \texttt{UPDATE} query to the ghost value
 ($\mu_{q_i}(t.A_j) = M^-$). However, it should be $M^- \leq M $ to ensure the
 constraints remain feasible (Equation~\ref{eq:uv}). These considerations
-ensure that the ghost assignment will not affect subsequent queries.}
+ensure that the ghost assignment will not affect subsequent queries.
 % So the $M^-$ assignment will not have an effect on subsequent queries encoded in the MILP problem:
 %
 % \xlw{Note that although the subsequent condition functions may be true initially, but any solutions having such positive conditions will have an associated objective-function value that is exceedingly large. Thus the MILP solver will always assign false to the subsequent condition functions.} 

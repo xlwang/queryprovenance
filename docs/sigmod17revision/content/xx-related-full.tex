@@ -4,7 +4,7 @@
 \label{s:related} 
 \sys tackles the problem of diagnosis and repair in relational query
 histories (query logs). 
-\newtext{However, since \sys does not modify the query structure, one could
+However, since \sys does not modify the query structure, one could
 frame this as a data diagnosis and repair problem: Queries are represented in
 a relation $R_q$ where each tuple is a record of a query and its parameters,
 and the log is modeled as a single nested \texttt{SELECT} query over $R_q$ and
@@ -25,7 +25,6 @@ that updates a single tuple).
 Finally, causality techniques~\cite{meliou2011tracing} are inefficient and
 cannot scale because the problem size grows exponentially. Moreover, they do
 not produce repairs.
-}
 
 
 \sys does not aim to correct errors in the data
@@ -103,7 +102,7 @@ All these approaches are
 limited to selection predicates of \texttt{SELECT} queries, and they
 only typically consider one query at a time. In contrast, \sys handles
 update workloads, processes large query histories, and can model
-several steps in the dataset's evolution. \newtext{A lot of explanation work~\cite{GebalyAGKS14, Khoussainova2012, Thirumuruganathan2012, Das2011, Fabbri2011, Bender14} targets specific application domains, limiting its applicability to our setting. }
+several steps in the dataset's evolution. A lot of explanation work~\cite{GebalyAGKS14, Khoussainova2012, Thirumuruganathan2012, Das2011, Fabbri2011, Bender14} targets specific application domains, limiting its applicability to our setting. 
 % \xlw{Scorpion and Roy's explanation work conflict with newly added paraphraph on data source+select query. So I remove them here.  }
 
 Finally, as \sys traces errors in the queries that manipulate data, it

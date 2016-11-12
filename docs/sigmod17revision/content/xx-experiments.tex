@@ -127,8 +127,8 @@ time between submitting a complaint set and the system terminating after retriev
 Accuracy is reported as the repair's precision (percentage of repaired tuples that were correctly fixed), 
 recall (the percentage of the full complaint set that was repaired), 
 and F1 measure (the harmonic mean of precision and recall). 
-\newtext{These metrics measure whether the complaint tuples are repaired correctly, but it is possible that the repaired query differs from the true query. 
-We separately evaluate whether \sys selects the right query to repair; these results are included in Appendix~\ref{app:index}.  In summary, we find that \sys always fixes the right query when the complaint set is complete.  However, the less complete the complaint set, and the older the corruption, the more likely it is that \sys will repair the wrong query.}
+These metrics measure whether the complaint tuples are repaired correctly, but it is possible that the repaired query differs from the true query. 
+We separately evaluate whether \sys selects the right query to repair; these results are included in Appendix~\ref{app:index}.  In summary, we find that \sys always fixes the right query when the complaint set is complete.  However, the less complete the complaint set, and the older the corruption, the more likely it is that \sys will repair the wrong query.
 Our experiments report averages across 20 runs.
 We describe the experimental parameters in the context of the datasets and workloads below. 
 
@@ -298,14 +298,14 @@ When the table is wide ($N_a = 500$), applying all optimizations ($inc_1-all$) i
 
 
 \stitle{Database Size:} \looseness -1
-\newtext{We vary the database size ($N_D \in [1k, 100k]$) with a large number of attributes ($N_a = 100$).
+We vary the database size ($N_D \in [1k, 100k]$) with a large number of attributes ($N_a = 100$).
 We fix the number of complaints by decreasing the query selectivity in proportion to $N_D$'s increase---the specific mechanism to do so did not affect the findings.
 Figure~\ref{f:attr100} shows that the costs are relatively flat until the corruption occurs in an old query ($Corruption\ Age = 250$).  
 In addition, we find that the cost is highly correlated with the number of candidate queries and attributes that are encoded in the MILP problem.
 The increase in cost despite tuple-slicing is due to the increasing number of candidate queries and attributes in the system; 
 we believe this increasing trend limits the solver's ability to prune constraints that correspond to queries and attributes that 
 clearly will not affect the complaint set---an implicit form of query and attribute slicing.  
-Ultimately, combining all three optimizations outperforms tuple-slicing by $2-3\times$.}
+Ultimately, combining all three optimizations outperforms tuple-slicing by $2-3\times$.
 
 \smallskip
 \textit{
@@ -325,14 +325,13 @@ In this section, we further study the performance of \sys in solving hard proble
 \stitle{Incomplete Complaint Set:} \looseness -1
 The first experiment (Figures~\ref{f:falsenegative_time} and~\ref{f:falsenegative_acc}) varies the false negative rate in incomplete complaint sets.
 We increase the rate from $0$ ($0\%$ missing in the complaint set) to $0.75$ ($75\%$ are missing).  
-\newtext{We find that reducing the number of reported complaints lowers the
+We find that reducing the number of reported complaints lowers the
 runtime; however, we observe a small reduction in repair quality (precision
 and recall in Figure~\ref{f:falsenegative_acc}) for recent corruptions and a
 significant drop for older ones. This is expected: the less information we
 have on the problem (fewer complaints), the lower our ability to fix it
 correctly. In the extreme case where very few complaints are available, the
 problem can be under-specified, and the true repair harder to identify.
-}
 
 
     

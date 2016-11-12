@@ -37,7 +37,7 @@ the cost to the left side of Figure~\ref{fig:querysize_vs_time}.
     \centering
     \includegraphics[width=0.35\textwidth]{figures/qsize_time_badscale}
     \vspace*{-0.1in}
-    \caption{Log size vs.\ execution time for 1000 records. \newtext{The basic approach failed to complete by the time limit of 1000sec for a log of $80$ queries.}}
+    \caption{Log size vs.\ execution time for 1000 records. The basic approach failed to complete by the time limit of 1000sec for a log of $80$ queries.}
     \label{fig:querysize_vs_time}
 \end{figure}
 
@@ -136,7 +136,6 @@ $t \in \mathcal{NC}$ that are matched by the solution.
 In our experiments, we find that this second MILP iteration adds
 minimal overhead ($0.1-0.5\%$) with respect to the initial MILP
 problem.   
-\newtext{
 \emph{Tuple-slicing} is a \textbf{heuristic} method that decomposes a large
 MILP problem into two, typically much smaller, MILP problems. It is effective
 in practice and greatly helps improve \sys performance, especially when the
@@ -152,7 +151,6 @@ repair.
 % \begin{lemma}
 %     If $\mathbb{R}$ is a set of repairs that \sys produces under no slicing optimizations and the given complaint set is complete, then \sys will produce the same repairs $\mathbb{R}$ under tuple slicing if non-complaint tuples are ....
 % \end{lemma}
-} 
 
 
 
@@ -212,7 +210,7 @@ This is the foundation of our \emph{query-slicing} optimization.
 	\[\mathcal{A}(\mathcal{C}) = \{A_i | t.A_i \neq t^*.A_i, c(t,t^*) \in \mathcal{C}\}\]
 \end{definition} 
 
-\newtext{
+
 We proceed to define the impact that a query has directly (the set of
 attributes it modifies), and its full impact (the set of attributes it may
 affect through all subsequent queries).
@@ -246,10 +244,8 @@ affect through all subsequent queries).
     % \]
 \end{definition}
 
-}
 % \vspace*{-0.2in}
 
-\newtext{
 Full impact is a form of forward provenance: it traces the query history
 toward more recent queries and extending the impact of a query to include
 every attribute that may have been affected by it. For example, assume the
@@ -264,7 +260,6 @@ and can be ignored in the repair process; otherwise, it is a candidate for
 repair. In the case of \emph{single-query corruptions}, $q$ is a candidate for
 repair only if $\mathcal{F}(q) \cap \mathcal{A}(C)=\mathcal{A}(C)$, which
 makes this optimization even more effective.
-}
 
 % By computing the full-impact of $q$, we can determine the extent that it affects $\mathcal{C}$
 % based on its overlap with the complaint attributes.
@@ -282,11 +277,11 @@ makes this optimization even more effective.
 
 We use $Rel\mathcal{(Q)}$ to denote the set of
 queries that are candidates for repair.
-\newtext{Query slicing only linearizes the queries in $Rel\mathcal{(Q)}$ which
+Query slicing only linearizes the queries in $Rel\mathcal{(Q)}$ which
 is a conservative estimate of all queries that may have affected the user
 complaints. Since this set is typically much smaller than the entire query
 log, this optimization leads to smaller problems than \emph{basic} without any
-loss of accuracy.  We formalize this result in Lemma~\ref{lem:sound}.}
+loss of accuracy.  We formalize this result in Lemma~\ref{lem:sound}.
 
 \subsection{Attribute Slicing: Reducing Attributes}\label{sec:opt:attslice}
 
@@ -296,7 +291,7 @@ $Rel\mathcal{(A)} = \cup_{q_i \in Rel\mathcal{Q}} (\mathcal{F}(q_i)\cup \mathcal
 We propose \emph{attribute slicing} optimization that only encodes constraints for attributes in $Rel\mathcal{(A)}$.
 We find that this type of slicing can be effective for wide tables along with queries that focus on a small subset of attributes.  
 
-\newtext{Similar to query slicing, this optimization removes only non-relevant
+Similar to query slicing, this optimization removes only non-relevant
 attributes through static analysis of the query log. Thus, it reduces the problem
 size without loss of accuracy. We formalize the soundness of the query and
 attribute slicing in the following lemma.
@@ -306,7 +301,6 @@ attribute slicing in the following lemma.
     optimizations, then \sys will produce the same repairs $\mathbf{R}$ under
     query and attribute slicing.
 \end{lemma}
-}
 
 
 \begin{algorithm}[t]
