@@ -1,0 +1,27 @@
+
+\begin{figure}[t]
+\centering
+{\scriptsize
+\begin{tabular}{ll}
+    \toprule
+    \textbf{Notation} & \textbf{Description}\\
+    \midrule
+    $\mathcal{Q}$& The sequence of executed update queries (log)\\ 
+             & $\mathcal{Q}=\{q_1, \dots, q_n\}$ \\
+    $D_0$    & Initial database state at beginning of log\\
+    $D_n$    & End database state (current) $D_n=\mathcal{Q}(D_0)$\\
+    $D_i$    & Database state after query $q_i$: $D_i=q_i(\dots q_1(D_0))$\\
+    $c: t\mapsto t^*$ & Complaint: $\mathcal{T}_c(D) = (D_n\setminus\{t\})\cup\{t^*\}$\\
+    $\mathcal{C}$ & Complaint set $\mathcal{C}=\{c_1,\dots,c_k\}$\\
+    $\mu_q(t)$  & Modifier function of $q$ (e.g., \texttt{SET} clause)\\
+    $\sigma_q(t)$   & Conditional function of $q$ (e.g., \texttt{WHERE} clause)\\
+    $t_{new}$   & Tuple values introduced in an \texttt{INSERT} query\\
+    $\mathcal{Q}^*$& Log repair\\
+    $d(\mathcal{Q}, \mathcal{Q}^*)$ & Distance functions between two query logs\\
+    \bottomrule
+\end{tabular}
+}
+\vspace{-2mm}
+\caption{Summary of notations used in the paper. }
+\label{tbl:notation}
+\end{figure}

@@ -1,0 +1,139 @@
+\section{Heuristics}
+\label{sec:heurstic}
+
+\subsection{Attribute Slicing}
+
+To further improve efficiency, we propose the attribute-slicing heuristic 
+(Algorithm~\ref{alg:heu}) that may lose accuracy. This attribute-slicing
+heuristic iteratively
+generates the log repair by splitting the relevant 
+attributes $Rel\mathcal{(A)}$ into
+groups and fixing parameters involved 
+in each group separately through a 
+much smaller MILP problem. By 
+controlling the number of attributes 
+in each group, we bound the size of 
+each MILP problem in the repair process.
+
+\begin{algorithm}[htbp]
+\caption{$AttributeSlicing$ heuristic.}
+\label{alg:heu}
+\begin{algorithmic}
+\REQUIRE {$\mathcal{Q}, D_0, D_n, \mathcal{C}$}
+\ENSURE {$\mathcal{Q^*}$}
+\STATE $Rel\mathcal{(A)} \leftarrow FindRelAttr(\mathcal{Q}, D_n, \mathcal{C})$
+\STATE $Rel\mathcal{(Q)} \leftarrow FindRelQuery(\mathcal{Q}, D_n, \mathcal{C})$
+\STATE $\mathcal{G} \leftarrow SplitAttr(Rel\mathcal{(A)})$
+\STATE $solved\_vals \leftarrow \emptyset$
+\FOR {each $\partial (Rel\mathcal{(A)})$ in $\mathcal{G}$}
+\STATE $\mathcal{Q'} \leftarrow PartialCF(\mathcal{Q}, \partial (Rel\mathcal{(A)}))$
+\STATE $solved\_vals \leftarrow BasicApproach(\mathcal{Q'}, solved\_vals, ...)$
+\ENDFOR
+\STATE $\mathcal{Q}^* \leftarrow ConvertQLog(Q, solved\_vals)$
+\STATE Return $\mathcal{Q}^*$
+\end{algorithmic}
+\end{algorithm}
+
+In order to construct the sub MILP problem 
+for a attribute group, we rewrite the conditional 
+function, $f_q(t)$, into 
+the partial conditional function format, $\partial (f_q(t))$.
+
+\begin{definition} [Partial Conditional Function]
+	The partial conditional function for a query $q$ over 
+	attribute set $\partial(Rel\mathcal{(A)})$ is:
+	\[
+    \partial (f_q(t))= 
+\begin{cases}
+    \partial (f_{q.\mu} (t)) ,& \text{if } \partial (f_{q.\sigma} (t))\\
+    t,              & \text{otherwise}
+\end{cases}
+\]
+where
+\begin{eqnarray*}
+\partial (f_{q.\mu} (t)) &=& \{f|f\in f_{q.\mu}(t), \Pi_{f}(R) 
+\in \partial (Rel\mathcal{(A)})\}\\
+\partial (f_{q.\sigma} (t)) &=& \cup_{f \in f_{q.\sigma} (t)} \partial(f)
+\end{eqnarray*}
+Note that $\partial(f)$ is a transformation over a function 
+(logical expression) $f$ defined
+as following:
+\[
+\partial(f) = 
+\begin{cases}
+x,\ if\ \Pi_{f}(R) \cap \partial(Rel\mathcal{(A)}) = \emptyset\\
+f, otherwise
+\end{cases}
+\]
+$x$ is a newly introduced boolean variable. 
+\end{definition} 
+By doing so, we can easily construct the sub MILP problem 
+in the same way as in the basic approach. Note that 
+after each iteration, the solved variables, 
+especially boolean variable $x$(s), are reused to provide 
+constraint(s) for attributes that have not been examined. 
+We demonstrate the process in Example~\ref{ex:heurstic}.
+
+\begin{example}\label{ex:heurstic}
+In this example, we demonstrate how to use Attribute-slicing heuristic to
+solve the problem in Example~\ref{ex:taxes}. According to
+Section~\ref{sec:opt}, we have:
+\begin{eqnarray*}
+\mathcal{F}(q_1) &=& \{rate, owed \} \\
+\mathcal{F}(q_2) &=& \{owed\} \\
+\mathcal{F}(q_3) &=& \{ID, rate, income, owed\}\\
+Rel(\mathcal{A}) &=& \{ID, rate, income, owed\}
+\end{eqnarray*}
+Let us split the relevant attributes into groups: \\ 
+$\{\{rate\}, \{owed\}, \{income\}, \{ID\}\}$.\\
+Consider the first attribute group $\{rate\}$, we 
+first rewrite the query log into $\partial(f_q(t))$ as the following:\\
+\begin{minipage}{0.7\textwidth}
+    \begin{minipage}[t]{0.2\textwidth}
+        \begin{align*}
+            f_{q_1.\mu} &=& \{\{rate = 30\}\}; \\
+f_{q_2.\mu} &=& \emptyset;  \\
+f_{q_3.\mu} &=& \{\{rate = 25\}\};
+        \end{align*}
+    \end{minipage}
+    \hspace{4em}
+    \begin{minipage}[t]{0.2\textwidth}
+        \begin{align*}
+           f_{q_1.\sigma} &=& x_1\\
+            f_{q_2.\sigma} &=& true\\
+           f_{q_1.\sigma} &=& x_3
+        \end{align*}
+    \end{minipage}
+\end{minipage}
+
+\smallskip
+
+\indent We construct a sub MILP problem by linearizing
+this query log over tuple $\{t_1, t_2, t_3, t_4\}$, parameterizing
+the numeric variables, $30 and 25$, into $var1, var2$,
+and setting the objective function as the minimum Euclidean
+distance between modified numeric variable with original ones.
+This sub MILP problem provides the following values: $var1 = 30, 
+var2 = 25$;$t_1.x_1 = false, t_1.x_3 = false$; $ t_2.x_1 = true, 
+t_2.x_3 = false$; $t_3.x_1 = false, t_3.x_3 = false$;
+$t_4.x_1 = false; t_4.x_3 = true$.
+
+\smallskip
+
+In next iteration, we focus on attribute group $\{owed\}$ and find
+the only numeric variable in $q_2$ should be $100$.
+We then examine attribute group $\{income\}$, since we solved
+$t_3.x_1 = false$ in the first iteration, the numeric 
+variable $85700$ in the where clause of $q_1$ has to be 
+changed into $86000+\epsilon$, where $\epsilon$
+is a small number less than the minimum gap among values in
+attribute $income$. Finally, we check attribute group
+$\{ID\}$, and derive a log repair by revise $q_1$ as
+\texttt{UPDATE Taxes Set rate = 30 WHERE income >= 86000+$\epsilon$ }. 
+\end{example}
+
+
+
+
+
+

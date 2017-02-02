@@ -1,0 +1,985 @@
+%!TEX root = ../main.tex
+
+\twocolumn[
+\begin{center}
+    {\LARGE \textbf{Cover Letter}}
+\end{center}
+\bigskip
+]
+
+\definecolor{commentColor}{HTML}{0000FF}
+
+\newcommand{\reviewer}[1]{\itshape{{\color{commentColor} #1}}}
+\newcommand{\comskip}{\bigskip}
+
+
+\renewenvironment{quote}
+{\vspace{-1mm}\list{}{\rightmargin=0cm \leftmargin=0cm}%
+\item\relax}
+{\endlist}
+
+We thank the reviewers and meta-reviewer for their insightful comments on our
+SIGMOD 2017 submission and their suggestions on how to strengthen our work. We
+used their comments, questions, and suggestions to revise and improve our
+paper. We provide here a summary of the revisions based on the reviews. We
+quote reviewer comments in blue, above our responses.
+
+\section*{Comments by Meta-Reviewer}
+
+\noindent
+\textbf{Comment \#1:} Slicing soundness
+\begin{quote}
+\reviewer{
+Discuss and clarify the soundness of slicing techniques.
+}
+\end{quote}
+
+We have added discussion in Sections~\ref{sec:opt:tbsize},
+\ref{sec:opt:query}, and~\ref{sec:opt:attslice} on the soundness of the three
+slicing methods.  We give the summary here:
+
+In the general case, tuple slicing is a heuristic method. It decomposes a
+large MILP problem into two, typically much smaller, MILP problems. It is
+effective in practice and greatly helps improve \sys performance, especially
+when the ratio of the complaint set size and the database size is small. In
+general, this heuristic can result in incorrect repairs. This is possible if a
+query $q$ succeeds an erroneous query $q_e$, and $q$ overwrites all changes by
+$q_e$. However, \emph{tuple slicing is sound in certain settings}, namely,
+when the complaint set is complete and if corruptions are limited to a single
+query. In these cases, by using incremental repair
+(Section~\ref{sec:incremental}) and by disallowing all non-complaint tuples in
+the refinement step (e.g., by restricting the value of the objective function
+in the refinement MILP to zero), the solver will be forced to pick the correct
+repair.
+
+
+
+The query and attribute slicing optimizations are always sound, in the sense
+that \sys will produce the same repairs when these optimizations are applied
+as when they are not. These slicing methods remove from the problem any
+queries and attributes, respectively, that could not have had an impact
+to the incorrect values in the complaints. More specifically,
+\emph{query-slicing} computes the \emph{full-impact} of each query, which is a
+form of forward provenance: starting at query $q$, and tracing the log forward
+(toward more recent queries) we keep track of all attributes that may have
+been modified by $q$. If the full-impact of $q$ does not intersect with any
+incorrect attributes in the complaint set, it is guaranteed that $q$ does not
+affect any of the errors reported in the complaint set. Similarly, attribute
+slicing summarizes all attributes that may have been modified by or define
+predicates in queries in the history. Any attributes that are not on this list
+can be safely ignored. Thus, applying query or attribute slicing will never
+reduce the accuracy of \sys. We formalize this result in
+Lemma~\ref{lem:sound}.
+
+
+ 
+\comskip
+
+\noindent
+\textbf{Comment \#2:} Clarifications
+\begin{quote}
+\reviewer{
+Clarify the assumptions, their interaction, and why they are realistic in practice. clarify that the system is not repairing the update queries, but the affected data (i.e., query is not correct and errors can still happen).}
+\end{quote}
+
+In this paper, we propose a framework \sys that identifies errors in query history and generates query log repair. 
+We assume errors are only in \textbf{query data instead their structures}. In addition, we focus on relatively 
+``simple'' OLTP queries with \textbf{no subqueries, aggregation, joins, and user-defined functions (UDFs)}. 
+We concentrate on a setting where no errors are exist in the data before importing into the database, i.e., 
+the initial database state always starts from empty or a clean checkpoint. \sys is not restricted to consistent 
+complaint set and we evaluate \sys's performance with incomplete complaint set in Figure~\ref{f:falsenegative}. 
+We leave the improvement on other types of inconsistency (e.g., false positive complaints, incomplete correct
+values) into our future work. Besides, \sys does not require single query corruption either, however, \sys 
+suffers from severe scalability limitation using current MILP solvers. We expect future improvement on \sys
+as well as MILP solvers and hardware to solve problems with multiple corruptions efficiently. 
+
+We also summarize all these assumptions in Section~\ref{sec:abstractions}.
+
+\alex{We should give some details here.}
+
+\comskip
+
+\noindent
+\textbf{Comment \#3:} Larger data sizes
+\begin{quote}
+\reviewer{
+Add experiment with larger data size, or clarify why they cannot be done.}
+\end{quote}
+
+% We extend our experiment with larger database sizes in Figure~\ref{f:attr100}
+% with up to $100k$ tuples.
+We apologize for the inconsistency between our scalability statement and the experiments 
+in our main content as the statement actually refers to our experiments in Appendix~\ref{sec:heuristic}, . 
+
+In this revision, we further extend our experiments and augment
+Figure~\ref{f:attr100} to database with up to $100k$ records. 
+We demonstrate that even with the most complex
+setting, \texttt{UPDATE} queries with \textit{range} \texttt{WHERE} clause,
+\sys scales to databases with $100k$ records when the corruption age is as old
+as $250$.
+
+\alex{We should add a couple more sentences here to apologize for the
+apparent inconsistency, and say that the 100k experiments were in the
+appendix, but they are now in the main paper. Did we just move an experiment,
+or did we augment the presented results?}
+
+
+\comskip
+
+\noindent
+\textbf{Comment \#4:} Error generation
+\begin{quote}
+\reviewer{
+investigate how many of the errors exhibit interesting patterns (such as a
+later update masking the effect of an earlier erroneous one). If there are
+already lots of examples of this, compare effectiveness on the ``simple''
+errors with the ``complex'' ones; otherwise, you should improve the test data
+generator.
+}
+\end{quote}
+
+
+To carefully evaluate \sys's performance over problems with different
+properties, we introduce a synthetic data generator in Section~\ref{sec:setup}
+with multiple adjustable parameters, including query type, workload and
+database size, and query selectivity. With the help of these parameters, we
+are able to control one of the key properties in the workload, the interaction
+of the queries, and thus to better understand \sys's performance. The level of
+query interactions greatly influences to the hardness of the problem as errors
+may propagate differently under different scenarios.
+
+There are many factors that may affect the level of query interactions. In
+general, \texttt{UPDATE} queries are heavily interact with each other than
+\texttt{INSERT} or \texttt{DELETE} queries since tuples persist in the
+database and may be continuously updated by the following \texttt{UPDATE}
+queries. We demonstrate this in Figure~\ref{f:indelup_time} and observe that
+under the same corruption age, \texttt{UPDATE}-workload requires longer time
+to solve than \texttt{DELETE} and \texttt{INSERT}-workloads. For
+\texttt{UPDATE} queries, \textit{constant} \texttt{SET} clauses do not require
+former attribute value(s), and thus have less query interaction compare to
+queries with \textit{relative} \texttt{SET} clauses
+(Figure~\ref{f:qidx_time}). Under default parameters, \texttt{UPDATE} queries
+with \textit{point} \texttt{WHERE} clauses update less amount of tuples than
+queries with \textit{range} \texttt{WHERE} clauses. Thus, the first type
+oftentimes has lower level of query interaction and easier to solve in
+practice (Figure~\ref{f:qidx_time}). For \texttt{UPDATE} queries with
+\textit{range} \texttt{WHERE} clauses, we found that both the number of
+attributes $N_a$ and query selectivity $s$ may strongly influence the level of
+query interaction (Appendix~\ref{app:selectivity}). Under our default setting,
+increase the number of attribute $N_a$ reduces the query interaction and thus
+we observe that problems with larger number of $N_a$ are easier to solve in
+Figure~\ref{f:attr}. On the other hand, increasing query selectivity $s$ means
+more tuples are updated by each query and thus leads to higher level of query
+interaction. Thus, higher query selectivity leads to longer solving time.
+
+
+
+\comskip
+
+\noindent
+\textbf{Comment \#5:} Possible baselines
+\begin{quote}
+\reviewer{
+Implementation of a baseline (described in the review) or explain why such
+baselines would fail in the context, to convince readers that complex patterns
+can be handled only by this new system.
+}
+\end{quote}
+
+In this paper, \sys solves two problems: 1. it finds the root reason(s) in the
+query history that causing database errors, and 2. it fixed the incorrectness
+by proposing a query log repair. Existing works~\cite{Wu13, roy2014formal,
+chalamalla2014,meliou2011tracing} mentioned by reviewer 3 study highly
+corrected problems: in general, they all target at explaining erroneous or
+undesired query results by tracing back data source input and reporting either
+particular input tuples or common input patterns. After carefully analysis, we
+conclude that none of these existing works could fix the incorrect queries
+(problem 2) nor solve the error identification task (problem 1) effectively
+and efficiently. We provide detailed analysis for each works in Reviewer 3's
+\# comment 2.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section*{Comments by Reviewer 1}
+
+\noindent
+\textbf{Comment \#1:} Slicing soundness
+\begin{quote}
+\reviewer{
+What are the soundness/correctness properties needed for the slicing
+heuristics to be applicable/useful?
+
+\dots
+
+Unclear whether (or why) slicing techniques are ``sound'', or whether they
+would be useful on realistic data rather than synthetic / randomly generated
+benchmark data.
+
+\dots
+
+p6. Why is tuple slicing sound? It sounds like it will amount to modeling only
+the tuples that are subject to a complaint...
+
+\dots
+
+p7. Likewise, I'm not convinced query or attribute slicing are safe
+optimizations.
+\dots  
+this requires proof
+
+}
+\end{quote}
+
+\emph{Tuple-slicing} is a \textbf{heuristic} that breaks down a large MILP problem 
+into two, often much smaller, MILP problems. It works effectively in practice and 
+greatly helps improving \sys's performance, especially when the ratio of complaint 
+set size and the database size is small. However, it it possible that \emph{tuple-slicing} 
+fixes the incorrect query and introduce noises to the query log repair. In addition, 
+under more complex settings where tuples are no longer independent 
+(also mentioned in the review ``p6 ...''), \emph{tuple-slicing} 
+is more likely to make mistakes. 
+
+In cases where the complaint set is complete and single query error,
+ \emph{tuple-slicing} can avoid making mistakes by incorporating other optimization and
+  enforcing empty non-complaint set
+in the refinement step. 
+To conclude, \emph{tuple-slicing} is safe for problems with single query corruption and complete complaint set both synthetic / randomly
+generated benchmark workloads and realistic workloads. We plan to improve \sys's ability in handling 
+inconsistent complaints, including incomplete complaint set, in our future work.
+
+\emph{Query-slicing} and \emph{attribute-slicing} remove irrelevant queries and attributes 
+according to whether or not they would affect the incorrect values in the complaints. 
+\sys conducts a throughout analysis by tracing forward the query history and identifies
+queries that are not able to modify incorrect attributes in the complaint set. Since adjustment
+to such queries has no impact on the erroneous values, it is safe to apply \emph{query-slicing}. 
+Similar to \emph{query-slicing}, \emph{attribute-slicing} searches for all attributes that may
+modified by queries in the workload (or a subset of queries after applying \emph{query-slicing}) and
+avoids encoding attributes that are not in the list into the MILP problem. Thus, \emph{attribute-slicing}
+is also safe. 
+
+\alex{Add details, not just references to different responses, as it is hard
+for reviewers to go back and forth.}
+
+
+\comskip
+
+\noindent
+\textbf{Comment \#2:} Correction
+\begin{quote}
+\reviewer{
+Please correct definition 6.
+
+\dots
+
+Suppose we have three queries \dots
+
+}
+\end{quote}
+
+\alex{The definition needs to be corrected, and more details should be added
+here.}
+
+\xlw{Original def. 6 seems misleading, let's verify it.}
+
+The \textbf{full-impact}, $\mathcal{F}(q_i)$, of a query $q_i$ includes all
+attributes that may modified by the query $q_i$ and it is calculate by the
+intermediate-impact of all its consecutive queries. Let us denote
+$\mathcal{F}_j(q_i)$ as the intermediate-impact of query $q_i$ on query $q_j$
+($j > i$) and $\mathcal{F}_j(q_i)$ is defined as follows. \[
+\mathcal{F}_j(q_i)=\mathcal{F}_{j-1}(q_i)\bigcup_{\substack{\mathcal{F}_{j-1}(q_i)\cap
+\mathcal{P}(q_j) \neq \emptyset}} \mathcal{I}(q_j), \] With initial impact
+$\mathcal{F}_i(q_i) = \mathcal{I}(q_i)$. The full-impact of $q_i$,
+$\mathcal{F}(q_i)$ is indeed the impact on the final query $q_n$,
+$\mathcal{F}_n(q_i)$: \[ \mathcal{F}(q_i)=\mathcal{F}_n(q_i) =
+\mathcal{I}_(q_i)\bigcup_{\substack{j = i+1 \\ \mathcal{F}_{j-1}(q_i)\cap
+\mathcal{P}(q_j) \neq \emptyset}}^n \mathcal{I}(q_j), \]
+
+For example, in the following query log (example mentioned in reviews):\\
+\textit{\indent q1 writes t.A; \\
+\indent q2 reads t.A and writes u.B; \\
+\indent q3 reads u.B and writes v.C.}\\
+\[\mathcal{F}_1(q_1) = \{t.A\};\] 
+\[\mathcal{F}_2(q_1) = \{t.A\} \bigcup_{\mathcal{F}_1(q_1) \cap \{t.A\} \neq \emptyset} \{u.B\} = \{t.A, u.B\};\]
+\[\mathcal{F}_3(q_1) = \{t.A, u.B\}\bigcup_{\mathcal{F}_2(q_2) \cap \{u.B\} \neq \emptyset} \{v.C\} = \{t.A, u.B, v.C\}.\]
+Thus the full-impact of $q_1$ is $\{t.A, u.B, v.C\}$.
+
+
+
+
+\comskip
+
+\noindent
+\textbf{Comment \#3:} Experiments on large datasets
+\begin{quote}
+\reviewer{
+Do the experiments substantiate the claim of scalability to ``large''
+databases of 100k records? If so the experimental evaluation needs to explain
+this more clearly. If not the introduction must avoid overselling this point.
+
+\dots
+
+Experimental evaluation doesn't live up to claims in introduction (5-6K
+records vs. 100K)
+
+\dots
+
+the experiments only seem to consider much smaller databases (5000-6000
+tuples).
+
+}
+\end{quote}
+
+Again, we apologize for inconsistency between our scalability statement and
+experiments in the main text and our statement was based on experiments in
+Appendix~\ref{sec:heuristic}.
+
+In addition, we extend our scalability experiment in Figure~\ref{f:attr100} to
+databases with $100k$ records and demonstrate that even with the most complex
+setting, \texttt{UPDATE} queries with \textit{range} \texttt{WHERE} clause,
+\sys scales to databases with $100k$ records when the corruption age is as old
+as $250$.
+
+\alex{Say more about the inconsistency between intro and evaluation.}
+
+
+\comskip
+
+\noindent
+\textbf{Comment \#4:} Why $M^+$ in \texttt{DELETE} query?
+\begin{quote}
+\reviewer{
+It's also not entirely clear why it is correct to use a ``large/unused'' value $M^+$ for attributes of deleted tuples.
+
+\dots
+
+p5. Handling DELETE using $M^+$. \dots I'm not sure I understand why this the
+case and if so, why it is correct. \dots for example if the test is ``t.A > 5'' then setting t.A to $M^+$ (assuming it's bigger than 5) will not invalidate the test.
+
+}
+\end{quote}
+
+\alex{Make sure to address both points!}
+
+For clarification we rename the former variable $M^+$ as $M^-$ to distinguish
+from $M$ and emphasis its relationship with $M$ as $M^- \leq M$. $M^-$ is set
+to a large enough number outside the attribute domain in order to guarantee
+that \sys would fix the incorrect \texttt{DELETE} query instead of its
+consecutive \texttt{UPDATE} queries. Recall our MILP encoding in Equation 6,
+to ensure that the attribute value of tuple is set to $M^-$ in a
+\texttt{DELETE} query, one need to set $x_{q_i,t} = 1$ which only requires
+variable adjustment in the \texttt{WHERE} clause such that $\sigma_{q_i}(t) =
+1$. Alternatively, it may also feasible to manipulate the consecutive
+\texttt{UPDATE} query such that the \texttt{SET} clause updates the tuple to
+$M^-$ as $\mu_{q_i}(t) = M^-$ (according to Equation 4). Modifying
+\texttt{DELETE} query or \texttt{UPDATE} query may all lead to feasible
+solution, however, different objective-function values are associated with
+them. By setting $M^-$ to a ``sufficiently large'' number, we force the
+objective-function value of the \texttt{UPDATE} query modification exceedingly
+large than the \texttt{DELETE} query's. Thus it is guaranteed that \sys will
+always fix the incorrect \texttt{DELETE} query instead of its consecutive
+\texttt{UPDATE} queries. In addition, we set $M^- \leq M$ to avoid generating
+infeasibility conditions.
+
+Note that for workloads with both \texttt{DELETE} and \texttt{UPDATE} queries.
+The assignment of $x_{q_i, t}$ in a \texttt{UPDATE} query 
+(with no \texttt{WHERE} clause) requires the following change:
+\begin{align}
+\label{eq:x2}
+x_{q_i, t} = x'_{q_i, t} \otimes 0 + (1-x'_{q_i, t}) \otimes \sigma_{q_i}(t) \nonumber \\
+x'_{q_i, t}= (t.A_j = M^-) \wedge (t.A_j^* = M^-) 
+\end{align}
+This arrangement avoid generating invalid MILP problems:
+by doing so, a deleted tuple having $t.A_j = M^-$ on all attributes leads to 
+$x'_{q_i, t} = 1$ and $x_{q_i, t}  = 0$ on all the following \texttt{UPDATE} queries. 
+In the example in reviewer mentioned in $p5$, suppose a tuple is deleted and values in all attributes are assigned to $M^-$. 
+The boolean variable $x'_{q_i, t}$ is set to $1$ and $x_{q_i, t} $ to $0$ for any following \texttt{UPDATE} queries regardless
+of their \texttt{WHERE} predicate. Thus, \texttt{UPDATE} queries won't updates values for already deleted tuples. 
+
+\comskip
+
+\noindent
+\textbf{Comment \#5:} Assumptions
+\begin{quote}
+\reviewer{
+Problem specification seems restrictive (users need to provide complete,
+correct rows as complaints).
+
+\dots
+
+p3. Please clarify whether a complaint needs to specify exact fix values for all fields \dots 
+}
+\end{quote}
+
+While in the paper we use exact fix values for all fields of a complaint, we
+only do so for ease of exposition, and this is actually not a limitation in
+our techniques. We have added clarification about this in
+Section~\ref{sec:model}.
+
+
+
+\comskip
+
+\noindent
+\textbf{Comment \#6:} Additional corrections and clarifications
+
+\smallskip
+
+We thank the reviewers for the many detailed comments. We have corrected the
+typos, and reworded confusing sentences. We also provide some further notes on
+some of the detailed comments below.
+
+\begin{quote}
+\reviewer{
+p2. Although it is just an example, it does seem like questionable design for
+the tax rates for different salary levels to be stored in the query rather
+than in the database.
+}
+\end{quote}
+
+The example is emulating a form-based entry of the tax-rate information, but
+we agree that in practice the design would be much more complex. We chose a
+substantial simplification to make the example easy to follow and to allow us
+to more easily highlight the contributions of our work.
+
+\begin{quote}
+\reviewer{
+p2. The figures in the example seem wrong (ironically) \dots
+}
+\end{quote}
+
+Thank you for noting this mistake. We corrected the figure to have the
+correct numbers.
+
+
+\begin{quote}
+\reviewer{
+p3. This is explained later, but please clarify that the expressions used in
+mu and sigma are from a limited language (e.g. arithmetic).
+}
+\end{quote}
+
+\alex{Have we done anything about this?} \xlw{The explanation and definition is
+quite close. We give def and then description. Maybe we should switch the order?}
+
+
+\begin{quote}
+\reviewer{
+p3. What does notation ``$D \setminus\{t\}$'' mean (in def 3) if $t = \bot$? No-op? Also,
+t* should be allowed to range over $D \cup \{\bot\}$ also to allow for deletion
+(as discussed on the next page).
+}
+\end{quote}
+
+We correct our definition on range of $t$ and $t^*$ as $D \cup \{\bot\}$. The transformation of 
+a database state $\mathcal{T}_c(D)$ excludes the complaint tuple $\{t\}$ and replace it with 
+$t^*$ with correct values. If $t = \bot$, it means tuple $t$ does not exist in the original
+database and should be added into the database; similarly if $t^* = \bot$, the tuple $t$ is in
+the original database but should be removed. 
+
+\alex{Have we done anything about this?}
+
+\begin{quote}
+\reviewer{
+p4. The paper often refers to ``data manipulation queries'', which sounds
+self-contradictory to me (a query reads, an update writes). Perhaps just
+``updates'' instead of ``data manipulation queries'' ?
+}
+\end{quote}
+
+We change it as ``data manipulation statements'' that include \texttt{UPDATE},
+\texttt{INSERT}, and \texttt{DELETE} queries. We intentionally avoid naming 
+them ``update queries'' in order to distinguish from the \texttt{UPDATE} query. 
+
+\alex{This term is only used once in the paper. How about we just change it to
+data manipulation statements?}
+
+
+\begin{quote}
+\reviewer{
+p5. How strongly does the performance of the MILP solver depend on M (the
+upper bound chosen on the value of a given numeric field)? Presumably,
+choosing the largest machine-representable number would lead to overflow
+problems?
+}
+\end{quote}
+
+To guarantee the correctness of the \texttt{UPDATE} queries, $M$ must 
+be assigned to a value outside the domain range of the corresponding attribute 
+because constraints in ~\ref{eq:uv} will be self-contradictory otherwise. For example, 
+attribute \textit{human age} has a domain range of $[0, 200]$, in which case $M$ must be 
+set to a value that is above $200$. 
+In addition, in order to maintain the feasibility for workloads with \texttt{DELETE}
+queries, $M$ must be set to a value that is $\geq M^-$ (we explained
+the setting of $M^-$ in Comment\# 4), but not necessary a 
+upper bound of the given numeric field. 
+
+\alex{Have we done anything about this?}
+
+
+\begin{quote}
+\reviewer{
+p5. In (5), should v be u?
+}
+\end{quote}
+
+We thank the reviewer for noting this, we correct this typo in the paper. 
+\alex{(5) does not seem to have changed. If it does not need to be changed, we
+should explain here why.} 
+
+
+\begin{quote}
+\reviewer{
+p7. ``Figure 3 showed the exponential cost'' - the scaling from 40 to 60 to 80 looked linear to me, just with a high coefficient.}
+\end{quote}
+We apologize for not stating it clear. In Figure~\ref{fig:querysize_vs_time}, \naive fails to produce an answer
+ for problems with $\geq 80$ queries within 1000 sec and \naive shows exponential cost for problems with $20$, $40$, and $60$ queries. 
+\alex{What is the answer here?}
+
+
+\begin{quote}
+\reviewer{
+p10. Fig. 8 - please add 0.75 (the largest x-axis value) to the x-axis, better yet, label the x-axis with the rate values that correspond to data points.
+}
+\end{quote}
+
+We thank the reviewer for the detailed suggestion and we implement this in our main text. 
+
+\begin{quote}
+\reviewer{
+p10. ``may suffer if the corruption occured in a very old query'' - does it (and are you saying fig. 8 supports this claim)?
+
+p10. ``may over-generalize'' - again, are you speculating or interpreting the results here?
+}
+\end{quote}
+
+We observe from Figure~\ref{f:falsenegative_acc} that \sys derives inaccurate log repairs when the corruption occured in 
+very old query  \textit{corruption age = 250}). Also, if there are insufficient complaints, then it is possible that the 
+repair will over-generalize to  ``repair'' the wrong records and lead to lower precision.
+
+\alex{What have we done for this?} \xlw{We added some clarification in the text. }
+
+\begin{quote}
+\reviewer{
+p10, footnote: this seems like a strong assumption! I guess this means that dealing with multiple errors that interact with each other is future work...
+}
+\end{quote}
+
+We clarify this assumption in Section~\ref{sec:abstractions}. Currently, we cannot apply incremental algorithm 
+on problems with multiple corruptions since errors may spread across the entire query history, \sys 
+does not scale over problems with more than 40 queries. We leave further improvement in our future work.
+
+\alex{We need to say something here.  Have we clarified this assumption early in the paper?}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section*{Comments by Reviewer 2}
+
+\noindent
+\textbf{Comment \#1:} Improvements
+\begin{quote}
+\reviewer{
+W1) Given that the paper considers a novel problem, I believe it could trigger
+quite some follow-up work. However, to do so, I personally think that further
+technical details or detailed theoretical discussion are necessary.
+ 
+}
+\end{quote}
+
+We clarify the soundness of the proposed optimization and conclude that
+\emph{tuple-slicing} is a highly effective heuristic that greatly improved
+\sys's execution efficiency and unlikely to make mistakes in practice;
+\emph{attribute, query-slicing} follow attribute updating lineage and thus
+guarantee the correctness.
+
+\comskip
+
+\noindent
+\textbf{Comment \#2:} Additional experiments
+\begin{quote}
+\reviewer{
+W2) I find the experimental evaluation rather preliminary and would appreciate
+experiments on larger data sets or some real data set.
+}
+\end{quote}
+
+We improve our experimental evaluation in three ways: we first extend our
+experiment with larger database sizes to up to $100k$ records in
+Figure~\ref{f:attr100}; we also evaluate \sys's ability in identifying the
+actual incorrect query in Appendix~\ref{app:index} and demonstrate that \sys
+always fixes the actual incorrect query when the complaint set is complete; we
+further study \sys's performance across different level of query interactions
+and include additional experiments on query selectivity in
+Appendix~\ref{app:selectivity}. Unfortunately, we are unable to get real data
+set and we put such evaluation to our future work.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section*{Comments by Reviewer 3}
+
+\noindent
+\textbf{Comment \#1:} Clarifying assumptions
+\begin{quote}
+\reviewer{
+\dots there is a long list of assumptions scattered around the paper
+
+\dots
+
+The problem is indeed difficult \dots and assumptions must be put in place
+ 
+}
+\end{quote}
+
+We thank the reviewer for suggesting a summary of assumptions applied to this paper. We implement this in Section~\ref{sec:abstractions} and 
+conclude the assumptions as follows:  \sys identifies errors and proposes query repairs 
+for query data but not on query structures and solves 
+OLTP queries with no subqueries, aggregation, joins, and user-defined functions (UDFs); 
+In addition, \sys assumes a setting where no errors are exist in the data before importing into the database, i.e., 
+the initial database state always starts from empty or a clean checkpoint. 
+We demonstrate that \sys can solve problems with corruptions in multiple queries, but its scalability in 
+this setting is limited (up to about 50 queries in the log).  \sys also solves problems with incomplete
+complaint set, but it is more likely to make mistakes for older corruptions with higher amount of missing complaints. 
+For cases where corruptions are restricted to a single query with complete complaint, 
+\sys can scale to large data and log sizes.
+
+\begin{quote}
+\reviewer{
+how do the assumptions interact with each other in practice 
+}
+\end{quote}
+
+We divide the above hard assumptions into three groups: assumption to error types (i.e., query data instead of query structure);
+assumptions to query complexity (i.e., no subqueries, aggregation, join, or UDFs); assumption to 
+a safe checkpoint (i.e., clean initial database state). Assumptions do not interact across groups. 
+Assumptions to the query complexity are strongly interact with each other, for example, subqueries and join 
+are highly correlated. However, detailed analysis towards relaxing these assumptions is out of the scope of this paper and 
+we consider it as our future work. 
+
+
+\begin{quote}
+\reviewer{
+Is it realistic to assume a safe checkpoint? 
+}
+\end{quote}
+It is realistic to assume a safe checkpoint because there always exists a safe checkpoint ---
+an empty database with each tuple corresponding to an \texttt{INSERT} query. 
+
+\begin{quote}
+\reviewer{
+Is it realistic to have at least 25\% of the errors detected?
+}
+\end{quote}
+
+Under our default setting, the full complaint set size for a single corruption is $~20-25$, thus 
+25\% deleted errors means only $5-7$ complaints are proceeded to \sys. Since queries
+are heavily interact with each other in our test data, having $5-7$ complaints is essential 
+to solve problems even with more recent corruptions. 
+We target to relax this requirement in our future work.
+
+\alex{We need to be detailed, and not just refer to another answer. This
+reviewer is asking very specific questions, not just collecting the
+assumptions to one place!}
+
+
+\comskip
+
+\noindent
+\textbf{Comment \#2:} Baseline -- Query errors as data
+\begin{quote}
+\reviewer{
+Errors are indeed in the queries, but are ultimately data errors \dots
+existing solutions \dots can be directly applied by modelling the query data
+as source data + SELECT queries.
+
+\dots
+
+it would be great if the author can precisely explain why such baselines would
+fail in their context.
+
+}
+\end{quote}
+
+\alex{Good arguments here, but this needs to be cleaned up.}
+
+In this paper, \sys solves two problems: 1. it finds the root reason(s) in the
+query history that causing database errors, and 2. it fixed the incorrectness
+by proposing a query log repair. Existing works mentioned above study highly
+corrected problems: in general, they all target at explaining erroneous or
+undesired query results by tracing back data source input and reporting either
+particular input tuples or common input patterns. After carefully analysis, we
+conclude that none of these existing works could fix the incorrectness nor
+solve the error identification task effectively and efficiently.
+
+In order to use these works to diagnose query history, we first convert the
+\textsc{Optimal Diagnosis} problem in Definition 4 as \textsc{Source data +
+SELECT queries} problem: Given database states $D_0$ and $D_n$, a query log
+$\mathcal{Q} = \{q_i\}$ such that $\mathcal{Q}(D_0) = D_n$, and a desired
+database state $D_n^*$ with no errors, we model the \textsc{Source data +
+SELECT queries} problem by creating a table $P$ for under-determined
+parameters in $\mathcal{Q}$ and table $D_0$ as source tables; and a single
+nested SELECT query $q_n'$ for queries in $\mathcal{Q}$. We demonstrate an
+abstract example in Example~\ref{fig:example}.
+
+\begin{figure}[t]
+The \textsc{Optimal Diagnosis} problem:\\
+    \begin{minipage}[t]{0.1\textwidth}
+         \vspace{0pt} 
+         \centering
+        \begin{tabular}{ll}
+            \multicolumn{2}{l}{Table $D_0$}\\
+            \toprule
+            \textbf{A}  & \textbf{B}\\
+            \midrule
+			 1 & 1 \\
+			 2 & 2 \\
+			 3 & 5 \\
+            \bottomrule
+            \\
+        \end{tabular}
+    \end{minipage}
+    \begin{minipage}[t]{0.2\textwidth}
+         \vspace{0pt} 
+         \centering
+        \begin{tabular}{p{26ex}}
+            \multicolumn{1}{l}{\emph{Query log}: $\mathcal{Q}$}\\
+            $q_1$: \texttt{\small UPDATE T SET B=B+1}\\
+            \texttt{\small WHERE A > 2 and a < \sout{5} {\color{red} 3}} \\
+            $q_2$: \texttt{\small UPDATE T SET B=B+3}\\
+                  \texttt{\small WHERE A > 0 and a < 4} \\
+        \end{tabular}
+    \end{minipage}
+    \begin{minipage}[t]{0.16\textwidth}
+         \vspace{0pt} 
+         \centering
+        \begin{tabular}{ll}
+            \multicolumn{2}{l}{Table $D_2^*$}\\
+            \toprule
+            \textbf{A}  & \textbf{B}\\
+            \midrule
+			 1 & 1 \\
+			 2 & 2 \\
+			 3 & {\textbf{6}} \\
+            \bottomrule
+            \\
+        \end{tabular}
+    \end{minipage}
+The \textsc{Source data + SELECT queries} problem: \\
+\begin{minipage}[t]{0.1\textwidth}
+         \vspace{0pt} 
+         \centering
+        \begin{tabular}{ll}
+            \multicolumn{2}{l}{Table $D_0$}\\
+            (same as above) \\
+        \end{tabular}
+    \end{minipage}
+\begin{minipage}[t]{0.36\textwidth}
+         \vspace{0pt} 
+         \centering
+        \begin{tabular}{llllll}
+            \multicolumn{6}{l}{Table $P$}\\
+            \toprule
+            \textbf{$p_1$}  & \textbf{$p_2$} & \textbf{$p_3$} & \textbf{$p_4$}  & \textbf{$p_5$} & \textbf{$p_6$} \\
+            \midrule
+			 1 & 2 & 3 & 3 & 0 & 4\\
+            \bottomrule
+            \\
+        \end{tabular}
+    \end{minipage}\\
+        \begin{minipage}[t]{0.22\textwidth}
+         \vspace{0pt} 
+         \centering
+        \begin{tabular}{p{2ex}p{55ex}}
+         \multicolumn{2}{l}{\emph{Queries}: }\\
+        $q'_1$: &
+        \texttt{\small SELECT $D_0.A$ AS A, $D_0.B$+$p_1$ AS B FROM $P, D_0$ } \\
+        & \texttt{\small WHERE $D_0.A$ > $p_2$ AND $D_0.A$ < $p_3$ UNION ALL}\\
+        & \texttt{\small SELECT $D_0.A$ AS A, $D_0.B$ AS B FROM $P, D_0$ }\\
+        &\texttt{\small  WHERE $\neg$($D_0.A$ > $p_2$ AND $D_0.A$ < $p_3$)} \\
+        $q'_2:$ &
+         \texttt{\small SELECT $D_1.A$ AS A, $D_1.B$+$p_4$ AS B FROM $P, q_1'\ as\ D_1$ } \\
+        & \texttt{\small WHERE $D_1.A$ > $p_5$ AND $D_1.A$ < $p_6$ UNION ALL}\\
+        & \texttt{\small SELECT $D_1.A$ AS A, $D_1.B$ AS B FROM $P, q_1'\ as\ D_1$ }\\
+        &\texttt{\small  WHERE $\neg$($D_1.A$ > $p_5$ AND $D_1.A$ < $p_6$)} \\
+        \end{tabular}
+    \end{minipage}
+    \caption{An abstract example for R3.2. (For simplicity, we use $q_1'$ for the input sub-query when introducing $q_2'$.)}
+\label{fig:example-cover}
+\end{figure}
+
+\noindent \textbf{[Roy et al. SIGMOD 2014, Wu et al. VLDB 2013, Chalamalla et al. SIGMOD 2014]} \\
+TLDR: These papers quantify responsibility of input data to errors in the
+output, however responsibility
+
+
+These papers focus on detecting and summarizing the likely source tuples by
+propagating ``responsibility'' from annotated output error tuples to sources.
+~\cite{Wu13} targets at explaining a set of SELECT query results by a
+conjunction of predicates on attributes where the SELECT clause in each query
+is restricted to a single aggregate operator. Similarly, ~\cite{roy2014formal}
+explains a group-by SQL query with a single aggregate function. Since there is
+no obvious mapping between complaints and a particular aggregate function,
+both algorithms cannot solve the error identification problem. Instead of
+aggregation results, ~\cite{chalamalla2014} searches for explanations for data
+quality rule violations. Even though complaints can be expressed as data
+quality rules, the algorithm does not distinguish the actual input source
+error (in $D_0$) and query parameter error (in $P$). Thus, in
+Example~\ref{fig:example}, the explanation $D_0.A = 3$ on table $D_0$ is also
+a valid explanation. Besides, ~\cite{chalamalla2014} relies on the causality
+relationship between erroneous data and their lineage, which is invalid for
+incorrect parameters in the update workload. Thus, this work cannot
+effectively solve the error identification problem either.
+
+\noindent \textbf{[Meliou et al. SIGMOD 2011]} \\
+TLDR: The number of disjunctions in the generated SAT expression increases
+exponentially with respect to the number of queries in the log. For instance,
+if the database contained 100 tuples and 10 queries, the number of
+disjunctions would be $\cdot 2^{10}$ and thus the number of lineage
+expressions would be $100\cdot 2^{100}$.
+
+The View-Conditioned Causality(VCC) work takes a set of input variables
+$\mathbf{X}$, a transformation $\mathbf{\Phi} =\{\Phi_1, \dots , \Phi_m\}$
+computing the output values $\mathbf{z}$, and a ground truth
+$\hat{\mathbf{z}}$, and detects input variables that are responsible for data
+errors $\mathbf{z}|\hat{\mathbf{z}}$. The \textsc{Source data + SELECT
+queries} problem can be expressed as a VCC problem where cells in $P$ form the
+input variables $\mathbf{X}$ and each tuple $t_i$ in $D_0$ and the SELECT
+query $q_n'$ is translated into a lineage expression $\Phi_i$. In each lineage
+expression $\Phi_i$, tuple values in $D_0$ and $D_n^*$ are further converted
+into constant variables. By doing so, only variables in $P$ will be selected
+to explain data errors. In Example~\ref{fig:example}, lineage expression
+$\Phi_3$ for tuple $t_3$ is as following:
+
+{\small
+\begin{eqnarray*}
+&((3 > p_2 \wedge 3 < p_3) \wedge (3 > p_5 \wedge 3 < p_6) \wedge (5 + p_1+p_4 = 6)) &\\
+&\vee ((3 > p_2 \wedge 3 < p_3) \wedge \neg(3 > p_5 \wedge 3 < p_6) \wedge (5 + p_1= 6))& \\
+&\vee (\neg(3 > p_2 \wedge 3 < p_3) \wedge (3 > p_5 \wedge 3 < p_6) \wedge (5 + p_4= 6))& \\
+&\vee (\neg(3 > p_2 \wedge 3 < p_3) \wedge \neg(3 > p_5 \wedge 3 < p_6) \wedge (5 = 6))&
+\end{eqnarray*}
+}
+Each row corresponding to the satisfactory condition for where clauses in $Q$.
+The first row, for example, means the where condition is true for both $q_1$
+and $q_2$. The ground truth output values for $\mathbf{\Phi}$ are all set to
+\textit{True}. By solving the VCC problem, one can identify incorrect
+parameters in the query log. However, as you may notice, the lineage
+expressions for tuples in $D_0$ are composed by disjunctive sub-expressions
+with exponential cardinality to the number of queries in $Q$. Since the
+execution efficiency is highly correlated to the complexity of lineage
+expressions, VCC solves the error detection task but cannot solve it
+efficiently.
+
+To conclude, none of these highly correlated works could handle both problems
+addressed by \sys: ~\cite{meliou2011tracing} solves the error detection
+problem with low efficiency; ~\cite{chalamalla2014} may solve the error
+detection problem but fail to distinguish data source errors and query errors;
+~\cite{Wu13} and ~\cite{roy2014formal} restricted to aggregations, thus cannot
+solve either problems.
+
+
+\comskip
+
+\noindent
+\textbf{Comment \#3:} Scalability 
+\begin{quote}
+\reviewer{
+\dots relatively small datasets are tested
+\dots I suggest to explicitly test the scalability until the bottlenecks of the solutions become clear (the MILP module?)
+}
+\end{quote}
+
+We extend our experiment with larger database size in Figure~\ref{f:attr100}
+and observe that with all optimization, \sys requires $~300$ sec to solve
+problems with $100k$ tuples and a corruption age of $250$ queries.
+
+There exists two scalability bottlenecks: the bottleneck of \sys in generating MILP problem that is solvable in 
+reasonable amount of time; and the bottleneck of memory limitation in the hardware we use for experiments. 
+These two bottlenecks are closely interact with each other as better hardware solves harder MILP problem in 
+shorter amount of time. Problems with $100$ attributes with more than $100k$ records with more than $250$ queries already 
+reach the upper bound of our experimental machines, thus we did not further extend \sys to larger database sizes. 
+
+
+\alex{I am afraid that we are not answering the second part of this reviewer's
+question.}
+
+
+\comskip
+
+\noindent
+\textbf{Comment \#4:} Accuracy metrics
+\begin{quote}
+\reviewer{
+I cannot grasp from the experiments section if the authors are counting the
+number of errors correctly identified or correctly fixed.
+\dots
+this implies that even complete complain sets do NOT guarantee that the query
+is correctly fixed and future errors will not occur \dots
+}
+\end{quote}
+
+In our experiment, we measure \sys's accuracy as whether all complaints are
+correctly fixed. In the example, we also consider $income >= 87200$ as a
+correct query repair as it resolves all the reported complaints. In addition,
+the repaired query is allowed to differ from the true query. However, this is
+very rare in practice and we show that \sys always pick the correct query to
+fix when the complaint set is complete. Though \sys dos not guarantee to
+propose a query log repair that is exactly the same with the original true
+query log, it identifies the incorrect query and provides a reasonable
+suggestion of how to fix the problem.
+
+
+
+\comskip
+
+\noindent
+\textbf{Comment \#5:} Error generation
+\begin{quote}
+\reviewer{
+I believe the way that errors are introduced can be improved.
+\dots Randomly introducing errors do not guarantee that complex patterns (such as the one in Figure 1) happen 
+\dots
+Unfortunately having some guarantee on the way that errors are introduced can
+be a challenging problem \dots
+}
+\end{quote}
+
+In this paper, we introduce a synthetic data generator in Section~\ref{sec:setup}
+with multiple adjustable parameters, including query type, workload and
+database size, and query selectivity.  These parameters allow us to generate 
+synthetic workloads on \texttt{UPDATE}, \texttt{INSERT}, and \texttt{DELETE} queries and
+further helps manipulating level of query interaction for \texttt{UDPATE}-workloads. 
+We found that \texttt{UPDATE} queries has higher level of query interaction and thus
+requires longer time to solve than \texttt{INSERT} and \texttt{DELETE} queries 
+(Figure~\ref{f:indelup_time}). Under our default setting, \texttt{UPDATE} queries with 
+\textit{range} predicates and \textit{relative} \texttt{SET} clauses have higher level of query
+ interaction than \textit{point} predicates and \textit{constant} 
+\texttt{SET} clauses respectively, thus problems with the former settings are 
+harder to solve than the latter settings (Figure~\ref{f:qidx_time}). 
+In addition, we also study the \sys's performance over two parameters that 
+contributes to the query interaction probability: the number of attributes, $N_a$, in 
+Figure~\ref{f:attr} and percentage of query selectivity in Appendix~\ref{app:selectivity}.
+Our experiment confirms that higher level of query interaction leads to 
+harder problems (requires longer time to solve). 
+
+\alex{We should talk about this here.}
+
+
+\comskip
+
+\noindent
+\textbf{Comment \#6:} Connection to data repair
+\begin{quote}
+\reviewer{
+the MILP formulation reminds me the SAT formulation in [25] and similar works
+for data cleaning. In fact def 4 is very close to the minimal repair concept
+in data repair. This can be clarified.
+}
+\end{quote}
+
+We thank the reviewer for mentioning these data repairs works. In fact, 
+\sys adopt similar intuition in these data repair works, 
+which seek for minimum repair on data, 
+to the query repair problem we studied in this paper. 
+
+\alex{Have we done something for this?} \xlw{let's cite these papers when explaining def 4. }

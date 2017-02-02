@@ -1,0 +1,82 @@
+
+
+\begin{figure*}[ht]
+	{\scriptsize
+    \begin{minipage}[t]{0.2\textwidth}
+         \vspace{0pt} 
+         \centering
+        \begin{tabular}{lllll}
+            \multicolumn{5}{l}{\emph{table}: $D_0$}\\
+            \toprule
+            \textbf{ID}  & \textbf{$a_1$}    & \textbf{$a_2$} & \textbf{$a_3$} & \textbf{$a_4$} \\
+            \midrule
+            0 & 8 & 4 & 12 & 28\\
+            1 & 2 & 10 & 15 & 3\\
+            \bottomrule
+            \\
+    \end{tabular}
+    \end{minipage}
+     \begin{minipage}[t]{0.5\textwidth}
+         \vspace{0pt} 
+         \centering
+        \begin{tabular}{l}
+            \multicolumn{1}{l}{A \texttt{DELETE} workload  $\mathcal{Q}_{del}$:                                                            }\\
+             \toprule
+            \texttt{Q1: DELETE FROM table WHERE $a_2$ in \sout{[3,5]} {\color{red}[30, 50]}} \\
+   			\texttt{Q2: DELETE FROM table WHERE $a_3$ in [7, 8] }\\ \hline
+    \end{tabular}
+    \end{minipage}
+    \begin{minipage}[t]{0.2\textwidth}
+         \vspace{0pt} 
+         \centering
+       \begin{tabular}{lllll}
+            \multicolumn{5}{l}{\emph{table}: $D_1$ after execute $\mathcal{Q}_{del}$}\\
+            \toprule
+            \textbf{ID}  & \textbf{$a_1$}    & \textbf{$a_2$} & \textbf{$a_3$} & \textbf{$a_4$} \\
+            \midrule
+            \rowcolor{mid-gray}
+            \sout{0} & \sout{8} & \sout{4} & \sout{12} & \sout{28}\\
+            1 & 2 & 10 & 15 & 3\\
+            \bottomrule
+            \\
+\end{tabular}
+    \end{minipage} \\
+  \begin{minipage}[t]{0.2\textwidth}
+         \vspace{0pt} 
+         \centering
+        \begin{tabular}{lllll}
+        
+            
+    \end{tabular}
+    \end{minipage}
+ \begin{minipage}[t]{0.5\textwidth}
+         \vspace{0pt} 
+         \centering
+        \begin{tabular}{l}
+   			\multicolumn{1}{l}{A \texttt{UPDATE} workload $\mathcal{Q}_{up}$:                              }\\
+   			 \toprule
+            \texttt{Q1: UPDATE table SET $a_1$ = 10 WHERE $a_2$ in \sout{[3,5]} {\color{red}[30, 50]}} \\
+   			\texttt{Q2: UPDATE table SET $a_4$ = 7 WHERE $a_3$ in [7, 8] }\\ \hline
+            \\
+    \end{tabular}
+    \end{minipage}     
+    \begin{minipage}[t]{0.2\textwidth}
+         \vspace{0pt} 
+         \centering
+\begin{tabular}{lllll}
+            \multicolumn{5}{l}{\emph{table}: $D_1'$ after execute $\mathcal{Q}_{up}$}\\
+            \toprule
+            \textbf{ID}  & \textbf{$a_1$}    & \textbf{$a_2$} & \textbf{$a_3$} & \textbf{$a_4$} \\
+            \midrule
+            \rowcolor{mid-gray}
+            0 & \color{red}{8} & 4 & 12 & 28\\
+            1 & 2 & 10 & 15 & 3\\
+            \bottomrule
+            \\
+\end{tabular}
+    \end{minipage}
+}
+    \vspace{-2mm}
+    \caption{A initial database state $D_0$ and database states after apply $\mathcal{Q}_{del}$ and $\mathcal{Q}_{up}$ on $D_0$. }
+    \label{fig:example2}
+\end{figure*}

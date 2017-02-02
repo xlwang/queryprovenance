@@ -1,0 +1,260 @@
+%!TEX root = ../main.tex
+
+\section*{Comments by Reviewer 1}
+
+\noindent
+\textbf{Comment \#1:} Slicing soundness
+\begin{quote}
+\reviewer{
+What are the soundness/correctness properties needed for the slicing
+heuristics to be applicable/useful?
+
+\dots
+
+Unclear whether (or why) slicing techniques are ``sound'', or whether they
+would be useful on realistic data rather than synthetic / randomly generated
+benchmark data.
+
+\dots
+
+p6. Why is tuple slicing sound?\dots This will work if most updates are
+independent \dots if one update contributes to a complaint tuple by reading
+from a non-complaint tuple, then it seems like the variables for the tuples
+not in C will be under-specified
+
+\dots
+
+p7. Likewise, I'm not convinced query or attribute slicing are safe
+optimizations.
+\dots  
+this requires proof
+
+}
+\end{quote}
+
+We have added discussion in Sections~\ref{sec:opt:tbsize},
+\ref{sec:opt:query}, and~\ref{sec:opt:attslice} on the soundness of the three
+slicing methods.   
+
+
+In the general case, tuple slicing is a heuristic method. It decomposes a
+large MILP problem into two, typically much smaller, MILP problems. It is
+effective in practice and greatly helps improve \sys performance, especially
+when the ratio of the complaint set size and the database size is small. In
+general, this heuristic can result in incorrect repairs. This is possible if a
+query $q$ succeeds an erroneous query $q_e$, and $q$ overwrites all changes by
+$q_e$. So, the reviewer is correct, that under a more complex scenario, where
+an update uses information from non-complaint tuples, tuple-slicing is more
+likely to make mistakes as it under-specifies dependent tuples that are not in
+the complaint set.
+However, \emph{tuple slicing is sound in certain settings}, namely,
+when the complaint set is complete and if corruptions are limited to a single
+query. In these cases, by using incremental repair
+(Section~\ref{sec:incremental}) and by disallowing all non-complaint tuples in
+the refinement step (e.g., by restricting the value of the objective function
+in the refinement MILP to zero), the solver will be forced to pick the correct
+repair.
+
+Even though tuple slicing is heuristic in general, it performs well in
+practice for workloads with diverse properties. Unfortunately, we do not have
+access to suitable real-world data, but studying simulation benchmarks in
+different application domains~\cite{oltpbench}, we found that most share the
+properties used in our evaluation (Section~\ref{sec:experiments:benchmark}).
+% Thus, we believe tuple-slicing does not limit to synthetic / randomly
+% generated benchmark workloads, instead, it could be applied on realistic workloads as well. 
+
+
+
+The query and attribute slicing optimizations are always sound, in the sense
+that \sys will produce the same repairs when these optimizations are applied
+as when they are not. These slicing methods remove from the problem any
+queries and attributes, respectively, that could not have have had an impact
+to the incorrect values in the complaints. More specifically,
+\emph{query-slicing} computes the \emph{full-impact} of each query, which is a
+form of forward provenance: starting at query $q$, and tracing the log forward
+(toward more recent queries) we keep track of all attributes that may have
+been modified by $q$. If the full-impact of $q$ does not intersect with any
+incorrect attributes in the complaint set, it is guaranteed that $q$ does not
+affect any of the errors reported in the complaint set. Similarly, attribute
+slicing summarizes all attributes that may have been modified by or define
+predicates in queries in the history. Any attributes that are not on this list
+can be safely ignored. Thus, applying query or attribute slicing will never
+reduce the accuracy of \sys. We formalize this result in
+Lemma~\ref{lem:sound}. We also edited the discussion of full impact in
+Section~\ref{sec:opt:query}, to clarify the conditions under which a query is
+a candidate for repair.
+
+
+% \alex{Add details, not just references to different responses, as it is hard
+% for reviewers to go back and forth.}
+
+
+\comskip
+
+\noindent
+\textbf{Comment \#2:} Correction
+\begin{quote}
+\reviewer{
+Please correct definition 6.
+
+\dots
+
+Suppose we have three queries \dots
+
+}
+\end{quote}
+
+We thank the reviewer for noting the error in the formula of
+Definition~\ref{eq:dependency}. We have revised it, and we have added an
+example to clarify the computation of full impact.
+In the example suggested by the reviewer, we have the following query log: \\
+\textit{\indent $q_1$ writes t.A; \\
+\indent $q_2$ reads t.A and writes u.B; \\
+\indent $q_3$ reads u.B and writes v.C.}\\
+The direct impact of $q_1$ is $\mathcal{I}(q_1)=\mathcal{F}_1(q_1) = \{t.A\}$.
+The impact of $q_1$ after considering query $q_2$ becomes $\mathcal{F}_2(q_1)
+= \{t.A, u.B\}$, since $\mathcal{F}_1(q_1) \cap\mathcal{P}(q_2) \neq
+\emptyset$. And finally, after considering $q_3$, the full impact of $q_1$ is
+$\mathcal{F}(q_1)=\{t.A, u.B, v.C\}$, since $\mathcal{F}_2(q_1)
+\cap\mathcal{P}(q_3) \neq \emptyset$.
+
+
+
+
+\comskip
+
+\noindent
+\textbf{Comment \#3:} Experiments on large datasets
+\begin{quote}
+\reviewer{
+Do the experiments substantiate the claim of scalability to ``large''
+databases of 100k records? If so the experimental evaluation needs to explain
+this more clearly. If not the introduction must avoid overselling this point.
+
+\dots
+
+Experimental evaluation doesn't live up to claims in introduction (5-6K
+records vs. 100K)
+
+\dots
+
+the experiments only seem to consider much smaller databases (5000-6000
+tuples).
+
+}
+\end{quote}
+
+We apologize for the apparent inconsistency between the statements in our
+introduction and the graphs in the experimental section. In our original
+submission, the graphs depicting the experiments on the larger datasets were
+in the appendix (Appendix~\ref{sec:heuristic}).
+
+For the revision, we further extended our experiments and augmented
+Figure~\ref{f:attr100} to datasets of up to $100K$ records. This experiment
+uses the most complex setting (\texttt{UPDATE} queries with \textit{range}
+\texttt{WHERE} clause), and shows that \sys is efficient for datasets of
+$100K$ records, even when the query corruption is not recent.
+
+The figures that depict experiments on databases of $100K$ records are:
+Figure~\ref{f:attr100}, Figure~\ref{f:heuristic}, and
+Figure~\ref{f:dbsizeratio}.
+
+\comskip
+
+\noindent
+\textbf{Comment \#4:} The role of $M^+$ in \texttt{DELETE} queries
+\begin{quote}
+\reviewer{
+It's also not entirely clear why it is correct to use a ``large/unused'' value $M^+$ for attributes of deleted tuples.
+
+\dots
+
+p5. Handling DELETE using $M^+$. \dots I'm not sure I understand why this the
+case and if so, why it is correct. \dots for example if the test is ``t.A > 5'' then setting t.A to $M^+$ (assuming it's bigger than 5) will not invalidate the test.
+
+}
+\end{quote}
+
+Since the MILP problem doesn't have a way to express a non-existent value, we
+encode a deleted tuple by setting its attributes to a \emph{``ghost''} value,
+$M^-$, outside of the attribute domain.\footnote{For clarification we rename
+the former variable $M^+$ as $M^-$ to distinguish from $M$ and emphasis its
+relationship with $M$ since $M^- \leq M$.}
+Since $M^-$ is outside of the attribute domain, any subsequent conditional
+functions will evaluate to false, so subsequent queries do not affect ghost
+tuples.
+There are nuances to how $M^-$ is set. It needs to be sufficiently large, for
+the MILP problem to prioritize a modification to the \texttt{WHERE} clause of
+the \texttt{DELETE} query ($\sigma_{q_i}(t) = 0/1$), compared to a
+modification of the \texttt{SET} clause of an \texttt{UPDATE} query to the
+ghost value ($\mu_{q_i}(t.A_j) = M^-$). However, it should be $M^- \leq M $ to
+ensure the constraints remain feasible (Equation~\ref{eq:uv}). These
+considerations ensure that the ghost assignment will not affect subsequent
+queries.
+
+Note that deletions affect the encoding of updates as well:
+Equation~\eqref{eq:x} presents a simplified form, which works accurately when
+there are no tuple deletions. In the presence of deletions, $x_{q_i, t}$ is
+computed by the following formula:
+$x_{q_i, t} = x'_{q_i, t} \otimes 0 + (1-x'_{q_i, t}) \otimes \sigma_{q_i}(t)$, where
+$x'_{q_i, t}= (t.A_j = M^-) \wedge (t.A_j^* = M^-)$.
+We prefer to keep the simple form of Equation~\eqref{eq:x} for ease of
+exposition, but we added this clarification as a footnote in
+Section~\ref{sec:linearize}.
+This encoding ensures that a deleted tuple will not be updated by subsequent \texttt{UPDATE} queries. 
+In the example mentioned by the reviewer, when a tuple is deleted its attributes are assigned values $M^-$. 
+The boolean variable $x'_{q_i, t}$ is set to $1$ and $x_{q_i, t}$ to $0$ for
+any following \texttt{UPDATE} queries. Thus, \texttt{UPDATE} queries will not
+change the values of deleted tuples.
+
+\comskip
+
+\noindent
+\textbf{Comment \#5:} Assumptions
+\begin{quote}
+\reviewer{
+Problem specification seems restrictive (users need to provide complete,
+correct rows as complaints).
+
+\dots
+
+p3. Please clarify whether a complaint needs to specify exact fix values for all fields \dots 
+}
+\end{quote}
+
+The reviewer is correct that our definition of a complaint assumes that a complaint
+specifies the correct values for all fields of a tuple. However, this is only done for
+ease of exposition, and it is not an inherent restriction in our approach. The
+definitions and our algorithms can trivially generalize to handle complaints
+were only some of the correct tuple values are known: At a high-level, unknown
+attribute values in a complaint are modeled as non-restricted parameters in
+the MILP, similar to the way that non-complaint tuples do not need to be
+assigned to specific values.
+
+We clarify this point in Section~\ref{sec:abstractions}. We emphasize and
+clarify other assumptions of \sys in the same section. We describe these in
+more detail in our responses to Meta-Reviewer Comment \#2, and Reviewer 3
+Comment \#1.
+
+% We have edited the text in Section~\ref{sec:abstractions} to emphasize all assumptions used by \sys.  We summarize the main points here.
+% 
+% We have also clarified in Sections~\ref{sec:abstractions} and~\ref{sec:opt}
+% the role of two additional restrictions in our framework: completeness of the
+% complaint set, and single-query corruptions. Under these assumptions, \sys can
+% take advantage of powerful optimizations. However, \sys is not restricted to
+% settings where these assumptions hold, and can handle cases of multiple query
+% corruptions and incomplete complaints. The effectiveness and efficiency of
+% \sys can be limited in these settings, mostly due to limitations of the MILP
+% solvers. Improvements in MILP technologies will also improve \sys's
+% capabilities. In our evaluation, we study these cases empirically, and we have
+% included experiments with incomplete complaints and multiple query corruptions
+% (Section~\ref{sec:experiments:hardprob}).
+% 
+% In addition, in the paper we use exact fix values for all fields of a complaint, we
+% only do so for ease of exposition, and this is actually not a limitation in
+% our techniques. We have added clarification about this in
+% Section~\ref{sec:model}.
+
+
+
+\comskip
