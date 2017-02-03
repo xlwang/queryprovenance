@@ -314,10 +314,16 @@ Ultimately, combining all three optimizations outperforms tuple-slicing by $2-3\
   the number of attributes and the number of tuples in the database, particularly when the corruption is old. 
   Tuple slicing is essential to solve general problems, while attribute and query slicing show significant gain for datasets with a large number of attributes.
 }
-\newtext{\sys has two scalability bottlenecks: the limitations of MILP solvers
-and the memory limitation of the machines. Our optimizations
-ameliorate these issues, however, we observe that problems with $100$ attributes, $100k$ records, and
-$250$ queries already come close to what we are able to solve at current stage.}
+
+\smallskip
+\newtext{\sys has two scalability bottlenecks: (1)~The MILP solvers have limitations
+that do not allow them to scale to very large problem sizes. Our optimizations
+ameliorate this issue, but ultimately, \sys still relies on MILP solvers to
+derive repairs. (2)~\sys is memory-intensive in its generation of the MILP
+variables and constraints; its memory requirements increase with the data and
+log size. We observed that problems with $100$ attributes, $100k$ records, and
+$250$ queries already come close to the memory limitations of the commodity
+machines we used.}
 \subsection{More Challenging Repair Settings}
 \label{sec:experiments:hardprob}
 
@@ -339,28 +345,73 @@ problem can be under-specified, and the true repair harder to identify.
 
     
 \begin{figure}[t]
-  \hspace*{-.1in}
+  %\hspace*{-.1in}
   \centering
-    \begin{subfigure}[t]{.33\textwidth}
+  \begin{minipage}{.49\textwidth}
+  \begin{subfigure}[t]{.39\textwidth}
       %\includegraphics[width = .99\columnwidth]{figures/noise_fn_time} 
       % or full label in 2 lines
-      \includegraphics[width = .99\columnwidth]{figures/noise_fn_time_fulllabel} 
+      \includegraphics[width = .99\columnwidth]{figures/noise_fn_time} 
+      \vspace*{-.1in}
+    \end{subfigure}
+    \begin{subfigure}[t]{.59\textwidth}
+      %\includegraphics[width = .99\columnwidth]{figures/noise_fn_acc}
+      \includegraphics[width = .99\columnwidth]{figures/noise_fn_acc}
+      \vspace*{-.1in}
+    \end{subfigure} \\
+      \begin{subfigure}[t]{.99\textwidth}
+           \centering
+      \includegraphics[width = .79\columnwidth]{figures/noise_legend} 
+      \vspace*{-.1in}
+    \end{subfigure} \\
+      \begin{subfigure}[t]{.39\textwidth}
       \vspace*{-.1in}
       \caption{False negatives vs time.}
       \label{f:falsenegative_time} 
     \end{subfigure}
-    \\
-    \begin{subfigure}[t]{.33\textwidth}
-      %\includegraphics[width = .99\columnwidth]{figures/noise_fn_acc}
-      \includegraphics[width = .99\columnwidth]{figures/noise_fn_acc_fulllabel}
+    \begin{subfigure}[t]{.59\textwidth}
       \vspace*{-.1in}
       \caption{False negatives vs accuracy.}
       \label{f:falsenegative_acc} 
     \end{subfigure}
+    
     \vspace*{-.1in}
     \caption{Incomplete complaint sets improve repair speed due to less complaints, but degrade repair quality for older corruption (with higher \textit{Corruption Age)}. }
      \label{f:falsenegative} 
-     \vspace{-2mm}
+  \end{minipage}
+  \end{figure}
+
+\begin{figure}[t]
+  %\hspace*{-.1in}
+  \centering
+    \begin{minipage}{.49\textwidth}
+  \begin{subfigure}[t]{.39\textwidth}
+      \includegraphics[width = .99\columnwidth]{figures/multi_time} 
+      \vspace*{-.1in}
+    \end{subfigure}
+    \begin{subfigure}[t]{.59\textwidth}
+      \includegraphics[width = .99\columnwidth]{figures/multi_pr}
+      \vspace*{-.1in}
+    \end{subfigure} \\
+           \begin{subfigure}[t]{.99\textwidth}
+           \centering
+      \includegraphics[width = .59\columnwidth]{figures/multi_legend} 
+      \vspace*{-.1in}
+    \end{subfigure} \\
+    \begin{subfigure}[t]{.39\textwidth}
+      \vspace*{-.1in}
+      \caption{Multi-corrupt. vs time.}
+      \label{f:multi_time} 
+    \end{subfigure}
+    \begin{subfigure}[t]{.59\textwidth}
+      \vspace*{-.1in}
+      \caption{Multi-corrupt. vs accuracy.}
+      \label{f:multi_acc} 
+    \end{subfigure}
+    \vspace*{-.1in}
+    \caption{Our analysis highlights limitations of \naive, the value of tuple-slicing, and the high cost of \texttt{UPDATE} queries. }
+     \label{f:multi} 
+  \end{minipage}
   \end{figure}
 
 
@@ -379,24 +430,6 @@ Specifically, as the corruptions increase, the number of possible assignments of
 We find that problem infeasibility is the predominant explanation for why the accuracy degrades past $30$ queries.  
 For example, with $40$ queries ($4$ corruptions), \naive takes nearly $750$s; however if we ignore the infeasible executions, the average is $300$ seconds and the precision and recall are greater than $0.94$.  
 Unfortunately, with $50$ queries ($5$ corruptions), all runs are infeasible and exceed the time limit.
-
-  \begin{figure}[t]
-  \hspace*{-.1in}
-  \centering
-    \begin{subfigure}[t]{.33\textwidth}
-    \includegraphics[width = .99\columnwidth]{figures/multi_time}
-    \caption{Performance for multiple corruptions.}
-    \label{f:multi_time} 
-    \end{subfigure}
-    \\
-        \begin{subfigure}[t]{.33\textwidth}
-    \includegraphics[width = .99\columnwidth]{figures/multi_pr}
-    \caption{Accuracy for multiple corruptions.}
-    \label{f:multi_acc} 
-    \end{subfigure}
-    \caption{Our analysis highlights limitations of \naive, the value of tuple-slicing, and the high cost of \texttt{UPDATE} queries.}
-    \vspace{-2mm}
-  \end{figure}
 
 
 
