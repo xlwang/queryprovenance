@@ -1,7 +1,7 @@
 alter table exps add column solver2 text;
 update exps set solver2 = solver || opt_approx; 
 
-alter table configs alter corrupt_qidx type int using corrupt_qidx::int;
+-- alter table configs alter corrupt_qidx type int using corrupt_qidx::int;
 
 
 
