@@ -103,22 +103,20 @@ attribute value $A_j$.
 \texttt{UPDATE:}
 Recall from Section~\ref{sec:models} that query $q_i$ can be modeled
 as the combination of a modifier function $\mu_{q_i}(t)$ and
-conditional function $\sigma_{q_i}(t)$. First, we introduce a binary
+conditional function $\sigma_{q_i}(t)$. 
+First, we use binary
 variable $x_{q_i, t}$ to indicate whether \newtext{query $q_i$ 
-modifies the value of tuple $t$: 
+changes $t$'s value: 
 \begin{align}
 \label{eq:x}
-x_{q_i, t} = (\neg x_{q_i, t}') \otimes \sigma_{q_i}(t)
+x_{q_i, t} = e_{q_i, t} \otimes \sigma_{q_i}(t)
 \end{align}
-$x_{q_i, t}'$ introduced in order to support query logs with \texttt{DELETE} statements.
-$x_{q_i, t}'$ is a binary indicator of whether $t$ is deleted from the database 
-before executing $q_i$. If $t$ has been deleted ($x_{q_i, t}'$=1), $x_{q_i, t}$
-will also be false, otherwise, $x_{q_i, t}$ is dependent $t$ satisfying the 
-condition function $\sigma_{q_i}$. 
-We will describe the set of $x_{q_i, t}'$ in Equation~\ref{eq:delete_x} as we introduce 
-the setting of \texttt{DELETE} queries.
-For simplicity, we set $x_{q_i, t}'= 0$ if there exists no \texttt{DELETE} 
-query in the query log. 
+We use $e_{q_i, t}$ to support query logs with \texttt{DELETE} statements.
+$e_{q_i, t}$ is a binary indicator of $t$'s existence in the database prior to $q_i$, and is
+by default set to $1$ when there are no \texttt{DELETE} queries in the log.
+If $t$ has been deleted, then $e_{q_i, t}=0$ and $x_{q_i, t}$ will simply be false, 
+otherwise, $x_{q_i, t}$ depends on $t$ satisfying the condition function $\sigma_{q_i}$. 
+We describe how to set $e_{q_i, t}$ (Equation~\ref{eq:delete_x}) when introducing \texttt{DELETE} queries.
 }
 
 %$t$ satisfies the
@@ -211,11 +209,12 @@ constraints remain feasible (Equation~\ref{eq:uv}).
 t'.A_j &=& x_{q_i, t} \otimes M^- + (1-x_{q_i, t}) \otimes t.A_j 
 \end{eqnarray}
 $x_{q_i, t}$ was defined in Equation~\ref{eq:x}, and 
-$x_{q_i, t}'=1$ if $t$ is correctly deleted---deleted in query $q_i$ ($t.A_j = M^-$) and 
-deleted in the complaint set ($t^*.A_j = M^-$).
+$e_{q_i, t}=0$ if $t$ was deleted in query $q_i$ ($t.A_j = M^-$) and that the deletion is correct
+due to its presence in the complaint set ($t^*.A_j = M^-$).  
+Otherwise, the tuple exists and $e_{q_i, t}=1$.
 \begin{eqnarray}
 \label{eq:delete_x}
-x_{q_i, t}' &=& (t.A_j = M^-) \wedge (t^*.A_j = M^-)
+e_{q_i, t} &=& \neg((t.A_j = M^-) \wedge (t^*.A_j = M^-))
 \end{eqnarray}
 }
 This expression is further linearized using the same method as Equation~\eqref{eq:uv}.
