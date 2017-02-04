@@ -221,19 +221,20 @@ affect through all subsequent queries).
     the set of attributes updated in its modifier function $\mu_{q_i}$,
     % (e.g., \texttt{SET} clause). 
     and \textbf{dependency},
-    $\mathcal{P}(q_i)$, which is the set of attributes involved in its
-    condition function $\sigma_{q_i}$. \newtext{We compute query $q_i$'s impact through queries
-    up to $q_{j+1}$ ($j \geq i$), denoted by $\mathcal{F}_{j+1}(q_i)$, from $q_i$'s impact to $q_j$:
+    $\mathcal{P}(q_i)$, which is the set of attributes involved in its condition function $\sigma_{q_i}$. 
+    \newtext{We use $\mathcal{F}_j(q_i)$ to denote the impact of $q_i$ on the output of $q_j$ ($j \geq i$):
+    {\small
     \[
-    \mathcal{F}_{j+1}(q_i)=
+    \mathcal{F}_{j}(q_i)=
     \begin{cases}
-    \mathcal{F}_{j}(q_i) \cup \mathcal{I}(q_{j+1}),&\ if\ \mathcal{F}_{j}(q_i) \cap \mathcal{P}(q_{j+1}) \neq \emptyset \\
-    \mathcal{F}_{j}(q_i),&\ otherwise
+    \mathcal{F}_{j-1}(q_i) \cup \mathcal{I}(q_j),&\ if\ j > i \wedge \mathcal{F}_{j-1}(q_i) \cap \mathcal{P}(q_{j}) \neq \emptyset \\
+    \mathcal{F}_{j-1}(q_i),&\ else\ if\ j > i\\
+    \mathcal{I}(q_i),&\ otherwise
     \end{cases}
     \]
-    Where $\mathcal{F}_{i}(q_i) = \mathcal{I}(q_i)$. Thus, query $q_i$'s \textbf{full impact},
-    which is the set of attributes it may affect through all subsequent queries in the log, is $q_i$'s
-    impact to the most recent query in the log: $\mathcal{F}(q_i) = \mathcal{F}_{n}(q_i)$.}
+    }
+    Thus, query $q_i$'s \textbf{full impact}---the set of attributes it may affect through all subsequent queries in the log---is its
+    impact to the most recent query: $\mathcal{F}(q_i) = \mathcal{F}_{n}(q_i)$.}
 %    Query $q_i$ has \textbf{full impact}, $\mathcal{F}(q_i)$, which is the set of attributes it may affect through all subsequent queries in the log:
 %    In this formula, $\mathcal{F}_j(q_i)$ denotes the impact of $q_i$ (set of attributes affected by $q_i$) through queries up to $q_j$:
 %    \\    $\mathcal{F}_j(q_i)\!=\!\mathcal{F}_{j-1}(q_i)\bigcup_{\substack{\mathcal{F}_{j-1}(q_i)\cap \mathcal{P}(q_j) \neq \emptyset}} \mathcal{I}(q_j)$, and $\mathcal{F}_i(q_i)\! =\! \mathcal{I}(q_i)$.

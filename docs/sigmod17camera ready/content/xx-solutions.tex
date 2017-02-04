@@ -110,12 +110,13 @@ modifies the value of tuple $t$:
 \label{eq:x}
 x_{q_i, t} = x_{q_i, t}' \otimes \sigma_{q_i}(t)
 \end{align}
-Where $x_{q_i, t}'$ is a binary indicator that
-reflects whether the tuple $t$ exists in the database
-before executing $q_i$. When $x_{q_i, t}'$ is false, $x_{q_i, t}$
-is guaranteed to be false, otherwise, the value of $x_{q_i, t}$ is dependent
-on whether $t$ satisfy the condition function of $q_i$.
-We will introduce the setting of $x_{q_i, t}'$ for \texttt{DELETE} queries.
+$x_{q_i, t}'$ introduced in order to support \texttt{DELETE} statements.
+$x_{q_i, t}'$ is a binary indicator of whether $t$ exists in the database 
+before executing $q_i$. If $t$ has been deleted ($x_{q_i, t}'$=0), $x_{q_i, t}$
+will also be false, otherwise, $x_{q_i, t}$ is dependent $t$ satisfying the 
+condition function $\sigma_{q_i}$. 
+For clarity, $x_{q_i, t}'=1$ for \texttt{UPDATE} and \texttt{INSERT} queries, and
+we will describe to set $x_{q_i, t}'$ for \texttt{DELETE} queries below.
 }
 
 %$t$ satisfies the
@@ -200,23 +201,21 @@ problem to prioritize a modification to the \texttt{WHERE} clause of the
 \texttt{DELETE} query ($\sigma_{q_i}(t) = 0/1$), compared to a modification of
 the \texttt{SET} clause of an \texttt{UPDATE} query to the ghost value
 ($\mu_{q_i}(t.A_j) = M^-$). However, it should be $M^- \leq M $ to ensure the
-constraints remain feasible (Equation~\ref{eq:uv}). These considerations
-ensure that the ghost assignment will not affect subsequent queries.
-% So the $M^-$ assignment will not have an effect on subsequent queries encoded in the MILP problem:
-%
-% \xlw{Note that although the subsequent condition functions may be true initially, but any solutions having such positive conditions will have an associated objective-function value that is exceedingly large. Thus the MILP solver will always assign false to the subsequent condition functions.} 
+constraints remain feasible (Equation~\ref{eq:uv}). 
+\newtext{Using $M^-$ thus ensures that subsequent queries will treat the tuple as a \emph{``ghost''} and ignore it.}
 \newtext{
 \begin{eqnarray}
 \label{eq:delete}
 t'.A_j &=& x_{q_i, t} \otimes M^- + (1-x_{q_i, t}) \otimes t.A_j 
 \end{eqnarray}
-Where we use Equation~\ref{eq:x} for variable $x_{q_i, t}$. 
-In addition, we set the binary variable $x_{q_i, t}'$ to true (in Equation~\ref{eq:x})
-if it is correctly deleted from the database.
+$x_{q_i, t}$ was defined in Equation~\ref{eq:x}, and 
+$x_{q_i, t}'=1$ if $t$ is correctly deleted---deleted in query $q_i$ ($t.A_j = M^-$) and 
+deleted in the complaint set ($t^*.A_j = M^-$).
 \begin{eqnarray}
 \label{eq:delete_x}
 x_{q_i, t}' &=& (t.A_j = M^-) \wedge (t^*.A_j = M^-)
-\end{eqnarray}}
+\end{eqnarray}
+}
 This expression is further linearized using the same method as Equation~\eqref{eq:uv}.
 
 \smallskip
