@@ -111,11 +111,11 @@ changes $t$'s value:
 \label{eq:x}
 x_{q_i, t} = e_{q_i, t} \otimes \sigma_{q_i}(t)
 \end{align}
-We use $e_{q_i, t}$ to support query logs with \texttt{DELETE} statements.
+We use $e_{q_i, t}$ to support \texttt{DELETE} statements.
 $e_{q_i, t}$ is a binary indicator of $t$'s existence in the database prior to $q_i$, and is
 by default set to $1$ when there are no \texttt{DELETE} queries in the log.
-If $t$ has been deleted, then $e_{q_i, t}=0$ and $x_{q_i, t}$ will simply be false, 
-otherwise, $x_{q_i, t}$ depends on $t$ satisfying the condition function $\sigma_{q_i}$. 
+If a tuple exists, then $x_{q_i, t}$ depends on $t$ satisfying the condition function $\sigma_{q_i}$. 
+Otherwise, $t$ has been deleted, $e_{q_i, t}=0$, and $x_{q_i, t}$ will always be false.
 We describe how to set $e_{q_i, t}$ (Equation~\ref{eq:delete_x}) when introducing \texttt{DELETE} queries.
 }
 
