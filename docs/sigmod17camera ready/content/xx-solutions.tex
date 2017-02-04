@@ -208,8 +208,7 @@ constraints remain feasible (Equation~\ref{eq:uv}).
 \label{eq:delete}
 t'.A_j &=& x_{q_i, t} \otimes M^- + (1-x_{q_i, t}) \otimes t.A_j 
 \end{eqnarray}
-$x_{q_i, t}$ was defined in Equation~\ref{eq:x}, and 
-$e_{q_i, t}=0$ if $t$ was deleted in query $q_i$ ($t.A_j = M^-$) and that the deletion is correct
+$e_{q_i, t}$ is set to $0$ if (1)~$t$ was deleted in $q_i$ ($t.A_j = M^-$) and (2)~the deletion is correct
 due to its presence in the complaint set ($t^*.A_j = M^-$).  
 Otherwise, the tuple exists and $e_{q_i, t}=1$.
 \begin{eqnarray}
