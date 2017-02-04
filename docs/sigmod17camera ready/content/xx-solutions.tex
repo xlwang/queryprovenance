@@ -101,12 +101,13 @@ attribute value $A_j$.
 \smallskip
 \noindent
 \texttt{UPDATE:}
+\looseness -1
 Recall from Section~\ref{sec:models} that query $q_i$ can be modeled
 as the combination of a modifier function $\mu_{q_i}(t)$ and
 conditional function $\sigma_{q_i}(t)$. 
 First, we use binary
 variable $x_{q_i, t}$ to indicate whether \newtext{query $q_i$ 
-changes $t$'s value: 
+produces an effect on tuple $t$.
 \begin{align}
 \label{eq:x}
 x_{q_i, t} = e_{q_i, t} \otimes \sigma_{q_i}(t)
@@ -180,10 +181,11 @@ t.A_j' = u.A_j + v.A_j
 
 \noindent\texttt{INSERT:}\looseness -1
 An insert query adds a new tuple $t_{new}$ to the database.  If the query were 
-corrupted, then the inserted values need repair. We use a binary variable $x$ to model whether the query is correct.  Each attribute of the newly inserted tuple ($t'.A_j$) may take one of two values: the value specified by the insertion query ($t_{new}.A_j$) if the query is correct ($x=1$), or an undetermined value ($v.A_j$) if the query is incorrect ($x=0$).  Thus, similar with Equation~\eqref{eq:linearization}, we write:
+corrupted, then the inserted values need repair. We use a binary variable $x_{q_i, t}$ to model whether the query 
+\newtext{impacts the value of tuple $t$.}.  Each attribute of the newly inserted tuple ($t'.A_j$) may take one of two values: the value specified by the insertion query ($t_{new}.A_j$) if the query \newtext{changes the value of the tuple $t$} ($x_{q_i, t}=1$), or an undetermined value ($v.A_j$) \newtext{otherwise}.  Thus, similar with Equation~\eqref{eq:linearization}, we write:
 \begin{eqnarray}
 \label{eq:insert}
-t'.A_j = x \otimes t_{new}.A_j + (1-x) \otimes v.A_j 
+t'.A_j = x_{q_i, t} \otimes t_{new}.A_j + (1-x_{q_i, t}) \otimes v.A_j 
 \end{eqnarray}
 
 
