@@ -108,15 +108,17 @@ variable $x_{q_i, t}$ to indicate whether \newtext{query $q_i$
 modifies the value of tuple $t$: 
 \begin{align}
 \label{eq:x}
-x_{q_i, t} = x_{q_i, t}' \otimes \sigma_{q_i}(t)
+x_{q_i, t} = (\neg x_{q_i, t}') \otimes \sigma_{q_i}(t)
 \end{align}
-$x_{q_i, t}'$ introduced in order to support \texttt{DELETE} statements.
-$x_{q_i, t}'$ is a binary indicator of whether $t$ exists in the database 
-before executing $q_i$. If $t$ has been deleted ($x_{q_i, t}'$=0), $x_{q_i, t}$
+$x_{q_i, t}'$ introduced in order to support query logs with \texttt{DELETE} statements.
+$x_{q_i, t}'$ is a binary indicator of whether $t$ is deleted from the database 
+before executing $q_i$. If $t$ has been deleted ($x_{q_i, t}'$=1), $x_{q_i, t}$
 will also be false, otherwise, $x_{q_i, t}$ is dependent $t$ satisfying the 
 condition function $\sigma_{q_i}$. 
-For clarity, $x_{q_i, t}'=1$ for \texttt{UPDATE} and \texttt{INSERT} queries, and
-we will describe to set $x_{q_i, t}'$ for \texttt{DELETE} queries below.
+We will describe the set of $x_{q_i, t}'$ in Equation~\ref{eq:delete_x} as we introduce 
+the setting of \texttt{DELETE} queries.
+For simplicity, we set $x_{q_i, t}'= 0$ if there exists no \texttt{DELETE} 
+query in the query log. 
 }
 
 %$t$ satisfies the
