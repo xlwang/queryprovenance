@@ -117,7 +117,7 @@ $e_{q_i, t}$ is a binary indicator of $t$'s existence in the database prior to $
 by default set to $1$ when there are no \texttt{DELETE} queries in the log.
 If a tuple exists, then $x_{q_i, t}$ depends on $t$ satisfying the condition function $\sigma_{q_i}$. 
 Otherwise, $t$ has been deleted, $e_{q_i, t}=0$, and $x_{q_i, t}$ will always be false.
-We describe how to set $e_{q_i, t}$ (Equation~\ref{eq:delete_x}) when introducing \texttt{DELETE} queries.
+We describe how to set $e_{q_i, t}$ (Equation~\ref{eq:delete_x}) when we introduce \texttt{DELETE} queries.
 }
 
 %$t$ satisfies the
@@ -182,7 +182,7 @@ t.A_j' = u.A_j + v.A_j
 \noindent\texttt{INSERT:}\looseness -1
 An insert query adds a new tuple $t_{new}$ to the database.  If the query were 
 corrupted, then the inserted values need repair. We use a binary variable $x_{q_i, t}$ to model whether the query 
-\newtext{impacts the value of tuple $t$.}.  Each attribute of the newly inserted tuple ($t'.A_j$) may take one of two values: the value specified by the insertion query ($t_{new}.A_j$) if the query \newtext{changes the value of the tuple $t$} ($x_{q_i, t}=1$), or an undetermined value ($v.A_j$) \newtext{otherwise}.  Thus, similar with Equation~\eqref{eq:linearization}, we write:
+\newtext{impacts the value of tuple $t$}.  Each attribute of the newly inserted tuple ($t'.A_j$) may take one of two values: the value specified by the insertion query ($t_{new}.A_j$) if the query \newtext{changes the value of the tuple $t$} ($x_{q_i, t}=1$), or an undetermined value ($v.A_j$) \newtext{otherwise}.  Thus, similar with Equation~\eqref{eq:linearization}, we write:
 \begin{eqnarray}
 \label{eq:insert}
 t'.A_j = x_{q_i, t} \otimes t_{new}.A_j + (1-x_{q_i, t}) \otimes v.A_j 
@@ -210,7 +210,8 @@ constraints remain feasible (Equation~\ref{eq:uv}).
 \label{eq:delete}
 t'.A_j &=& x_{q_i, t} \otimes M^- + (1-x_{q_i, t}) \otimes t.A_j 
 \end{eqnarray}
-$e_{q_i, t}$ is set to $0$ if (1)~$t$ was deleted in $q_i$ ($t.A_j = M^-$) and (2)~the deletion is correct
+The variable $x_{q_i, t}$ is set according to Equation~\eqref{eq:x}; in Equation~\eqref{eq:x},
+$e_{q_i, t}$ is set to $0$ if $t$ was deleted in $q_i$ ($t.A_j = M^-$) and the deletion is correct
 due to its presence in the complaint set ($t^*.A_j = M^-$).  
 Otherwise, the tuple exists and $e_{q_i, t}=1$.
 \begin{eqnarray}

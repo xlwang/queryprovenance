@@ -54,7 +54,7 @@ the cost to the left side of Figure~\ref{fig:querysize_vs_time}.
       truth: correct interval in true query;
       repair: interval returned by the solver.}
     \label{fig:groups}
-    \vspace{-2mm}
+    % \vspace{-2mm}
 \end{figure}
 
 
@@ -228,7 +228,7 @@ affect through all subsequent queries).
     \mathcal{F}_{j}(q_i)=
     \begin{cases}
     \mathcal{F}_{j-1}(q_i) \cup \mathcal{I}(q_j),&\ if\ j > i \wedge \mathcal{F}_{j-1}(q_i) \cap \mathcal{P}(q_{j}) \neq \emptyset \\
-    \mathcal{F}_{j-1}(q_i),&\ else\ if\ j > i\\
+    \mathcal{F}_{j-1}(q_i),&\ if\ j > i \wedge \mathcal{F}_{j-1}(q_i) \cap \mathcal{P}(q_{j}) = \emptyset\\
     \mathcal{I}(q_i),&\ otherwise
     \end{cases}
     \]
