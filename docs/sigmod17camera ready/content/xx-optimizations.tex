@@ -222,19 +222,18 @@ affect through all subsequent queries).
     % (e.g., \texttt{SET} clause). 
     and \textbf{dependency},
     $\mathcal{P}(q_i)$, which is the set of attributes involved in its condition function $\sigma_{q_i}$. 
-    \newtext{We use $\mathcal{F}_j(q_i)$ to denote the impact of $q_i$ on the output of $q_j$ ($j \geq i$):
-    {\small
-    \[
+    We use $\mathcal{F}_j(q_i)$ to denote the impact of $q_i$ on the output of $q_j$ ($j \geq i$):
+    \[\Scale[0.9]{
     \mathcal{F}_{j}(q_i)=
     \begin{cases}
     \mathcal{F}_{j-1}(q_i) \cup \mathcal{I}(q_j),&\ if\ j > i \wedge \mathcal{F}_{j-1}(q_i) \cap \mathcal{P}(q_{j}) \neq \emptyset \\
     \mathcal{F}_{j-1}(q_i),&\ if\ j > i \wedge \mathcal{F}_{j-1}(q_i) \cap \mathcal{P}(q_{j}) = \emptyset\\
     \mathcal{I}(q_i),&\ otherwise
-    \end{cases}
+    \end{cases}}
     \]
-    }
+
     Thus, query $q_i$'s \textbf{full impact}---the set of attributes it may affect through all subsequent queries in the log---is its
-    impact to the most recent query: $\mathcal{F}(q_i) = \mathcal{F}_{n}(q_i)$.}
+    impact to the most recent query: $\mathcal{F}(q_i) = \mathcal{F}_{n}(q_i)$.
 %    Query $q_i$ has \textbf{full impact}, $\mathcal{F}(q_i)$, which is the set of attributes it may affect through all subsequent queries in the log:
 %    In this formula, $\mathcal{F}_j(q_i)$ denotes the impact of $q_i$ (set of attributes affected by $q_i$) through queries up to $q_j$:
 %    \\    $\mathcal{F}_j(q_i)\!=\!\mathcal{F}_{j-1}(q_i)\bigcup_{\substack{\mathcal{F}_{j-1}(q_i)\cap \mathcal{P}(q_j) \neq \emptyset}} \mathcal{I}(q_j)$, and $\mathcal{F}_i(q_i)\! =\! \mathcal{I}(q_i)$.
