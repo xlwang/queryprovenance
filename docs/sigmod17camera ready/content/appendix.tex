@@ -134,7 +134,31 @@ impossible to derive $D_i^*$. In contrast, the incremental version of
 \sys can bypass this problem by encoding subsequent queries in the log
 in a MILP representation.
 
-
+   \begin{figure*}[t]
+  \centering
+  \begin{subfigure} [t]{.3\textwidth}
+    \includegraphics[width = .99\columnwidth]{figures/indelup_acc_idx}
+    \vspace*{-.25in}
+    \caption{Correct repair ratio vs. query types}
+    \label{f:querytyperatio} 
+    \end{subfigure}
+    \begin{subfigure} [t]{.3\textwidth}
+    \includegraphics[width = .99\columnwidth]{figures/dbsize_acc_idx}
+    \vspace*{-.25in}
+    \caption{Correct repair ratio vs. database sizes}
+    \label{f:dbsizeratio} 
+    \end{subfigure}
+    \begin{subfigure} [t]{.3\textwidth}
+    \includegraphics[width = .99\columnwidth]{figures/noise_fn_acc_idx}
+    \vspace*{-.25in}
+    \caption{Top-k vs. query types. }
+    \vspace*{-.1in}
+    \label{f:noiseratio} 
+    \end{subfigure}
+   \caption{ \sys maintains 1.0 correct repair ratio with complete complaint set. }
+   \vspace*{-.1in}
+   \label{fig:truerate}
+  \end{figure*}
 \item \textbf{Structurally Different \texttt{WHERE} Clause Results: } 
 The basic classifier approach simply learns a set of rules to minimize
 classification error, and can derive a clause whose struture is arbitrarily 
@@ -178,31 +202,6 @@ focus on the \texttt{UPDATE} workload and three ages of corruption, while
 increasing the database size. Again, \sys is accurate in every case
 (Figure~\ref{f:dbsizeratio}).
 
-   \begin{figure*}[t]
-  \centering
-  \begin{subfigure} [t]{.3\textwidth}
-    \includegraphics[width = .99\columnwidth]{figures/indelup_acc_idx}
-    \vspace*{-.25in}
-    \caption{Correct repair ratio vs. query types}
-    \label{f:querytyperatio} 
-    \end{subfigure}
-    \begin{subfigure} [t]{.3\textwidth}
-    \includegraphics[width = .99\columnwidth]{figures/dbsize_acc_idx}
-    \vspace*{-.25in}
-    \caption{Correct repair ratio vs. database sizes}
-    \label{f:dbsizeratio} 
-    \end{subfigure}
-    \begin{subfigure} [t]{.3\textwidth}
-    \includegraphics[width = .99\columnwidth]{figures/noise_fn_acc_idx}
-    \vspace*{-.25in}
-    \caption{Top-k vs. query types. }
-    \vspace*{-.1in}
-    \label{f:noiseratio} 
-    \end{subfigure}
-   \caption{ \sys maintains 1.0 correct repair ratio with complete complaint set. }
-   \vspace*{-.1in}
-   \label{fig:truerate}
-  \end{figure*}
 
 Finally, we study the effect of incomplete complaints in
 Figure~\ref{f:noiseratio}. Increasing the false negative rate means that more
