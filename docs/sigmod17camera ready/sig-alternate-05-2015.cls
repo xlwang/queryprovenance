@@ -1498,18 +1498,18 @@
 \newdimen\bibindent
 \setcounter{enumi}{1}
 \bibindent=0em
-\def\thebibliography#1{% 
+\def\thebibliography#1{%
 \ifnum\addauflag=0\addauthorsection\global\addauflag=1\fi
      \section[References]{%    <=== OPTIONAL ARGUMENT ADDED HERE
         {References} % was uppercased but this affects pdf bookmarks (SP/GM October 2004)
-          {\vskip -5pt plus 1pt} % GM Nov. 2006 / GM July 2000 (for somewhat tighter spacing) 
+          \vskip -5pt  % GM July 2000 (for tighter spacing)
          \@mkboth{{\refname}}{{\refname}}%
      }%
      \list{[\arabic{enumi}]}{%
          \settowidth\labelwidth{[#1]}%
          \leftmargin\labelwidth
-         %\advance\leftmargin\labelsep
-         %\advance\leftmargin\bibindent
+         \advance\leftmargin\labelsep
+         \advance\leftmargin\bibindent
          \parsep=0pt\itemsep=1pt % GM July 2000
          \itemindent -\bibindent
          \listparindent \itemindent
