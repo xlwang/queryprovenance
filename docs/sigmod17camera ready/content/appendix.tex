@@ -44,6 +44,7 @@ cause a subset of the tuples to be misclassified, and in turn,
 translate into data errors. 
 Therefore, repairing the complaints corresponds to repairing the imprecise classification. 
 
+\looseness -1
 The repair works as follows: For an incorrect query $q$, let
 $D_0$ be the database state before $q$, and $D_1^*$ the \emph{correct}
 database state that should have been the result after $q$, if $q$ were correct.
@@ -83,7 +84,7 @@ In this case, we execute a second repair step.
  \label{f:heuristic}
 \end{figure}
 
-
+\looseness -1
 We model the errors as a simple linear system of equations: 
 each expression in the \texttt{SET} clause is translated into a
 linear equation in the same fashion as described in Section~\ref{sec:sol}.
@@ -118,8 +119,9 @@ that applies \dt over more queries is expected to have little hope of succeeding
 There are three important reasons why \dt, and any approach that focuses on a single query at a 
 time\footnote{Although our incremental approach tries to generate a repair for a single query at a time, it encodes all subsequent queries in the log.}, will not perform well.
 
-\begin{itemize}[itemsep=1pt, leftmargin=5mm]
-\item \textbf{Single Query Limitation: }
+%\begin{itemize}[itemsep=1pt, leftmargin=*]
+\begin{description}[leftmargin=0mm, topsep=0mm, itemsep=0mm, parsep=1mm]
+\item [Single Query Limitation. ]
 In principle, one could attempt to apply this technique to the
 entire log one query at a time, starting from the most recent query.
 Even ignoring the low repair accuracy shown in Figure~\ref{f:heuristic_acc},
@@ -159,7 +161,7 @@ in a MILP representation.
    \vspace*{-.1in}
    \label{fig:truerate}
   \end{figure*}
-\item \textbf{Structurally Different \texttt{WHERE} Clause Results: } 
+\item [Structurally Different \texttt{WHERE} Clause Results.] 
 The basic classifier approach simply learns a set of rules to minimize
 classification error, and can derive a clause whose struture is arbitrarily 
 different from the original query's \texttt{WHERE} clause.
@@ -167,7 +169,7 @@ Although it may be possible to incorporate a distance measure as part of the dec
 splitting criteria, it is likely to be a heuristic with no guarantees.
 
 
-\item \textbf{High Selectivity, Low Precision: }
+\item [High Selectivity, Low Precision.]
 Classifiers try to avoid overfitting by balancing the complexity of the rules with classification accuracy.
 This is problematic for highly selective queries (e.g., primary key updates), because the classifier
 may simply ignore the single incorrect record and generate a rule such as \texttt{FALSE}.
@@ -177,7 +179,7 @@ Compound with the fact that many workloads are primarily composed of
 key update queries~\cite{oltpbench} this issue severely limits the
 applicability of learning-based approaches.
 
-\end{itemize}
+\end{description}
 
 
 \section{Repairing the Correct Query}

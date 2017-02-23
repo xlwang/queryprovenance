@@ -1516,7 +1516,7 @@
          \usecounter{enumi}
      }%
      \let\newblock\@empty
-     % \raggedright % GM July 2000
+     \raggedright % GM July 2000
      \sloppy
      \sfcode`\.=1000\relax
 }
