@@ -28,7 +28,7 @@
 
 \begin{figure}[t]
 \centering
-  \includegraphics[width = .75\columnwidth]{figures/benchmark_time}
+  \includegraphics[width = .66\columnwidth]{figures/benchmark_time}
   \vspace*{-.2in}
   \caption{\sys quickly produces repairs for OLTP workloads.}
   \label{f:tpcctatp} 
@@ -197,7 +197,7 @@ Both setups were generated using the OLTP-bench~\cite{oltpbench}.
     \vspace*{-.1in}
     \caption{For datasets with many attributes or many records, the optimizations result in significant improvements.}
     \label{f:database}
-    \vspace{-2mm}
+    \vspace{-4mm}
   \end{figure*}
 
 \stitle{Corrupting Queries:} We corrupt query $q_i$ by replacing it with a randomly
@@ -337,21 +337,7 @@ Ultimately, combining all three optimizations outperforms tuple-slicing by $2-3\
 
 In this section, we further study the performance of \sys in solving hard problems---when the set of complaints is incomplete, and when there is more than one corruption that led to the complaints\footnote{
 \footnotesize Note that even when there are multiple corruptions in the log, the incremental algorithm may still be applicable if only one is responsible for the set of complaints.  We leave this study to future work.}.
- 
-\stitle{Incomplete Complaint Set:} \looseness -1
-The first experiment (Figures~\ref{f:falsenegative_time} and~\ref{f:falsenegative_acc}) varies the false negative rate in incomplete complaint sets.
-We increase the rate from $0$ ($0\%$ missing in the complaint set) to $0.75$ ($75\%$ are missing).  
-We find that reducing the number of reported complaints lowers the
-runtime; however, we observe a small reduction in repair quality (precision
-and recall in Figure~\ref{f:falsenegative_acc}) for recent corruptions and a
-significant drop for older ones. This is expected: the less information we
-have on the problem (fewer complaints), the lower our ability to fix it
-correctly. In the extreme case where very few complaints are available, the
-problem can be under-specified, and the true repair harder to identify.
-
-
-
-    
+     
 \begin{figure}[t]
   %\hspace*{-.1in}
   \centering
@@ -387,6 +373,7 @@ problem can be under-specified, and the true repair harder to identify.
     \caption{Incomplete complaint sets improve repair speed due to less complaints, but degrade repair quality for older corruption (with higher \textit{Corruption Age)}. }
      \label{f:falsenegative} 
   \end{minipage}
+  \vspace{-2mm}
   \end{figure}
 
 \begin{figure}[t]
@@ -420,7 +407,22 @@ problem can be under-specified, and the true repair harder to identify.
     \caption{Our analysis highlights limitations of \naive, the value of tuple-slicing, and the high cost of \texttt{UPDATE} queries. }
      \label{f:multi} 
   \end{minipage}
+  \vspace{-2mm}
   \end{figure}
+
+\stitle{Incomplete Complaint Set:} \looseness -1
+The first experiment (Figures~\ref{f:falsenegative_time} and~\ref{f:falsenegative_acc}) varies the false negative rate in incomplete complaint sets.
+We increase the rate from $0$ ($0\%$ missing in the complaint set) to $0.75$ ($75\%$ are missing).  
+We find that reducing the number of reported complaints lowers the
+runtime; however, we observe a small reduction in repair quality (precision
+and recall in Figure~\ref{f:falsenegative_acc}) for recent corruptions and a
+significant drop for older ones. This is expected: the less information we
+have on the problem (fewer complaints), the lower our ability to fix it
+correctly. In the extreme case where very few complaints are available, the
+problem can be under-specified, and the true repair harder to identify.
+
+
+
 
 
 
