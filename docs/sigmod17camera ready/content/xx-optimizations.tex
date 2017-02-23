@@ -328,23 +328,7 @@ attribute slicing in the following lemma.
 \end{algorithmic}
 \end{algorithm}
 
-\begin{algorithm}[t]
-\caption{$Inc_k:$ The incremental algorithm. 
-}
-\scriptsize
-\label{alg:incalg}
-\begin{algorithmic}[2]
-\REQUIRE {$Q, \mathcal{D}_j, \mathcal{D}_n, \mathcal{C}, k$}
-\STATE Sort $Q$ from most to least recent
-\FOR {each $q_i...q_{i+k} \in Q$}
-  \STATE $\mathcal{Q}_{suffix}$ = $\{q_j | j \ge i \}$ 
-  \STATE $\mathcal{Q}^*$ $\leftarrow$ $Basic_{params}(\mathcal{Q}_{suffix}, \mathcal{D}_j, \mathcal{D}_n, \mathcal{C}, \{q_i, q_{i+k}\})$
-  \IF {$\mathcal{Q}^* \neq \emptyset$}
-    \STATE Return $\mathcal{Q}^*$
-  \ENDIF
-\ENDFOR
-\end{algorithmic}
-\end{algorithm}
+
 
 \subsection{Incremental Repairs}\label{sec:incremental}
 
@@ -367,7 +351,23 @@ a $10\times$ scalability improvement.
 Our experiments further evaluate different batching levels $k$ in the incremental algorithm and show that it is impractical from both a performance and accuracy to have $k > 1$.
 
 
-
+\begin{algorithm}[t]
+\caption{$Inc_k:$ The incremental algorithm. 
+}
+\scriptsize
+\label{alg:incalg}
+\begin{algorithmic}[2]
+\REQUIRE {$Q, \mathcal{D}_j, \mathcal{D}_n, \mathcal{C}, k$}
+\STATE Sort $Q$ from most to least recent
+\FOR {each $q_i...q_{i+k} \in Q$}
+  \STATE $\mathcal{Q}_{suffix}$ = $\{q_j | j \ge i \}$ 
+  \STATE $\mathcal{Q}^*$ $\leftarrow$ $Basic_{params}(\mathcal{Q}_{suffix}, \mathcal{D}_j, \mathcal{D}_n, \mathcal{C}, \{q_i, q_{i+k}\})$
+  \IF {$\mathcal{Q}^* \neq \emptyset$}
+    \STATE Return $\mathcal{Q}^*$
+  \ENDIF
+\ENDFOR
+\end{algorithmic}
+\end{algorithm}
 
 
 

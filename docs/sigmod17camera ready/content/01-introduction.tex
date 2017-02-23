@@ -31,14 +31,14 @@ errors, and there is a pressing need for solutions to diagnose and
 repair these errors. Consider the following representative toy example
 that we will use throughout this paper:
 
-\begin{example}[Tax bracket adjustment]\label{ex:taxes}
-Tax brackets determine tax rates for different income levels and are
+\begin{example}[Tax bracket adjustment]\label{ex:taxes} \looseness-1
+Tax brackets, determining tax rates for different income levels, are
 often adjusted. Accounting firms implement these changes to their
-databases by appropriately updating the tax rates of their customers.
+databases by appropriately updating the customer tax rates.
 Figure~\ref{fig:example} shows a simplified tax rate adjustment
 scenario and highlights how a single error to the predicate in update
-query $q_1$ can introduce errors in the \texttt{owed} attribute, and a
-benign query $q_3$ can then propagate the error to affect the
+query $q_1$ can introduce errors in the \texttt{owed} attribute; a
+benign query $q_3$ then propagates the error to affect the
 \texttt{pay} attribute.
 \end{example}
 

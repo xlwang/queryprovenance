@@ -18,6 +18,7 @@
     \caption{Query dimensionality vs time.}
     \label{f:where_time} 
   \end{subfigure}
+  \vspace{-2mm}
   \caption{ \sys can repair \texttt{INSERT} and \texttt{DELETE} workloads quickly; complex \texttt{UPDATE} queries are more expensive to repair.}
   \vspace{-2mm}
 \end{figure*}
@@ -153,9 +154,10 @@ and a WHERE clause can either be a $Point$ predicate on a key, or a $Range$ pred
 
 \begin{scriptsize}
 \begin{verbatim}
- SET Clause:                WHERE Clause:
-  Constant: SET (a_i=?), ..   Point: WHERE a_j=? & ..
-  Relative: SET (a_i=a_i+?)   Range: WHERE a_j in [?,?+r] & ..\end{verbatim}
+ SET Clause:                  WHERE Clause:
+  Constant: SET (a_i=?), ...    Point: WHERE a_j=? & ...
+  Relative: SET (a_i=a_i+?)     Range: WHERE a_j in [?,?+r] & ...
+\end{verbatim}
 \end{scriptsize}
 \noindent where \verb|?|$\in [0, V_d]$ is random and \verb|r| is the size of the range predicate. 
 Query selectivity is by default $2\%$ (\verb|r|$=4$).
@@ -369,11 +371,11 @@ In this section, we further study the performance of \sys in solving hard proble
       \label{f:falsenegative_acc} 
     \end{subfigure}
     
-    \vspace*{-.1in}
+    \vspace{-3mm}
     \caption{Incomplete complaint sets improve repair speed due to less complaints, but degrade repair quality for older corruption (with higher \textit{Corruption Age)}. }
      \label{f:falsenegative} 
   \end{minipage}
-  \vspace{-2mm}
+  \vspace{-1mm}
   \end{figure}
 
 \begin{figure}[t]

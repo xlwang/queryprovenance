@@ -205,7 +205,7 @@ the \texttt{SET} clause of an \texttt{UPDATE} query to the ghost value
 ($\mu_{q_i}(t.A_j) = M^-$). However, it should be $M^- \leq M $ to ensure the
 constraints remain feasible (Equation~\ref{eq:uv}). 
 Using $M^-$ thus ensures that subsequent queries will treat the tuple as a \emph{``ghost''} and ignore it.
-
+% 
 \begin{eqnarray}
 \label{eq:delete}
 t'.A_j &=& x_{q_i, t} \otimes M^- + (1-x_{q_i, t}) \otimes t.A_j 

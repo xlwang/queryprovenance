@@ -80,9 +80,10 @@ In this case, we execute a second repair step.
   \caption{Comparison on Accuracy.}
   \label{f:heuristic_acc} 
   \end{subfigure}
+  \vspace{-2mm}
  \caption{\dt compared with \sys}
  \label{f:heuristic}
- \vspace{-4mm}
+ \vspace{-2mm}
 \end{figure}
 
 \looseness -1
@@ -101,11 +102,11 @@ We restrict the query log to contain a single query that is corrupted, use a com
 We use the following query template, where all \texttt{SET} clauses assign the attributes to constants,
 and the \texttt{WHERE} clauses consist of range predicates:
 
-{\scriptsize
+{\small
 \begin{verbatim}
-  UPDATE table
-  SET  (a_i=?), ...
-  WHERE a_j in [?,?+r] AND ...
+         UPDATE table
+         SET  (a_i=?), ...
+         WHERE a_j in [?,?+r] AND ...
 \end{verbatim}
 }
 
@@ -158,8 +159,8 @@ in a MILP representation.
     \vspace*{-.1in}
     \label{f:noiseratio} 
     \end{subfigure}
+    \vspace{-2mm}
    \caption{ \sys maintains 1.0 correct repair ratio with complete complaint set. }
-   \vspace*{-.1in}
    \label{fig:truerate}
   \end{figure*}
 \item [Structurally Different \texttt{WHERE} Clause Results.] 
@@ -232,6 +233,7 @@ valid fixes and \sys simply chooses the one with the lowest objective.
 \begin{figure}[t]
 \centering
   \includegraphics[width =.66\columnwidth]{figures/rangevstime}
+  \vspace{-2mm}
  \caption{ Increasing query selectivity leads to longer \sys execution time.}
   \label{f:selectivityvstime} 
 \end{figure}
